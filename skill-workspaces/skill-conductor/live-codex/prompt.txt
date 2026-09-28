@@ -1,0 +1,1 @@
+Read input.txt in the current workspace and return its exact content. Do not modify any files.

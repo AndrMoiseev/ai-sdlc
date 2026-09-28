@@ -1,0 +1,64 @@
+﻿{
+  "skill_name": "sc-harness-probe-20260928",
+  "description": "Use when explicitly asked to run the skill-conductor harness integration probe. Not for arithmetic.",
+  "harness": "codex",
+  "model": null,
+  "results": [
+    {
+      "query": "$sc-harness-probe-20260928 Run the integration probe.",
+      "should_trigger": true,
+      "trigger_rate": 1.0,
+      "triggers": 1,
+      "runs": 1,
+      "pass": true,
+      "errors": [],
+      "run_results": [
+        {
+          "run": 1,
+          "triggered": true,
+          "status": "completed",
+          "error": null,
+          "duration_ms": 8417,
+          "usage": {
+            "input_tokens": 17176,
+            "cached_input_tokens": 12416,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 50,
+            "reasoning_output_tokens": 16
+          }
+        }
+      ]
+    },
+    {
+      "query": "What is 2 + 2? Reply with the number only.",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true,
+      "errors": [],
+      "run_results": [
+        {
+          "run": 1,
+          "triggered": false,
+          "status": "completed",
+          "error": null,
+          "duration_ms": 7947,
+          "usage": {
+            "input_tokens": 17025,
+            "cached_input_tokens": 12416,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 5,
+            "reasoning_output_tokens": 0
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "errors": 0
+  }
+}

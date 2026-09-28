@@ -1,0 +1,4 @@
+[
+  {"query": "$sc-harness-probe-20260928 Run the integration probe.", "should_trigger": true},
+  {"query": "What is 2 + 2? Reply with the number only.", "should_trigger": false}
+]
