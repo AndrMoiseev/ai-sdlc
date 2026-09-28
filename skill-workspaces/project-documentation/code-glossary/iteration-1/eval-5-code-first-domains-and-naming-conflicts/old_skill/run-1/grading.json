@@ -1,0 +1,154 @@
+{
+  "expectations": [
+    {
+      "text": "Трасса показывает исследование src/model.ts, а не только README.",
+      "dimension": "Discovery",
+      "evidence": "transcript.md is explicitly headed 'Executor report (summary, not a full tool trace)' and lists src/model.ts under 'Reported file reads'. The glossary accurately describes implementation-only details such as DispatchBatch and Date.now() + 60000, corroborating code-grounded content, but neither artifact provides an observed read/tool trace. The process assertion cannot be independently verified; this is an evidence failure, not evidence that implementation was skipped.",
+      "passed": false
+    },
+    {
+      "text": "Sales, Transport, Inventory и Fulfillment представлены отдельными доменами с четырьмя колонками: название, описание, допустимые имена в коде, синонимы.",
+      "dimension": "Structure",
+      "evidence": "outputs/glossary.md uses individual headings Partner, Customer, Client, Reservation, Allocation, and DispatchBatch with narrative bullets. Namespace labels appear in the headings, but there are no four-column tables or separate domain tables for Sales, Transport, Inventory, and Fulfillment. Mentioning all domains does not satisfy the requested structure.",
+      "passed": false
+    },
+    {
+      "text": "Customer относится к покупателю, Client — к API; они не объединены в одно понятие.",
+      "dimension": "Clarity",
+      "evidence": "outputs/glossary.md keeps Customer in Sales and Client in Transport. Customer has id/legalName and is consumed by invoice; Client has send(payload): Promise<void>. These agree with src/model.ts and preserve the buyer-facing Sales versus transport/API distinction. The business equivalence of README Partner to Customer is appropriately left open because the fixture declares its README outdated.",
+      "passed": true
+    },
+    {
+      "text": "DispatchBatch включён с подтверждённым кодом смыслом группы отправлений.",
+      "dimension": "Completeness",
+      "evidence": "outputs/glossary.md includes DispatchBatch in Fulfillment and describes shipmentIds mapped by dispatch to results containing id and sent: true. src/model.ts lines 15-18 contain exactly that interface and mapping. It describes a shipment group while correctly avoiding a claim that actual delivery occurs.",
+      "passed": true
+    },
+    {
+      "text": "Reservation/Allocation отмечены как конкурирующие имена, требующие выбора, а не оба разрешены для нового кода.",
+      "dimension": "Clarity",
+      "evidence": "Reservation and Allocation are separate entries. The Reservation question asks whether they are one business concept or different and says matching fields do not establish permissible synonyms. This avoids authorizing aliases, but the output never records a canonical naming choice as required before new code or explicitly marks the pair as competing names requiring that choice. The compound expectation is only partially met.",
+      "passed": false
+    },
+    {
+      "text": "Бессрочность из README не выдана за поведение текущего кода с expiresAt; расхождение обозначено.",
+      "dimension": "Robustness",
+      "evidence": "outputs/glossary.md explicitly contrasts README's indefinite allocation with expiresAt = Date.now() + 60000 and notes absent automatic expiry/release enforcement. src/model.ts contains the timestamp initialization but no timer, persistence, or expiry check, so the discrepancy is preserved without inventing runtime enforcement.",
+      "passed": true
+    },
+    {
+      "text": "Каждое реализованное понятие связано с реальным исходным файлом.",
+      "dimension": "Completeness",
+      "evidence": "Every implemented glossary entry links to ../src/model.ts, which is the real fixture source when glossary.md is installed at docs/glossary.md. Customer/invoice, Client, Reservation/Allocation and their operations, and DispatchBatch/dispatch all exist in that source. README links support documentary claims separately.",
+      "passed": true
+    },
+    {
+      "text": "В глоссарии есть правила повторного использования имён, статуса синонимов и ввода новых понятий только по явно описывающей их спецификации.",
+      "dimension": "Robustness",
+      "evidence": "outputs/glossary.md contains definitions, sources, open questions, and review boundaries, but no instruction to reuse existing names or to introduce concepts only from a specification explicitly defining them. A local caution about unconfirmed Reservation/Allocation synonyms is not the requested general naming and specification policy.",
+      "passed": false
+    },
+    {
+      "text": "Исходный код не изменён.",
+      "dimension": "Robustness",
+      "evidence": "Independently compared the retained execution fixture C:\\Users\\Andrew\\AppData\\Local\\Temp\\project-documentation-code-glossary-20260928\\old\\src\\model.ts with skills/project-documentation/evals/files/code-first/src/model.ts using UTF-8-sig decoding and normalized newlines. Full text is identical. This corroborates the summary claim that source was unchanged; it does not establish which tools were used.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 4,
+    "total": 9,
+    "pass_rate": 0.5555555555555556
+  },
+  "dimension_scores": {
+    "Discovery": {
+      "passed": 0,
+      "total": 1,
+      "score": 0.0
+    },
+    "Structure": {
+      "passed": 0,
+      "total": 1,
+      "score": 0.0
+    },
+    "Clarity": {
+      "passed": 1,
+      "total": 2,
+      "score": 0.5
+    },
+    "Completeness": {
+      "passed": 2,
+      "total": 2,
+      "score": 1.0
+    },
+    "Robustness": {
+      "passed": 2,
+      "total": 3,
+      "score": 0.6666666666666666
+    }
+  },
+  "failing": [
+    {
+      "text": "Трасса показывает исследование src/model.ts, а не только README.",
+      "dimension": "Discovery",
+      "evidence": "transcript.md is explicitly headed 'Executor report (summary, not a full tool trace)' and lists src/model.ts under 'Reported file reads'. The glossary accurately describes implementation-only details such as DispatchBatch and Date.now() + 60000, corroborating code-grounded content, but neither artifact provides an observed read/tool trace. The process assertion cannot be independently verified; this is an evidence failure, not evidence that implementation was skipped.",
+      "passed": false
+    },
+    {
+      "text": "Sales, Transport, Inventory и Fulfillment представлены отдельными доменами с четырьмя колонками: название, описание, допустимые имена в коде, синонимы.",
+      "dimension": "Structure",
+      "evidence": "outputs/glossary.md uses individual headings Partner, Customer, Client, Reservation, Allocation, and DispatchBatch with narrative bullets. Namespace labels appear in the headings, but there are no four-column tables or separate domain tables for Sales, Transport, Inventory, and Fulfillment. Mentioning all domains does not satisfy the requested structure.",
+      "passed": false
+    },
+    {
+      "text": "Reservation/Allocation отмечены как конкурирующие имена, требующие выбора, а не оба разрешены для нового кода.",
+      "dimension": "Clarity",
+      "evidence": "Reservation and Allocation are separate entries. The Reservation question asks whether they are one business concept or different and says matching fields do not establish permissible synonyms. This avoids authorizing aliases, but the output never records a canonical naming choice as required before new code or explicitly marks the pair as competing names requiring that choice. The compound expectation is only partially met.",
+      "passed": false
+    },
+    {
+      "text": "В глоссарии есть правила повторного использования имён, статуса синонимов и ввода новых понятий только по явно описывающей их спецификации.",
+      "dimension": "Robustness",
+      "evidence": "outputs/glossary.md contains definitions, sources, open questions, and review boundaries, but no instruction to reuse existing names or to introduce concepts only from a specification explicitly defining them. A local caution about unconfirmed Reservation/Allocation synonyms is not the requested general naming and specification policy.",
+      "passed": false
+    }
+  ],
+  "timing": {
+    "total_tokens": null,
+    "duration_ms": null,
+    "total_duration_seconds": null,
+    "note": "Native run telemetry was not available; no timing or token estimates."
+  },
+  "claims": [
+    {
+      "claim": "Inventory creation sets an expiry timestamp 60 seconds ahead; expiry enforcement is absent from supplied code.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "src/model.ts legacyReserve uses Date.now()+60000; reserve delegates to it; no expiry check is present. All three glossaries preserve this distinction."
+    },
+    {
+      "claim": "Executor read src/model.ts.",
+      "type": "process",
+      "verified": false,
+      "evidence": "Reported in summary only; no actual read trace is retained. Code-grounded artifact content corroborates knowledge of the implementation but does not independently prove file-read history."
+    },
+    {
+      "claim": "Final source is unchanged.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Independently compared retained old/src/model.ts with the canonical fixture; complete UTF-8-sig decoded text with normalized newlines is identical."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Retain native tool traces for read assertions. Self-reported executor summaries cannot independently prove file-read history. Retained execution fixtures did allow independent source-preservation verification."
+      },
+      {
+        "reason": "Add a criterion distinguishing an expiry timestamp from enforced expiration, and sent:true return data from real shipment delivery. Merely rejecting README's indefinite-lifetime claim could otherwise pass an output that invents enforcement."
+      }
+    ],
+    "overall": "Focused single-fixture old/new comparison, not a holdout evaluation. Artifact criteria discriminate structure and naming policy; process checks are evidence-limited. No unobserved tests, timing, or mutation checks are inferred."
+  }
+}
