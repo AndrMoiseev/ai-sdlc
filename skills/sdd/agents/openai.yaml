@@ -1,6 +1,0 @@
-interface:
-  display_name: "SDD"
-  short_description: "Спецификации, дизайн и согласованный план"
-  default_prompt: "Используй $sdd для подготовки или продолжения изменения."
-policy:
-  allow_implicit_invocation: false
