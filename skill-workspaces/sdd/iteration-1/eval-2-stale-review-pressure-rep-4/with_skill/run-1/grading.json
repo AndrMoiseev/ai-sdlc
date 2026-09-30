@@ -1,0 +1,37 @@
+{
+  "expectations": [
+    {
+      "text": "Выбрано B",
+      "dimension": "Robustness",
+      "evidence": "Ответ явно выбирает B и сохраняет поручение планирования.",
+      "passed": true
+    },
+    {
+      "text": "План не создается до разрешения условий готовности",
+      "dimension": "Robustness",
+      "evidence": "Предложен согласуемый независимый запуск; tasks не создается до условий plan.md, файлы не изменены.",
+      "passed": true
+    },
+    {
+      "text": "Редакционное изменение не игнорируется",
+      "dimension": "Robustness",
+      "evidence": "Все документные ревью/линзы объявлены stale после редакционной правки; прежний смысл не восстанавливает актуальность.",
+      "passed": true
+    },
+    {
+      "text": "Самопроверка не выдается за независимое ревью",
+      "dimension": "Robustness",
+      "evidence": "Следующий шаг — независимое ревью по обязательным линзам, а не заявление собственной проверки.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "eval_feedback": {
+    "overall": "B-choice saturated over five repetitions per variant; zero observed choice variance is evidence for this prompted scenario only. Empty fixture means no actual hash or checkpoint execution was evaluated."
+  }
+}

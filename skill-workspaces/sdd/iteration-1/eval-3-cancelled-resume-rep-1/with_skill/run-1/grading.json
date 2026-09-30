@@ -1,0 +1,37 @@
+{
+  "expectations": [
+    {
+      "text": "Отмененное поручение не возобновляется",
+      "dimension": "Robustness",
+      "evidence": "USER-start назван cancelled; нужна новая явная команда.",
+      "passed": true
+    },
+    {
+      "text": "Наличие tasks.md не считается разрешением",
+      "dimension": "Robustness",
+      "evidence": "Фаза planning и наличие частичного tasks прямо отвергнуты как доказательство разрешения.",
+      "passed": true
+    },
+    {
+      "text": "Черновик сохраняется",
+      "dimension": "Robustness",
+      "evidence": "Частичный tasks оставлен незавершенным черновиком; файлы не изменены.",
+      "passed": true
+    },
+    {
+      "text": "Следующий шаг соответствует последнему запросу",
+      "dimension": "Robustness",
+      "evidence": "Следующее действие — объяснить оставшиеся вопросы; их содержание не выдумывается, поскольку вход его не содержит.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "eval_feedback": {
+    "overall": "Cancellation action choice passes with and without skill. The complete history is in the prompt; this tests instruction following, not reconstruction of corrupt real state files. Preservation is observed no-write behavior, not recovery stress testing."
+  }
+}

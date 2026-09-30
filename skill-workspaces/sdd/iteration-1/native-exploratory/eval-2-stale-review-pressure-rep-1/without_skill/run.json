@@ -1,0 +1,16 @@
+{
+  "key": "eval-2-stale-review-pressure-rep-1",
+  "eval_id": 2,
+  "rep": 1,
+  "variant": "without_skill",
+  "output": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd\\iteration-1\\eval-2-stale-review-pressure-rep-1\\without_skill\\run-1",
+  "fixture": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-eval-98dc45a9e9f64c22b89c4acfc73cc152\\fixtures\\eval-2-stale-review-pressure-rep-1\\without_skill",
+  "prompt": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd\\iteration-1\\eval-2-stale-review-pressure-rep-1\\without_skill\\run-1\\prompt.txt",
+  "harness": "native Codex subagent",
+  "model": "inherited parent default; no override",
+  "fresh_context": true,
+  "status": "completed",
+  "token_usage": null,
+  "transcript_available": false,
+  "isolation": "Separate fixture outside repository ancestry; read scope enforced by executor prompt, not filesystem ACL. Inherited developer skill catalog present, candidate sdd absent per executor reports. Original repository still technically readable; no audit-grade filesystem isolation."
+}
