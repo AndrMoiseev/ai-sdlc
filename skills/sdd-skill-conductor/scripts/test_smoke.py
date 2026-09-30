@@ -3,7 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml>=6.0"]
 # ///
-"""Smoke tests for skill-conductor scripts.
+"""Smoke tests for sdd-skill-conductor scripts.
 
 Run: uv run scripts/test_smoke.py
 
@@ -172,7 +172,7 @@ def test_eval_skill_list_description_no_crash():
 
 
 def test_eval_skill_json_emits_all_det_ids():
-    """--json on skill-conductor itself emits every deterministic question id exactly once, well-formed."""
+    """--json on sdd-skill-conductor itself emits every deterministic question id exactly once, well-formed."""
     sys.path.insert(0, str(SCRIPTS_DIR))
     try:
         import eval_skill  # pyright: ignore[reportMissingImports]  # resolved at runtime via sys.path.insert
@@ -269,7 +269,7 @@ def test_aggregate_benchmark_help():
 # --- run all ---
 
 def main():
-    print("\nskill-conductor smoke tests\n" + "─" * 32)
+    print("\nsdd-skill-conductor smoke tests\n" + "─" * 32)
 
     print("\nutils.parse_skill_md:")
     run("parses good skill", test_parse_good)

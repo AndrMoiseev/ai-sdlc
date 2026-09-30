@@ -1,6 +1,6 @@
 # JSON Schemas
 
-This document defines the JSON schemas used by skill-conductor.
+This document defines the JSON schemas used by sdd-skill-conductor.
 
 ---
 

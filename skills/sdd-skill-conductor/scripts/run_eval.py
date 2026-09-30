@@ -32,7 +32,7 @@ def run_single_query(query: str, skill_name: str, skill_description: str,
     marker = "SKILL_CONDUCTOR_PROBE_" + uuid.uuid4().hex
     # Description-only probes do not copy the caller's repository or full skill.
     # Behavioral evals use run_task.py and explicitly prepared fixtures instead.
-    with tempfile.TemporaryDirectory(prefix="skill-conductor-probe-") as directory:
+    with tempfile.TemporaryDirectory(prefix="sdd-skill-conductor-probe-") as directory:
         workspace = Path(directory)
         skill_dir = workspace / (".agents" if selected == "codex" else ".claude") / "skills" / skill_name
         skill_dir.mkdir(parents=True)

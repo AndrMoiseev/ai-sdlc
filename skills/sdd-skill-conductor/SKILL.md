@@ -1,5 +1,5 @@
 ---
-name: skill-conductor
+name: sdd-skill-conductor
 description: >
   Create, edit, evaluate, and package agent skills. Use when building a new
   skill from scratch, improving an existing skill, fixing a skill that never
@@ -11,7 +11,7 @@ description: >
   tasks.
 ---
 
-# Skill Conductor
+# SDD Skill Conductor
 
 Full lifecycle management for agent skills: **draft → test → review → improve → repeat**.
 

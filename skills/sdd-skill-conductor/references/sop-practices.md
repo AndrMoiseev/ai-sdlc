@@ -159,7 +159,7 @@ Split writing and execution into two sessions:
 2. **Unnamed sources.** "Contacts from about.md" — but what if about.md doesn't exist? Agent A would reach into memory, Agent B will make it up.
 3. **Fuzzy exit conditions.** "When the quote is ready — send it" — what does "ready" mean?
 
-In `skill-conductor` this is built in: Mode 1 Step 6 (Eval Loop) spawns an executor subagent **in a clean session**. Reinforcement: periodically run the skill yourself, in a clean session without your own vault — if it breaks, you baked in assumptions you didn't surface into the text.
+In `sdd-skill-conductor` this is built in: Mode 1 Step 6 (Eval Loop) spawns an executor subagent **in a clean session**. Reinforcement: periodically run the skill yourself, in a clean session without your own vault — if it breaks, you baked in assumptions you didn't surface into the text.
 
 ---
 
