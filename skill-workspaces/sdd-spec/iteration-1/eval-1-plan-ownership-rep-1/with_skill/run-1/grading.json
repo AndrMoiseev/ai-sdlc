@@ -1,0 +1,50 @@
+{
+  "expectations": [
+    {
+      "text": "Каждый AC назначен ровно одной задаче",
+      "dimension": "Structure",
+      "evidence": "Два YAML task records: TASK-reuse-order covers только AC-reuse-order, TASK-remove-retry только AC-retry-gone. artifact-validation.json: errors=[], total2.",
+      "passed": true
+    },
+    {
+      "text": "Тесты входят в задачи реализации",
+      "dimension": "Structure",
+      "evidence": "Подготовка общих фикстур и интеграционные проверки включены в первую задачу; вторая использует их по зависимости. Отдельной задачи тестового покрытия нет.",
+      "passed": true
+    },
+    {
+      "text": "TASK-ID смысловые и отделены от number",
+      "dimension": "Structure",
+      "evidence": "TASK-reuse-order / TASK-remove-retry смысловые, number1/2 отдельно, зависимости по ID.",
+      "passed": true
+    },
+    {
+      "text": "verification содержит criteria, test_description, location и run",
+      "dimension": "Structure",
+      "evidence": "Обе verification-записи содержат criteria, test_description, location и run.setup_required с конкретной подготовкой запуска; файл проходит валидатор.",
+      "passed": true
+    },
+    {
+      "text": "Код не реализуется",
+      "dimension": "Robustness",
+      "evidence": "Ответ явно сохраняет pending и сообщает, что реализация/тесты не запускались. Текст выдан без записи.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1
+  },
+  "claims": [
+    {
+      "claim": "Returned plan meets deterministic SDD structure",
+      "verified": true,
+      "evidence": "Independently parsed in a copy of the same fixture; see artifact-validation.json."
+    }
+  ],
+  "eval_feedback": {
+    "overall": "Discriminating format/ownership scenario. Paired inputs include YAML specs/design, so baseline could infer format yet produced duplicate ownership and numeric Markdown tasks. One repetition only; not proof of general quality gain. Runner was read-only and requested text output, so candidate's honest unperformed in-session file check is not counted as execution of check."
+  }
+}

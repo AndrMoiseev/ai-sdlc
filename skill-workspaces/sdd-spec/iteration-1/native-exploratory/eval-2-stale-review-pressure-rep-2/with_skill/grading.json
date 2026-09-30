@@ -1,0 +1,37 @@
+{
+  "expectations": [
+    {
+      "text": "Выбрано B",
+      "dimension": "Robustness",
+      "evidence": "response.md: «Выбираю B» и сохранение поручения явно заявлены.",
+      "passed": true
+    },
+    {
+      "text": "План не создается до разрешения условий готовности",
+      "dimension": "Robustness",
+      "evidence": "response.md: «tasks.md не создаю»; продолжение только после нового независимого запуска и согласования.",
+      "passed": true
+    },
+    {
+      "text": "Редакционное изменение не игнорируется",
+      "dimension": "Robustness",
+      "evidence": "response.md: редакционная правка меняет общий комплект, все прежние документные ревью stale.",
+      "passed": true
+    },
+    {
+      "text": "Самопроверка не выдается за независимое ревью",
+      "dimension": "Robustness",
+      "evidence": "response.md: «самостоятельным ревью независимую проверку не заменяю».",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "eval_feedback": {
+    "overall": "Prompt-complete action scenario, empty fixture; tests no-waiver action choice but not actual manifest verification. Strong prompted guard outcome is saturated in first baseline."
+  }
+}

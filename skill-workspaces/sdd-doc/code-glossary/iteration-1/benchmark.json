@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "skill_name": "project-documentation",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-09-28T12:45:08Z",
+    "evals_run": [
+      5,
+      6
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 5,
+      "configuration": "new_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8888888888888888,
+        "passed": 8,
+        "failed": 1,
+        "total": 9,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0422\u0440\u0430\u0441\u0441\u0430 \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u0435 src/model.ts, \u0430 \u043d\u0435 \u0442\u043e\u043b\u044c\u043a\u043e README.",
+          "dimension": "Discovery",
+          "evidence": "transcript.md is explicitly headed 'Executor report (summary, not a full tool trace)' and lists src/model.ts under 'Reported file reads'. The glossary accurately describes implementation-only details such as DispatchBatch and Date.now() + 60000, corroborating code-grounded content, but neither artifact provides an observed read/tool trace. The process assertion cannot be independently verified; this is an evidence failure, not evidence that implementation was skipped.",
+          "passed": false
+        },
+        {
+          "text": "Sales, Transport, Inventory \u0438 Fulfillment \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u044b \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u043c\u0438 \u0434\u043e\u043c\u0435\u043d\u0430\u043c\u0438 \u0441 \u0447\u0435\u0442\u044b\u0440\u044c\u043c\u044f \u043a\u043e\u043b\u043e\u043d\u043a\u0430\u043c\u0438: \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435, \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435, \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0438\u043c\u0435\u043d\u0430 \u0432 \u043a\u043e\u0434\u0435, \u0441\u0438\u043d\u043e\u043d\u0438\u043c\u044b.",
+          "dimension": "Structure",
+          "evidence": "outputs/glossary.md has separate Sales, Transport, Inventory, and Fulfillment sections. Each contains a substantive table headed Name, Description, Allowed code names, Synonyms; entries reflect the corresponding namespace definitions in src/model.ts. All four requested domains and columns are present.",
+          "passed": true
+        },
+        {
+          "text": "Customer \u043e\u0442\u043d\u043e\u0441\u0438\u0442\u0441\u044f \u043a \u043f\u043e\u043a\u0443\u043f\u0430\u0442\u0435\u043b\u044e, Client \u2014 \u043a API; \u043e\u043d\u0438 \u043d\u0435 \u043e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u044b \u0432 \u043e\u0434\u043d\u043e \u043f\u043e\u043d\u044f\u0442\u0438\u0435.",
+          "dimension": "Clarity",
+          "evidence": "outputs/glossary.md keeps Customer in Sales and Client in Transport. Customer has id/legalName and is consumed by invoice; Client has send(payload): Promise<void>. These agree with src/model.ts and preserve the buyer-facing Sales versus transport/API distinction. The business equivalence of README Partner to Customer is appropriately left open because the fixture declares its README outdated.",
+          "passed": true
+        },
+        {
+          "text": "DispatchBatch \u0432\u043a\u043b\u044e\u0447\u0451\u043d \u0441 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043d\u043d\u044b\u043c \u043a\u043e\u0434\u043e\u043c \u0441\u043c\u044b\u0441\u043b\u043e\u043c \u0433\u0440\u0443\u043f\u043f\u044b \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0439.",
+          "dimension": "Completeness",
+          "evidence": "outputs/glossary.md includes DispatchBatch in Fulfillment and describes shipmentIds mapped by dispatch to results containing id and sent: true. src/model.ts lines 15-18 contain exactly that interface and mapping. It describes a shipment group while correctly avoiding a claim that actual delivery occurs.",
+          "passed": true
+        },
+        {
+          "text": "Reservation/Allocation \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u044b \u043a\u0430\u043a \u043a\u043e\u043d\u043a\u0443\u0440\u0438\u0440\u0443\u044e\u0449\u0438\u0435 \u0438\u043c\u0435\u043d\u0430, \u0442\u0440\u0435\u0431\u0443\u044e\u0449\u0438\u0435 \u0432\u044b\u0431\u043e\u0440\u0430, \u0430 \u043d\u0435 \u043e\u0431\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u044b \u0434\u043b\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u0434\u0430.",
+          "dimension": "Clarity",
+          "evidence": "The Inventory row says 'Undetermined: a choice is required for the competing record type names' and explicitly states that observed names are not interchangeable names for new code. The open question asks whether Reservation or Allocation should be canonical, matching the identical interfaces and shared creation path in src/model.ts without inventing an adopted choice.",
+          "passed": true
+        },
+        {
+          "text": "\u0411\u0435\u0441\u0441\u0440\u043e\u0447\u043d\u043e\u0441\u0442\u044c \u0438\u0437 README \u043d\u0435 \u0432\u044b\u0434\u0430\u043d\u0430 \u0437\u0430 \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435 \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u043a\u043e\u0434\u0430 \u0441 expiresAt; \u0440\u0430\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0435 \u043e\u0431\u043e\u0437\u043d\u0430\u0447\u0435\u043d\u043e.",
+          "dimension": "Robustness",
+          "evidence": "outputs/glossary.md explicitly contrasts README's indefinite allocation with expiresAt = Date.now() + 60000 and notes absent automatic expiry/release enforcement. src/model.ts contains the timestamp initialization but no timer, persistence, or expiry check, so the discrepancy is preserved without inventing runtime enforcement.",
+          "passed": true
+        },
+        {
+          "text": "\u041a\u0430\u0436\u0434\u043e\u0435 \u0440\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u043f\u043e\u043d\u044f\u0442\u0438\u0435 \u0441\u0432\u044f\u0437\u0430\u043d\u043e \u0441 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u043c \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u043c \u0444\u0430\u0439\u043b\u043e\u043c.",
+          "dimension": "Completeness",
+          "evidence": "Every implemented glossary entry links to ../src/model.ts, which is the real fixture source when glossary.md is installed at docs/glossary.md. Customer/invoice, Client, Reservation/Allocation and their operations, and DispatchBatch/dispatch all exist in that source. README links support documentary claims separately.",
+          "passed": true
+        },
+        {
+          "text": "\u0412 \u0433\u043b\u043e\u0441\u0441\u0430\u0440\u0438\u0438 \u0435\u0441\u0442\u044c \u043f\u0440\u0430\u0432\u0438\u043b\u0430 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0433\u043e \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f \u0438\u043c\u0451\u043d, \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u0441\u0438\u043d\u043e\u043d\u0438\u043c\u043e\u0432 \u0438 \u0432\u0432\u043e\u0434\u0430 \u043d\u043e\u0432\u044b\u0445 \u043f\u043e\u043d\u044f\u0442\u0438\u0439 \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e \u044f\u0432\u043d\u043e \u043e\u043f\u0438\u0441\u044b\u0432\u0430\u044e\u0449\u0435\u0439 \u0438\u0445 \u0441\u043f\u0435\u0446\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438.",
+          "dimension": "Robustness",
+          "evidence": "The 'Use when writing code' section directs readers to find/reuse the relevant existing concept, says synonyms 'do not authorize new code names', and permits a new domain concept only when a specification explicitly describes it, after checking for an equivalent. It also requires clarification when neither exists. These are explicit actionable rules, not just descriptive entries.",
+          "passed": true
+        },
+        {
+          "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u044b\u0439 \u043a\u043e\u0434 \u043d\u0435 \u0438\u0437\u043c\u0435\u043d\u0451\u043d.",
+          "dimension": "Robustness",
+          "evidence": "Independently compared the retained execution fixture C:\\Users\\Andrew\\AppData\\Local\\Temp\\project-documentation-code-glossary-20260928\\new\\src\\model.ts with skills/project-documentation/evals/files/code-first/src/model.ts using UTF-8-sig decoding and normalized newlines. Full text is identical. This corroborates the summary claim that source was unchanged; it does not establish which tools were used.",
+          "passed": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "new_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0410\u0433\u0435\u043d\u0442 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043b \u0440\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044e \u043d\u0435\u0441\u043c\u043e\u0442\u0440\u044f \u043d\u0430 \u0434\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0441\u0440\u043e\u043a\u0430 \u0438 \u0433\u043e\u0442\u043e\u0432\u0443\u044e \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044e.",
+          "dimension": "Discovery",
+          "evidence": "transcript.md is explicitly headed 'Executor report (summary, not a full tool trace)' and lists src/model.ts under 'Reported file reads'. The glossary accurately describes implementation-only details such as DispatchBatch and Date.now() + 60000, corroborating code-grounded content, but neither artifact provides an observed read/tool trace. The process assertion cannot be independently verified; this is an evidence failure, not evidence that implementation was skipped.",
+          "passed": false
+        },
+        {
+          "text": "Account \u0438 Position \u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u044b \u0432\u043e\u043f\u0440\u043e\u0441\u0430\u043c\u0438, \u0430 \u043d\u0435 \u0432\u044b\u0434\u0443\u043c\u0430\u043d\u043d\u044b\u043c\u0438 \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u044f\u043c\u0438 \u0438\u043b\u0438 \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u043c\u0438 \u0438\u043c\u0435\u043d\u0430\u043c\u0438.",
+          "dimension": "Robustness",
+          "evidence": "The 'Requested concepts awaiting definition' section says Account and Position are questions, not established domain entries, and that their meaning and permitted code names are unconfirmed. Each bullet requests a definition/specification before identifiers are introduced. Neither name exists in fixture source or README; no invented definition or authorized identifier is supplied.",
+          "passed": true
+        },
+        {
+          "text": "\u0413\u043b\u043e\u0441\u0441\u0430\u0440\u0438\u0439 \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u0442 \u0434\u043e\u043c\u0435\u043d\u043d\u044b\u0435 \u0442\u0430\u0431\u043b\u0438\u0446\u044b \u0438 \u043f\u043e\u043d\u044f\u0442\u0438\u0435 DispatchBatch \u0438\u0437 \u043a\u043e\u0434\u0430.",
+          "dimension": "Structure",
+          "evidence": "Sales, Transport, Inventory, and Fulfillment each have Name/Description/Permitted code names/Synonyms tables. Fulfillment includes Dispatch batch, identifies Fulfillment.DispatchBatch and shipmentIds, and describes dispatch's per-ID result mapping with a source link. The fixture confirms those exact declarations and behavior.",
+          "passed": true
+        },
+        {
+          "text": "\u041a\u043e\u043d\u0444\u043b\u0438\u043a\u0442\u0443\u044e\u0449\u0438\u0435 Reservation/Allocation \u043d\u0435 \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0435\u043d\u044b \u0432 \u043d\u0430\u0431\u043e\u0440 \u0440\u0430\u0437\u0440\u0435\u0448\u0451\u043d\u043d\u044b\u0445 \u0438\u043c\u0451\u043d.",
+          "dimension": "Clarity",
+          "evidence": "The Inventory table marks Reservation/Allocation terminology unresolved; its permitted-names column says 'Not determined for the concept: a naming choice is required' and 'do not treat them as freely interchangeable choices for new code'. The question explicitly asks which is canonical if they are one concept. Listing existing contract fields does not authorize the competing type names.",
+          "passed": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5555555555555556,
+        "passed": 5,
+        "failed": 4,
+        "total": 9,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0422\u0440\u0430\u0441\u0441\u0430 \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u0435 src/model.ts, \u0430 \u043d\u0435 \u0442\u043e\u043b\u044c\u043a\u043e README.",
+          "dimension": "Discovery",
+          "evidence": "transcript.md is explicitly headed 'Executor report (summary, not a full tool trace)' and lists src/model.ts under 'Reported file reads'. The glossary accurately describes implementation-only details such as DispatchBatch and Date.now() + 60000, corroborating code-grounded content, but neither artifact provides an observed read/tool trace. The process assertion cannot be independently verified; this is an evidence failure, not evidence that implementation was skipped.",
+          "passed": false
+        },
+        {
+          "text": "Sales, Transport, Inventory \u0438 Fulfillment \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u044b \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u043c\u0438 \u0434\u043e\u043c\u0435\u043d\u0430\u043c\u0438 \u0441 \u0447\u0435\u0442\u044b\u0440\u044c\u043c\u044f \u043a\u043e\u043b\u043e\u043d\u043a\u0430\u043c\u0438: \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435, \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435, \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 \u0438\u043c\u0435\u043d\u0430 \u0432 \u043a\u043e\u0434\u0435, \u0441\u0438\u043d\u043e\u043d\u0438\u043c\u044b.",
+          "dimension": "Structure",
+          "evidence": "outputs/glossary.md uses individual headings Partner, Customer, Client, Reservation, Allocation, and DispatchBatch with narrative bullets. Namespace labels appear in the headings, but there are no four-column tables or separate domain tables for Sales, Transport, Inventory, and Fulfillment. Mentioning all domains does not satisfy the requested structure.",
+          "passed": false
+        },
+        {
+          "text": "Customer \u043e\u0442\u043d\u043e\u0441\u0438\u0442\u0441\u044f \u043a \u043f\u043e\u043a\u0443\u043f\u0430\u0442\u0435\u043b\u044e, Client \u2014 \u043a API; \u043e\u043d\u0438 \u043d\u0435 \u043e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u044b \u0432 \u043e\u0434\u043d\u043e \u043f\u043e\u043d\u044f\u0442\u0438\u0435.",
+          "dimension": "Clarity",
+          "evidence": "outputs/glossary.md keeps Customer in Sales and Client in Transport. Customer has id/legalName and is consumed by invoice; Client has send(payload): Promise<void>. These agree with src/model.ts and preserve the buyer-facing Sales versus transport/API distinction. The business equivalence of README Partner to Customer is appropriately left open because the fixture declares its README outdated.",
+          "passed": true
+        },
+        {
+          "text": "DispatchBatch \u0432\u043a\u043b\u044e\u0447\u0451\u043d \u0441 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043d\u043d\u044b\u043c \u043a\u043e\u0434\u043e\u043c \u0441\u043c\u044b\u0441\u043b\u043e\u043c \u0433\u0440\u0443\u043f\u043f\u044b \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0439.",
+          "dimension": "Completeness",
+          "evidence": "outputs/glossary.md includes DispatchBatch in Fulfillment and describes shipmentIds mapped by dispatch to results containing id and sent: true. src/model.ts lines 15-18 contain exactly that interface and mapping. It describes a shipment group while correctly avoiding a claim that actual delivery occurs.",
+          "passed": true
+        },
+        {
+          "text": "Reservation/Allocation \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u044b \u043a\u0430\u043a \u043a\u043e\u043d\u043a\u0443\u0440\u0438\u0440\u0443\u044e\u0449\u0438\u0435 \u0438\u043c\u0435\u043d\u0430, \u0442\u0440\u0435\u0431\u0443\u044e\u0449\u0438\u0435 \u0432\u044b\u0431\u043e\u0440\u0430, \u0430 \u043d\u0435 \u043e\u0431\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u044b \u0434\u043b\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u043a\u043e\u0434\u0430.",
+          "dimension": "Clarity",
+          "evidence": "Reservation and Allocation are separate entries. The Reservation question asks whether they are one business concept or different and says matching fields do not establish permissible synonyms. This avoids authorizing aliases, but the output never records a canonical naming choice as required before new code or explicitly marks the pair as competing names requiring that choice. The compound expectation is only partially met.",
+          "passed": false
+        },
+        {
+          "text": "\u0411\u0435\u0441\u0441\u0440\u043e\u0447\u043d\u043e\u0441\u0442\u044c \u0438\u0437 README \u043d\u0435 \u0432\u044b\u0434\u0430\u043d\u0430 \u0437\u0430 \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435 \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u043a\u043e\u0434\u0430 \u0441 expiresAt; \u0440\u0430\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0435 \u043e\u0431\u043e\u0437\u043d\u0430\u0447\u0435\u043d\u043e.",
+          "dimension": "Robustness",
+          "evidence": "outputs/glossary.md explicitly contrasts README's indefinite allocation with expiresAt = Date.now() + 60000 and notes absent automatic expiry/release enforcement. src/model.ts contains the timestamp initialization but no timer, persistence, or expiry check, so the discrepancy is preserved without inventing runtime enforcement.",
+          "passed": true
+        },
+        {
+          "text": "\u041a\u0430\u0436\u0434\u043e\u0435 \u0440\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u043f\u043e\u043d\u044f\u0442\u0438\u0435 \u0441\u0432\u044f\u0437\u0430\u043d\u043e \u0441 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u043c \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u043c \u0444\u0430\u0439\u043b\u043e\u043c.",
+          "dimension": "Completeness",
+          "evidence": "Every implemented glossary entry links to ../src/model.ts, which is the real fixture source when glossary.md is installed at docs/glossary.md. Customer/invoice, Client, Reservation/Allocation and their operations, and DispatchBatch/dispatch all exist in that source. README links support documentary claims separately.",
+          "passed": true
+        },
+        {
+          "text": "\u0412 \u0433\u043b\u043e\u0441\u0441\u0430\u0440\u0438\u0438 \u0435\u0441\u0442\u044c \u043f\u0440\u0430\u0432\u0438\u043b\u0430 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0433\u043e \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f \u0438\u043c\u0451\u043d, \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u0441\u0438\u043d\u043e\u043d\u0438\u043c\u043e\u0432 \u0438 \u0432\u0432\u043e\u0434\u0430 \u043d\u043e\u0432\u044b\u0445 \u043f\u043e\u043d\u044f\u0442\u0438\u0439 \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e \u044f\u0432\u043d\u043e \u043e\u043f\u0438\u0441\u044b\u0432\u0430\u044e\u0449\u0435\u0439 \u0438\u0445 \u0441\u043f\u0435\u0446\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438.",
+          "dimension": "Robustness",
+          "evidence": "outputs/glossary.md contains definitions, sources, open questions, and review boundaries, but no instruction to reuse existing names or to introduce concepts only from a specification explicitly defining them. A local caution about unconfirmed Reservation/Allocation synonyms is not the requested general naming and specification policy.",
+          "passed": false
+        },
+        {
+          "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u044b\u0439 \u043a\u043e\u0434 \u043d\u0435 \u0438\u0437\u043c\u0435\u043d\u0451\u043d.",
+          "dimension": "Robustness",
+          "evidence": "Independently compared the retained execution fixture C:\\Users\\Andrew\\AppData\\Local\\Temp\\project-documentation-code-glossary-20260928\\old\\src\\model.ts with skills/project-documentation/evals/files/code-first/src/model.ts using UTF-8-sig decoding and normalized newlines. Full text is identical. This corroborates the summary claim that source was unchanged; it does not establish which tools were used.",
+          "passed": true
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "new_skill": {
+      "pass_rate": {
+        "mean": 0.8194,
+        "stddev": 0.0982,
+        "min": 0.75,
+        "max": 0.8889,
+        "n": 2
+      },
+      "time_seconds": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null,
+        "n": 0
+      },
+      "tokens": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null,
+        "n": 0
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.5556,
+        "stddev": 0.0,
+        "min": 0.5556,
+        "max": 0.5556,
+        "n": 1
+      },
+      "time_seconds": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null,
+        "n": 0
+      },
+      "tokens": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null,
+        "n": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.26",
+      "time_seconds": null,
+      "tokens": null
+    }
+  },
+  "notes": []
+}

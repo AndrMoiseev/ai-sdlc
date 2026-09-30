@@ -1,0 +1,20 @@
+{
+  "harness": "codex",
+  "model": null,
+  "status": "completed",
+  "usage": {
+    "input_tokens": 229562,
+    "cached_input_tokens": 179584,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2333,
+    "reasoning_output_tokens": 42
+  },
+  "duration_ms": 100132,
+  "returncode": 0,
+  "error": null,
+  "eval_id": 1,
+  "rep": 1,
+  "variant": "with_skill",
+  "fixture": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-eval-98dc45a9e9f64c22b89c4acfc73cc152\\fixtures\\eval-1-plan-ownership-rep-1\\with_skill",
+  "isolation": "Separate fixture cwd outside repo ancestors; CLI read-only sandbox. Candidate only explicitly supplied for with_skill. No global skill installs. Full discovered catalog not automatically exported; verify executor report."
+}

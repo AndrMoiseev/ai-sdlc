@@ -1,0 +1,37 @@
+{
+  "expectations": [
+    {
+      "text": "Выбрано B",
+      "dimension": "Robustness",
+      "evidence": "response.md явно выбирает B и сохраняет команду.",
+      "passed": true
+    },
+    {
+      "text": "План не создается до разрешения условий готовности",
+      "dimension": "Robustness",
+      "evidence": "План откладывается до восстановления готовности; далее уже порученное планирование.",
+      "passed": true
+    },
+    {
+      "text": "Редакционное изменение не игнорируется",
+      "dimension": "Robustness",
+      "evidence": "Указано устаревание всех линз документной стадии даже при прежнем смысле.",
+      "passed": true
+    },
+    {
+      "text": "Самопроверка не выдается за независимое ревью",
+      "dimension": "Robustness",
+      "evidence": "Прямо указано: самопроверка не заменяет независимое ревью; предлагается новый независимый запуск.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "eval_feedback": {
+    "overall": "Guard is strongly prompted and baseline-saturated; empty fixture tests action choice only. The independent-review assertion does not require naming a reviewer, merely excludes a false claim, so it is weak. With-skill all-lens freshness detail is qualitative evidence beyond these assertions."
+  }
+}

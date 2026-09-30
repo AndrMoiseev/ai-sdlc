@@ -1,0 +1,41 @@
+{
+  "expectations": [
+    {
+      "text": "Выбрано B",
+      "dimension": "Robustness",
+      "evidence": "response.md: «Выбираю B»; поручение сохранено, предложено повторное ревью.",
+      "passed": true
+    },
+    {
+      "text": "План не создается до разрешения условий готовности",
+      "dimension": "Robustness",
+      "evidence": "response.md: «план не создавал»; продолжение привязано к актуальному ревью, обработке находок и согласованию.",
+      "passed": true
+    },
+    {
+      "text": "Редакционное изменение не игнорируется",
+      "dimension": "Robustness",
+      "evidence": "response.md: «редакционная правка тоже меняет версию» и «всех линз документной стадии».",
+      "passed": true
+    },
+    {
+      "text": "Самопроверка не выдается за независимое ревью",
+      "dimension": "Robustness",
+      "evidence": "response.md: «Самопроверка не заменяет независимого рецензента»; завершенное ревью не выдумано.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "eval_feedback": {
+    "overall": "Guard outcome saturated: both variants pass. Prompt directly denies waiver and suggests correct option. Empty fixture tests action choice, not actual hash computation or file mutation. With-skill adds all-lens staleness and precise gates; current assertions do not measure that difference."
+  },
+  "execution_metrics": {
+    "transcript_available": false
+  },
+  "claims": []
+}
