@@ -1,0 +1,8 @@
+name: ai-sdlc-workspace
+version: "0.1.0"
+description: Practices used to develop the ai-sdlc repository.
+targets: [codex, claude]
+dependencies:
+  apm:
+    - path: ./packages/aisdlc-core
+    - path: ./packages/aisdlc-skills
