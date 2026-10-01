@@ -3,5 +3,6 @@ version: "0.1.0"
 description: Specification-driven development and project terminology.
 dependencies:
   apm:
+    - path: ../common-dependencies
     - path: ../../skills/sdd-spec
     - path: ../../skills/sdd-doc

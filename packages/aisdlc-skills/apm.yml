@@ -3,4 +3,5 @@ version: "0.1.0"
 description: Authoring, evaluating, and maintaining agent skills.
 dependencies:
   apm:
+    - path: ../common-dependencies
     - path: ../../skills/sdd-skill-conductor

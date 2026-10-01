@@ -21,6 +21,10 @@ One skill to rule them all — from architecture to packaging. The core loop is 
 
 Before running scripts or evaluations, read **`references/runtime-setup.md`**. Prefer clean native subagents in the current harness (Codex or Claude Code); use the matching CLI when native execution cannot provide the required isolation. Structural checks need `uv`, not LLM credentials. Run script examples from this skill's directory, or use absolute script paths.
 
+## Package runtime requirements
+
+When creating a skill, changing runtime commands, or reviewing a skill for installation or packaging, read and apply [package-runtime.md](references/package-runtime.md). It defines runtime storage and the checks required before distribution.
+
 ## How to communicate
 
 Read context cues. If the user is a skill author iterating on their own work, be direct and technical. If they're new to skills, explain the _why_ behind each step — not just what to do, but why it matters. Default to conversational, not robotic.
@@ -39,7 +43,7 @@ Detect mode from context. If ambiguous, ask.
 | 1. CREATE   | "build a skill", "new skill for..."              | Full lifecycle: intent → architecture → scaffold → write → test |
 | 2. IMPROVE  | "fix this skill", "it doesn't trigger"           | Diagnose → eval loop → gated self-update → iterate              |
 | 3. VALIDATE | "test this skill", "run evals"                   | Structural checks + trigger testing + BinEval scoring           |
-| 4. REVIEW   | "review this skill", third-party assessment      | 11-point quality gate, quick and focused                        |
+| 4. REVIEW   | "review this skill", third-party assessment      | Quality checklist, quick and focused                           |
 | 5. OPTIMIZE | "improve triggering", "description optimization" | Automated description optimization with train/test split        |
 | 6. PACKAGE  | "package for distribution"                       | Validate + bundle into .skill file                              |
 
@@ -339,6 +343,7 @@ Quick quality gate for third-party skills.
 [ ] SKILL.md < 500 lines
 [ ] References max 1 level deep
 [ ] Scripts tested and executable
+[ ] Package runtime checks completed (references/package-runtime.md)
 [ ] No hardcoded paths/tokens/secrets
 ```
 
@@ -465,6 +470,7 @@ Load on demand, at the point of use named in each mode — never wholesale. Load
 | `references/quality-questions.md`| BinEval question bank (deterministic + bank)|
 | `references/pressure-testing.md` | Micro-tests for wording + pressure scenarios for discipline skills |
 | `references/sop-practices.md`    | **Canon: 10 authoring principles (universal)** + deep SOP methodology for procedural skills |
+| `references/package-runtime.md` | External runtime state and checks before distribution |
 | `references/runtime-setup.md`    | Harness selection, isolation, CLI and native runs |
 | `eval-viewer/`                   | Interactive HTML viewer for eval results   |
 | `assets/eval_review.html`        | Trigger eval set editor                    |

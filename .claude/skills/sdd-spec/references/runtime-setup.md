@@ -2,15 +2,17 @@
 
 До работы определи абсолютные `<skill-root>` (каталог этого пакета), `<repo>` и безопасный `<id>`. Проверь наличие полного пакета: flows, references, templates, scripts, pyproject.toml, uv.lock и метаданные хоста. Прочитай инструкции проекта и проверь возможность читать источники и писать `sdd/changes/`. Не перезаписывай существующее изменение с совпадающим именем.
 
-Для детерминированных проверок нужны uv и Python 3.11+; версии зависимостей закреплены в uv.lock. Проверь `uv --version`; `uv run --project <skill-root> --locked python --version` проверяет окружение проекта. При отсутствующем инструменте или недоступных зависимостях сообщи конкретное ограничение и способ восстановления через [uv](https://docs.astral.sh/uv/getting-started/installation/). Не выдавай непройденную проверку за успешную и не обходи gate ревью; доступное исследование и сохранение черновиков допустимы.
+Для детерминированных проверок нужны uv и Python 3.11+; версии зависимостей закреплены в uv.lock. Проверь `uv --version`; `python <skill-root>/scripts/run.py version` проверяет окружение. При отсутствующем инструменте или недоступных зависимостях сообщи конкретное ограничение и способ восстановления через [uv](https://docs.astral.sh/uv/getting-started/installation/). Не выдавай непройденную проверку за успешную и не обходи gate ревью; доступное исследование и сохранение черновиков допустимы.
+
+Запускай проверки через `scripts/run.py`. Он хранит окружение uv, байткод Python и кэш pytest в пользовательском каталоге кэшей, вне пакета. У каждой исходной или установленной копии отдельное окружение, определяемое по абсолютному пути. Команда `python <skill-root>/scripts/run.py cache-dir` показывает его расположение. На Windows используется `%LOCALAPPDATA%/ai-sdlc/sdd-spec/`, на macOS — `~/Library/Caches/ai-sdlc/sdd-spec/`, на Linux — `${XDG_CACHE_HOME:-~/.cache}/ai-sdlc/sdd-spec/`. Прямой `uv run --project <skill-root>` создаёт `.venv` внутри пакета; используй запускатель, чтобы runtime-файлы не попадали в установку APM.
 
 Запускай из любой директории, подставляя абсолютные пути и заключая пути с пробелами в кавычки:
 
 ```text
-uv run --project <skill-root> --locked python <skill-root>/scripts/check.py --project-root <repo> --change <id> --stage documents
-uv run --project <skill-root> --locked python <skill-root>/scripts/check.py --project-root <repo> --change <id> --stage plan
-uv run --project <skill-root> --locked python <skill-root>/scripts/snapshot.py --project-root <repo> --change <id> --stage documents
-uv run --project <skill-root> --locked python <skill-root>/scripts/snapshot.py --project-root <repo> --change <id> --stage plan
+python <skill-root>/scripts/run.py check --project-root <repo> --change <id> --stage documents
+python <skill-root>/scripts/run.py check --project-root <repo> --change <id> --stage plan
+python <skill-root>/scripts/run.py snapshot --project-root <repo> --change <id> --stage documents
+python <skill-root>/scripts/run.py snapshot --project-root <repo> --change <id> --stage plan
 ```
 
 Check и snapshot только читают проект; JSON идет в stdout. Snapshot сам не сохраняет файлы. Основной агент переносит манифест в отчет/решение. Check разделяет errors/warnings, review_status и approval_status: exit 0 — структура корректна, 1 — структурные ошибки, 2 — проверка не выполнена. Exit 0 не является разрешением перехода. Documents не требует tasks; plan добавляет покрытие AC, граф и проверки задач.

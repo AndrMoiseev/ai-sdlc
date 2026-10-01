@@ -6,6 +6,8 @@
 /.agents/skills/sdd-doc/** text=auto eol=lf
 /.agents/skills/sdd-spec/** text=auto eol=lf
 /.agents/skills/sdd-skill-conductor/** text=auto eol=lf
+/.agents/skills/humanizer-ru/** text=auto eol=lf
 /.claude/skills/sdd-doc/** text=auto eol=lf
 /.claude/skills/sdd-spec/** text=auto eol=lf
 /.claude/skills/sdd-skill-conductor/** text=auto eol=lf
+/.claude/skills/humanizer-ru/** text=auto eol=lf

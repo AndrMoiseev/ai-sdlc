@@ -19,7 +19,7 @@
 Локальные проверки:
 
 ```text
-uv run --project skills/sdd-spec --locked python -m pytest skills/sdd-spec/tests
+python skills/sdd-spec/scripts/run.py test
 ```
 
 [Ручные процедуры](evals/manual.md) разделяют статическую проверку инструкций и фактическое выполнение; [происхождение](references/openspec-origin.md) содержит адаптации OpenSpec и лицензию.
