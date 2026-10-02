@@ -4,3 +4,5 @@ description: Shared third-party skills for ai-sdlc packages.
 dependencies:
   apm:
     - smixs/humanizer-ru#ff990df404f78fb1a43fc574a725490bd1be8070
+    # Archify v3.0.1
+    - tt-a1i/archify/archify#2ab3cae7ac2c2a55d7386ca789d03c4fcd31816c

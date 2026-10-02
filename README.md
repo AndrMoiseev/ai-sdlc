@@ -10,14 +10,31 @@
 |---|---|
 | [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-doc`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
-| [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru) |
+| [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
 `aisdlc-core` и `aisdlc-skills` можно подключать по отдельности или вместе.
 Оба автоматически устанавливают `common-dependencies`; при совместной
-установке общая зависимость используется один раз. `humanizer-ru` загружается
-из внешнего репозитория; его версия закреплена полным Git SHA в манифесте
-`common-dependencies`. Для обновления измените этот SHA и выполните
+установке общая зависимость используется один раз. `humanizer-ru` и `archify`
+загружаются из внешних репозиториев; их версии закреплены полными Git SHA
+в манифесте `common-dependencies`. Archify закреплён на коммите тега `v3.0.1`.
+Для обновления измените соответствующий SHA и выполните
 `apm install --update`, затем проверьте изменения скилла и lock-файла.
+Если APM использует старый граф вложенных зависимостей, выполните
+`apm install --update --refresh`.
+
+Для Archify нужен каталог `bin/`. В корневом `apm.yml` разрешена его установка
+через `executables.allow` для конкретного SHA Archify. При подключении пакетов
+в другом проекте перенесите этот блок в манифест потребителя: настройки доверия
+корневого проекта не наследуются через зависимости. При обновлении Archify
+обновите SHA и в зависимости, и в разрешении. Для запуска требуется Node.js.
+Для неинтерактивной установки используйте `apm install --trust-bin`
+(для зафиксированных версий — `apm install --frozen --trust-bin`). Без этого
+флага APM может пропустить `bin/`, даже при наличии разрешения в манифесте.
+При проверке этого подключения `apm audit --ci` сообщил drift для 14 файлов
+Archify в `bin/`: контрольная переустановка пропустила их, хотя файлы присутствуют
+в lock-файле и их хэши совпадают. `apm install --frozen --trust-bin` проходит
+без изменения lock-файла, а `node .agents/skills/archify/bin/archify.mjs doctor`
+подтверждает комплектность установки. Полный audit пока не проходит.
 
 OpenSpec CLI и установленные
 в этом проекте OpenSpec-скиллы в эти наборы не входят.

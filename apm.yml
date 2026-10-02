@@ -1,8 +1,14 @@
 name: ai-sdlc-workspace
-version: "0.1.0"
+version: 0.1.0
 description: Practices used to develop the ai-sdlc repository.
-targets: [codex, claude]
+targets:
+- codex
+- claude
 dependencies:
   apm:
-    - path: ./packages/aisdlc-core
-    - path: ./packages/aisdlc-skills
+  - path: ./packages/aisdlc-core
+  - path: ./packages/aisdlc-skills
+executables:
+  allow:
+    github.com/tt-a1i/archify/archify#2ab3cae7ac2c2a55d7386ca789d03c4fcd31816c:
+      bin: true
