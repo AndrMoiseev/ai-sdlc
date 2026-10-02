@@ -16,7 +16,7 @@ upstream_main_commit: df940cdd18551b0277cf897c5a5d3c2a2bb21938
 
 ## Основания и ограничения анализа
 
-Локально прочитаны [proposal](../../../openspec/changes/skill-catalog-installer/proposal.md), [design](../../../openspec/changes/skill-catalog-installer/design.md), обе спецификации и [tasks](../../../openspec/changes/skill-catalog-installer/tasks.md). На момент проверки отмечено 0 из 18 задач реализации. Поэтому сравниваются **проектируемые гарантии нашего установщика** и **документация с исходниками готового TeamAI**, а не результаты испытаний двух работающих продуктов.
+Локально прочитаны [proposal](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/proposal.md), [design](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/design.md), обе спецификации и [tasks](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/tasks.md). На момент проверки отмечено 0 из 18 задач реализации. Поэтому сравниваются **проектируемые гарантии нашего установщика** и **документация с исходниками готового TeamAI**, а не результаты испытаний двух работающих продуктов.
 
 У TeamAI проверены две версии:
 
@@ -55,7 +55,7 @@ upstream_main_commit: df940cdd18551b0277cf897c5a5d3c2a2bb21938
 | Внутренние источники | Приватные источники вне v1 | GitHub, GitLab, другие и частные Git-сервисы | Ограничение собственной v1 может мешать реальным внутренним практикам |
 | Эксплуатация | uv/Git, собственный CLI; runtime скиллов отдельно | Node/Git, конфигурация TeamAI и интеграции агентов | У собственного варианта меньше интеграций, но всё их сопровождение наше |
 
-Основания для локальной колонки: [каталог](../../../openspec/changes/skill-catalog-installer/specs/skill-catalog/spec.md) и [установка](../../../openspec/changes/skill-catalog-installer/specs/skill-project-installation/spec.md). Для TeamAI: [обзор 0.26.0](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/docs/product-overview.md), [матрица агентов](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/README.md), [руководство](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/docs/usage-guide.md), [контракт sources](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/src/types.ts#L243), [доставка скиллов](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/src/resources/skills.ts#L739).
+Основания для локальной колонки: [каталог](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/specs/skill-catalog/spec.md) и [установка](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/specs/skill-project-installation/spec.md). Для TeamAI: [обзор 0.26.0](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/docs/product-overview.md), [матрица агентов](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/README.md), [руководство](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/docs/usage-guide.md), [контракт sources](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/src/types.ts#L243), [доставка скиллов](https://github.com/Tencent/teamai-cli/blob/96e5331a2ea5dded15c866c4eaac946602bb0702/src/resources/skills.ts#L739).
 
 ## Где TeamAI лучше отвечает исходной задаче
 
@@ -115,7 +115,7 @@ TeamAI меняет конфигурации агентов, используе�
 6. **Сложность зависимостей стоит подтвердить.** Сам план требует отдельно установить реальные связи, а интеграционный граф строить на явно тестовой зависимости. Пока нет основания считать универсальный резолвер главной потребностью команды.
 7. **Успех стоит измерять применением.** Проверки байтов и lock необходимы для установщика, но не покажут, что участник нашёл нужную практику и получил полезный результат. Поведенческие сценарии можно держать в проверках практик и пилоте, не превращая установщик в систему сертификации.
 
-Основание: [design и его trade-offs](../../../openspec/changes/skill-catalog-installer/design.md), [задачи реализации и интеграций](../../../openspec/changes/skill-catalog-installer/tasks.md).
+Основание: [design и его trade-offs](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/design.md), [задачи реализации и интеграций](../../../openspec/changes/archive/2026-10-02-skill-catalog-installer/tasks.md).
 
 ## Варианты решения и стоимость
 
