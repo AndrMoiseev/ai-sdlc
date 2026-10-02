@@ -50,7 +50,7 @@ def test_required_resources_ship_together():
     files += [f"templates/{name}.md" for name in
               ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "lens-index")]
     files += [f"references/{name}.md" for name in
-              ("document-format", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan")]
+              ("document-format", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass")]
     for file in files:
         assert (ROOT / file).is_file(), file
 
