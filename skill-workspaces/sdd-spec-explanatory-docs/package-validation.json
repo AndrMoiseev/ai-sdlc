@@ -1,0 +1,601 @@
+{
+  "temporary_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx",
+  "source": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec",
+  "copy": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec",
+  "commands": [
+    {
+      "label": "package-uv-version",
+      "argv": [
+        "uv",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.03152390000104788
+    },
+    {
+      "label": "package-copy-cache",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "cache-dir"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.15144420000069658
+    },
+    {
+      "label": "package-copy-tests",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "test"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 16.535810800000036
+    },
+    {
+      "label": "package-structural",
+      "argv": [
+        "uv",
+        "run",
+        "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-skill-conductor\\scripts\\eval_skill.py",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 1,
+      "seconds": 3.6552157000005536
+    },
+    {
+      "label": "approval-snapshot-before",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "snapshot",
+        "--project-root",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\approval-project",
+        "--change",
+        "demo",
+        "--stage",
+        "documents"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.8131979999998293
+    },
+    {
+      "label": "approval-check-before",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "check",
+        "--project-root",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\approval-project",
+        "--change",
+        "demo",
+        "--stage",
+        "documents"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.6188903000002028
+    },
+    {
+      "label": "approval-snapshot-after",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "snapshot",
+        "--project-root",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\approval-project",
+        "--change",
+        "demo",
+        "--stage",
+        "documents"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.533062800001062
+    },
+    {
+      "label": "approval-check-after",
+      "argv": [
+        "C:\\Program Files\\Python314\\python.exe",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "check",
+        "--project-root",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\approval-project",
+        "--change",
+        "demo",
+        "--stage",
+        "documents"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.5632048000006762
+    },
+    {
+      "label": "package-structural-utf8",
+      "argv": [
+        "uv",
+        "run",
+        "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-skill-conductor\\scripts\\eval_skill.py",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.20613630000298144
+    },
+    {
+      "label": "package-copy-contract-final",
+      "argv": [
+        "python",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "test",
+        "-k",
+        "package_contract"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.8000781000009738
+    },
+    {
+      "label": "package-copy-contract-final",
+      "argv": [
+        "python",
+        "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\installed\\sdd-spec\\scripts\\run.py",
+        "test",
+        "-k",
+        "package_contract"
+      ],
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\external-cwd",
+      "exit_code": 0,
+      "seconds": 0.7570626000015181
+    }
+  ],
+  "copied_hashes": {
+    ".gitignore": "b0b18f5bf7184f205a45032e7a3034fffc852f9c6ad28ae26bb839e2893b5ddd",
+    "agents/openai.yaml": "db27a4783bf0805ab392ccadf8d58475f5e517b9c136efeff659c687d9d77e4a",
+    "evals/evals.json": "4e334acac38961c0e783f794990ee930a890095d079b89b3c6237bc22f29dcbd",
+    "evals/manual.md": "dc1c05ca405efa7ea2f94141135b31b5241687385fb5a60522f0a4328e5117c8",
+    "flows/draft.md": "47da0a2f5fdab554017a2bac21b30151228389a0e31fa87ad6d8dd20643da641",
+    "flows/explain.md": "5fbda38a80e806e7ce3097819a41ebe164a48a4ba43ee03329acaa4af5d76cfb",
+    "flows/explore.md": "4ef45a8d0501ca774f72efefe0e7dd69c44c0ead08b2bbcdd5b2c752f8ad4465",
+    "flows/plan.md": "6912604be9d80bb5adc0c97571e63c79ef0865cca5f66929b0ef24c51270dade",
+    "flows/resume.md": "963a2c7d621662bf86b9c3210cc41a9b24a9e2f36bf48ef0d04e394894bfc90b",
+    "flows/review.md": "53d5dc8542bbe1533009e972da8f5421eaefc396abd703576711583f4d79bdd6",
+    "flows/revise.md": "ef1aeab09c5105a536b1b814bbbaecc8af9d2f159237ccd98a136c325c23661c",
+    "flows/user-review.md": "f85a66b2087dfc88fd7214478e0ffc96841913ed92fd617d8f94f297f5d2c07c",
+    "pyproject.toml": "e1e46cc730aba25ce65cfeefa6321ef49c65b7b2161c91bb96d58125457f1f9c",
+    "README.md": "25b0692068593d76c67be566de52d359f2d5508ce40b603ec8683dd973d736df",
+    "references/claude-code.md": "d315ec196429c09cf26156566b35f3e67bc5e26dda7fe3e5e8149e63df920025",
+    "references/codex.md": "4107c78d518ec3719e43640845952adca4eecb9feaab392ce87c056ac541a8a4",
+    "references/consistency.md": "f70dccab9bdc126b2285452b6cdee5e80396ac2103d951821529cffef4f5f308",
+    "references/document-format.md": "56989ae8910fa717fadfd8c3f4b18b9bfe85ff14ce15129b321cd6cd45b6208c",
+    "references/editorial-pass.md": "3da0dc06fd8538fbc3e8eec521be6b2d12a76d14648590a64e1294ba990e1abf",
+    "references/explanation.md": "a99677409b9caa8f3ca1d6b5de4e4baa15b10f771a52ef9ee371289e90d92347",
+    "references/openspec-origin.md": "e09cf14ceb4f631930e596d6ad8f76bb338a38e31506f208385b9b3f949375cd",
+    "references/reviewer-documents.md": "c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb",
+    "references/reviewer-plan.md": "af07257e416e4403b0146a849754c520635a28bdf4edde854220a2b95b906dbf",
+    "references/runtime-setup.md": "b05d9018994dfa862e5450dced6f69223c2ea9efb841a9c1ef9ba229dedd213e",
+    "scripts/check.py": "dd97be92d1978b0ac10b176857940d0f66146d57108d9368f15705e9f1d02a7d",
+    "scripts/lib/__init__.py": "bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a",
+    "scripts/lib/documents.py": "649556d2358d304bf1395e4cb235e28f6e968c14da6c35efa4c67d2c9021591a",
+    "scripts/lib/paths.py": "1e5fcd4492ffd77f77232570876f12dc9de661a35f6e6f9dbf6cb9475094cd8a",
+    "scripts/lib/reviews.py": "3231b914052dbc8e0833ce12de1c0ab65178eeb225f54206836d419da30670c9",
+    "scripts/lib/snapshots.py": "8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae",
+    "scripts/lib/validation.py": "98f6eb474759cd5f239f2e512f4a5bd340deeb9816119f7be51a598a28207ab5",
+    "scripts/run.py": "4210015f854e5c8aade47a40bf2d587a5512485850e4cc1df65117b941306799",
+    "scripts/snapshot.py": "b888fdc7f9ed93264537d0caae878ba8cec340008b785fd1aa35efc77f549ce3",
+    "SKILL.md": "e6758a6f8fb530531f5987e8da9c6a967eda871a9bf4ccf5201f87feb7c8156f",
+    "templates/decisions.md": "767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c",
+    "templates/design.md": "8cdbbcc546c848ec0167664a894f6ffb3781f1bfb913f9ebd75dda88a247ccef",
+    "templates/explanation.md": "36adf2b9eec634285c5e73aa9933526a5b85b1da18a4547983a6cea9c5342808",
+    "templates/lens-index.md": "9960a72def2967a4607efd50f4d2b9fcf4447309cef53ce8cab9311b7e350ae0",
+    "templates/preview-handoff.md": "9f4324caf1e14c718580fa0dbd77f7103df04dd0c2cd1b3ae0d5ce2b34d97d4d",
+    "templates/proposal.md": "ad14e3009145c0b658c254e5d47d02b4e4f4283b25b10d203792e650744b6e61",
+    "templates/review-report.md": "dfdfba807f3a77aedcca8ccbce9fc982dfc5490a0390f48b3e76034a51ed0944",
+    "templates/review-summary.md": "dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc",
+    "templates/spec.md": "bd1a2ec3834581f3f36d584bf46a18dba9037affe2054ef52e0e9d47ee6a09a0",
+    "templates/state.md": "329d88c35f8aa30899f50b13bbded8a56a44f2a139bd2421f0e7b75558f0ad8e",
+    "templates/tasks.md": "a9f53f1612052eb85c87e8e2b8a4fdb4764bb2f254bb9707036e8c962ea1ae80",
+    "tests/conftest.py": "3945bb7d71bc71f9828a72e648379981ec83522919f59b58d4e27084989b8d71",
+    "tests/test_authorizations.py": "469745ca63d36864ea6204f5fe9cccb74ce21548622c52cbdf47ae5e56b2db84",
+    "tests/test_check_command.py": "75d448068b39371457cc6be163e9c3dca4caf9bc50bd392491539b821ad8b34b",
+    "tests/test_document_records.py": "37913754cd6fe16c6b811a4f62e1104eee12a0d90b8d0e0c1738d22ec9fa5118",
+    "tests/test_lens_index.py": "cd4921a9c4ef1a70a1b26f87ccecda398100d0b3c72011b52d15c36aa6678d00",
+    "tests/test_package_contract.py": "eb39d0b5f57a15d1bea184848a98b1909f7619e2a818e6af4b4355cea8fc6e30",
+    "tests/test_review_records.py": "f99eca1b3e1cbf7e3ce22efeb698eac8b7ddd7d85bc154252d415bc38c1cd858",
+    "tests/test_runtime_launcher.py": "a660251027e59c7f95a37f3f4eb028ac11469a4fed06ab57e046f4d2e4401ce1",
+    "tests/test_snapshots.py": "fb11fcf88683fa60a81ce4496453e09c3ab125e1ddce4dac28234d4ceef78e38",
+    "tests/test_task_coverage.py": "0dcd1a0e30a1cdd5b72d1eb76390be1cabf267d52fdb1f48130b72a5561aa975",
+    "tests/test_task_graph.py": "a6fa5e2dc181c9afa9310b0e9c588630093d4c8289c8b1b5ad7b1e66bf59571b",
+    "tests/test_task_verification.py": "3ed5d15bf9c49312d6109675031eca8789a63feb6b141112cf126f7f5c41092f",
+    "tests/test_template_contract.py": "832f93035ef3c444910c4157184e5eae399c0c6c76a234686ee13a0251e6cba6",
+    "tests/test_traceability.py": "b6036cb41b4e1be6826020da54a9552ecf5a610b042262a212078f0fbc4d02bc",
+    "uv.lock": "3921f204a3397bf0525d01e4d372cca24ac0bbe0c2cee83001b2874578f93c49"
+  },
+  "copy_tests_passed": true,
+  "structural_records": [
+    {
+      "id": "DET-STRUCT-SKILLMD-EXISTS",
+      "dimension": "Structure",
+      "text": "Does SKILL.md exist?",
+      "violation_example": "The skill folder has no SKILL.md file.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "SKILL.md exists"
+    },
+    {
+      "id": "DET-STRUCT-NO-README",
+      "dimension": "Structure",
+      "text": "Is there no README.md inside the skill?",
+      "violation_example": "A README.md file exists inside the skill folder.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "README.md found inside skill (should not exist)"
+    },
+    {
+      "id": "DET-STRUCT-NO-CHANGELOG",
+      "dimension": "Structure",
+      "text": "Is there no CHANGELOG.md inside the skill?",
+      "violation_example": "A CHANGELOG.md file exists inside the skill folder.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No CHANGELOG.md inside skill"
+    },
+    {
+      "id": "DET-STRUCT-REFS-DEPTH",
+      "dimension": "Structure",
+      "text": "Are references nested at most 1 level deep?",
+      "violation_example": "A file under references/ is nested more than 1 level deep.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "References depth OK (≤1 level)"
+    },
+    {
+      "id": "DET-STRUCT-FRONTMATTER-VALID",
+      "dimension": "Structure",
+      "text": "Is the YAML frontmatter present and valid?",
+      "violation_example": "SKILL.md has missing, malformed, or non-dict YAML frontmatter.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Valid frontmatter format"
+    },
+    {
+      "id": "DET-DISCOVERY-NAME-VALID",
+      "dimension": "Discovery",
+      "text": "Is name kebab-case, <=64 chars, matching the folder?",
+      "violation_example": "The name is missing, not kebab-case, too long, or does not match the folder.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Name: sdd-spec"
+    },
+    {
+      "id": "DET-DISCOVERY-DESC-PRESENT",
+      "dimension": "Discovery",
+      "text": "Is description present, <=1024 chars, free of angle brackets, and a string (not a YAML list)?",
+      "violation_example": "The description is missing, too long, contains angle brackets, or is not a string.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Description length: 87 chars"
+    },
+    {
+      "id": "DET-DISCOVERY-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain trigger phrases (e.g. 'Use when ...')?",
+      "violation_example": "The description has no trigger phrases like 'Use when ...'.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "Description missing trigger phrases (add 'Use when...')"
+    },
+    {
+      "id": "DET-DISCOVERY-NEG-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain negative triggers (e.g. 'Do NOT use for ...')?",
+      "violation_example": "The description has no negative triggers like 'Do NOT use for ...'.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "Consider adding negative triggers ('Do NOT use for...')"
+    },
+    {
+      "id": "DET-DISCOVERY-NO-PROCESS-LEAK",
+      "dimension": "Discovery",
+      "text": "Is the description free of multi-step process/workflow language?",
+      "violation_example": "The description contains multi-step process/workflow language.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No process/workflow language in description"
+    },
+    {
+      "id": "DET-STRUCT-BODY-LENGTH",
+      "dimension": "Structure",
+      "text": "Is the SKILL.md body at most 500 lines?",
+      "violation_example": "The SKILL.md body exceeds 500 lines.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body size: 33 lines, 245 words"
+    },
+    {
+      "id": "DET-COMPLETE-NO-TODO",
+      "dimension": "Completeness",
+      "text": "Is the body free of [TODO] placeholders?",
+      "violation_example": "The body contains [TODO] placeholders.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No [TODO] placeholders in body"
+    },
+    {
+      "id": "DET-STRUCT-HEADERS",
+      "dimension": "Structure",
+      "text": "Does the body have at least 2 section headers?",
+      "violation_example": "The body has fewer than 2 section headers.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body structure: 3 sections"
+    },
+    {
+      "id": "DET-STRUCT-MOC",
+      "dimension": "Structure",
+      "text": "Is the body a map (not a long prose dump with few section anchors)?",
+      "violation_example": "The body is a long prose dump with few section anchors.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body reads as a map, not a prose dump"
+    },
+    {
+      "id": "DET-ROBUST-NO-SECRETS",
+      "dimension": "Robustness",
+      "text": "Is SKILL.md free of secrets/env/keys (API keys, exported env vars)?",
+      "violation_example": "SKILL.md contains secrets, API keys, or exported env vars.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "No secrets/env leaked in SKILL.md"
+    },
+    {
+      "id": "DET-ROBUST-NO-USERPATHS",
+      "dimension": "Robustness",
+      "text": "Is SKILL.md free of user-absolute paths (/home/<user>, /Users/<user>)?",
+      "violation_example": "SKILL.md contains user-absolute paths.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No user-absolute paths in SKILL.md"
+    },
+    {
+      "id": "DET-ROBUST-SCRIPTS-NONEMPTY",
+      "dimension": "Robustness",
+      "text": "Are all bundled scripts non-empty?",
+      "violation_example": "A bundled script file is empty.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Script: check.py (2690 bytes)"
+    }
+  ],
+  "relocated_resources": [
+    {
+      "path": "flows/explain.md",
+      "bytes": 5417,
+      "author_path_present": false,
+      "links": [
+        {
+          "target": "resume.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../references/explanation.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../templates/explanation.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../references/runtime-setup.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "revise.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../references/runtime-setup.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../templates/preview-handoff.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../references/editorial-pass.md",
+          "exists": true,
+          "inside_copy": true
+        }
+      ]
+    },
+    {
+      "path": "references/explanation.md",
+      "bytes": 15404,
+      "author_path_present": false,
+      "links": [
+        {
+          "target": "../flows/revise.md",
+          "exists": true,
+          "inside_copy": true
+        },
+        {
+          "target": "../templates/preview-handoff.md",
+          "exists": true,
+          "inside_copy": true
+        }
+      ]
+    },
+    {
+      "path": "templates/explanation.md",
+      "bytes": 3513,
+      "author_path_present": false,
+      "links": [
+        {
+          "target": "archify/module-map/captures/preview.png",
+          "exists": false,
+          "inside_copy": true
+        },
+        {
+          "target": "archify/module-map/diagram.html",
+          "exists": false,
+          "inside_copy": true
+        },
+        {
+          "target": "archify/module-map/diagram.html",
+          "exists": false,
+          "inside_copy": true
+        }
+      ],
+      "example_links_note": "archify/... links are fenced illustrative output links, not bundled resource dependencies"
+    },
+    {
+      "path": "templates/preview-handoff.md",
+      "bytes": 5410,
+      "author_path_present": false,
+      "links": [],
+      "example_links_note": "archify/... links are fenced illustrative output links, not bundled resource dependencies"
+    }
+  ],
+  "approval_preservation": {
+    "mode": "local deterministic mechanism; synthetic artifacts; no route or browser execution",
+    "manifest_equal": true,
+    "normative_bytes_equal": true,
+    "before": {
+      "approved": true,
+      "ready": true,
+      "applicability": {
+        "USER-doc-approval": true
+      },
+      "work_authorizations": {},
+      "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+    },
+    "after": {
+      "approved": true,
+      "ready": true,
+      "applicability": {
+        "USER-doc-approval": true
+      },
+      "work_authorizations": {},
+      "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+    },
+    "check_exit_codes": [
+      0,
+      0
+    ],
+    "approval_status_equal": true
+  },
+  "cleanliness": {
+    "source": {
+      "entries": 68,
+      "suspects": [],
+      "hidden_entries": [
+        ".gitignore"
+      ]
+    },
+    "copy": {
+      "entries": 68,
+      "suspects": [],
+      "hidden_entries": [
+        ".gitignore"
+      ]
+    }
+  },
+  "copy_unchanged_after_checks": true,
+  "source_changed_since_copy": [],
+  "final_package_contract_passed": true,
+  "final_copy_hashes": {
+    ".gitignore": "b0b18f5bf7184f205a45032e7a3034fffc852f9c6ad28ae26bb839e2893b5ddd",
+    "agents/openai.yaml": "db27a4783bf0805ab392ccadf8d58475f5e517b9c136efeff659c687d9d77e4a",
+    "evals/evals.json": "4e334acac38961c0e783f794990ee930a890095d079b89b3c6237bc22f29dcbd",
+    "evals/manual.md": "cd2c4a3f8b73a5d8910340f918e503e48922db4d66fcc6a6b53175e029d168eb",
+    "flows/draft.md": "47da0a2f5fdab554017a2bac21b30151228389a0e31fa87ad6d8dd20643da641",
+    "flows/explain.md": "5fbda38a80e806e7ce3097819a41ebe164a48a4ba43ee03329acaa4af5d76cfb",
+    "flows/explore.md": "4ef45a8d0501ca774f72efefe0e7dd69c44c0ead08b2bbcdd5b2c752f8ad4465",
+    "flows/plan.md": "6912604be9d80bb5adc0c97571e63c79ef0865cca5f66929b0ef24c51270dade",
+    "flows/resume.md": "963a2c7d621662bf86b9c3210cc41a9b24a9e2f36bf48ef0d04e394894bfc90b",
+    "flows/review.md": "53d5dc8542bbe1533009e972da8f5421eaefc396abd703576711583f4d79bdd6",
+    "flows/revise.md": "0c0636a3f6ddeb1662970cb6230fc5be5a4dcafa68bfa80ecb274bfea5accf4a",
+    "flows/user-review.md": "f85a66b2087dfc88fd7214478e0ffc96841913ed92fd617d8f94f297f5d2c07c",
+    "pyproject.toml": "e1e46cc730aba25ce65cfeefa6321ef49c65b7b2161c91bb96d58125457f1f9c",
+    "README.md": "25b0692068593d76c67be566de52d359f2d5508ce40b603ec8683dd973d736df",
+    "references/claude-code.md": "d315ec196429c09cf26156566b35f3e67bc5e26dda7fe3e5e8149e63df920025",
+    "references/codex.md": "4107c78d518ec3719e43640845952adca4eecb9feaab392ce87c056ac541a8a4",
+    "references/consistency.md": "f70dccab9bdc126b2285452b6cdee5e80396ac2103d951821529cffef4f5f308",
+    "references/document-format.md": "56989ae8910fa717fadfd8c3f4b18b9bfe85ff14ce15129b321cd6cd45b6208c",
+    "references/editorial-pass.md": "3da0dc06fd8538fbc3e8eec521be6b2d12a76d14648590a64e1294ba990e1abf",
+    "references/explanation.md": "17e422a2128fe1d65bba2ed27cbcc51b30634eadcbd2a423263e6a479323597c",
+    "references/openspec-origin.md": "e09cf14ceb4f631930e596d6ad8f76bb338a38e31506f208385b9b3f949375cd",
+    "references/reviewer-documents.md": "c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb",
+    "references/reviewer-plan.md": "af07257e416e4403b0146a849754c520635a28bdf4edde854220a2b95b906dbf",
+    "references/runtime-setup.md": "b05d9018994dfa862e5450dced6f69223c2ea9efb841a9c1ef9ba229dedd213e",
+    "scripts/check.py": "dd97be92d1978b0ac10b176857940d0f66146d57108d9368f15705e9f1d02a7d",
+    "scripts/lib/__init__.py": "bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a",
+    "scripts/lib/documents.py": "649556d2358d304bf1395e4cb235e28f6e968c14da6c35efa4c67d2c9021591a",
+    "scripts/lib/paths.py": "1e5fcd4492ffd77f77232570876f12dc9de661a35f6e6f9dbf6cb9475094cd8a",
+    "scripts/lib/reviews.py": "3231b914052dbc8e0833ce12de1c0ab65178eeb225f54206836d419da30670c9",
+    "scripts/lib/snapshots.py": "8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae",
+    "scripts/lib/validation.py": "98f6eb474759cd5f239f2e512f4a5bd340deeb9816119f7be51a598a28207ab5",
+    "scripts/run.py": "4210015f854e5c8aade47a40bf2d587a5512485850e4cc1df65117b941306799",
+    "scripts/snapshot.py": "b888fdc7f9ed93264537d0caae878ba8cec340008b785fd1aa35efc77f549ce3",
+    "SKILL.md": "e6758a6f8fb530531f5987e8da9c6a967eda871a9bf4ccf5201f87feb7c8156f",
+    "templates/decisions.md": "767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c",
+    "templates/design.md": "8cdbbcc546c848ec0167664a894f6ffb3781f1bfb913f9ebd75dda88a247ccef",
+    "templates/explanation.md": "36adf2b9eec634285c5e73aa9933526a5b85b1da18a4547983a6cea9c5342808",
+    "templates/lens-index.md": "9960a72def2967a4607efd50f4d2b9fcf4447309cef53ce8cab9311b7e350ae0",
+    "templates/preview-handoff.md": "aa585cbef9961db4aeac38b4100dc86023652aa7caf65fbbc68e7291a79431be",
+    "templates/proposal.md": "ad14e3009145c0b658c254e5d47d02b4e4f4283b25b10d203792e650744b6e61",
+    "templates/review-report.md": "dfdfba807f3a77aedcca8ccbce9fc982dfc5490a0390f48b3e76034a51ed0944",
+    "templates/review-summary.md": "dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc",
+    "templates/spec.md": "bd1a2ec3834581f3f36d584bf46a18dba9037affe2054ef52e0e9d47ee6a09a0",
+    "templates/state.md": "329d88c35f8aa30899f50b13bbded8a56a44f2a139bd2421f0e7b75558f0ad8e",
+    "templates/tasks.md": "a9f53f1612052eb85c87e8e2b8a4fdb4764bb2f254bb9707036e8c962ea1ae80",
+    "tests/conftest.py": "3945bb7d71bc71f9828a72e648379981ec83522919f59b58d4e27084989b8d71",
+    "tests/test_authorizations.py": "469745ca63d36864ea6204f5fe9cccb74ce21548622c52cbdf47ae5e56b2db84",
+    "tests/test_check_command.py": "75d448068b39371457cc6be163e9c3dca4caf9bc50bd392491539b821ad8b34b",
+    "tests/test_document_records.py": "37913754cd6fe16c6b811a4f62e1104eee12a0d90b8d0e0c1738d22ec9fa5118",
+    "tests/test_lens_index.py": "cd4921a9c4ef1a70a1b26f87ccecda398100d0b3c72011b52d15c36aa6678d00",
+    "tests/test_package_contract.py": "eb39d0b5f57a15d1bea184848a98b1909f7619e2a818e6af4b4355cea8fc6e30",
+    "tests/test_review_records.py": "f99eca1b3e1cbf7e3ce22efeb698eac8b7ddd7d85bc154252d415bc38c1cd858",
+    "tests/test_runtime_launcher.py": "a660251027e59c7f95a37f3f4eb028ac11469a4fed06ab57e046f4d2e4401ce1",
+    "tests/test_snapshots.py": "fb11fcf88683fa60a81ce4496453e09c3ab125e1ddce4dac28234d4ceef78e38",
+    "tests/test_task_coverage.py": "0dcd1a0e30a1cdd5b72d1eb76390be1cabf267d52fdb1f48130b72a5561aa975",
+    "tests/test_task_graph.py": "a6fa5e2dc181c9afa9310b0e9c588630093d4c8289c8b1b5ad7b1e66bf59571b",
+    "tests/test_task_verification.py": "3ed5d15bf9c49312d6109675031eca8789a63feb6b141112cf126f7f5c41092f",
+    "tests/test_template_contract.py": "832f93035ef3c444910c4157184e5eae399c0c6c76a234686ee13a0251e6cba6",
+    "tests/test_traceability.py": "b6036cb41b4e1be6826020da54a9552ecf5a610b042262a212078f0fbc4d02bc",
+    "uv.lock": "3921f204a3397bf0525d01e4d372cca24ac0bbe0c2cee83001b2874578f93c49"
+  },
+  "final_source_matches_copy": true,
+  "final_validation_at_utc": "2026-10-02T16:38:48.893150+00:00"
+}

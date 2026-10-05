@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-8.4.2, pluggy-1.6.0
+cachedir: C:\Users\Andrew\AppData\Local\ai-sdlc\sdd-spec\e8434f067026c784\pytest
+rootdir: C:\Users\Andrew\AppData\Local\Temp\sdd-spec-portability-mcsi5ylx\installed\sdd-spec
+configfile: pyproject.toml
+collected 132 items / 127 deselected / 5 selected
+
+..\installed\sdd-spec\tests\test_package_contract.py .....               [100%]
+
+====================== 5 passed, 127 deselected in 0.16s ======================

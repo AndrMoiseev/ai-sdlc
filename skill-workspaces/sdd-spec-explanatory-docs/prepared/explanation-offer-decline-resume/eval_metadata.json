@@ -1,0 +1,20 @@
+{
+  "eval_id": 11,
+  "eval_name": "explanation-offer-decline-resume",
+  "prompt": "$sdd-spec Подготовь черновик документов sample-change по материалам фикстуры. Пока поручено только создание основного комплекта; после него покажи следующий доступный шаг.",
+  "expectations": [
+    "После редактуры черновика предложены один документ, набор документов и отказ до предложения независимого ревью",
+    "До выбора нет создания пояснения или вызовов archify",
+    "Молчание не трактуется как разрешение и не блокирует основной процесс",
+    "Отказ с областью и манифестом сохранён в читаемой части state без нового kind USER",
+    "Resume той же версии после отказа не повторяет предложение",
+    "Поздний явный запрос и выбор набора документов выполняются",
+    "Согласие на пояснение не выдано за согласие на ревью или планирование"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

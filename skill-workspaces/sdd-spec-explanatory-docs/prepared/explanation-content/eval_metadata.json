@@ -1,0 +1,20 @@
+{
+  "eval_id": 4,
+  "eval_name": "explanation-content",
+  "prompt": "$sdd-spec Подготовь пояснение решения sample-change по существующим proposal, design и specs: создание заказа и отмена с возвратом. Покажи затронутые компоненты, процессы и взаимодействия. Исходное поведение внешнего обработчика неизвестно. Код не реализуй.",
+  "expectations": [
+    "Оба процесса и каждый сценарий фикстуры покрыты ссылками на нормативные источники",
+    "Есть объяснение до/после, неизвестное исходное поведение не придумано",
+    "Для неприменимого представления указана предметная причина",
+    "Вызваны применимые типы architecture, workflow и sequence через установленный archify",
+    "Статусы узлов и связей независимы; изменённое сообщение прежнего участника помечено отдельно",
+    "Новые обязательства возвращены в revise, а не скрыто внесены в пояснение",
+    "index.md содержит стабильные ID, пути артефактов, места вставки и исходный documents-манифест"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

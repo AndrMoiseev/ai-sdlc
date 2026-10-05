@@ -1,0 +1,103 @@
+{
+    "schema_version":  2,
+    "diagram_type":  "workflow",
+    "meta":  {
+                 "title":  "Order retry — independent markers",
+                 "output":  "diagram.html",
+                 "quality_profile":  "showcase"
+             },
+    "lanes":  [
+                  {
+                      "id":  "flow",
+                      "label":  "AFTER: create order"
+                  },
+                  {
+                      "id":  "before",
+                      "label":  "BEFORE: retired retry"
+                  }
+              ],
+    "nodes":  [
+                  {
+                      "id":  "request",
+                      "lane":  "flow",
+                      "col":  0,
+                      "type":  "external",
+                      "label":  "Request",
+                      "sublabel":  "[=] HTTP POST",
+                      "width":  170,
+                      "tag":  "[=]"
+                  },
+                  {
+                      "id":  "lookup",
+                      "lane":  "flow",
+                      "col":  1,
+                      "type":  "backend",
+                      "label":  "Check key",
+                      "sublabel":  "[+] deduplicate",
+                      "width":  170,
+                      "tag":  "[+]"
+                  },
+                  {
+                      "id":  "reply",
+                      "lane":  "flow",
+                      "col":  2,
+                      "type":  "backend",
+                      "label":  "Reply",
+                      "sublabel":  "[~] HTTP response",
+                      "width":  170,
+                      "tag":  "[~]"
+                  },
+                  {
+                      "id":  "retry",
+                      "lane":  "before",
+                      "col":  0,
+                      "type":  "backend",
+                      "label":  "Retry endpoint",
+                      "sublabel":  "[-] old insert",
+                      "width":  170,
+                      "tag":  "[-]"
+                  },
+                  {
+                      "id":  "duplicate",
+                      "lane":  "before",
+                      "col":  1,
+                      "type":  "database",
+                      "label":  "Second order",
+                      "sublabel":  "[-] duplicate",
+                      "width":  170,
+                      "tag":  "[-]"
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "check",
+                      "from":  "request",
+                      "to":  "lookup",
+                      "label":  "[+] key lookup"
+                  },
+                  {
+                      "id":  "same",
+                      "from":  "lookup",
+                      "to":  "reply",
+                      "label":  "[~] existing key -\u003e 200"
+                  },
+                  {
+                      "id":  "retired",
+                      "from":  "retry",
+                      "to":  "duplicate",
+                      "label":  "[-] write again",
+                      "variant":  "dashed"
+                  }
+              ],
+    "cards":  [
+                  {
+                      "dot":  "cyan",
+                      "title":  "Change markers",
+                      "items":  [
+                                    "[=] existing / unchanged; [+] added; [~] changed; [-] removed",
+                                    "Node and relationship statuses are independent.",
+                                    "BEFORE retains the removed retry write; AFTER returns 410 without a write."
+                                ]
+                  }
+              ]
+}

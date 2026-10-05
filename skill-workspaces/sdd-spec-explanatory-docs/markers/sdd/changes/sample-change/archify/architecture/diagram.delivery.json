@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "246e99a9-e2f2-4eec-a69f-93d1a503230a",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\architecture\\candidate.json",
+  "output": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\architecture\\diagram.html",
+  "specification": {
+    "sha256": "5b271786df2b72c1a3cdfb960cc9b619f14f706c1aea3ea5d34dc0b6d8153de0",
+    "bytes": 4184
+  },
+  "artifact": {
+    "sha256": "a6ed602e65dcb9ad7d86acdb59105cfcb1840f74bdd15c63eb9d0e73b0fa5c48",
+    "bytes": 748337
+  }
+}

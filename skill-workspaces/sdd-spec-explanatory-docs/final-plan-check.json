@@ -1,0 +1,90 @@
+﻿{
+  "schema_version": 1,
+  "stage": "plan",
+  "errors": [],
+  "warnings": [],
+  "review_status": {
+    "required_lenses": [
+      "plan"
+    ],
+    "coverage": {
+      "plan": "stale"
+    },
+    "reports": {
+      "20261002T114440Z-explanation/consistency": {
+        "stage": "document_review",
+        "lens_id": "consistency",
+        "result": "completed_no_findings",
+        "freshness": "current",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "ba1d5cb44aa5466126199bf6bdccac24652f1409f16a12daed84e28f7839e880"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "7ec9447e90c535b89e14652de5d046683182d4433cd5db6988000200d1de0477"
+          },
+          {
+            "path": "specs/solution-explanation/spec.md",
+            "sha256": "d6dbb09af2432013260e991d61e5a0a38400a3a904fd56ea54c7e537d1418ef7"
+          }
+        ]
+      },
+      "20261002T122525Z-plan/plan": {
+        "stage": "plan_review",
+        "lens_id": "plan",
+        "result": "completed_no_findings",
+        "freshness": "stale",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "ba1d5cb44aa5466126199bf6bdccac24652f1409f16a12daed84e28f7839e880"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "7ec9447e90c535b89e14652de5d046683182d4433cd5db6988000200d1de0477"
+          },
+          {
+            "path": "specs/solution-explanation/spec.md",
+            "sha256": "d6dbb09af2432013260e991d61e5a0a38400a3a904fd56ea54c7e537d1418ef7"
+          },
+          {
+            "path": "tasks.md",
+            "sha256": "42a7e9d759af1000af722e385a11f8d1753247af7891c0f785575e18e0dce3be"
+          }
+        ]
+      }
+    },
+    "complete": false,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": false,
+    "ready": false,
+    "applicability": {
+      "USER-review-explanation-plan": true,
+      "USER-review-explanation": true,
+      "USER-approve-explanation-documents": true,
+      "USER-plan-explanation": true
+    },
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  },
+  "tasks": {
+    "available_by_graph": [],
+    "cannot_parallel_with": {
+      "TASK-explanation-diagrams": [],
+      "TASK-checked-previews": [],
+      "TASK-preview-handoff": [],
+      "TASK-explanation-freshness": [],
+      "TASK-explanation-offer": []
+    },
+    "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+  },
+  "progress": {
+    "done": 5,
+    "total": 5
+  }
+}

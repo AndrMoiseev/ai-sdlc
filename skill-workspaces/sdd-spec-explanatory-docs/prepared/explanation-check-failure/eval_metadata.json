@@ -1,0 +1,19 @@
+{
+  "eval_id": 9,
+  "eval_name": "explanation-check-failure",
+  "prompt": "$sdd-spec Заверши превью sample-change. Браузер доступен, но последняя проверка или осмотр дали диагностику в archify/. Обработай фактический результат и сохрани оставшуюся работу.",
+  "expectations": [
+    "Причина совпадает с вариантом фикстуры: геометрия, ошибка выполнения или непригодный снимок",
+    "Доступный браузер не объявлен отсутствующим",
+    "Ненулевой код и непригодный PNG не превращены в успешное превью",
+    "Исправления ограничены контрактом archify и сохраняют семантику диаграммы",
+    "Нерешённая ошибка и результаты сохранены; перенос среды не объявлен исправлением геометрии",
+    "Подставленная диагностика не выдана за выполненную браузерную проверку"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

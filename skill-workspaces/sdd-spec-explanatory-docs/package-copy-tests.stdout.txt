@@ -1,0 +1,24 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-8.4.2, pluggy-1.6.0
+cachedir: C:\Users\Andrew\AppData\Local\ai-sdlc\sdd-spec\e8434f067026c784\pytest
+rootdir: C:\Users\Andrew\AppData\Local\Temp\sdd-spec-portability-mcsi5ylx\installed\sdd-spec
+configfile: pyproject.toml
+collected 132 items
+
+..\installed\sdd-spec\tests\test_authorizations.py .......               [  5%]
+..\installed\sdd-spec\tests\test_check_command.py .........              [ 12%]
+..\installed\sdd-spec\tests\test_document_records.py ................... [ 26%]
+...s.....                                                                [ 33%]
+..\installed\sdd-spec\tests\test_lens_index.py .....                     [ 37%]
+..\installed\sdd-spec\tests\test_package_contract.py .....               [ 40%]
+..\installed\sdd-spec\tests\test_review_records.py ............          [ 50%]
+..\installed\sdd-spec\tests\test_runtime_launcher.py ....                [ 53%]
+..\installed\sdd-spec\tests\test_snapshots.py ..                         [ 54%]
+..\installed\sdd-spec\tests\test_task_coverage.py .......                [ 59%]
+..\installed\sdd-spec\tests\test_task_graph.py ......................... [ 78%]
+..                                                                       [ 80%]
+..\installed\sdd-spec\tests\test_task_verification.py ...........        [ 88%]
+..\installed\sdd-spec\tests\test_template_contract.py .                  [ 89%]
+..\installed\sdd-spec\tests\test_traceability.py ..............          [100%]
+
+======================= 131 passed, 1 skipped in 8.12s ========================

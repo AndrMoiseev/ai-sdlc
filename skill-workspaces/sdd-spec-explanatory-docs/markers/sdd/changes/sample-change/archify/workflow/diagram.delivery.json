@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b8e6284a-2405-40f7-a924-f000b87e563e",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\workflow\\candidate.json",
+  "output": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\workflow\\diagram.html",
+  "specification": {
+    "sha256": "d2da750160c2db78078c6952b7a06429b6dcd2d9c1ba3a0c07c1f836e4c526d0",
+    "bytes": 3769
+  },
+  "artifact": {
+    "sha256": "b9acb61a66f38a414dd3153d8d5677033c1236a1268cd44f136bf7251ad2448a",
+    "bytes": 749159
+  }
+}

@@ -32,6 +32,8 @@ def test_every_local_markdown_link_resolves_inside_package():
         if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
             continue
         content = path.read_text(encoding="utf-8")
+        # Fenced examples describe generated project files, not package links.
+        content = re.sub(r"(?ms)^(`{3,}|~{3,})[^\n]*\n.*?^\1[ \t]*$", "", content)
         for target in re.findall(r"\[[^\]\n]+\]\(([^)\n]+)\)", content):
             if re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*:", target) or target.startswith("#"):
                 continue
@@ -46,11 +48,11 @@ def test_every_local_markdown_link_resolves_inside_package():
 def test_required_resources_ship_together():
     files = ["README.md", "pyproject.toml", "uv.lock", "scripts/check.py", "scripts/snapshot.py", "scripts/run.py"]
     files += [f"flows/{name}.md" for name in
-              ("explore", "draft", "revise", "review", "user-review", "resume", "plan")]
+              ("explore", "draft", "revise", "review", "user-review", "resume", "plan", "explain")]
     files += [f"templates/{name}.md" for name in
-              ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "lens-index")]
+              ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "lens-index", "explanation", "preview-handoff")]
     files += [f"references/{name}.md" for name in
-              ("document-format", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass")]
+              ("document-format", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation")]
     for file in files:
         assert (ROOT / file).is_file(), file
 

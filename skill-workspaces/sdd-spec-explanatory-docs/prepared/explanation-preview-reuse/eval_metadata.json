@@ -1,0 +1,19 @@
+{
+  "eval_id": 7,
+  "eval_name": "explanation-preview-reuse",
+  "prompt": "$sdd-spec Обнови превью в пояснении sample-change. В archify/ уже есть HTML и результаты проверки со снимками; сверь их пригодность и используй доступные результаты.",
+  "expectations": [
+    "Проверена привязка receipt и PNG к текущим байтам HTML, а не только documents-манифесту",
+    "При актуальном пригодном наборе нет повторной генерации PNG",
+    "Изображение осмотрено до заявления о читаемости",
+    "Кликабельное превью ведёт на HTML и корректно разрешается из explanation.md и explanation/",
+    "Прежний PNG при изменённом HTML не выдан за актуальный",
+    "Проверка без снимков не объявлена готовым превью"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

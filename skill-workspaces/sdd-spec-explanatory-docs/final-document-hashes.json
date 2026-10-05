@@ -1,0 +1,22 @@
+[
+    {
+        "path":  "sdd/changes/sdd-spec-explanatory-docs/proposal.md",
+        "sha256":  "7ec9447e90c535b89e14652de5d046683182d4433cd5db6988000200d1de0477"
+    },
+    {
+        "path":  "sdd/changes/sdd-spec-explanatory-docs/design.md",
+        "sha256":  "ba1d5cb44aa5466126199bf6bdccac24652f1409f16a12daed84e28f7839e880"
+    },
+    {
+        "path":  "sdd/changes/sdd-spec-explanatory-docs/specs/solution-explanation/spec.md",
+        "sha256":  "d6dbb09af2432013260e991d61e5a0a38400a3a904fd56ea54c7e537d1418ef7"
+    },
+    {
+        "path":  "sdd/changes/sdd-spec-explanatory-docs/tasks.md",
+        "sha256":  "bbddc45c062a7749d594dcb88bc77f721ed7e31427bb49440396c3b30717fc3e"
+    },
+    {
+        "path":  "sdd/changes/sdd-spec-explanatory-docs/implementation-report.md",
+        "sha256":  "9775cb560bf1cd9e0387acb3ddeba3823dde460f2a1b9eeba6978a4346e7eeda"
+    }
+]

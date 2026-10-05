@@ -69,6 +69,40 @@ dependencies:
   local_path: ../../skills/sdd-doc
   declaring_parent: ./packages/aisdlc-core
   anchored_local_path: skills/sdd-doc
+- repo_url: _local/sdd-implement
+  name: sdd-implement
+  version: unknown
+  depth: 2
+  resolved_by: _local/aisdlc-core
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/sdd-implement
+  - .agents/skills/sdd-implement/SKILL.md
+  - .agents/skills/sdd-implement/agents/openai.yaml
+  - .agents/skills/sdd-implement/references/agents.md
+  - .agents/skills/sdd-implement/references/progress.md
+  - .agents/skills/sdd-implement/references/testing.md
+  - .claude/skills/sdd-implement
+  - .claude/skills/sdd-implement/SKILL.md
+  - .claude/skills/sdd-implement/agents/openai.yaml
+  - .claude/skills/sdd-implement/references/agents.md
+  - .claude/skills/sdd-implement/references/progress.md
+  - .claude/skills/sdd-implement/references/testing.md
+  deployed_file_hashes:
+    .agents/skills/sdd-implement/SKILL.md: sha256:b34b477f9f37b86bb2b693d9e97af3affdf41f2d480b9276750dc48d704074b8
+    .agents/skills/sdd-implement/agents/openai.yaml: sha256:37d97b998b7c76811bcdba5303392d53cab6fd77e435e9cb87400843cad084ad
+    .agents/skills/sdd-implement/references/agents.md: sha256:70e8942cfb67a836391677813daaf8b94b51b1e06127e1f1ad8cb35761f6a301
+    .agents/skills/sdd-implement/references/progress.md: sha256:dc42c8bfaebe32d067df6fc741ed406801048948c083b0575a6161cfcbef91c1
+    .agents/skills/sdd-implement/references/testing.md: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990
+    .claude/skills/sdd-implement/SKILL.md: sha256:b34b477f9f37b86bb2b693d9e97af3affdf41f2d480b9276750dc48d704074b8
+    .claude/skills/sdd-implement/agents/openai.yaml: sha256:37d97b998b7c76811bcdba5303392d53cab6fd77e435e9cb87400843cad084ad
+    .claude/skills/sdd-implement/references/agents.md: sha256:70e8942cfb67a836391677813daaf8b94b51b1e06127e1f1ad8cb35761f6a301
+    .claude/skills/sdd-implement/references/progress.md: sha256:dc42c8bfaebe32d067df6fc741ed406801048948c083b0575a6161cfcbef91c1
+    .claude/skills/sdd-implement/references/testing.md: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990
+  source: local
+  local_path: ../../skills/sdd-implement
+  declaring_parent: ./packages/aisdlc-core
+  anchored_local_path: skills/sdd-implement
 - repo_url: _local/sdd-skill-conductor
   name: sdd-skill-conductor
   version: unknown
@@ -9361,3 +9395,111 @@ deployments:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
   content_hash: sha256:3921f204a3397bf0525d01e4d372cca24ac0bbe0c2cee83001b2874578f93c49
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:b34b477f9f37b86bb2b693d9e97af3affdf41f2d480b9276750dc48d704074b8
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:37d97b998b7c76811bcdba5303392d53cab6fd77e435e9cb87400843cad084ad
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement/references/agents.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:70e8942cfb67a836391677813daaf8b94b51b1e06127e1f1ad8cb35761f6a301
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement/references/progress.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:dc42c8bfaebe32d067df6fc741ed406801048948c083b0575a6161cfcbef91c1
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-implement/references/testing.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:b34b477f9f37b86bb2b693d9e97af3affdf41f2d480b9276750dc48d704074b8
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:37d97b998b7c76811bcdba5303392d53cab6fd77e435e9cb87400843cad084ad
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement/references/agents.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:70e8942cfb67a836391677813daaf8b94b51b1e06127e1f1ad8cb35761f6a301
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement/references/progress.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:dc42c8bfaebe32d067df6fc741ed406801048948c083b0575a6161cfcbef91c1
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-implement/references/testing.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-implement
+  active_owner: local:skills/sdd-implement
+  content_hash: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990

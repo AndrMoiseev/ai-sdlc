@@ -1,0 +1,70 @@
+[
+  {
+    "path": "skills/sdd-spec/flows/explain.md",
+    "sha256": "5fbda38a80e806e7ce3097819a41ebe164a48a4ba43ee03329acaa4af5d76cfb"
+  },
+  {
+    "path": "skills/sdd-spec/references/explanation.md",
+    "sha256": "17e422a2128fe1d65bba2ed27cbcc51b30634eadcbd2a423263e6a479323597c"
+  },
+  {
+    "path": "skills/sdd-spec/templates/explanation.md",
+    "sha256": "36adf2b9eec634285c5e73aa9933526a5b85b1da18a4547983a6cea9c5342808"
+  },
+  {
+    "path": "skills/sdd-spec/templates/preview-handoff.md",
+    "sha256": "aa585cbef9961db4aeac38b4100dc86023652aa7caf65fbbc68e7291a79431be"
+  },
+  {
+    "path": "skills/sdd-spec/SKILL.md",
+    "sha256": "e6758a6f8fb530531f5987e8da9c6a967eda871a9bf4ccf5201f87feb7c8156f"
+  },
+  {
+    "path": "skills/sdd-spec/README.md",
+    "sha256": "25b0692068593d76c67be566de52d359f2d5508ce40b603ec8683dd973d736df"
+  },
+  {
+    "path": "skills/sdd-spec/flows/draft.md",
+    "sha256": "47da0a2f5fdab554017a2bac21b30151228389a0e31fa87ad6d8dd20643da641"
+  },
+  {
+    "path": "skills/sdd-spec/flows/resume.md",
+    "sha256": "963a2c7d621662bf86b9c3210cc41a9b24a9e2f36bf48ef0d04e394894bfc90b"
+  },
+  {
+    "path": "skills/sdd-spec/flows/revise.md",
+    "sha256": "0c0636a3f6ddeb1662970cb6230fc5be5a4dcafa68bfa80ecb274bfea5accf4a"
+  },
+  {
+    "path": "skills/sdd-spec/references/runtime-setup.md",
+    "sha256": "b05d9018994dfa862e5450dced6f69223c2ea9efb841a9c1ef9ba229dedd213e"
+  },
+  {
+    "path": "skills/sdd-spec/references/document-format.md",
+    "sha256": "56989ae8910fa717fadfd8c3f4b18b9bfe85ff14ce15129b321cd6cd45b6208c"
+  },
+  {
+    "path": "skills/sdd-spec/references/editorial-pass.md",
+    "sha256": "3da0dc06fd8538fbc3e8eec521be6b2d12a76d14648590a64e1294ba990e1abf"
+  },
+  {
+    "path": "skills/sdd-spec/evals/manual.md",
+    "sha256": "cd2c4a3f8b73a5d8910340f918e503e48922db4d66fcc6a6b53175e029d168eb"
+  },
+  {
+    "path": "skills/sdd-spec/evals/evals.json",
+    "sha256": "4e334acac38961c0e783f794990ee930a890095d079b89b3c6237bc22f29dcbd"
+  },
+  {
+    "path": "sdd/changes/sdd-spec-explanatory-docs/implementation-report.md",
+    "sha256": "02d20ab28be1dcf547a3c46aaf39a70763aba1a99d100b5d82ef6a31b2782d9c"
+  },
+  {
+    "path": "sdd/changes/sdd-spec-explanatory-docs/tasks.md",
+    "sha256": "15249971357d30904b477b8862e69b19ea0ea982579b7ba6a1a83f2771a90b3a"
+  },
+  {
+    "path": "sdd/changes/sdd-spec-explanatory-docs/state.md",
+    "sha256": "7f73df421c3003402d56a2a34dd2808241c6ab58fee7b603dad39cc0330277d5"
+  }
+]

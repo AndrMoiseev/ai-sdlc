@@ -1,0 +1,82 @@
+{
+    "schema_version":  1,
+    "diagram_type":  "sequence",
+    "meta":  {
+                 "title":  "Order retry — independent markers",
+                 "output":  "diagram.html",
+                 "quality_profile":  "showcase",
+                 "viewBox":  [
+                                 900,
+                                 540
+                             ],
+                 "column_fit":  "spread"
+             },
+    "participants":  [
+                         {
+                             "id":  "client",
+                             "type":  "external",
+                             "label":  "Client",
+                             "sublabel":  "Без изменений: caller"
+                         },
+                         {
+                             "id":  "api",
+                             "type":  "backend",
+                             "label":  "API",
+                             "sublabel":  "Без изменений: handler"
+                         },
+                         {
+                             "id":  "keys",
+                             "type":  "backend",
+                             "label":  "Worker",
+                             "sublabel":  "Новый: async processor"
+                         }
+                     ],
+    "messages":  [
+                     {
+                         "id":  "request",
+                         "from":  "client",
+                         "to":  "api",
+                         "y":  160,
+                         "label":  "Без изменений: POST order",
+                         "variant":  "default"
+                     },
+                     {
+                         "id":  "lookup",
+                         "from":  "api",
+                         "to":  "keys",
+                         "y":  200,
+                         "label":  "Новый: async OrderCreated",
+                         "variant":  "dashed",
+                         "note":  "New asynchronous event; caller does not wait for worker completion."
+                     },
+                     {
+                         "id":  "found",
+                         "from":  "keys",
+                         "to":  "api",
+                         "y":  245,
+                         "label":  "Новый: async receipt",
+                         "variant":  "return",
+                         "note":  "Receipt follows asynchronous processing; not a blocking request return."
+                     },
+                     {
+                         "id":  "reply",
+                         "from":  "api",
+                         "to":  "client",
+                         "y":  295,
+                         "label":  "Изменён: 200 same order",
+                         "variant":  "return",
+                         "note":  "[~] Changed response from the existing API participant; returns the previously stored order."
+                     }
+                 ],
+    "cards":  [
+                  {
+                      "dot":  "cyan",
+                      "title":  "Change markers",
+                      "items":  [
+                                    "[=] existing / unchanged; [+] added; [~] changed; [-] removed",
+                                    "Node and relationship statuses are independent.",
+                                    "BEFORE retains the removed retry write; AFTER returns 410 without a write."
+                                ]
+                  }
+              ]
+}

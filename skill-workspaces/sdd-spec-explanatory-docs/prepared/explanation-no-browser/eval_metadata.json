@@ -1,0 +1,19 @@
+{
+  "eval_id": 8,
+  "eval_name": "explanation-no-browser",
+  "prompt": "$sdd-spec Продолжи пояснение sample-change. archify доступен, но его проверка сообщает, что в этой среде браузер недоступен. Сохрани результат и подготовь передачу для завершения превью в новой среде.",
+  "expectations": [
+    "В каждом незавершённом месте виден ARCHIFY_PREVIEW_PENDING:<diagram-id> с фактической причиной",
+    "Ссылка есть только для существующего HTML",
+    "HTML, браузерная проверка и осмотр имеют отдельные фактические статусы",
+    "archify/preview-handoff.md содержит реальные ID, документы, пути, диагностику и поручение обнаружить установленный archify",
+    "Передача требует сверить documents-манифест и текущий HTML до замены заглушек",
+    "Отсутствие отдельного browser-tool не принято за доказательство недоступности Chrome/Chromium для archify"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

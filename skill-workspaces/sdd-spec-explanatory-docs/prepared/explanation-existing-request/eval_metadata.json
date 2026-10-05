@@ -1,0 +1,19 @@
+{
+  "eval_id": 12,
+  "eval_name": "explanation-existing-request",
+  "prompt": "$sdd-spec Продолжи sample-change после перерыва. В state и истории сохранено поручение подготовить пояснение; проверь его область, действительность и выполненную часть, затем сделай следующий допустимый шаг.",
+  "expectations": [
+    "Действующее поручение выполнено без повторного запроса того же разрешения",
+    "Готовая актуальная часть сохранена, продолжена незавершённая",
+    "Отменённое поручение не возобновлено",
+    "Новая область не получила разрешение от существующего пояснения",
+    "Блокирующие вопросы основного комплекта сохраняют силу",
+    "Ревью и планирование сохраняют отдельные условия и разрешения"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

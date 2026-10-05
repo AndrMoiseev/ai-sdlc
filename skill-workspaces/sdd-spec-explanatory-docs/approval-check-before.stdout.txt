@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "stage": "documents",
+  "errors": [],
+  "warnings": [
+    {
+      "code": "state_recovery",
+      "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-portability-mcsi5ylx\\approval-project\\sdd\\changes\\demo\\state.md",
+      "element_id": null,
+      "message": "State is missing; recover a draft checkpoint without inferring approvals."
+    }
+  ],
+  "review_status": {
+    "required_lenses": [
+      "consistency"
+    ],
+    "coverage": {
+      "consistency": "completed"
+    },
+    "reports": {
+      "local-fixture/consistency": {
+        "stage": "document_review",
+        "lens_id": "consistency",
+        "result": "completed_no_findings",
+        "freshness": "current",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "76d0455432b0be665ff8e4c8d692e9e4f2bbad7058eba3f19ea5ab1b172692e2"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "fa4ba3cf8055c7a82f3df5710b5fdefa2462d14db73355c638a00835c882ab96"
+          },
+          {
+            "path": "specs/feature/spec.md",
+            "sha256": "8ab740ebfad37a673449e47d096c5b458d18e5aa73ab61904fb36528c964e841"
+          }
+        ]
+      }
+    },
+    "complete": true,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": true,
+    "ready": true,
+    "applicability": {
+      "USER-doc-approval": true
+    },
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  }
+}

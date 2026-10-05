@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "15ccf244-98c4-4ebb-b88f-90459cc761d9",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\candidate.json",
+  "output": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\diagram.html",
+  "specification": {
+    "sha256": "1a9cb8a516ce6307bcc79bb29e6fea570ddc3e1c63761fd414df63e06d8bee1c",
+    "bytes": 3578
+  },
+  "artifact": {
+    "sha256": "91d86aa7a7026f37473f31217201f52a95313b0d8df2a60b656e57ef807e3bd6",
+    "bytes": 746923
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "eval_id": 6,
+  "eval_name": "explanation-portable-layout",
+  "prompt": "$sdd-spec Сделай пояснение sample-change набором документов: обзор и отдельные создание заказа и возврат. Сохрани прежние диаграммы и результаты проверок при добавлении новой версии. Каталог изменения затем передадим в другой проект.",
+  "expectations": [
+    "explanation.md ссылается на документы explanation/ и локальный archify/",
+    "Все команды пишут внутрь archify/ тестового изменения, вне пакетов скиллов и отдельного .archify проекта",
+    "Разные диаграммы и повторные проверки имеют разные пути без перезаписи прежних результатов",
+    "index.md связывает ID, HTML, снимки, проверки и каждое место вставки",
+    "После переноса копии изменения все относительные ссылки внутри производного комплекта разрешаются",
+    "ID и хеши сохранённых исторических файлов совпадают после переноса"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

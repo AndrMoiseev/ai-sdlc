@@ -1,0 +1,44 @@
+[
+  {
+    "path": "skills/sdd-spec/references/explanation.md",
+    "old": "Удалённый шаг\nне выглядит исполняемым в будущем процессе.",
+    "new": "Не показывай удалённый шаг\nкак исполняемый в будущем процессе.",
+    "pattern": 4
+  },
+  {
+    "path": "skills/sdd-spec/references/explanation.md",
+    "old": "index.md является обычным Markdown, без нового `document_type`.",
+    "new": "index.md - обычный Markdown, без нового `document_type`.",
+    "pattern": 3
+  },
+  {
+    "path": "skills/sdd-spec/references/explanation.md",
+    "old": "Примеры синтаксиса в шаблоне являются образцами,\nа реальные пути всегда берутся из результата проверки.",
+    "new": "В шаблоне приведены образцы синтаксиса;\nреальные пути всегда бери из результата проверки.",
+    "pattern": 3
+  },
+  {
+    "path": "skills/sdd-spec/references/explanation.md",
+    "old": "Правка, добавление или удаление proposal/design/specs делает пояснение\nтребующим сверки.",
+    "new": "Правка, добавление или удаление proposal/design/specs требует\nсверки пояснения.",
+    "pattern": 1
+  },
+  {
+    "path": "skills/sdd-spec/templates/preview-handoff.md",
+    "old": "Доступность браузера включает\n   локальный Chrome/Chromium.",
+    "new": "При проверке доступности браузера учитывай\n   локальный Chrome/Chromium.",
+    "pattern": 36
+  },
+  {
+    "path": "skills/sdd-spec/templates/preview-handoff.md",
+    "old": "смена среды не является исправлением содержательного дефекта.",
+    "new": "смена среды не исправляет содержательный дефект.",
+    "pattern": 1
+  },
+  {
+    "path": "skills/sdd-spec/flows/revise.md",
+    "old": "Правка только производных материалов не устаревает согласование неизменённых нормативных документов.",
+    "new": "Правка только производных материалов не делает устаревшим согласование неизменённых нормативных документов.",
+    "pattern": 36
+  }
+]

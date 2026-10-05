@@ -1,0 +1,20 @@
+{
+  "eval_id": 10,
+  "eval_name": "explanation-stale-inputs",
+  "prompt": "$sdd-spec Продолжи sample-change согласно сохранённому поручению. Пояснение и index.md уже есть; основной комплект после их создания изменился. Проверь согласованность перед продолжением.",
+  "expectations": [
+    "Сверены пути и хеши всех текущих proposal, design и specs",
+    "Изменение, добавление и удаление источника выявлены до выдачи пояснения как актуального",
+    "При revise, resume и выполнении preview-handoff сработала проверка устаревания",
+    "Затронутые части обновлены, применимость сохранённых частей проверена",
+    "Новый исходный манифест записан только после сверки всего пояснения",
+    "Внешний код оценён отдельно без обещания автоматического покрытия documents snapshot",
+    "Новое обязательство направлено в revise; прежний document_approval не перенесён на изменённые нормативные документы"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

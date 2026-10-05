@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "sequence",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\candidate.json",
+    "sha256": "182f8e83e022449a08ea23fe319d5c653a2d0689b75f45493ac06972e0797701",
+    "bytes": 1605
+  },
+  "artifact": {
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\diagram.html"
+  },
+  "gates": {
+    "validate": "fail",
+    "deliver": "not-run",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "validate",
+  "diagnostics": [
+    {
+      "code": "schema/minimum",
+      "severity": "error",
+      "message": "/messages/0/y (id/label: \"request\") must be >= 160 {\"comparison\":\">=\",\"limit\":160}",
+      "subject": {
+        "diagramType": "sequence",
+        "path": "/messages/0/y",
+        "identity": "request"
+      },
+      "evidence": {
+        "keyword": "minimum",
+        "comparison": ">=",
+        "limit": 160
+      },
+      "supportedFixes": [
+        "use a value >= 160"
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 1,
+    "shown": 1,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\diagram.finalize.json",
+    "summaryReceipt": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\diagram.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-02T16:23:59.158Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 916,
+  "nextAction": {
+    "action": "edit-in-place",
+    "candidate": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-explanatory-docs\\markers\\sdd\\changes\\sample-change\\archify\\sequence\\candidate.json",
+    "constraint": "Preserve unaffected semantics and geometry; do not replace the whole candidate.",
+    "then": "finalize-once"
+  }
+}

@@ -1,0 +1,13 @@
+Installed 1 package in 25ms
+Traceback (most recent call last):
+  File "C:\Users\Andrew\repos\ai-sdlc\skills\sdd-skill-conductor\scripts\eval_skill.py", line 414, in <module>
+    result = eval_skill(args.skill_folder, json_mode=args.json)
+  File "C:\Users\Andrew\repos\ai-sdlc\skills\sdd-skill-conductor\scripts\eval_skill.py", line 236, in eval_skill
+    content = skill_md.read_text()
+  File "C:\Users\Andrew\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py", line 788, in read_text
+    return f.read()
+           ~~~~~~^^
+  File "C:\Users\Andrew\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\encodings\cp1251.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x98 in position 1759: character maps to <undefined>

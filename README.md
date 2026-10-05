@@ -8,7 +8,7 @@
 
 | Пакет | Состав |
 |---|---|
-| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-doc`, пакет `common-dependencies` |
+| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
@@ -36,8 +36,8 @@ Archify в `bin/`: контрольная переустановка пропу�
 без изменения lock-файла, а `node .agents/skills/archify/bin/archify.mjs doctor`
 подтверждает комплектность установки. Полный audit пока не проходит.
 
-OpenSpec CLI и установленные
-в этом проекте OpenSpec-скиллы в эти наборы не входят.
+OpenSpec CLI и установленные в этом проекте скиллы `openspec-*` в эти наборы
+не входят. Для работы `sdd-implement` требуется отдельно установленный OpenSpec CLI.
 
 ### Работа над этим репозиторием
 
@@ -143,3 +143,8 @@ apm install AndrMoiseev/ai-sdlc/packages/aisdlc-skills --target codex,claude
   Неоднозначные термины остаются открытыми вопросами.
   [Ручная проверка](skills/sdd-doc/evals/manual.md) ·
   [Состояние проверки](skill-workspaces/sdd-doc/validation.md).
+
+- [sdd-implement](skills/sdd-implement/SKILL.md) — выполнение или продолжение
+  готового изменения OpenSpec по явному вызову `$sdd-implement` или `/sdd-implement`.
+  Перенесён из пользовательского `openspec-autopilot`; автоматический выбор
+  отключён для Codex и Claude Code.

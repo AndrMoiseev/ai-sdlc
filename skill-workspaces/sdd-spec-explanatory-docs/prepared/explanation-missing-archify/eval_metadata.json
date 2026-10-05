@@ -1,0 +1,18 @@
+{
+  "eval_id": 5,
+  "eval_name": "explanation-missing-archify",
+  "prompt": "$sdd-spec Создай пояснение sample-change с диаграммами. В этой среде archify отсутствует; установка сейчас недоступна. Сохрани всё, что можно подготовить по документам.",
+  "expectations": [
+    "Полезный текст пояснения сохранён",
+    "Отсутствие archify и способ ручного подключения обозначены",
+    "HTML, PNG и успешные проверки не выдуманы",
+    "Нет ссылок на несуществующий HTML",
+    "Недоступность зависимости не объявлена отсутствием браузера"
+  ],
+  "execution_status": "skipped-per-user-local-only",
+  "fixture_status": "base-prepared; variants-require-manual-setup",
+  "baseline": "old_skill",
+  "candidate": "freeze-after-edits",
+  "environment": "codex-cli-default",
+  "notes": "No LLM run authorized. Base fixtures exist; real/mocked browser variants must be configured explicitly."
+}

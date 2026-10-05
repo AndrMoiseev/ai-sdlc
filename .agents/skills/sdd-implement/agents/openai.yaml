@@ -1,0 +1,6 @@
+interface:
+  display_name: "SDD Implement"
+  short_description: "Execute OpenSpec tasks with commits and agent reviews"
+  default_prompt: "Use $sdd-implement to execute or resume the ready OpenSpec change specified in this conversation."
+policy:
+  allow_implicit_invocation: false

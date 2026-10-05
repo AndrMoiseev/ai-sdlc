@@ -1,0 +1,102 @@
+{
+    "schema_version":  1,
+    "diagram_type":  "architecture",
+    "meta":  {
+                 "title":  "Order retry — independent markers",
+                 "output":  "diagram.html",
+                 "quality_profile":  "showcase"
+             },
+    "components":  [
+                       {
+                           "id":  "client",
+                           "type":  "external",
+                           "label":  "Client",
+                           "sublabel":  "[=] HTTP caller",
+                           "pos":  [
+                                       40,
+                                       70
+                                   ],
+                           "size":  [
+                                        170,
+                                        70
+                                    ],
+                           "tag":  "[=]"
+                       },
+                       {
+                           "id":  "api",
+                           "type":  "backend",
+                           "label":  "Orders API",
+                           "sublabel":  "[=] request handler",
+                           "pos":  [
+                                       430,
+                                       70
+                                   ],
+                           "size":  [
+                                        170,
+                                        70
+                                    ],
+                           "tag":  "[=]"
+                       },
+                       {
+                           "id":  "orders",
+                           "type":  "database",
+                           "label":  "Orders",
+                           "sublabel":  "[=] stored orders",
+                           "pos":  [
+                                       430,
+                                       340
+                                   ],
+                           "size":  [
+                                        170,
+                                        70
+                                    ],
+                           "tag":  "[=]"
+                       },
+                       {
+                           "id":  "keys",
+                           "type":  "backend",
+                           "label":  "Payment Service",
+                           "sublabel":  "[=] refund handler",
+                           "pos":  [
+                                       820,
+                                       70
+                                   ],
+                           "size":  [
+                                        180,
+                                        70
+                                    ],
+                           "tag":  "[=]"
+                       }
+                   ],
+    "connections":  [
+                        {
+                            "id":  "request",
+                            "from":  "client",
+                            "to":  "api",
+                            "label":  "[=] POST order"
+                        },
+                        {
+                            "id":  "lookup",
+                            "from":  "api",
+                            "to":  "keys",
+                            "label":  "[+] keyed refund"
+                        },
+                        {
+                            "id":  "insert",
+                            "from":  "api",
+                            "to":  "orders",
+                            "label":  "[~] insert if new key"
+                        }
+                    ],
+    "cards":  [
+                  {
+                      "dot":  "cyan",
+                      "title":  "Change markers",
+                      "items":  [
+                                    "[=] existing / unchanged; [+] added; [~] changed; [-] removed",
+                                    "Node and relationship statuses are independent.",
+                                    "BEFORE retains the removed retry write; AFTER returns 410 without a write."
+                                ]
+                  }
+              ]
+}

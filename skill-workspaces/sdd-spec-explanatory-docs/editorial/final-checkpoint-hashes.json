@@ -1,0 +1,14 @@
+[
+  {
+    "path": "sdd\\changes\\sdd-spec-explanatory-docs\\implementation-report.md",
+    "sha256": "9775cb560bf1cd9e0387acb3ddeba3823dde460f2a1b9eeba6978a4346e7eeda"
+  },
+  {
+    "path": "sdd\\changes\\sdd-spec-explanatory-docs\\tasks.md",
+    "sha256": "bbddc45c062a7749d594dcb88bc77f721ed7e31427bb49440396c3b30717fc3e"
+  },
+  {
+    "path": "sdd\\changes\\sdd-spec-explanatory-docs\\state.md",
+    "sha256": "f56937996a3847f26f96d04c14fe9830afc58a0a6af902e5faca74f51d952247"
+  }
+]
