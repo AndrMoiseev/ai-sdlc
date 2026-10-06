@@ -35,17 +35,58 @@ Omit `--model` to use the selected CLI's configured default. If a model is speci
 - Keep answers, assertions, prior outputs, and grader instructions out of executor context. Explicit behavior runs can point the with-skill agent to the candidate's `SKILL.md`; that tests instruction following, not automatic discovery.
 - Give write access only when the task needs fixture edits, and only within the disposable run workspace. A workspace argument is not proof of isolation: inspect discovered instructions and execution traces, and retain normal sandbox and permission enforcement.
 
+## Check fixture dependencies before model execution
+
+Read the tested skill's runtime instructions and the flows exercised by the scenario.
+Inventory their required skills and resources, including transitive dependencies.
+Copy complete dependency packages into each isolated fixture and use the paths the
+executor will see. A dependency installed in the author's repository does not satisfy
+this check. Keep dependency versions identical between baseline and candidate;
+only the skill under test differs. A no-skill control can declare an empty inventory.
+
+Save a JSON fixture manifest outside the executor's context. List required files
+relative to the fixture root. For example, an sdd-spec scenario that edits Russian
+documents needs its humanizer dependency even when it does not generate diagrams:
+
+```json
+{
+  "schema_version": 1,
+  "required_files": [
+    ".agents/skills/sdd-spec/SKILL.md",
+    ".agents/skills/humanizer-ru/SKILL.md",
+    ".agents/skills/humanizer-ru/references/patterns.md",
+    ".agents/skills/humanizer-ru/scripts/lint.py"
+  ],
+  "expected_missing_files": []
+}
+```
+
+Use the host's actual discovery paths (for example `.claude/skills` for Claude Code).
+For a scenario deliberately testing a missing dependency, put its entry point in
+`expected_missing_files` instead of `required_files`. The runner verifies absence
+as well as presence. The inventory is explicit: the checker cannot infer dependencies
+described only in prose, so reconcile it with runtime instructions before the batch.
+
+Run the command below with `--preflight-only` and a separate output directory before
+the first model call. It checks readable resources inside the fixture, rejects paths
+escaping it, and writes `preflight.json` without starting a model. The same check runs
+again before every real execution. A missing dependency is a fixture setup error:
+repair the fixture before the batch, rather than scoring it as a skill failure or
+making the model search the author's environment. Filesystem checks do not prove
+runtime tools, authentication, or model-visible discovery; verify those separately
+with the small read-only probe above before scaling up.
+
 ## Run a behavior scenario
 
 Prepare `prompt.txt` and a disposable fixture workspace. In the with-skill prompt, explicitly invoke or reference the skill using the selected harness's supported mechanism. Use the same task without the skill instruction for the baseline.
 
 ```bash
-uv run scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --output-dir <run-artifacts>
+uv run scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --fixture-manifest fixture.json --output-dir <run-artifacts>
 ```
 
 Add `--allow-writes` for scenarios that edit fixture files. `--model` and `--timeout` are optional. Keep output artifacts outside the fixture when the task must not read its own trace. The runner saves the response, execution trace, run metadata, and timing; inspect completion/error status before grading. A timeout, permission failure, or authentication error is a failed execution, not a negative skill-discovery result.
 
-The CLI runner writes `response.md`, `stdout.jsonl`, `stderr.txt`, `run.json`, and `timing.json`. Use a new output directory per run. `run.json` records the selected harness and requested model; a `null` model means the CLI default was used, not that the parent conversation's model was inherited.
+The CLI runner requires `--fixture-manifest` and writes `preflight.json` before model execution. Completed executions also write `response.md`, `stdout.jsonl`, `stderr.txt`, `run.json`, and `timing.json`. Use a new output directory per run. `run.json` records the selected harness and requested model; a `null` model means the CLI default was used, not that the parent conversation's model was inherited.
 
 For native runs, save equivalent artifacts yourself. Record measured wall time and only token counts reported by the harness. Use `null` for unavailable timing or usage fields; never infer tokens from text length or treat missing metrics as zero.
 

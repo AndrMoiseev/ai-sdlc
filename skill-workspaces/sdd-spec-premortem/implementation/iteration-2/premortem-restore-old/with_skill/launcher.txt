@@ -1,0 +1,2 @@
+{"status": "completed", "harness": "codex", "output_dir": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-old\\with_skill\\execution", "error": null}
+

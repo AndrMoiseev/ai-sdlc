@@ -1,0 +1,56 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Выбрано C и независимая работа продолжена",
+                             "dimension":  "Completeness",
+                             "evidence":  "Trace and state explicitly select C, retain proposals and Q-report-action. Actual saved CSV draft/specification documents the three agreed columns and independent verification; work continues without waiting for the mode choice.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Нет нового согласованного требования или выдуманного решения пользователя",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state and product documents keep manager A/B as unapproved proposals, omit automatic assignment requirements and record no risk acceptance or invented USER consent. Premortem storage preserves the open action premise rather than treating urgency as authorization.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  149.684
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru; artifacts are drafts."
+                                                ]
+                           }
+}

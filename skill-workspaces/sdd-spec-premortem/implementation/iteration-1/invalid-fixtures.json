@@ -1,0 +1,10 @@
+﻿{
+    "invalid_eval_ids":  [
+                             13,
+                             14,
+                             16,
+                             20
+                         ],
+    "reason":  "Initial fixtures disclosed dispatcher assignment timing in unknown-answer cases and differed beyond saved-answer presence. Do not grade these runs. Rerun corrected fixtures under iteration-1-corrected.",
+    "reported_by":  "root fixture review"
+}

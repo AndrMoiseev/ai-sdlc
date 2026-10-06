@@ -1,0 +1,1 @@
+Source sdd/changes/sdd-spec-premortem/state.md: prose excluding frontmatter, YAML, historical quotes in Условие включения, service notes, link destinations. Authored blockquote example retained. Final lines: Q-premortem-record.text then Q-premortem-trigger.text.

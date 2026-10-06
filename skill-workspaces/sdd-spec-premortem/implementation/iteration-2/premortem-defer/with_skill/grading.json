@@ -1,0 +1,49 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Неблокирующий Q имеет reason и конкретный return_at",
+      "dimension": "Robustness",
+      "evidence": "State preserves Q-bulk-capacity as blocking:false/status:open, reason limiting the pilot to confirmed10 rows, and return_at before expanding to mass rollout. Updated proposal/spec/design actually constrain the pilot scope, so the saved nonblocking decision is applied to the work.",
+      "passed": true
+    },
+    {
+      "text": "Причина и условие возврата совпадают в Q и premortem.md",
+      "dimension": "Robustness",
+      "evidence": "premortem.md capacity finding explicitly repeats the same reason and return trigger as state: current pilot is limited to confirmed10 rows; revisit before expansion to mass rollout. The finding links Q-bulk-capacity. Trace item_8 writes these texts together after the failed earlier command, and persisted files contain the matching values.",
+      "passed": true
+    },
+    {
+      "text": "Отсрочка не названа принятием риска",
+      "dimension": "Robustness",
+      "evidence": "Premortem expressly states that deferral does not mean acceptance of mass-rollout risk. Design likewise says pilot scope does not establish mass capacity; no user risk-acceptance record is invented, and the capacity question remains open.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 345551,
+    "duration_ms": 171719,
+    "total_duration_seconds": 171.719
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Изменение времени назначения с 08:30 на 07:30 обнаружено по источнику",
+      "dimension": "Robustness",
+      "evidence": "Trace item_3 reads current docs/report.md; item_4 reads historical docs/decision.md and prior premortem. Item_5 explicitly reports the08:30-to07:30 change. Saved premortem contrasts both sources and explains why08:00 now arrives30 minutes late.",
+      "passed": true
+    },
+    {
+      "text": "Пересмотрена затронутая часть, остальные выводы сохранены",
+      "dimension": "Robustness",
+      "evidence": "Only premortem/state are rewritten; premortem What remains retains recipient, purpose, three columns and manual assignment. Q-report-time is reopened and07:00 is labelled an unaccepted proposal. The old normative deadline remains pending the user answer and state clearly flags that limitation rather than reopening unrelated decisions.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 230183,
+    "duration_ms": 148207,
+    "total_duration_seconds": 148.207
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

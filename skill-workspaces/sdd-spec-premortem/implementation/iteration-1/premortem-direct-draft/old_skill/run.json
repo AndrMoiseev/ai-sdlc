@@ -1,0 +1,15 @@
+{
+  "harness": "codex",
+  "model": null,
+  "status": "completed",
+  "usage": {
+    "input_tokens": 397515,
+    "cached_input_tokens": 349952,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 7353,
+    "reasoning_output_tokens": 33
+  },
+  "duration_ms": 239446,
+  "returncode": 0,
+  "error": null
+}

@@ -1,0 +1,25 @@
+﻿{
+  "schema_version": 1,
+  "stage": "documents",
+  "errors": [],
+  "warnings": [],
+  "review_status": {
+    "required_lenses": [
+      "consistency"
+    ],
+    "coverage": {
+      "consistency": "missing"
+    },
+    "reports": {},
+    "complete": false,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": false,
+    "ready": false,
+    "applicability": {},
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  }
+}

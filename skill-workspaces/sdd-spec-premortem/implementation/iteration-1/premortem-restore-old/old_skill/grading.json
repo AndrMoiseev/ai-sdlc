@@ -1,0 +1,51 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "Выполнена короткая проверка по доступным материалам",
+                             "dimension":  "Robustness",
+                             "evidence":  "Trace and output state verify src/labels.json, docs/labels.md and change.diff: only Отпавить changes to Отправить. State records the bounded source check, and resume-check.json reports structural success. The check is materially limited to the supplied typo change rather than inventing product uncertainty.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Отсутствие старой записи не вызывает автоматического интервью и не отменяет согласования",
+                             "dimension":  "Robustness",
+                             "evidence":  "State preserves USER-documents-approved, existing review links and matching normative hashes, explicitly saying absence of the old checkpoint does not cancel those records. No product interview is opened because of the missing checkpoint. A separate question asks about unavailable humanizer-ru, an editorial dependency; this is not caused by the absent premortem record.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  142.184
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}

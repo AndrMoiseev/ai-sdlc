@@ -1,0 +1,9 @@
+{
+  "eval_id": 15,
+  "eval_name": "premortem-small-change",
+  "prompt": "$sdd-spec Подготовь документы label-typo: исправление «Отпавить» на «Отправить». Прочитай change.diff и docs/labels.md; других изменений нет.",
+  "expectations": [
+    "В state записано «Премортем: находок нет»",
+    "Нет отдельного интервью, искусственных рисков и premortem.md"
+  ]
+}

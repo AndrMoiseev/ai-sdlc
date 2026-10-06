@@ -1,0 +1,14 @@
+[
+  {
+    "path": "design.md",
+    "sha256": "ffb953b513204b4cc3d2cfb3fc15e37ca3c61ee502daf3bdff25443b81123af0"
+  },
+  {
+    "path": "proposal.md",
+    "sha256": "a4ff5502e7dc1650a51628a3bf67bb7de621c4e25d0d8a89a1810a2cae5b6c7a"
+  },
+  {
+    "path": "specs/main/spec.md",
+    "sha256": "3dfa6cffea0567e4f68206e2e18e8f1306e119d459b886ed0fbacf289ccbe6fb"
+  }
+]

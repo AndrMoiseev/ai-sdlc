@@ -1,0 +1,1 @@
+Source: sdd/changes/sdd-spec-premortem/state.md. Prose excludes frontmatter, YAML, historical blockquotes, technical service notes and link destinations. Final line: Q-premortem-trigger.text.

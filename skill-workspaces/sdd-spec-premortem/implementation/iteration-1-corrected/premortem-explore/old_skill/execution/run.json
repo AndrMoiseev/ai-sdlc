@@ -1,0 +1,9 @@
+{
+  "harness": "codex",
+  "model": null,
+  "status": "timeout",
+  "usage": null,
+  "duration_ms": 480472,
+  "returncode": 1,
+  "error": "Evaluation timed out after 480s"
+}

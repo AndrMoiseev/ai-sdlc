@@ -1,0 +1,56 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Прочитан источник назначения отчёта",
+                             "dimension":  "Completeness",
+                             "evidence":  "Trace executes Get-Content docs/report.md, docs/decision.md and the output state quotes the saved answer that the dispatcher uses the 09:00 CSV during assignment at 09:30. This demonstrates reading the purpose source rather than inferring its contents.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Вопрос о назначении повторно не задан",
+                             "dimension":  "Robustness",
+                             "evidence":  "All agent messages were inspected: none asks what the report is for or repeats the saved assignment question. state.md explicitly says the prior answer resolves the use premise and that automatic assignment is excluded. Future implementation details are noted without reopening report purpose.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  121.465
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+                                                   "Initial read permission errors recovered."
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated."
+                                                ]
+                           }
+}

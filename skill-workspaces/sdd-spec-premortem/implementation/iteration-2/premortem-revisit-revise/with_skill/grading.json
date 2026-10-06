@@ -1,0 +1,49 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Пересмотрена только затронутая предпосылка",
+      "dimension": "Robustness",
+      "evidence": "Premortem retains the historical08:00 resolution, then revises the same time finding for assignment07:30. Q-report-time is reopened; no unrelated question or duplicate finding is created. CSV and remaining premises are explicitly retained.",
+      "passed": true
+    },
+    {
+      "text": "Остальные выводы сохранены",
+      "dimension": "Robustness",
+      "evidence": "Premortem CSV section retains delivery_id, overdue_minutes, responsible verbatim. Proposal/spec/design keep dispatcher recipient, manual assignment and automatic-assignment exclusion. Existing REQ/AC/Q IDs remain stable.",
+      "passed": true
+    },
+    {
+      "text": "Последствия отражены в зависимых документах либо открытом Q",
+      "dimension": "Robustness",
+      "evidence": "Saved proposal/spec/design remove the old08:00 commitment and document the before07:30 constraint while leaving the precise deadline unresolved. Q-report-time is blocking/open, and spec explicitly distinguishes assignment time from selected report deadline. No07:00 behavior is invented.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 601916,
+    "duration_ms": 259710,
+    "total_duration_seconds": 259.71
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

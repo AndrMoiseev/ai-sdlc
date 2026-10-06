@@ -1,0 +1,90 @@
+{
+  "scope": "Static instruction coverage only; this does not establish observed behavior or substitute for execution evaluations.",
+  "criteria": [
+    {
+      "id": "AC-premortem-explore",
+      "evidence": "references/premortem.md opening and numbered steps; flows/explore.md step 2; flows/draft.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-direct-draft",
+      "evidence": "references/premortem.md opening and numbered steps; flows/explore.md step 2; flows/draft.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-small-change",
+      "evidence": "references/premortem.md opening and numbered steps; flows/explore.md step 2; flows/draft.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-known-answer",
+      "evidence": "references/premortem.md steps 1-4 distinguish fact/hypothesis, read sources first and avoid question quotas",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-unknown-assumption",
+      "evidence": "references/premortem.md steps 1-4 distinguish fact/hypothesis, read sources first and avoid question quotas",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-no-quota",
+      "evidence": "references/premortem.md steps 1-4 distinguish fact/hypothesis, read sources first and avoid question quotas",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-empty-result",
+      "evidence": "references/premortem.md storage section; templates/state.md and templates/premortem.md",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-findings-document",
+      "evidence": "references/premortem.md storage section; templates/state.md and templates/premortem.md",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-closed-history",
+      "evidence": "references/premortem.md storage section; templates/state.md and templates/premortem.md",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-block-dependent",
+      "evidence": "references/premortem.md question/disposition bullets require blocking dependent choices, matching reason/return_at and real risk/scope choices",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-defer",
+      "evidence": "references/premortem.md question/disposition bullets require blocking dependent choices, matching reason/return_at and real risk/scope choices",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-no-scope-growth",
+      "evidence": "references/premortem.md question/disposition bullets require blocking dependent choices, matching reason/return_at and real risk/scope choices",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-resume-current",
+      "evidence": "references/premortem.md continuation section; flows/resume.md step 3; flows/revise.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-revisit",
+      "evidence": "references/premortem.md continuation section; flows/resume.md step 3; flows/revise.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-restore",
+      "evidence": "references/premortem.md continuation section; flows/resume.md step 3; flows/revise.md step 3",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-normative-change",
+      "evidence": "references/premortem.md normative-boundary section; flows/plan.md entry; scripts/lib/snapshots.py fixed normative input list",
+      "covered": true
+    },
+    {
+      "id": "AC-premortem-no-gate-bypass",
+      "evidence": "references/premortem.md normative-boundary section; flows/plan.md entry; scripts/lib/snapshots.py fixed normative input list",
+      "covered": true
+    }
+  ]
+}

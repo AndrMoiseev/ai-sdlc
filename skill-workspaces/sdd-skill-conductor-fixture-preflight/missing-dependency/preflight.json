@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "workspace": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-skill-conductor-fixture-preflight\\fixture",
+  "manifest": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-skill-conductor-fixture-preflight\\fixture.json",
+  "checked": [
+    {
+      "path": ".agents/skills/sdd-spec/SKILL.md",
+      "expected": "readable"
+    }
+  ],
+  "errors": [
+    "Required fixture resource unavailable: .agents/skills/humanizer-ru/SKILL.md: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-skill-conductor-fixture-preflight\\\\fixture\\\\.agents\\\\skills\\\\humanizer-ru\\\\SKILL.md'",
+    "Required fixture resource unavailable: .agents/skills/humanizer-ru/references/patterns.md: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-skill-conductor-fixture-preflight\\\\fixture\\\\.agents\\\\skills\\\\humanizer-ru\\\\references\\\\patterns.md'",
+    "Required fixture resource unavailable: .agents/skills/humanizer-ru/scripts/lint.py: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-skill-conductor-fixture-preflight\\\\fixture\\\\.agents\\\\skills\\\\humanizer-ru\\\\scripts\\\\lint.py'"
+  ]
+}

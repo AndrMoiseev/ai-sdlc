@@ -1,0 +1,44 @@
+{
+  "harness": "Codex",
+  "uv_version": "0.12.5",
+  "python_version": "3.14.7",
+  "baseline_tests": {
+    "command": "python skills/sdd-spec/scripts/run.py test",
+    "exit_code": 0,
+    "passed": 139,
+    "skipped": 1,
+    "reported_duration_seconds": 10.66
+  },
+  "candidate_tests": {
+    "command": "python skills/sdd-spec/scripts/run.py test",
+    "exit_code": 0,
+    "passed": 139,
+    "skipped": 1,
+    "reported_duration_seconds": 17.67
+  },
+  "structural_check": {
+    "command": "uv run skills/sdd-skill-conductor/scripts/eval_skill.py skills/sdd-spec --json",
+    "exit_code": 0,
+    "baseline": "baseline-structure.json",
+    "candidate": "candidate-structure.json",
+    "existing_noncritical_findings": [
+      "README.md is required by the existing package contract",
+      "Automatic trigger phrases are intentionally absent in the explicit-only skill"
+    ]
+  },
+  "authority_probe": {
+    "command": "python skill-workspaces/sdd-spec-premortem/implementation/check_authority.py",
+    "exit_code": 0,
+    "results": "authority-results.json",
+    "research_preserves_manifest_and_current_review": true,
+    "normative_edit_invalidates_review_and_approval": true,
+    "scope": "Deterministic fixture probe; does not establish agent behavior"
+  },
+  "automatic_discovery": "not applicable: explicit-only",
+  "installation_or_packaging": "not requested; not performed",
+  "runtime": {
+    "skill_launcher_cache": "user LOCALAPPDATA/ai-sdlc/sdd-spec; outside packages",
+    "conductor_bytecode": "Generated harness.pyc preserved under implementation/runtime-preserved/conductor-pycache after all batches completed",
+    "final_package_scan": "No .venv, __pycache__ or .pytest_cache in source skills, installed .agents/skills, or relocated preflight packages"
+  }
+}

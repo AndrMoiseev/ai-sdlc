@@ -1,0 +1,51 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Недоступный существенный источник не назван подтверждением",
+                             "dimension":  "Robustness",
+                             "evidence":  "Both actual state and updated premortem.md explicitly identify docs/decision.md as absent. The historical08:00/08:30 claim is quoted as history, not confirmation, and agreement across normative drafts is explicitly insufficient to restore the missing source.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Обозначено ограничение, вопрос касается только существенного пробела",
+                             "dimension":  "Robustness",
+                             "evidence":  "State preserves confirmed recipient/goal/three CSV columns and reopens only Q-report-time for current assignment time, required CSV time and timezone. Agent messages ask that material question without reopening report purpose or format; no arbitrary new schedule is chosen.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  132.643
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}

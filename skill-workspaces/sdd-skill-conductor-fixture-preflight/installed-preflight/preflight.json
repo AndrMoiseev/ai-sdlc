@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "workspace": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-skill-conductor-fixture-preflight\\fixture",
+  "manifest": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-skill-conductor-fixture-preflight\\fixture.json",
+  "checked": [
+    {
+      "path": ".agents/skills/sdd-spec/SKILL.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/SKILL.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/references/patterns.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/scripts/lint.py",
+      "expected": "readable"
+    }
+  ],
+  "errors": []
+}

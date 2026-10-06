@@ -1,0 +1,62 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "До подробной спецификации сохранён итог премортема",
+                             "dimension":  "Completeness",
+                             "evidence":  "Before any proposal/spec/design, actual research.md saves a substantive failure analysis: CSV may arrive correctly but trigger no useful action, with supporting missing-action evidence and a concrete verification step. State links the saved research, remains discovery and records no specification transition. This expectation does not require the name premortem.md or a literal section title; the saved substance meets it.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Неизвестное назначение отчёта обозначено гипотезой и конкретным вопросом",
+                             "dimension":  "Robustness",
+                             "evidence":  "research.md explicitly labels the receive/select/contact/act/result chain as «гипотеза агента» and says dispatcher powers/actions are unknown. State stores open blocking Q-report-action asking intervention in current deliveries versus retrospective analysis; the final message asks the same concrete purpose question. Neither suggested scenario is promoted to an agreed requirement.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  153.536
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+                                                     "No product code or operational evidence available; proposed action chain remains a hypothesis."
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru leaves editorial work incomplete. Original corrected baseline attempt timed out; this separate controlled retry completed."
+                                                ]
+                           },
+    "eval_feedback":  {
+                          "suggestions":  [
+
+                                          ],
+                          "overall":  "The completed baseline already identifies missing purpose and saves causal failure reasoning before specification. Do not infer new detection capability from the candidate; the specific artifact-location contract is assessed in case17."
+                      }
+}

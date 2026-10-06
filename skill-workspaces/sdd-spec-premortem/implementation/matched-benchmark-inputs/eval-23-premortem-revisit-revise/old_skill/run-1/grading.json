@@ -1,0 +1,49 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Пересмотрена только затронутая предпосылка",
+      "dimension": "Robustness",
+      "evidence": "premortem.md preserves the old 09:00/08:30 failure and 08:00 answer as history, then narrowly revisits assignment at07:30. Q-report-time alone is reopened. Proposed07:00 is explicitly an agent proposal, not silently selected as a new requirement.",
+      "passed": true
+    },
+    {
+      "text": "Остальные выводы сохранены",
+      "dimension": "Robustness",
+      "evidence": "The saved premortem CSV section retains all three column names, recipient, goal and manual assignment. Proposal/spec/design retain those same commitments and exclusion of automatic assignment; the final response explicitly preserves CSV and other premises.",
+      "passed": true
+    },
+    {
+      "text": "Последствия отражены в зависимых документах либо открытом Q",
+      "dimension": "Robustness",
+      "evidence": "Proposal and spec replace the stale08:00 commitment with before07:30 and an unresolved exact deadline. AC-report-delivered and design refer to Q-report-time, whose state record is blocking/open. Trace writes and subsequent readback confirm these changes exist, not just a suggested next step.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 370759,
+    "duration_ms": 180524,
+    "total_duration_seconds": 180.524
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

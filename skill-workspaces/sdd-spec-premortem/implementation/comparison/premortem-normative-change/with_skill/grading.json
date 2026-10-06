@@ -1,0 +1,62 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Правка только premortem.md сохраняет documents-манифест",
+                             "dimension":  "Robustness",
+                             "evidence":  "After the first-stage evidence clarification, SHA256 values of proposal.md, design.md and specs/main/spec.md each exactly match the saved USER-documents-approved input manifest. premortem.md adds only the weekday-session explanation; state keeps the original08:00 decision current. Direct hashes verify the normative manifest is unchanged.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "После отдельного выбора поведения обновлены spec с AC и связанные документы",
+                             "dimension":  "Completeness",
+                             "evidence":  "The separate followup prompt explicitly selects07:00. followup/run.json reports completed, and followup-outputs contain07:00 in REQ-report-export, AC-report-delivered, proposal and design. All three normative hashes differ from the first-stage snapshot; the new user decision is quoted in state.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "После нормативной правки прежние ревью и согласования отмечены stale",
+                             "dimension":  "Robustness",
+                             "evidence":  "Followup state explicitly marks prior consistency review stale and USER-documents-approved inapplicable to the changed version, clears approval_refs, and preserves the historical records rather than rewriting them. It records approved=false and ready=false; no new review or approval is fabricated.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  3,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  3
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  279.335
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Both stages completed with humanizer-ru unavailable; editorial completeness is not asserted."
+                                                ]
+                           }
+}

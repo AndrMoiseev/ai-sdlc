@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "stage": "plan",
+  "errors": [],
+  "warnings": [],
+  "review_status": {
+    "required_lenses": [
+      "plan"
+    ],
+    "coverage": {
+      "plan": "missing"
+    },
+    "reports": {},
+    "complete": false,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": false,
+    "ready": false,
+    "applicability": {
+      "USER-skip-premortem-document-review": true,
+      "USER-accept-premortem-documents": true,
+      "USER-plan-premortem": true
+    },
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  },
+  "tasks": {
+    "available_by_graph": [
+      "TASK-premortem-entry"
+    ],
+    "cannot_parallel_with": {
+      "TASK-premortem-entry": [],
+      "TASK-premortem-findings": [],
+      "TASK-premortem-resume": [],
+      "TASK-premortem-authority": []
+    },
+    "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+  },
+  "progress": {
+    "done": 0,
+    "total": 4
+  }
+}

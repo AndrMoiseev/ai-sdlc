@@ -1,0 +1,56 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Закрытая находка и основания сохранены в premortem.md",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual premortem.md retains the historical 09:00 versus 08:30 mismatch and its consequence, links docs/report.md and the dated user decision docs/decision.md, records the adopted 08:00 deadline and closure of Q-report-time, and states which normative documents were updated. The finding history is preserved rather than deleted.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "State сохраняет ссылку и отмечает отсутствие открытых находок",
+                             "dimension":  "Completeness",
+                             "evidence":  "state.md retains [premortem.md](premortem.md), says the report/assignment contradiction is resolved, sets Q-report-time status to resolved and explicitly states «Открытых вопросов нет». Together these substantively identify the only finding as closed; the assertion does not prescribe an exact heading or literal phrase.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  2,
+                                                  "passed":  2
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  361.205
+               },
+    "claims":  [
+                   {
+                       "claim":  "Report deadline changed to 08:00",
+                       "evidence":  "spec.md requirement and AC both explicitly say к 08:00; premortem ties this change to the saved user decision.",
+                       "verified":  true,
+                       "type":  "factual"
+                   }
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+                                                   "Initial read permission errors recovered."
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru leaves mandatory editorial work incomplete; no overall readiness claim is graded."
+                                                ]
+                           }
+}

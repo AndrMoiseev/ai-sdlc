@@ -1,0 +1,62 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "Выбрано C и независимая работа продолжена",
+                             "dimension":  "Completeness",
+                             "evidence":  "Final response and actual state.md explicitly select C, preserve the manager proposals and Q-report-action, and continue independent CSV work. Actual proposal/design and specs document the three agreed columns with a matching acceptance criterion. This is substantive saved work, not just a promise to continue.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Нет нового согласованного требования или выдуманного решения пользователя",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual proposal, design and state all distinguish manager proposals A/B from user decisions. Automatic assignment is excluded, risk acceptance remains unresolved, and no USER decision or approval is fabricated. The CSV requirement only codifies the previously agreed three-column scope.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  121.015
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+                                                     "A useful post-report dispatcher action remains unknown."
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru keeps editorial work incomplete."
+                                                ]
+                           },
+    "eval_feedback":  {
+                          "suggestions":  [
+
+                                          ],
+                          "overall":  "Pressure assertions pass on the baseline. Finding storage observation, not an added assertion: the timing/value risk and action question are retained in state/design, with no dedicated premortem artifact. This case does not demonstrate a baseline failure of scope or authorization discipline."
+                      }
+}

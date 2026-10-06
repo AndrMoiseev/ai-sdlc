@@ -1,0 +1,62 @@
+{
+  "premortem-explore": [
+    "AC-premortem-explore",
+    "AC-premortem-unknown-assumption"
+  ],
+  "premortem-direct-draft": [
+    "AC-premortem-direct-draft"
+  ],
+  "premortem-small-change": [
+    "AC-premortem-small-change",
+    "AC-premortem-no-quota",
+    "AC-premortem-empty-result"
+  ],
+  "premortem-known-answer": [
+    "AC-premortem-known-answer"
+  ],
+  "premortem-findings-document": [
+    "AC-premortem-findings-document"
+  ],
+  "premortem-closed-history": [
+    "AC-premortem-closed-history"
+  ],
+  "premortem-block-dependent": [
+    "AC-premortem-block-dependent"
+  ],
+  "premortem-defer": [
+    "AC-premortem-defer"
+  ],
+  "premortem-no-scope-growth": [
+    "AC-premortem-no-scope-growth"
+  ],
+  "premortem-resume-current": [
+    "AC-premortem-resume-current"
+  ],
+  "premortem-revisit-revise": [
+    "AC-premortem-revisit"
+  ],
+  "premortem-revisit-resume": [
+    "AC-premortem-revisit"
+  ],
+  "premortem-restore-old": [
+    "AC-premortem-restore"
+  ],
+  "premortem-restore-link": [
+    "AC-premortem-restore"
+  ],
+  "premortem-restore-source": [
+    "AC-premortem-restore"
+  ],
+  "premortem-normative-change": [
+    "AC-premortem-normative-change"
+  ],
+  "premortem-no-review": [
+    "AC-premortem-no-gate-bypass"
+  ],
+  "premortem-no-command": [
+    "AC-premortem-no-gate-bypass"
+  ],
+  "premortem-valid-waiver": [
+    "AC-premortem-no-gate-bypass"
+  ]
+}

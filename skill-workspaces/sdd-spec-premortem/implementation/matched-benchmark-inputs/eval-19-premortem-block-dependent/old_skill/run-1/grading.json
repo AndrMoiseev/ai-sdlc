@@ -1,0 +1,62 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Есть blocking Q, зависимый выбор не утверждён",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state contains open blocking Q-delivery-mode and explicitly limits it to dependent choices. Proposal leaves both modes open; design labels report-only as an agent recommendation rather than a user decision. No automatic assignment behavior is approved.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Независимая часть черновика подготовлена",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual proposal, design and spec are saved. REQ-report-csv and AC-csv-columns/AC-csv-mode-independent specify the agreed three columns independently of mode; other unknowns remain explicit. This is substantive independent drafting.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Готовность к ревью не объявлена",
+                             "dimension":  "Robustness",
+                             "evidence":  "State explicitly says the full set is not ready for review or approval; open blocking questions remain and ready=false is recorded. Final response calls the documents drafts and does not turn structural success into review readiness.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  3,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  3
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  166.922
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "The fixture omitted required humanizer-ru although it exists in the author repository; this is a fixture dependency omission, not a skill defect or general environment incapability. Editorial work remains incomplete. Original attempt timed out; controlled retry completed."
+                                                ]
+                           }
+}

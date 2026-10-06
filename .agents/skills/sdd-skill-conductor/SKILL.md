@@ -182,6 +182,7 @@ Before the full loop, micro-test the wording of anything you just wrote (5+ fres
 - [ ] Each eval has a descriptive name (not just `eval-0`) and `eval_metadata.json`
 - [ ] Native subagents or the selected CLI can execute a clean run; see `references/runtime-setup.md`
 - [ ] Each run has a separate fixture workspace and the baseline cannot discover the skill under test
+- [ ] Fixture dependency inventory matches the tested flows; required resources pass the runtime-setup preflight inside each isolated workspace, including dependency skills
 - [ ] `uv` and `eval-viewer/generate_review.py` are reachable from current working dir
 
 If any item fails — fix before proceeding. A missing workspace dir mid-run loses outputs.

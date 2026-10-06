@@ -1,0 +1,56 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Выбрано B",
+                             "dimension":  "Completeness",
+                             "evidence":  "Response and actual state explicitly choose B. review/decisions.md stores USER-plan-request as planning_command scoped to the existing change after entry conditions are met. State proposes consistency review and preserves the command without executing blocked planning.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Tasks не создан, ревью и waiver не выдуманы",
+                             "dimension":  "Robustness",
+                             "evidence":  "No tasks.md or independent review report exists in output. The only new review artifact is decisions.md containing the actual planning request, not a waiver or completed review. State explicitly says premortem does not replace review and urgency is not a waiver.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  121.618
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing editorial dependency; no review readiness asserted."
+                                                ]
+                           }
+}

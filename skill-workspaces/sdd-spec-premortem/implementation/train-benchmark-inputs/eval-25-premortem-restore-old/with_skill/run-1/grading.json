@@ -1,0 +1,51 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Выполнена короткая проверка по доступным материалам",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state records a short check of proposal/spec/design, src/labels.json, docs/labels.md and change.diff. It identifies only the typo correction and explicitly records Премортем: находок нет; no new premortem artifact or product question was needed.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Отсутствие старой записи не вызывает автоматического интервью и не отменяет согласования",
+                             "dimension":  "Robustness",
+                             "evidence":  "State preserves USER-documents-approved and prior review links, records all three normative hashes as matching, and explicitly says absence of the earlier premortem does not cancel approval. No product interview occurs; the separate missing-editor dependency remains a limitation.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  128.52
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}

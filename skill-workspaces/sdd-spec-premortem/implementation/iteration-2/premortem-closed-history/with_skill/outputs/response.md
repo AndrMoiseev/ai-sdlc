@@ -1,0 +1,3 @@
+Сохранены правки в пяти документах delivery-report: срок **08:00** отражён в proposal, спецификации, критерии приёмки и design. `Q-report-time` закрыт; история решения сохранена в премортеме и state. Код не изменён.
+
+Документы остаются черновиком: `humanizer-ru` не найден. [Правило редактуры](C:/Users/Andrew/AppData/Local/Temp/sdd-premortem-with_skill-18-fqccd1np/.agents/skills/sdd-spec/references/editorial-pass.md) требует: «Если humanizer или чистый контекст недоступен, сохрани черновик». Для завершения нужно восстановить зависимость; итоговая проверка пока отложена.

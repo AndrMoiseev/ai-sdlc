@@ -1,0 +1,51 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Отсутствующий premortem.md по ссылке обнаружен, прежняя проверка не объявлена подтверждённой",
+                             "dimension":  "Robustness",
+                             "evidence":  "Trace detects missing premortem.md and docs/decision.md. Actual state quotes the historical link as history and explicitly says its completed-premise-check claim is unconfirmed; it does not fabricate a replacement finding history.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Доступный контекст восстановлен, существенный пробел оформлен Q",
+                             "dimension":  "Robustness",
+                             "evidence":  "State reconstructs the supported recipient, goal and three-column CSV from available documents, marks 08:00 as unsupported and creates blocking Q-report-before-assignment. The question asks the needed time/timezone before assignment and explains its effect on AC-report-delivered.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  145.386
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}

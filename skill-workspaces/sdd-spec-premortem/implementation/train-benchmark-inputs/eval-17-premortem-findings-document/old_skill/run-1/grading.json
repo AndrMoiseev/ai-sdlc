@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "text": "premortem.md содержит цель, границы и четыре части находки: провал, предпосылка, основания, действие",
+      "dimension": "Structure",
+      "evidence": "The snapshot contains research.md and state.md, but no premortem.md. research.md does perform substantive failure analysis: the goal is fewer delays, the boundary is the sole docs/report.md source, the report arrives after assignment, and a concrete check compares availability/view/assignment/action times. Thus the content is substantially present elsewhere, but the required persistent premortem artifact is absent; this is an artifact-contract failure, not proof that the agent missed the business risk.",
+      "passed": false
+    },
+    {
+      "text": "В разделе Премортем state только итог и рабочая ссылка",
+      "dimension": "Structure",
+      "evidence": "state.md has sections Выполнено, Основание и предложения, Следующий шаг, Проверки и ограничения and Продолжение. It links to existing research.md under Выполнено, but has no Премортем section or corresponding premortem checkpoint/link. A generic research link does not satisfy the requested stable section and artifact contract.",
+      "passed": false
+    },
+    {
+      "text": "Вопрос связан с Q-ID в state",
+      "dimension": "Completeness",
+      "evidence": "research.md explicitly names «Блокирующий выбор Q-action-window» and asks whether the report supports assignment before 08:30 or redistribution after 09:00. state.md contains the matching sdd_record: question, id: Q-action-window, identical question text, blocking: true and status: open. The next-step text also refers to that ID, giving a concrete and consistent continuation link.",
+      "passed": true
+    }
+  ],
+  "summary": {"passed": 1, "failed": 2, "total": 3, "pass_rate": 0.3333333333333333},
+  "dimension_scores": {"Structure": {"score": 0.0, "passed": 0, "total": 2}, "Completeness": {"score": 1.0, "passed": 1, "total": 1}},
+  "failing": [
+    {"text": "premortem.md содержит цель, границы и четыре части находки: провал, предпосылка, основания, действие", "dimension": "Structure", "evidence": "Substantive risk reasoning exists in research.md, but required premortem.md is absent."},
+    {"text": "В разделе Премортем state только итог и рабочая ссылка", "dimension": "Structure", "evidence": "state.md contains a research link but no Премортем section or premortem artifact link."}
+  ],
+  "timing": {"executor_duration_seconds": 167.854, "grader_duration_seconds": null, "total_duration_seconds": null},
+  "claims": [
+    {"claim": "Отчёт приходит на 30 минут позже назначения исполнителей", "type": "factual", "verified": true, "evidence": "Prompt/source times 09:00 and 08:30 support the arithmetic; research.md appropriately qualifies the same-day/time-zone assumption."},
+    {"claim": "Сохранены исследование и точка продолжения", "type": "factual", "verified": true, "evidence": "Both substantive research.md and state.md exist in the output snapshot and retain the open action-window question."}
+  ],
+  "user_notes_summary": {"uncertainties": ["No product code, runtime schedule verification or delivery statistics were available; hypotheses were distinguished from facts."], "needs_review": ["Mandatory humanizer-ru editorial dependency was missing; output is explicitly a draft."], "workarounds": ["Initial sandbox reads failed; subsequent reads and artifact writes succeeded."]},
+  "eval_feedback": {
+    "suggestions": [{"assertion": "premortem.md содержит цель, границы и четыре части находки: провал, предпосылка, основания, действие", "reason": "Separate artifact-contract compliance from substantive risk reasoning in a future revision: this run has meaningful evidence-backed failure analysis in research.md yet fails the required filename. Preserve the frozen assertion for current comparison."}],
+    "overall": "The failures identify persistence/structure requirements. They should not be summarized as failure to identify the report/action timing mismatch."
+  }
+}

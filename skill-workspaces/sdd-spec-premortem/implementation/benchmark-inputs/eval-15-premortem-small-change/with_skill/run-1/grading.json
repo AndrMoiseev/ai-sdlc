@@ -1,0 +1,56 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "В state записано «Премортем: находок нет»",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual state.md has section Премортем containing exactly «Премортем: находок нет». This follows trace reads of change.diff and docs/labels.md and a bounded design for the single string correction, so the checkpoint reflects the supplied scope.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Нет отдельного интервью, искусственных рисков и premortem.md",
+                             "dimension":  "Robustness",
+                             "evidence":  "Trace messages explicitly say clarifications are unnecessary; no separate interview occurs. Output has no premortem.md, and design.md limits itself to the specified string, JSON correctness and existing button behavior. No artificial risk or feature is introduced.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  278.701
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+                                                   "Initial read permission errors recovered."
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated."
+                                                ]
+                           }
+}

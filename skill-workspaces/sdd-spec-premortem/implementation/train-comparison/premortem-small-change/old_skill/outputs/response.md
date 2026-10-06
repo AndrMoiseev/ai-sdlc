@@ -1,0 +1,3 @@
+Сохранены черновики proposal, spec, design и [state.md](C:/Users/Andrew/AppData/Local/Temp/sdd-premortem-old_skill-15-909f959d/sdd/changes/label-typo/state.md) в `sdd/changes/label-typo/`. Структурная проверка прошла без ошибок. Код не изменён.
+
+Обязательная редактура заблокирована: `humanizer-ru` отсутствует. [Правила скилла](C:/Users/Andrew/AppData/Local/Temp/sdd-premortem-old_skill-15-909f959d/.agents/skills/sdd-spec/references/editorial-pass.md) требуют: «Если humanizer или чистый контекст недоступен, сохрани черновик». Для завершения нужна эта зависимость либо ваше явное исключение для текущей версии.

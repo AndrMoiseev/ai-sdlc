@@ -1,0 +1,306 @@
+[
+  {
+    "id": 13,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 153536,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-explore\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 13,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 475083,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-explore\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 14,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 185003,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-direct-draft\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 14,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 276872,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-direct-draft\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 15,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 167040,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-small-change\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 15,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 278701,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-small-change\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 16,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 151766,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-corrected\\premortem-known-answer\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 16,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 121465,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-known-answer\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 17,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 167854,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-findings-document\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 17,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 168669,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-findings-document\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 18,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 361205,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-closed-history\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 18,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 134534,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-closed-history\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 19,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 166922,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-block-dependent\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 19,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 164767,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-block-dependent\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 20,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 197318,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-corrected\\premortem-defer\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 20,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 171719,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-defer\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 21,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 137639,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-scope-growth\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 21,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 149684,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-scope-growth\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 22,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 135138,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-resume-current\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 22,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 119931,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-resume-current\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 23,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 180524,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-revisit-revise\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 23,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 259710,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-revisit-revise\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 24,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 148207,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-revisit-resume\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 24,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 147166,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-revisit-resume\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 25,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 142184,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-old\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 25,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 128520,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-old\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 26,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 145386,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-link\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 26,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 142068,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-link\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 27,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 101885,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-source\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 27,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 132643,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-source\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 28,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 340665,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-normative-change\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 28,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 279335,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-normative-change\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 29,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 121618,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-review\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 29,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 120318,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-review\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 30,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 118977,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-command\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 30,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 158761,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-command\\with_skill",
+    "graded": true
+  },
+  {
+    "id": 31,
+    "variant": "old_skill",
+    "status": "completed",
+    "duration_ms": 149374,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-valid-waiver\\old_skill",
+    "graded": true
+  },
+  {
+    "id": 31,
+    "variant": "with_skill",
+    "status": "completed",
+    "duration_ms": 181414,
+    "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-valid-waiver\\with_skill",
+    "graded": true
+  }
+]

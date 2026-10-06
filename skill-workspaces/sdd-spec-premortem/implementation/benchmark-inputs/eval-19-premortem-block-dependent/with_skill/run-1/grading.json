@@ -1,0 +1,62 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Есть blocking Q, зависимый выбор не утверждён",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state has open blocking Q-delivery-mode asking report-only versus automatic assignment. The specification explicitly leaves automatic assignment unspecified until the choice and clarifies its CSV acceptance criterion does not require both modes.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Независимая часть черновика подготовлена",
+                             "dimension":  "Completeness",
+                             "evidence":  "The actual partial specification defines REQ-csv-columns and AC-csv-columns for the three agreed fields independent of mode. Proposal/design/state are saved alongside it, so the independent draft is substantive.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Готовность к ревью не объявлена",
+                             "dimension":  "Robustness",
+                             "evidence":  "Response and state explicitly withhold review readiness, record open blocking questions, missing editorial dependency and absent review/approval. No readiness or completed whole-specification claim appears.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  3,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  3
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  164.767
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru; artifacts are drafts."
+                                                ]
+                           }
+}

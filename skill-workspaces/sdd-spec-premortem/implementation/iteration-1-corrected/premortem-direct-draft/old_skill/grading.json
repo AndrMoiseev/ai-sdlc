@@ -1,0 +1,7 @@
+{
+  "status": "execution_limitation",
+  "expectations": [],
+  "summary": {"passed": 0, "failed": 0, "total": 0, "pass_rate": null},
+  "limitations": ["run.json reports timeout after 480s, returncode 1. No behavioral verdict issued for incomplete execution."],
+  "execution_status": "timeout"
+}

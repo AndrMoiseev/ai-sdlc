@@ -1,0 +1,30 @@
+[
+  {
+    "path": "docs/decision.md",
+    "sha256": "e14fd6f643fc7b6104a9e9bb52299efba362666bfa589d31d68dcf2af32875f6"
+  },
+  {
+    "path": "docs/report.md",
+    "sha256": "bc7a6da437ff8efdfeba82131cde6c0c58177746625b3da203a610f9c7891d75"
+  },
+  {
+    "path": "sdd/changes/delivery-report/design.md",
+    "sha256": "43157ae48be504a93817442541fb0278643bf94504a277485e3f81b0b15d8624"
+  },
+  {
+    "path": "sdd/changes/delivery-report/premortem.md",
+    "sha256": "77ca8d4f7aacd52425752401af63f171522ae977f381edbc2266a92ede550ee3"
+  },
+  {
+    "path": "sdd/changes/delivery-report/proposal.md",
+    "sha256": "6dba5ae30685e7586adfc6fa2c4cf153ac6bcd1fe77547485fbcc26371a21083"
+  },
+  {
+    "path": "sdd/changes/delivery-report/specs/main/spec.md",
+    "sha256": "bf01e424450408f148aaea436cb28e0a75c5f32516ddec4ddca02439940849fe"
+  },
+  {
+    "path": "sdd/changes/delivery-report/state.md",
+    "sha256": "001eedd8f2668ba180832dcd651af8147d6b17d2bf554443a5ad36c7a16920db"
+  }
+]

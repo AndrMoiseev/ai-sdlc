@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "В state записано «Премортем: находок нет»",
+      "dimension": "Completeness",
+      "evidence": "The actual outputs/sdd/changes/label-typo/state.md contains completed work, next step, decisions and checks, ending with «Содержательных блокирующих и отложенных вопросов нет». It contains neither «Премортем: находок нет» nor an equivalent explicit record that the premortem was performed and found nothing. The executor successfully read the change and wrote all three draft documents before stopping for missing humanizer-ru; this grades the missing premortem record, not editorial readiness.",
+      "passed": false
+    },
+    {
+      "text": "Нет отдельного интервью, искусственных рисков и premortem.md",
+      "dimension": "Robustness",
+      "evidence": "The trace proceeds from reading change.diff and docs/labels.md directly to the bounded proposal/spec/design. No interview about hypothetical failure occurs, and the output inventory contains no premortem.md. design.md mentions only accidental modification of the key or neighboring text, with a concrete diff check; this is proportionate implementation hygiene, not an invented product risk or expanded scope. The final request concerns a missing editorial dependency, not a premortem interview.",
+      "passed": true
+    }
+  ],
+  "summary": {"passed": 1, "failed": 1, "total": 2, "pass_rate": 0.5},
+  "dimension_scores": {
+    "Completeness": {"score": 0.0, "passed": 0, "total": 1},
+    "Robustness": {"score": 1.0, "passed": 1, "total": 1}
+  },
+  "failing": [
+    {
+      "text": "В state записано «Премортем: находок нет»",
+      "dimension": "Completeness",
+      "evidence": "state.md does not record a premortem or its no-findings result; the generic absence of blocking questions does not establish that the premortem occurred."
+    }
+  ],
+  "timing": {"executor_duration_seconds": 167.04, "grader_duration_seconds": null, "total_duration_seconds": null},
+  "claims": [
+    {"claim": "Структурная проверка прошла без ошибок", "type": "process", "verified": true, "evidence": "stdout.jsonl item_7 executes scripts/run.py check, returns exit 0 with errors: [] and warnings: []. The output correctly keeps review and approval incomplete."},
+    {"claim": "Сохранены черновики proposal, spec, design и state", "type": "factual", "verified": true, "evidence": "All four documents exist in the output snapshot and contain substantive content for the single submit-label spelling correction."}
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": ["Missing humanizer-ru prevents completion of mandatory editorial work; behavioral grade concerns the already-produced draft and state only."],
+    "workarounds": ["Initial file-read permission failure recovered on retry; subsequent required reads, writes and structural check succeeded."]
+  },
+  "eval_feedback": {
+    "suggestions": [{"assertion": "Нет отдельного интервью, искусственных рисков и premortem.md", "reason": "This combines three independently falsifiable properties. Preserve the current frozen expectation for comparison, but decompose in a future eval revision so one failure identifies its cause."}],
+    "overall": "The missing explicit no-findings checkpoint discriminates the requested behavior. Missing editorial dependency is a separate fixture limitation and must not be interpreted as evidence about candidate editorial quality."
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "ids": [
+    14,
+    20,
+    23,
+    24,
+    30,
+    31
+  ],
+  "improved": [
+    {
+      "eval_id": 14,
+      "text": "До подробной спецификации сохранён итог проверки предпосылок",
+      "baseline_evidence": "Trace item9 writes proposal, detailed spec, design and finally state. No premortem artifact or saved state result of a completed premise check exists. Proposal acknowledges that usefulness is unproven, which is relevant partial evidence, but this remains problem framing; the concrete risk discussion and Q-dispatcher-action are saved with/after detailed specification rather than as the required prior recorded check. The checkpoint has no premortem outcome or finding link.",
+      "candidate_evidence": "stdout.jsonl completed command item_9 first writes premortem.md, then proposal.md, specs/delivery-report/spec.md and design.md. The premortem identifies the concrete failure 'CSV выпускается ежедневно, но просрочки не снижаются', connects it to the unverified dispatcher action, cites docs/report.md, and routes the unresolved premise to Q-dispatcher-action. Thus the result exists before normative drafting; the later state entry alone is not used as proof of ordering."
+    }
+  ],
+  "regressed": [],
+  "persistent_fail": [],
+  "stable_success": [
+    {
+      "eval_id": 14,
+      "text": "Зависимое поведение не выдумано",
+      "baseline_evidence": "Specification leaves selection/calculation/timezone/delivery rules unresolved and labels criteria as draft. Design calls contacting the responsible party an author hypothesis, not an agreed process, and excludes automatic reassignment. State Q-dispatcher-action is blocking/open; no dependent dispatch behavior is invented as a commitment.",
+      "candidate_evidence": "Saved spec retains only known 09:00, recipient and CSV columns, explicitly leaving selection, calculation, errors, timezone and delivery channel unresolved. Design labels its module split as proposed logical responsibilities and states 'технический подход не выбран'. State Q-dispatcher-action is blocking/open, and the final response asks which decision the dispatcher takes. Neither automatic assignment nor escalation is added as a commitment."
+    },
+    {
+      "eval_id": 20,
+      "text": "Неблокирующий Q имеет reason и конкретный return_at",
+      "baseline_evidence": "state.md retains Q-bulk-capacity blocking:false/status:open with reason limiting the current pilot to confirmed 10 rows and return_at before expansion to mass rollout. The agent edits proposal/spec/design to express that pilot boundary, so this is considered use of the inherited question in the continued task, not merely unattended fixture data.",
+      "candidate_evidence": "State preserves Q-bulk-capacity as blocking:false/status:open, reason limiting the pilot to confirmed10 rows, and return_at before expanding to mass rollout. Updated proposal/spec/design actually constrain the pilot scope, so the saved nonblocking decision is applied to the work."
+    },
+    {
+      "eval_id": 20,
+      "text": "Причина и условие возврата совпадают в Q и premortem.md",
+      "baseline_evidence": "premortem.md adds a Pilot boundary section: current work is 10 rows, unknown mass capacity does not block it, Q-bulk-capacity stays open until expansion. This matches state reason and return_at semantically. Trace item_10 edits the premortem and normative scope together; no different trigger is introduced.",
+      "candidate_evidence": "premortem.md capacity finding explicitly repeats the same reason and return trigger as state: current pilot is limited to confirmed10 rows; revisit before expansion to mass rollout. The finding links Q-bulk-capacity. Trace item_8 writes these texts together after the failed earlier command, and persisted files contain the matching values."
+    },
+    {
+      "eval_id": 20,
+      "text": "Отсрочка не названа принятием риска",
+      "baseline_evidence": "Design says the pilot does not establish readiness for mass load and mass rollout remains out of scope. State and the final response keep capacity open/nonblocking; neither claims the remaining risk was accepted or creates a USER risk decision.",
+      "candidate_evidence": "Premortem expressly states that deferral does not mean acceptance of mass-rollout risk. Design likewise says pilot scope does not establish mass capacity; no user risk-acceptance record is invented, and the capacity question remains open."
+    },
+    {
+      "eval_id": 23,
+      "text": "Пересмотрена только затронутая предпосылка",
+      "baseline_evidence": "premortem.md preserves the old 09:00/08:30 failure and 08:00 answer as history, then narrowly revisits assignment at07:30. Q-report-time alone is reopened. Proposed07:00 is explicitly an agent proposal, not silently selected as a new requirement.",
+      "candidate_evidence": "Premortem retains the historical08:00 resolution, then revises the same time finding for assignment07:30. Q-report-time is reopened; no unrelated question or duplicate finding is created. CSV and remaining premises are explicitly retained."
+    },
+    {
+      "eval_id": 23,
+      "text": "Остальные выводы сохранены",
+      "baseline_evidence": "The saved premortem CSV section retains all three column names, recipient, goal and manual assignment. Proposal/spec/design retain those same commitments and exclusion of automatic assignment; the final response explicitly preserves CSV and other premises.",
+      "candidate_evidence": "Premortem CSV section retains delivery_id, overdue_minutes, responsible verbatim. Proposal/spec/design keep dispatcher recipient, manual assignment and automatic-assignment exclusion. Existing REQ/AC/Q IDs remain stable."
+    },
+    {
+      "eval_id": 23,
+      "text": "Последствия отражены в зависимых документах либо открытом Q",
+      "baseline_evidence": "Proposal and spec replace the stale08:00 commitment with before07:30 and an unresolved exact deadline. AC-report-delivered and design refer to Q-report-time, whose state record is blocking/open. Trace writes and subsequent readback confirm these changes exist, not just a suggested next step.",
+      "candidate_evidence": "Saved proposal/spec/design remove the old08:00 commitment and document the before07:30 constraint while leaving the precise deadline unresolved. Q-report-time is blocking/open, and spec explicitly distinguishes assignment time from selected report deadline. No07:00 behavior is invented."
+    },
+    {
+      "eval_id": 24,
+      "text": "Изменение времени назначения с 08:30 на 07:30 обнаружено по источнику",
+      "baseline_evidence": "Trace item_3 reads current docs/report.md; item_4 reads historical docs/decision.md and prior premortem. Item_5 explicitly reports the08:30-to07:30 change. Saved premortem contrasts both sources and explains why08:00 now arrives30 minutes late.",
+      "candidate_evidence": "Trace items3/4 read current docs/report.md and item6 reads docs/decision.md. Persisted premortem contrasts historical assignment08:30 against current07:30 and calculates that08:00 is now30 minutes late; final response repeats that source-grounded change."
+    },
+    {
+      "eval_id": 24,
+      "text": "Пересмотрена затронутая часть, остальные выводы сохранены",
+      "baseline_evidence": "Only premortem/state are rewritten; premortem What remains retains recipient, purpose, three columns and manual assignment. Q-report-time is reopened and07:00 is labelled an unaccepted proposal. The old normative deadline remains pending the user answer and state clearly flags that limitation rather than reopening unrelated decisions.",
+      "candidate_evidence": "Premortem revisits the existing time finding, retaining its09:00 failure history and subsequent08:00 answer. CSV section, manual assignment and goal remain intact. State reopens only Q-report-time and explains normative08:00 remains unconfirmed pending the new answer; no unrelated decision is reopened."
+    },
+    {
+      "eval_id": 30,
+      "text": "Tasks не создан",
+      "baseline_evidence": "Output tree contains proposal/design/spec/state/premortem and prior review files, with no tasks.md. State sets awaiting:planning_command and final response says plan not created. Trace only persists the checkpoint after read-only document checks.",
+      "candidate_evidence": "Output inventory has no tasks.md. Trace item9 writes state only; checkpoint phase:user_review/awaiting:planning_command explicitly says tasks not created, matching the final response. Existing normative documents and review are preserved."
+    },
+    {
+      "eval_id": 30,
+      "text": "Завершённый премортем не выдан за planning_command",
+      "baseline_evidence": "State records complete premortem and current review separately from the missing planning command; it explicitly says document agreement does not replace planning command. review/decisions.md contains only prior document approval, and no new planning USER record is manufactured.",
+      "candidate_evidence": "State separates closed premortem history and applicable document approval from absent planning permission: continuation does not authorize planning, and script ready does not replace a command. It quotes the user denial of a planning command and records no new planning authorization."
+    },
+    {
+      "eval_id": 31,
+      "text": "Применимый waiver признан при корректной структуре и согласовании документов",
+      "baseline_evidence": "Trace documents check returns errors/warnings empty, consistency waived, approved/ready true and all three USER records applicable. State explicitly recognizes those matching manifests and preserves normative documents; waiver is scoped to document_review/consistency, not editorial or plan review.",
+      "candidate_evidence": "Trace item8 executes documents check and snapshot; state records matching hashes for all three normative documents and applicability of approval, consistency waiver and planning command. Waiver is explicitly restricted to document_review consistency, with plan review still required. Normative documents remain unchanged."
+    },
+    {
+      "eval_id": 31,
+      "text": "Tasks создан по действующей команде без дополнительного согласования премортема",
+      "baseline_evidence": "tasks.md exists with TASK-deliver-daily-report pending, covers AC-report-delivered and includes integration verification. It cites USER-plan-request. Trace creates the file and plan check passes structure. No premortem-specific approval is requested; the final editorial-dependency exception question is a separate inherited requirement and does not undo task creation.",
+      "candidate_evidence": "tasks.md is written in trace item10 with TASK-deliver-daily-report pending, covers AC-report-delivered and integrated verification. State cites USER-plan-request and says repeat agreement/command are unnecessary. No additional premortem approval is introduced; the final question concerns only missing editorial dependency after the plan draft already exists."
+    }
+  ],
+  "limitations": [
+    "Corrected baseline14 first attempt timed out480s; unchanged-input retry with1200s budget completed185s and supplies paired grading. Original timeout retained.",
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable.",
+    "Single completed run per version; no repeated-run confidence claim."
+  ]
+}

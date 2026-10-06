@@ -1,0 +1,14 @@
+[
+  {
+    "path": "change.diff",
+    "sha256": "f72b075471993703cd6c17c48ac8be4875694a1107389d4be29291f8eb749a12"
+  },
+  {
+    "path": "docs/labels.md",
+    "sha256": "3e5d2d8bc15d9235084dcdec3893fcc0a9b9d7831cc3b447678ad7f641ad10db"
+  },
+  {
+    "path": "src/labels.json",
+    "sha256": "4f5509e05692d2762f16fb9c31fa9fca97191e60762b9def86589367fc5d48da"
+  }
+]

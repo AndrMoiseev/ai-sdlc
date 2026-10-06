@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "stage": "documents",
+  "errors": [],
+  "warnings": [],
+  "review_status": {
+    "required_lenses": [
+      "consistency"
+    ],
+    "coverage": {
+      "consistency": "completed"
+    },
+    "reports": {
+      "20261001T080000Z-prior/consistency": {
+        "stage": "document_review",
+        "lens_id": "consistency",
+        "result": "completed_no_findings",
+        "freshness": "current",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "fcea12db1f318b5ddcc721eb8e6a433e8f7ebbdd62bd3553a09fb034d121ff7a"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "08fca42029f572ffdb9f5b9578d450ab7c5d10a1c08f6324d6bcab12908cf457"
+          },
+          {
+            "path": "specs/main/spec.md",
+            "sha256": "d59f978d20b49a069d2026426f56c2c7e3b03e67ded212cd11145b781b266276"
+          }
+        ]
+      }
+    },
+    "complete": true,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": true,
+    "ready": true,
+    "applicability": {
+      "USER-documents-approved": true
+    },
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  }
+}

@@ -1,0 +1,449 @@
+{
+  "target": "skill-artifact",
+  "skill_name": "sdd-spec",
+  "skill_path": "skill-workspaces/sdd-spec-premortem/implementation/candidate",
+  "eval_id": null,
+  "question_source": "hybrid",
+  "requirements": [],
+  "questions": [
+    {
+      "id": "DET-STRUCT-SKILLMD-EXISTS",
+      "dimension": "Structure",
+      "text": "Does SKILL.md exist?",
+      "violation_example": "The skill folder has no SKILL.md file.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "SKILL.md exists"
+    },
+    {
+      "id": "DET-STRUCT-NO-README",
+      "dimension": "Structure",
+      "text": "Is there no README.md inside the skill?",
+      "violation_example": "A README.md file exists inside the skill folder.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "README.md found inside skill (should not exist)"
+    },
+    {
+      "id": "DET-STRUCT-NO-CHANGELOG",
+      "dimension": "Structure",
+      "text": "Is there no CHANGELOG.md inside the skill?",
+      "violation_example": "A CHANGELOG.md file exists inside the skill folder.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No CHANGELOG.md inside skill"
+    },
+    {
+      "id": "DET-STRUCT-REFS-DEPTH",
+      "dimension": "Structure",
+      "text": "Are references nested at most 1 level deep?",
+      "violation_example": "A file under references/ is nested more than 1 level deep.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "References depth OK (≤1 level)"
+    },
+    {
+      "id": "DET-STRUCT-FRONTMATTER-VALID",
+      "dimension": "Structure",
+      "text": "Is the YAML frontmatter present and valid?",
+      "violation_example": "SKILL.md has missing, malformed, or non-dict YAML frontmatter.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Valid frontmatter format"
+    },
+    {
+      "id": "DET-DISCOVERY-NAME-VALID",
+      "dimension": "Discovery",
+      "text": "Is name kebab-case, <=64 chars, matching the folder?",
+      "violation_example": "The name is missing, not kebab-case, too long, or does not match the folder.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Name: sdd-spec"
+    },
+    {
+      "id": "DET-DISCOVERY-DESC-PRESENT",
+      "dimension": "Discovery",
+      "text": "Is description present, <=1024 chars, free of angle brackets, and a string (not a YAML list)?",
+      "violation_example": "The description is missing, too long, contains angle brackets, or is not a string.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "Description length: 87 chars"
+    },
+    {
+      "id": "DET-DISCOVERY-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain trigger phrases (e.g. 'Use when ...')?",
+      "violation_example": "The description has no trigger phrases like 'Use when ...'.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "Description missing trigger phrases (add 'Use when...')"
+    },
+    {
+      "id": "DET-DISCOVERY-NEG-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain negative triggers (e.g. 'Do NOT use for ...')?",
+      "violation_example": "The description has no negative triggers like 'Do NOT use for ...'.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 0,
+      "explanation": "Consider adding negative triggers ('Do NOT use for...')"
+    },
+    {
+      "id": "DET-DISCOVERY-NO-PROCESS-LEAK",
+      "dimension": "Discovery",
+      "text": "Is the description free of multi-step process/workflow language?",
+      "violation_example": "The description contains multi-step process/workflow language.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No process/workflow language in description"
+    },
+    {
+      "id": "DET-STRUCT-BODY-LENGTH",
+      "dimension": "Structure",
+      "text": "Is the SKILL.md body at most 500 lines?",
+      "violation_example": "The SKILL.md body exceeds 500 lines.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body size: 33 lines, 245 words"
+    },
+    {
+      "id": "DET-COMPLETE-NO-TODO",
+      "dimension": "Completeness",
+      "text": "Is the body free of [TODO] placeholders?",
+      "violation_example": "The body contains [TODO] placeholders.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No [TODO] placeholders in body"
+    },
+    {
+      "id": "DET-STRUCT-HEADERS",
+      "dimension": "Structure",
+      "text": "Does the body have at least 2 section headers?",
+      "violation_example": "The body has fewer than 2 section headers.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body structure: 3 sections"
+    },
+    {
+      "id": "DET-STRUCT-MOC",
+      "dimension": "Structure",
+      "text": "Is the body a map (not a long prose dump with few section anchors)?",
+      "violation_example": "The body is a long prose dump with few section anchors.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Body reads as a map, not a prose dump"
+    },
+    {
+      "id": "DET-ROBUST-NO-SECRETS",
+      "dimension": "Robustness",
+      "text": "Is SKILL.md free of secrets/env/keys (API keys, exported env vars)?",
+      "violation_example": "SKILL.md contains secrets, API keys, or exported env vars.",
+      "source": "deterministic",
+      "critical": true,
+      "answer": 1,
+      "explanation": "No secrets/env leaked in SKILL.md"
+    },
+    {
+      "id": "DET-ROBUST-NO-USERPATHS",
+      "dimension": "Robustness",
+      "text": "Is SKILL.md free of user-absolute paths (/home/<user>, /Users/<user>)?",
+      "violation_example": "SKILL.md contains user-absolute paths.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "No user-absolute paths in SKILL.md"
+    },
+    {
+      "id": "DET-ROBUST-SCRIPTS-NONEMPTY",
+      "dimension": "Robustness",
+      "text": "Are all bundled scripts non-empty?",
+      "violation_example": "A bundled script file is empty.",
+      "source": "deterministic",
+      "critical": false,
+      "answer": 1,
+      "explanation": "Script: check.py (2690 bytes)"
+    },
+    {
+      "id": "Q-DISCOVERY-1",
+      "dimension": "Discovery",
+      "requirement_id": null,
+      "text": "Does the description state, in one phrase, what the skill actually does (its purpose) rather than only when to use it?",
+      "violation_example": "Description reads 'Use when the user mentions invoices.' — it names a trigger but never says the skill parses and validates invoice PDFs.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "SKILL.md describes preparation and approval of specifications, design and a change plan. This states the work product, rather than merely an invocation keyword.",
+      "answer": 1
+    },
+    {
+      "id": "Q-DISCOVERY-2",
+      "dimension": "Discovery",
+      "requirement_id": null,
+      "text": "Does the description broaden the trigger surface — 4-5 natural phrasings a user might actually say, and/or a clause like 'even if the user doesn't explicitly say \"<canonical term>\"'?",
+      "violation_example": "Description triggers only on the single canonical term 'dashboard', with no variations ('chart', 'metrics view', 'display our data'), so the skill never fires when the user phrases it any other way.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The description supplies only explicit sdd invocation, with no 4-5 natural phrasings or broadened-trigger clause. This is intentional for disable-model-invocation: true, but the fixed bank question is not satisfied; automatic discovery is outside the declared invocation policy.",
+      "answer": 0
+    },
+    {
+      "id": "Q-CLARITY-1",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Does each critical instruction explain WHY it matters, not just WHAT to do?",
+      "violation_example": "Step says 'Do not round prices' with no reason, so the agent rounds anyway on an edge case it judges harmless.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "references/premortem.md explains that a report schedule does not establish usefulness and that a matching manifest does not prove changed behavior reached the specification. resume.md explains that state and task presence do not establish permission. These explanations ground the critical evidence and authorization instructions.",
+      "answer": 1
+    },
+    {
+      "id": "Q-CLARITY-2",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Is a single term used consistently for each concept (no synonym drift like template/boilerplate/scaffold for the same thing)?",
+      "violation_example": "The body calls the same artifact 'template', then 'boilerplate', then 'scaffold', forcing the agent to guess whether they are the same object.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The new reference and template consistently distinguish premortem findings, Q records, review FIND records, and USER decisions. document-format.md preserves the same document and manifest terminology; no alternate identifier system is introduced.",
+      "answer": 1
+    },
+    {
+      "id": "Q-CLARITY-3",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Are instructions free of vague modifiers ('usually', 'as needed', 'periodically') and instead state measurable criteria?",
+      "violation_example": "'Periodically re-check the data' gives no measurable trigger, so the agent never re-checks.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "flows/resume.md ends with an instruction to save periodically when metrics are absent, while flows/draft.md says to investigate proportionally to the change. The former has no observable cadence. Many other thresholds are concrete, including greater than 70%, but the fixed question asks for freedom from vague modifiers.",
+      "answer": 0
+    },
+    {
+      "id": "Q-CLARITY-4",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Are instructions unambiguous, free of tangled multi-condition negations a model could interpret two ways?",
+      "violation_example": "'Do X unless not Y, except when Z' leaves the agent to pick an interpretation at random.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "references/premortem.md separates no-findings, findings, closed history, changed evidence and missing evidence into distinct paragraphs and branches. Planning prerequisites are explicitly enumerated in flows/plan.md, with permission and version agreement distinguished rather than expressed through nested negation.",
+      "answer": 1
+    },
+    {
+      "id": "Q-CLARITY-5",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Are instructions phrased as imperative commands ('Extract the data') rather than descriptive prose ('the data should be extracted')?",
+      "violation_example": "Steps are written as 'you should usually consider extracting', which reads as a suggestion the agent can skip.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The executable instructions use direct imperatives such as Прочитай, Сохрани, Проверь and Пересчитай throughout explore/draft/revise/resume. Descriptive paragraphs define artifact semantics; they do not weaken the procedural steps into suggestions.",
+      "answer": 1
+    },
+    {
+      "id": "Q-CLARITY-6",
+      "dimension": "Clarity",
+      "requirement_id": null,
+      "text": "Are the rules free of nuance and exemption clauses ('don't X unless…', 'this doesn't apply to…'), with real exceptions expressed as separate conditionals keyed to observable predicates?",
+      "violation_example": "'Never restate the spec unless it adds clarity.' — the 'unless' reopens the negotiation, so the agent restates the spec and calls it clarifying.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "Premortem branches use observable predicates: first check with no findings, existing closed findings, changed source, missing referenced file, and a selected normative behavior change. Editorial exclusions likewise enumerate document languages and protected fragments rather than permitting broad discretionary exceptions.",
+      "answer": 1
+    },
+    {
+      "id": "Q-STRUCT-1",
+      "dimension": "Structure",
+      "requirement_id": null,
+      "text": "Does SKILL.md delegate heavy detail to references/ instead of inlining it, keeping the body a navigable map?",
+      "violation_example": "A 400-line procedure is pasted inline in SKILL.md with no pointer to a references/ file.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "SKILL.md is a short entry and flow map. Premortem detail resides in references/premortem.md and templates/premortem.md; document format, runtime, editorial and review procedures are separated into named references and flows.",
+      "answer": 1
+    },
+    {
+      "id": "Q-STRUCT-2",
+      "dimension": "Structure",
+      "requirement_id": null,
+      "text": "Are the reference pointers directive — stating WHEN to read each file and, for skills with 2 or more references, what NOT to load for a given task — rather than a flat 'file — purpose' list?",
+      "violation_example": "The References section is a bare list ('docx-js.md - for creating documents, ooxml.md - for editing'), so the agent either loads all of them or none.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The flow table and startup paragraph say when to open runtime, document format and a host adapter, but do not explicitly tell readers what references not to load for a task. OpenSpec provenance, README and manual are a flat purpose list. The bank specifically requires selective-loading exclusions when multiple references exist.",
+      "answer": 0
+    },
+    {
+      "id": "Q-ROBUST-1",
+      "dimension": "Robustness",
+      "requirement_id": null,
+      "text": "Does the skill specify a pre-flight check (required tools/env/files) and tell the agent to stop and report when something is missing?",
+      "violation_example": "The skill calls `gh pr status` with no check that `gh` exists, so on a machine without it the agent improvises a substitute.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "references/runtime-setup.md requires package files, readable sources, writable change directory, uv and Python 3.11+. Missing tools or dependencies produce a concrete limitation and recovery path, with no fabricated checks or bypassed gate; drafts remain allowed.",
+      "answer": 1
+    },
+    {
+      "id": "Q-ROBUST-2",
+      "dimension": "Robustness",
+      "requirement_id": null,
+      "text": "Does the skill name concrete edge cases or failure modes and tell the agent how to handle them?",
+      "violation_example": "The skill covers only the happy path; when the input file is absent there is no instruction, so the agent fabricates data.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "references/premortem.md covers missing prior state, missing linked document, unavailable source, stale premise, a trivial typo, and closed findings. It specifies narrow reconstruction and targeted questions rather than assuming completion or restarting an interview.",
+      "answer": 1
+    },
+    {
+      "id": "Q-ROBUST-3",
+      "dimension": "Robustness",
+      "requirement_id": null,
+      "text": "Do bundled scripts handle errors and return descriptive stdout/stderr on failure rather than failing silently? (If the skill bundles no scripts, answer 1 — vacuously satisfied.)",
+      "violation_example": "A bundled script exits 0 with empty output when its input is malformed, hiding the failure from the caller.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "scripts/check.py catches InputError, ValidationError, OSError and UnicodeError, emits structured code/path/message errors, and distinguishes exits 1 and 2. scripts/run.py reports missing uv and keeps runtime caches external. snapshot code raises descriptive missing/unreadable input errors.",
+      "answer": 1
+    },
+    {
+      "id": "Q-ROBUST-4",
+      "dimension": "Robustness",
+      "requirement_id": null,
+      "text": "Is the skill free of time-sensitive language ('before/after <date>', 'the new API', 'currently') that rots, with legacy information separated from the current path (e.g. in a collapsed details block)?",
+      "violation_example": "'If you're doing this before August 2025, use the old API.' — a year later the agent cannot tell which branch is current.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The reviewed current path relies on explicit schema versions, runtime requirements and relative artifact state, not calendar cutovers or claims about a new API. Timestamps in templates are examples for records, not dated branches in operational instructions.",
+      "answer": 1
+    },
+    {
+      "id": "Q-COMPLETE-1",
+      "dimension": "Completeness",
+      "requirement_id": null,
+      "text": "Does the skill cover every use case its description claims to handle, with no triggered scenario left without instructions?",
+      "violation_example": "Description promises 'review and package skills' but the body has no packaging steps.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The description promises specification, design and plan preparation/approval. SKILL.md maps these to draft, review, user-review and plan, while explore, revise and resume cover clarification and continuation. Each promised work product has a template and flow.",
+      "answer": 1
+    },
+    {
+      "id": "Q-COMPLETE-2",
+      "dimension": "Completeness",
+      "requirement_id": null,
+      "text": "Does the skill read as written from real practice — concrete examples, real edge cases — rather than abstract from-memory prose?",
+      "violation_example": "Every example is a synthetic 'Acme Corp' placeholder and the 'Common Mistakes' section is empty or generic.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The reference uses concrete schedule-without-purpose and typo-diff cases, and explicitly handles missing sources, closed history, deferred nonblocking questions and scope growth. The workflow also addresses stale hashes and cancelled commands rather than limiting itself to idealized happy-path prose.",
+      "answer": 1
+    },
+    {
+      "id": "Q-COMPLETE-3",
+      "dimension": "Completeness",
+      "requirement_id": null,
+      "text": "Are short checklists placed inline at the risk step rather than collected in one section at the end of the document?",
+      "violation_example": "All quality checks live in a 'QA' section at the bottom; the agent finishes the steps above and never reaches it.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The plan entry enumerates readiness conditions before tasks creation. Explore ends with a local completion check; review ends with reports/manifests/coverage/checkpoint checks. The premortem completion condition sits immediately after the four checking steps, before storage instructions.",
+      "answer": 1
+    },
+    {
+      "id": "Q-COMPLETE-4",
+      "dimension": "Completeness",
+      "requirement_id": null,
+      "text": "Is the skill free of Redundant content — sections explaining what the model already knows (basic concepts, common library usage, generic best practices)?",
+      "violation_example": "The body opens with a 'What is JSON' section and a tutorial on standard `requests` usage, spending tokens on knowledge the model already has.",
+      "source": "llm",
+      "critical": false,
+      "explanation": "The reviewed files define package-specific SDD fields, permissions, manifests and premortem storage. They do not teach generic Markdown, JSON, Python or basic project-management concepts; templates are operational artifacts rather than tutorials.",
+      "answer": 1
+    }
+  ],
+  "dimension_scores": {
+    "Discovery": {
+      "score": 0.5714285714285714,
+      "passed": 4,
+      "total": 7
+    },
+    "Clarity": {
+      "score": 0.8333333333333334,
+      "passed": 5,
+      "total": 6
+    },
+    "Structure": {
+      "score": 0.8,
+      "passed": 8,
+      "total": 10
+    },
+    "Robustness": {
+      "score": 1.0,
+      "passed": 7,
+      "total": 7
+    },
+    "Completeness": {
+      "score": 1.0,
+      "passed": 5,
+      "total": 5
+    }
+  },
+  "failing": [
+    {
+      "id": "DET-STRUCT-NO-README",
+      "dimension": "Structure",
+      "text": "Is there no README.md inside the skill?",
+      "explanation": "README.md found inside skill (should not exist)",
+      "critical": false
+    },
+    {
+      "id": "DET-DISCOVERY-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain trigger phrases (e.g. 'Use when ...')?",
+      "explanation": "Description missing trigger phrases (add 'Use when...')",
+      "critical": false
+    },
+    {
+      "id": "DET-DISCOVERY-NEG-TRIGGERS",
+      "dimension": "Discovery",
+      "text": "Does the description contain negative triggers (e.g. 'Do NOT use for ...')?",
+      "explanation": "Consider adding negative triggers ('Do NOT use for...')",
+      "critical": false
+    },
+    {
+      "id": "Q-DISCOVERY-2",
+      "dimension": "Discovery",
+      "text": "Does the description broaden the trigger surface — 4-5 natural phrasings a user might actually say, and/or a clause like 'even if the user doesn't explicitly say \"<canonical term>\"'?",
+      "explanation": "The description supplies only explicit sdd invocation, with no 4-5 natural phrasings or broadened-trigger clause. This is intentional for disable-model-invocation: true, but the fixed bank question is not satisfied; automatic discovery is outside the declared invocation policy.",
+      "critical": false
+    },
+    {
+      "id": "Q-CLARITY-3",
+      "dimension": "Clarity",
+      "text": "Are instructions free of vague modifiers ('usually', 'as needed', 'periodically') and instead state measurable criteria?",
+      "explanation": "flows/resume.md ends with an instruction to save periodically when metrics are absent, while flows/draft.md says to investigate proportionally to the change. The former has no observable cadence. Many other thresholds are concrete, including greater than 70%, but the fixed question asks for freedom from vague modifiers.",
+      "critical": false
+    },
+    {
+      "id": "Q-STRUCT-2",
+      "dimension": "Structure",
+      "text": "Are the reference pointers directive — stating WHEN to read each file and, for skills with 2 or more references, what NOT to load for a given task — rather than a flat 'file — purpose' list?",
+      "explanation": "The flow table and startup paragraph say when to open runtime, document format and a host adapter, but do not explicitly tell readers what references not to load for a task. OpenSpec provenance, README and manual are a flat purpose list. The bank specifically requires selective-loading exclusions when multiple references exist.",
+      "critical": false
+    }
+  ]
+}

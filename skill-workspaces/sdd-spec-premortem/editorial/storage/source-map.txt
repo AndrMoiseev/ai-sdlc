@@ -1,0 +1,1 @@
+Source: sdd/changes/sdd-spec-premortem/state.md; author prose excluding frontmatter, YAML, historical blockquotes, service notes and link destinations; appended Q-premortem-record.text and Q-premortem-trigger.text.

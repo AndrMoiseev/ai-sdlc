@@ -1,0 +1,51 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Отсутствующий premortem.md по ссылке обнаружен, прежняя проверка не объявлена подтверждённой",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state and newly reconstructed premortem.md both identify the missing previous linked artifact. They explicitly state its historical contents and completion cannot be confirmed. The new document is labeled a reconstruction from available sources, not a recovered old result.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Доступный контекст восстановлен, существенный пробел оформлен Q",
+                             "dimension":  "Robustness",
+                             "evidence":  "The reconstructed artifact preserves known recipient, goal and CSV, cites available sources and marks missing docs/decision.md as the reason the 08:00 timing premise is unverified. Open blocking Q-report-timing asks assignment time and needed lead time; its dependency on AC/requirements is explained.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  142.068
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}

@@ -1,0 +1,2 @@
+state.prose.md: sdd/changes/sdd-spec-premortem/state.md, prose outside frontmatter and YAML; appended Q-premortem-trigger.text
+Protected Markdown link destinations excluded; labels retained. Original lint false positive: pattern 23 vs within research filename.

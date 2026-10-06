@@ -1,0 +1,51 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Закрытая находка и основания сохранены в premortem.md",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual premortem.md retains the original 09:00-after-08:30 failure, the required before-assignment premise and links to docs/report.md plus the dated docs/decision.md answer. It explicitly closes the finding and links Q-report-time, updated requirement/AC and design. Historical evidence is retained.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "State сохраняет ссылку и отмечает отсутствие открытых находок",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual state.md contains «Открытых находок нет; история: [premortem.md](premortem.md).» The target exists. Q-report-time is resolved, and the prior decision is linked, so absence of open findings is supported rather than merely asserted.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  2,
+                                                  "passed":  2
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  134.534
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+                                                ]
+                           }
+}

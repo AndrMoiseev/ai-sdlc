@@ -1,0 +1,56 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "Прочитан источник назначения отчёта",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual state.md quotes the saved docs/decision.md answer verbatim: report at 09:00 supports manual assignment at 09:30 and automatic assignment is unnecessary. The trace acknowledges this purpose source before proposing further research.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Вопрос о назначении повторно не задан",
+                             "dimension":  "Robustness",
+                             "evidence":  "The trace does ask about handling changes in delivery data between 09:00 and 09:30, but does not ask the already-answered purpose/assignment-action question again. state.md explicitly recognizes that purpose is resolved. The new freshness question is a distinct issue, so the narrow frozen assertion passes.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  151.766
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+                                                ]
+                           }
+}

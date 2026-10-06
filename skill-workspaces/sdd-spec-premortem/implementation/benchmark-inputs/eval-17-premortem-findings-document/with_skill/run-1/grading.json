@@ -1,0 +1,62 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "premortem.md содержит цель, границы и четыре части находки: провал, предпосылка, основания, действие",
+                             "dimension":  "Structure",
+                             "evidence":  "Actual premortem.md includes the goal of reducing delivery delays, confines evidence to docs/report.md and distinguishes unknown runtime behavior. Each of its two findings explicitly contains Возможный провал, Предпосылка успеха, Основания and Дальнейшее действие; the timing finding cites 09:00 versus 08:30 and ties follow-up to the dependent decision.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "В разделе Премортем state только итог и рабочая ссылка",
+                             "dimension":  "Structure",
+                             "evidence":  "The state section Премортем consists only of «Есть находки: [premortem.md](premortem.md).» The target exists in the same output directory and contains the detailed findings; details remain outside this compact section.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Вопрос связан с Q-ID в state",
+                             "dimension":  "Completeness",
+                             "evidence":  "premortem.md links Q-report-timing to state.md#q-report-timing and Q-success-measure to state.md#q-success-measure. Corresponding state headings and sdd_record question IDs exist, with open statuses, blocking distinctions and reason/return_at for the deferred measurement question.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  3,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  3
+                },
+    "dimension_scores":  {
+                             "Structure":  {
+                                               "score":  1,
+                                               "total":  2,
+                                               "passed":  2
+                                           },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  168.669
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+                                                   "Initial read permission errors recovered."
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated."
+                                                ]
+                           }
+}

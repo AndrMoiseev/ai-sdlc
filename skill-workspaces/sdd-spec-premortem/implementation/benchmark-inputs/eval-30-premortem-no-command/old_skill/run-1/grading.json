@@ -1,0 +1,43 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Tasks не создан",
+      "dimension": "Robustness",
+      "evidence": "Output tree contains proposal/design/spec/state/premortem and prior review files, with no tasks.md. State sets awaiting:planning_command and final response says plan not created. Trace only persists the checkpoint after read-only document checks.",
+      "passed": true
+    },
+    {
+      "text": "Завершённый премортем не выдан за planning_command",
+      "dimension": "Robustness",
+      "evidence": "State records complete premortem and current review separately from the missing planning command; it explicitly says document agreement does not replace planning command. review/decisions.md contains only prior document approval, and no new planning USER record is manufactured.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 318864,
+    "duration_ms": 118977,
+    "total_duration_seconds": 118.977
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

@@ -1,0 +1,56 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "До подробной спецификации сохранён итог премортема",
+                             "dimension":  "Completeness",
+                             "evidence":  "Actual outputs contain premortem.md with three goal-related failure scenarios and state.md with a compact findings link. No detailed proposal/spec/design has been produced; phase is discovery. The saved premortem therefore precedes specification work.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Неизвестное назначение отчёта обозначено гипотезой и конкретным вопросом",
+                             "dimension":  "Robustness",
+                             "evidence":  "state.md labels possible report use as Гипотеза агента, says no variant is chosen, and records Q-dispatcher-action asking what concrete action the dispatcher should take at 09:00. premortem.md explains the source lacks this action and separates a suggested contact-responsible scenario from agreed requirements.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  475.083
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+                                                ]
+                           }
+}

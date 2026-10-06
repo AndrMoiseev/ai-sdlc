@@ -252,13 +252,83 @@ class EvaluationTests(unittest.TestCase):
             prompt = base / "prompt.txt"
             prompt.write_text("Создай глоссарий", encoding="utf-8")
             output = base / "run"
-            argv = ["run_task.py", "--harness", "codex", "--prompt-file", str(prompt), "--workspace", str(base), "--output-dir", str(output)]
+            manifest = base / "fixture.json"
+            manifest.write_text(json.dumps({"schema_version": 1, "required_files": []}), encoding="utf-8")
+            argv = ["run_task.py", "--harness", "codex", "--prompt-file", str(prompt), "--workspace", str(base), "--output-dir", str(output), "--fixture-manifest", str(manifest)]
             with patch.object(sys, "argv", argv), patch.object(run_task, "run_prompt", return_value=result(status="error")) as execute, \
                     patch("builtins.print"):
                 self.assertEqual(run_task.main(), 1)
                 self.assertEqual(json.loads((output / "run.json").read_text(encoding="utf-8"))["status"], "error")
                 self.assertEqual(run_task.main(), 1)
                 self.assertEqual(execute.call_count, 1)
+
+
+class FixturePreflightTests(unittest.TestCase):
+    def invoke(self, base, required, absent=None, extra=()):
+        fixture = base / "fixture"
+        fixture.mkdir(exist_ok=True)
+        prompt = base / "prompt.txt"
+        prompt.write_text("Run the skill", encoding="utf-8")
+        manifest = base / "fixture.json"
+        manifest.write_text(json.dumps({"schema_version": 1, "required_files": required,
+                                       "expected_missing_files": absent or []}), encoding="utf-8")
+        output = base / "output"
+        argv = ["run_task.py", "--prompt-file", str(prompt), "--workspace", str(fixture),
+                "--fixture-manifest", str(manifest), "--output-dir", str(output), *extra]
+        with patch.object(sys, "argv", argv), patch.object(run_task, "run_prompt", return_value=result()) as execute, \
+                patch("builtins.print"):
+            code = run_task.main()
+        return code, execute, output
+
+    def test_host_dependency_does_not_satisfy_missing_fixture_dependency(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            # The author's copy exists, but the isolated executor cannot use it.
+            (base / "humanizer.md").write_text("installed dependency", encoding="utf-8")
+            code, execute, output = self.invoke(base, [".agents/skills/humanizer-ru/SKILL.md"])
+            self.assertEqual(code, 1)
+            execute.assert_not_called()
+            self.assertFalse((output / "run.json").exists())
+            report = json.loads((output / "preflight.json").read_text(encoding="utf-8"))
+            self.assertIn("humanizer-ru", report["errors"][0])
+
+    def test_present_dependency_allows_model_and_preflight_only_never_calls_model(self):
+        for extra in ([], ["--preflight-only"]):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as directory:
+                base = Path(directory)
+                dependency = base / "fixture/.agents/skills/humanizer-ru/SKILL.md"
+                dependency.parent.mkdir(parents=True)
+                dependency.write_text("humanizer instructions", encoding="utf-8")
+                code, execute, _ = self.invoke(base, [".agents/skills/humanizer-ru/SKILL.md"], extra=extra)
+                self.assertEqual(code, 0)
+                self.assertEqual(execute.call_count, 0 if extra else 1)
+
+    def test_expected_missing_is_explicit_and_must_actually_be_missing(self):
+        for present in (False, True):
+            with self.subTest(present=present), tempfile.TemporaryDirectory() as directory:
+                base = Path(directory)
+                if present:
+                    (base / "fixture").mkdir()
+                    (base / "fixture/dependency.md").write_text("unexpected", encoding="utf-8")
+                code, execute, _ = self.invoke(base, [], ["dependency.md"])
+                self.assertEqual(code, 1 if present else 0)
+                self.assertEqual(execute.call_count, 0 if present else 1)
+
+    def test_external_paths_and_malformed_inventory_stop_before_model(self):
+        for paths in (["../humanizer.md"], "not a list", [42], [""]):
+            with self.subTest(paths=paths), tempfile.TemporaryDirectory() as directory:
+                code, execute, _ = self.invoke(Path(directory), paths)
+                self.assertEqual(code, 1)
+                execute.assert_not_called()
+
+    def test_manifest_cannot_be_omitted(self):
+        with patch.object(sys, "argv", ["run_task.py", "--prompt-file", "prompt.txt",
+                                      "--workspace", "fixture", "--output-dir", "out"]), \
+                patch.object(run_task, "run_prompt") as execute, patch("sys.stderr"):
+            with self.assertRaises(SystemExit) as error:
+                run_task.main()
+            self.assertEqual(error.exception.code, 2)
+            execute.assert_not_called()
 
 
 class OptimizationTests(unittest.TestCase):

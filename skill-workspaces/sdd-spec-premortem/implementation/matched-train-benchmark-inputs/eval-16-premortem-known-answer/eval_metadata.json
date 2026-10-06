@@ -1,0 +1,9 @@
+{
+  "eval_id": 16,
+  "eval_name": "premortem-known-answer",
+  "prompt": "$sdd-spec Исследуй delivery-report по docs/report.md и сохранённому ответу в docs/decision.md.",
+  "expectations": [
+    "Прочитан источник назначения отчёта",
+    "Вопрос о назначении повторно не задан"
+  ]
+}

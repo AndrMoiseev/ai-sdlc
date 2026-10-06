@@ -1,0 +1,43 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Применимый waiver признан при корректной структуре и согласовании документов",
+      "dimension": "Robustness",
+      "evidence": "Trace documents check returns errors/warnings empty, consistency waived, approved/ready true and all three USER records applicable. State explicitly recognizes those matching manifests and preserves normative documents; waiver is scoped to document_review/consistency, not editorial or plan review.",
+      "passed": true
+    },
+    {
+      "text": "Tasks создан по действующей команде без дополнительного согласования премортема",
+      "dimension": "Robustness",
+      "evidence": "tasks.md exists with TASK-deliver-daily-report pending, covers AC-report-delivered and includes integration verification. It cites USER-plan-request. Trace creates the file and plan check passes structure. No premortem-specific approval is requested; the final editorial-dependency exception question is a separate inherited requirement and does not undo task creation.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 362362,
+    "duration_ms": 149374,
+    "total_duration_seconds": 149.374
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

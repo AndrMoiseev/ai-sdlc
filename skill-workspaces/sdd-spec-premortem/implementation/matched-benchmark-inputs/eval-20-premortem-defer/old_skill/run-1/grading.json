@@ -1,0 +1,49 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Неблокирующий Q имеет reason и конкретный return_at",
+      "dimension": "Robustness",
+      "evidence": "state.md retains Q-bulk-capacity blocking:false/status:open with reason limiting the current pilot to confirmed 10 rows and return_at before expansion to mass rollout. The agent edits proposal/spec/design to express that pilot boundary, so this is considered use of the inherited question in the continued task, not merely unattended fixture data.",
+      "passed": true
+    },
+    {
+      "text": "Причина и условие возврата совпадают в Q и premortem.md",
+      "dimension": "Robustness",
+      "evidence": "premortem.md adds a Pilot boundary section: current work is 10 rows, unknown mass capacity does not block it, Q-bulk-capacity stays open until expansion. This matches state reason and return_at semantically. Trace item_10 edits the premortem and normative scope together; no different trigger is introduced.",
+      "passed": true
+    },
+    {
+      "text": "Отсрочка не названа принятием риска",
+      "dimension": "Robustness",
+      "evidence": "Design says the pilot does not establish readiness for mass load and mass rollout remains out of scope. State and the final response keep capacity open/nonblocking; neither claims the remaining risk was accepted or creates a USER risk decision.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 417249,
+    "duration_ms": 197318,
+    "total_duration_seconds": 197.318
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

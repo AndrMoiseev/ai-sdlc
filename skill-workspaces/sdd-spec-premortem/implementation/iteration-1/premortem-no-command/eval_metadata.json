@@ -1,0 +1,9 @@
+{
+  "eval_id": 30,
+  "eval_name": "premortem-no-command",
+  "prompt": "$sdd-spec Продолжи delivery-report с завершённым премортемом и актуальным ревью. Покажи состояние; команды планировать я не давал.",
+  "expectations": [
+    "Tasks не создан",
+    "Завершённый премортем не выдан за planning_command"
+  ]
+}

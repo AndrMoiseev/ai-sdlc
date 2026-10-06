@@ -1,0 +1,38 @@
+[
+  {
+    "path": "docs/decision.md",
+    "sha256": "e14fd6f643fc7b6104a9e9bb52299efba362666bfa589d31d68dcf2af32875f6"
+  },
+  {
+    "path": "docs/report.md",
+    "sha256": "8d5bc8cd626bc9af67321dae5c064e60b2d59690c1cda60b9e2feea2aa8c99c6"
+  },
+  {
+    "path": "sdd/changes/delivery-report/design.md",
+    "sha256": "43157ae48be504a93817442541fb0278643bf94504a277485e3f81b0b15d8624"
+  },
+  {
+    "path": "sdd/changes/delivery-report/premortem.md",
+    "sha256": "77ca8d4f7aacd52425752401af63f171522ae977f381edbc2266a92ede550ee3"
+  },
+  {
+    "path": "sdd/changes/delivery-report/proposal.md",
+    "sha256": "6dba5ae30685e7586adfc6fa2c4cf153ac6bcd1fe77547485fbcc26371a21083"
+  },
+  {
+    "path": "sdd/changes/delivery-report/review/20261001T080000Z-prior/consistency.md",
+    "sha256": "d2e42ba960e3d4bc5c492738a0448f887d399aa6d3d3b53793240f4eb906594a"
+  },
+  {
+    "path": "sdd/changes/delivery-report/review/decisions.md",
+    "sha256": "cafbdf1fad2b2ee7e5a7e00bc77cebc4efaa316cd32463ac690465e8a6edb8c5"
+  },
+  {
+    "path": "sdd/changes/delivery-report/specs/main/spec.md",
+    "sha256": "bf01e424450408f148aaea436cb28e0a75c5f32516ddec4ddca02439940849fe"
+  },
+  {
+    "path": "sdd/changes/delivery-report/state.md",
+    "sha256": "035a8f5d5e146f8b4757bf83ec7fb0316d27d46a1207579a4a2446066230ad8f"
+  }
+]

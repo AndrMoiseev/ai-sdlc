@@ -1,0 +1,43 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "Tasks не создан",
+      "dimension": "Robustness",
+      "evidence": "Output inventory has no tasks.md. Trace item9 writes state only; checkpoint phase:user_review/awaiting:planning_command explicitly says tasks not created, matching the final response. Existing normative documents and review are preserved.",
+      "passed": true
+    },
+    {
+      "text": "Завершённый премортем не выдан за planning_command",
+      "dimension": "Robustness",
+      "evidence": "State separates closed premortem history and applicable document approval from absent planning permission: continuation does not authorize planning, and script ready does not replace a command. It quotes the user denial of a planning command and records no new planning authorization.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 1.0,
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "failing": [],
+  "timing": {
+    "total_tokens": 389480,
+    "duration_ms": 158761,
+    "total_duration_seconds": 158.761
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

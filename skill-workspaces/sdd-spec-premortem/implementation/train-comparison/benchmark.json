@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "skill_name": "sdd-spec",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-10-06T12:18:53Z",
+    "evals_run": [],
+    "runs_per_configuration": 3
+  },
+  "runs": [],
+  "run_summary": {
+    "delta": {
+      "pass_rate": null,
+      "time_seconds": null,
+      "tokens": null
+    }
+  },
+  "notes": []
+}

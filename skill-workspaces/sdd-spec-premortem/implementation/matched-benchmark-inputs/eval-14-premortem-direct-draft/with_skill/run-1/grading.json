@@ -1,0 +1,51 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "До подробной спецификации сохранён итог проверки предпосылок",
+      "dimension": "Completeness",
+      "evidence": "stdout.jsonl completed command item_9 first writes premortem.md, then proposal.md, specs/delivery-report/spec.md and design.md. The premortem identifies the concrete failure 'CSV выпускается ежедневно, но просрочки не снижаются', connects it to the unverified dispatcher action, cites docs/report.md, and routes the unresolved premise to Q-dispatcher-action. Thus the result exists before normative drafting; the later state entry alone is not used as proof of ordering.",
+      "passed": true
+    },
+    {
+      "text": "Зависимое поведение не выдумано",
+      "dimension": "Robustness",
+      "evidence": "Saved spec retains only known 09:00, recipient and CSV columns, explicitly leaving selection, calculation, errors, timezone and delivery channel unresolved. Design labels its module split as proposed logical responsibilities and states 'технический подход не выбран'. State Q-dispatcher-action is blocking/open, and the final response asks which decision the dispatcher takes. Neither automatic assignment nor escalation is added as a commitment.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "dimension_scores": {
+    "Completeness": {
+      "score": 1.0,
+      "passed": 1,
+      "total": 1
+    },
+    "Robustness": {
+      "score": 1.0,
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "failing": [],
+  "claims": [
+    {
+      "claim": "Documents structure check passed",
+      "type": "process",
+      "verified": true,
+      "evidence": "Trace item_10 executes the bundled check with exit 0; saved state records errors/warnings empty and review missing/ready false separately."
+    }
+  ],
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "The ordering criterion is checked against trace writes, not retrospective state prose."
+  }
+}

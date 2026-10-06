@@ -1,0 +1,38 @@
+[
+  {
+    "path": "change.diff",
+    "sha256": "f72b075471993703cd6c17c48ac8be4875694a1107389d4be29291f8eb749a12"
+  },
+  {
+    "path": "docs/labels.md",
+    "sha256": "3e5d2d8bc15d9235084dcdec3893fcc0a9b9d7831cc3b447678ad7f641ad10db"
+  },
+  {
+    "path": "sdd/changes/label-typo/design.md",
+    "sha256": "fcea12db1f318b5ddcc721eb8e6a433e8f7ebbdd62bd3553a09fb034d121ff7a"
+  },
+  {
+    "path": "sdd/changes/label-typo/proposal.md",
+    "sha256": "08fca42029f572ffdb9f5b9578d450ab7c5d10a1c08f6324d6bcab12908cf457"
+  },
+  {
+    "path": "sdd/changes/label-typo/review/20261001T080000Z-prior/consistency.md",
+    "sha256": "dc9a71cac799c34182671c6db19d8d2d07f333770db1955429c94abc781a4602"
+  },
+  {
+    "path": "sdd/changes/label-typo/review/decisions.md",
+    "sha256": "02419e64652895fa9e1be478a99ac670f75811ac864d09f4595f612fc17f8a99"
+  },
+  {
+    "path": "sdd/changes/label-typo/specs/main/spec.md",
+    "sha256": "d59f978d20b49a069d2026426f56c2c7e3b03e67ded212cd11145b781b266276"
+  },
+  {
+    "path": "sdd/changes/label-typo/state.md",
+    "sha256": "21092ef8f7370c06540d4db5f810eaf241d9b23ba089eced9e0d8af2eb6ca978"
+  },
+  {
+    "path": "src/labels.json",
+    "sha256": "4f5509e05692d2762f16fb9c31fa9fca97191e60762b9def86589367fc5d48da"
+  }
+]

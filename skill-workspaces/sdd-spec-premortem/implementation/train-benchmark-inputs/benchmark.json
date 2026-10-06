@@ -1,0 +1,649 @@
+{
+  "metadata": {
+    "skill_name": "sdd-spec",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-10-06T12:21:25Z",
+    "evals_run": [
+      13,
+      15,
+      16,
+      17,
+      18,
+      19,
+      21,
+      22,
+      25,
+      26,
+      27
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 13,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 475.083,
+        "tokens": 464036,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0414\u043e \u043f\u043e\u0434\u0440\u043e\u0431\u043d\u043e\u0439 \u0441\u043f\u0435\u0446\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d \u0438\u0442\u043e\u0433 \u043f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c\u0430",
+          "dimension": "Completeness",
+          "evidence": "Actual outputs contain premortem.md with three goal-related failure scenarios and state.md with a compact findings link. No detailed proposal/spec/design has been produced; phase is discovery. The saved premortem therefore precedes specification work.",
+          "passed": true
+        },
+        {
+          "text": "\u041d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435 \u043e\u0442\u0447\u0451\u0442\u0430 \u043e\u0431\u043e\u0437\u043d\u0430\u0447\u0435\u043d\u043e \u0433\u0438\u043f\u043e\u0442\u0435\u0437\u043e\u0439 \u0438 \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u044b\u043c \u0432\u043e\u043f\u0440\u043e\u0441\u043e\u043c",
+          "dimension": "Robustness",
+          "evidence": "state.md labels possible report use as \u0413\u0438\u043f\u043e\u0442\u0435\u0437\u0430 \u0430\u0433\u0435\u043d\u0442\u0430, says no variant is chosen, and records Q-dispatcher-action asking what concrete action the dispatcher should take at 09:00. premortem.md explains the source lacks this action and separates a suggested contact-responsible scenario from agreed requirements.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+      ]
+    },
+    {
+      "eval_id": 15,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 278.701,
+        "tokens": 399197,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0412 state \u0437\u0430\u043f\u0438\u0441\u0430\u043d\u043e \u00ab\u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c: \u043d\u0430\u0445\u043e\u0434\u043e\u043a \u043d\u0435\u0442\u00bb",
+          "dimension": "Completeness",
+          "evidence": "Actual state.md has section \u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c containing exactly \u00ab\u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c: \u043d\u0430\u0445\u043e\u0434\u043e\u043a \u043d\u0435\u0442\u00bb. This follows trace reads of change.diff and docs/labels.md and a bounded design for the single string correction, so the checkpoint reflects the supplied scope.",
+          "passed": true
+        },
+        {
+          "text": "\u041d\u0435\u0442 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0433\u043e \u0438\u043d\u0442\u0435\u0440\u0432\u044c\u044e, \u0438\u0441\u043a\u0443\u0441\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0445 \u0440\u0438\u0441\u043a\u043e\u0432 \u0438 premortem.md",
+          "dimension": "Robustness",
+          "evidence": "Trace messages explicitly say clarifications are unnecessary; no separate interview occurs. Output has no premortem.md, and design.md limits itself to the specified string, JSON correctness and existing button behavior. No artificial risk or feature is introduced.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated.",
+        "Initial read permission errors recovered."
+      ]
+    },
+    {
+      "eval_id": 16,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 121.465,
+        "tokens": 305959,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u043d \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f \u043e\u0442\u0447\u0451\u0442\u0430",
+          "dimension": "Completeness",
+          "evidence": "Trace executes Get-Content docs/report.md, docs/decision.md and the output state quotes the saved answer that the dispatcher uses the 09:00 CSV during assignment at 09:30. This demonstrates reading the purpose source rather than inferring its contents.",
+          "passed": true
+        },
+        {
+          "text": "\u0412\u043e\u043f\u0440\u043e\u0441 \u043e \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e \u043d\u0435 \u0437\u0430\u0434\u0430\u043d",
+          "dimension": "Robustness",
+          "evidence": "All agent messages were inspected: none asks what the report is for or repeats the saved assignment question. state.md explicitly says the prior answer resolves the use premise and that automatic assignment is excluded. Future implementation details are noted without reopening report purpose.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated.",
+        "Initial read permission errors recovered."
+      ]
+    },
+    {
+      "eval_id": 17,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 168.669,
+        "tokens": 282367,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "premortem.md \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u0442 \u0446\u0435\u043b\u044c, \u0433\u0440\u0430\u043d\u0438\u0446\u044b \u0438 \u0447\u0435\u0442\u044b\u0440\u0435 \u0447\u0430\u0441\u0442\u0438 \u043d\u0430\u0445\u043e\u0434\u043a\u0438: \u043f\u0440\u043e\u0432\u0430\u043b, \u043f\u0440\u0435\u0434\u043f\u043e\u0441\u044b\u043b\u043a\u0430, \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f, \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435",
+          "dimension": "Structure",
+          "evidence": "Actual premortem.md includes the goal of reducing delivery delays, confines evidence to docs/report.md and distinguishes unknown runtime behavior. Each of its two findings explicitly contains \u0412\u043e\u0437\u043c\u043e\u0436\u043d\u044b\u0439 \u043f\u0440\u043e\u0432\u0430\u043b, \u041f\u0440\u0435\u0434\u043f\u043e\u0441\u044b\u043b\u043a\u0430 \u0443\u0441\u043f\u0435\u0445\u0430, \u041e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f and \u0414\u0430\u043b\u044c\u043d\u0435\u0439\u0448\u0435\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435; the timing finding cites 09:00 versus 08:30 and ties follow-up to the dependent decision.",
+          "passed": true
+        },
+        {
+          "text": "\u0412 \u0440\u0430\u0437\u0434\u0435\u043b\u0435 \u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c state \u0442\u043e\u043b\u044c\u043a\u043e \u0438\u0442\u043e\u0433 \u0438 \u0440\u0430\u0431\u043e\u0447\u0430\u044f \u0441\u0441\u044b\u043b\u043a\u0430",
+          "dimension": "Structure",
+          "evidence": "The state section \u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c consists only of \u00ab\u0415\u0441\u0442\u044c \u043d\u0430\u0445\u043e\u0434\u043a\u0438: [premortem.md](premortem.md).\u00bb The target exists in the same output directory and contains the detailed findings; details remain outside this compact section.",
+          "passed": true
+        },
+        {
+          "text": "\u0412\u043e\u043f\u0440\u043e\u0441 \u0441\u0432\u044f\u0437\u0430\u043d \u0441 Q-ID \u0432 state",
+          "dimension": "Completeness",
+          "evidence": "premortem.md links Q-report-timing to state.md#q-report-timing and Q-success-measure to state.md#q-success-measure. Corresponding state headings and sdd_record question IDs exist, with open statuses, blocking distinctions and reason/return_at for the deferred measurement question.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru unavailable; artifacts are explicitly drafts and overall editorial readiness is not evaluated.",
+        "Initial read permission errors recovered."
+      ]
+    },
+    {
+      "eval_id": 18,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 134.534,
+        "tokens": 341098,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0417\u0430\u043a\u0440\u044b\u0442\u0430\u044f \u043d\u0430\u0445\u043e\u0434\u043a\u0430 \u0438 \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 premortem.md",
+          "dimension": "Completeness",
+          "evidence": "Actual premortem.md retains the original 09:00-after-08:30 failure, the required before-assignment premise and links to docs/report.md plus the dated docs/decision.md answer. It explicitly closes the finding and links Q-report-time, updated requirement/AC and design. Historical evidence is retained.",
+          "passed": true
+        },
+        {
+          "text": "State \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u0435\u0442 \u0441\u0441\u044b\u043b\u043a\u0443 \u0438 \u043e\u0442\u043c\u0435\u0447\u0430\u0435\u0442 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u043d\u0430\u0445\u043e\u0434\u043e\u043a",
+          "dimension": "Completeness",
+          "evidence": "Actual state.md contains \u00ab\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u043d\u0430\u0445\u043e\u0434\u043e\u043a \u043d\u0435\u0442; \u0438\u0441\u0442\u043e\u0440\u0438\u044f: [premortem.md](premortem.md).\u00bb The target exists. Q-report-time is resolved, and the prior decision is linked, so absence of open findings is supported rather than merely asserted.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+      ]
+    },
+    {
+      "eval_id": 19,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 164.767,
+        "tokens": 285493,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0415\u0441\u0442\u044c blocking Q, \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u044b\u0439 \u0432\u044b\u0431\u043e\u0440 \u043d\u0435 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043d",
+          "dimension": "Robustness",
+          "evidence": "Actual state has open blocking Q-delivery-mode asking report-only versus automatic assignment. The specification explicitly leaves automatic assignment unspecified until the choice and clarifies its CSV acceptance criterion does not require both modes.",
+          "passed": true
+        },
+        {
+          "text": "\u041d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u0430\u044f \u0447\u0430\u0441\u0442\u044c \u0447\u0435\u0440\u043d\u043e\u0432\u0438\u043a\u0430 \u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043b\u0435\u043d\u0430",
+          "dimension": "Completeness",
+          "evidence": "The actual partial specification defines REQ-csv-columns and AC-csv-columns for the three agreed fields independent of mode. Proposal/design/state are saved alongside it, so the independent draft is substantive.",
+          "passed": true
+        },
+        {
+          "text": "\u0413\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u044c \u043a \u0440\u0435\u0432\u044c\u044e \u043d\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0430",
+          "dimension": "Robustness",
+          "evidence": "Response and state explicitly withhold review readiness, record open blocking questions, missing editorial dependency and absent review/approval. No readiness or completed whole-specification claim appears.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru; artifacts are drafts."
+      ]
+    },
+    {
+      "eval_id": 21,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 149.684,
+        "tokens": 278368,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0412\u044b\u0431\u0440\u0430\u043d\u043e C \u0438 \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430 \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0435\u043d\u0430",
+          "dimension": "Completeness",
+          "evidence": "Trace and state explicitly select C, retain proposals and Q-report-action. Actual saved CSV draft/specification documents the three agreed columns and independent verification; work continues without waiting for the mode choice.",
+          "passed": true
+        },
+        {
+          "text": "\u041d\u0435\u0442 \u043d\u043e\u0432\u043e\u0433\u043e \u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f \u0438\u043b\u0438 \u0432\u044b\u0434\u0443\u043c\u0430\u043d\u043d\u043e\u0433\u043e \u0440\u0435\u0448\u0435\u043d\u0438\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+          "dimension": "Robustness",
+          "evidence": "Actual state and product documents keep manager A/B as unapproved proposals, omit automatic assignment requirements and record no risk acceptance or invented USER consent. Premortem storage preserves the open action premise rather than treating urgency as authorization.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru; artifacts are drafts."
+      ]
+    },
+    {
+      "eval_id": 22,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 119.931,
+        "tokens": 243618,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u043d\u044b \u0438\u0442\u043e\u0433, premortem.md \u043f\u043e \u0441\u0441\u044b\u043b\u043a\u0435 \u0438 \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a\u0438",
+          "dimension": "Completeness",
+          "evidence": "The transcript contains a successful combined Get-Content of state.md, proposal.md, design.md, spec.md, premortem.md, docs/decision.md and docs/report.md. The output state cites the same sources and accurately reconciles the prior 09:00 conflict with the saved 08:00 answer.",
+          "passed": true
+        },
+        {
+          "text": "\u0421\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0435 \u043e\u0442\u0432\u0435\u0442\u044b \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u044b \u0431\u0435\u0437 \u0438\u043d\u0442\u0435\u0440\u0432\u044c\u044e \u0438 \u0434\u0443\u0431\u043b\u0435\u0439 \u043d\u0430\u0445\u043e\u0434\u043e\u043a",
+          "dimension": "Robustness",
+          "evidence": "Trace preserves the saved 08:00 deadline and three-column CSV without a repeated interview. Actual state keeps Q-report-time resolved and says open findings are absent; existing premortem.md retains the single closed historical finding, with no duplicate. Missing humanizer-ru is separately recorded as an editorial limitation.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru blocks next editorial step; no readiness assertion graded."
+      ]
+    },
+    {
+      "eval_id": 15,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 167.04,
+        "tokens": 240169,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0412 state \u0437\u0430\u043f\u0438\u0441\u0430\u043d\u043e \u00ab\u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c: \u043d\u0430\u0445\u043e\u0434\u043e\u043a \u043d\u0435\u0442\u00bb",
+          "dimension": "Completeness",
+          "evidence": "The actual outputs/sdd/changes/label-typo/state.md contains completed work, next step, decisions and checks, ending with \u00ab\u0421\u043e\u0434\u0435\u0440\u0436\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0445 \u0431\u043b\u043e\u043a\u0438\u0440\u0443\u044e\u0449\u0438\u0445 \u0438 \u043e\u0442\u043b\u043e\u0436\u0435\u043d\u043d\u044b\u0445 \u0432\u043e\u043f\u0440\u043e\u0441\u043e\u0432 \u043d\u0435\u0442\u00bb. It contains neither \u00ab\u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c: \u043d\u0430\u0445\u043e\u0434\u043e\u043a \u043d\u0435\u0442\u00bb nor an equivalent explicit record that the premortem was performed and found nothing. The executor successfully read the change and wrote all three draft documents before stopping for missing humanizer-ru; this grades the missing premortem record, not editorial readiness.",
+          "passed": false
+        },
+        {
+          "text": "\u041d\u0435\u0442 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0433\u043e \u0438\u043d\u0442\u0435\u0440\u0432\u044c\u044e, \u0438\u0441\u043a\u0443\u0441\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0445 \u0440\u0438\u0441\u043a\u043e\u0432 \u0438 premortem.md",
+          "dimension": "Robustness",
+          "evidence": "The trace proceeds from reading change.diff and docs/labels.md directly to the bounded proposal/spec/design. No interview about hypothetical failure occurs, and the output inventory contains no premortem.md. design.md mentions only accidental modification of the key or neighboring text, with a concrete diff check; this is proportionate implementation hygiene, not an invented product risk or expanded scope. The final request concerns a missing editorial dependency, not a premortem interview.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru prevents completion of mandatory editorial work; behavioral grade concerns the already-produced draft and state only.",
+        "Initial file-read permission failure recovered on retry; subsequent required reads, writes and structural check succeeded."
+      ]
+    },
+    {
+      "eval_id": 16,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 151.766,
+        "tokens": 264919,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u043d \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f \u043e\u0442\u0447\u0451\u0442\u0430",
+          "dimension": "Completeness",
+          "evidence": "Actual state.md quotes the saved docs/decision.md answer verbatim: report at 09:00 supports manual assignment at 09:30 and automatic assignment is unnecessary. The trace acknowledges this purpose source before proposing further research.",
+          "passed": true
+        },
+        {
+          "text": "\u0412\u043e\u043f\u0440\u043e\u0441 \u043e \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e \u043d\u0435 \u0437\u0430\u0434\u0430\u043d",
+          "dimension": "Robustness",
+          "evidence": "The trace does ask about handling changes in delivery data between 09:00 and 09:30, but does not ask the already-answered purpose/assignment-action question again. state.md explicitly recognizes that purpose is resolved. The new freshness question is a distinct issue, so the narrow frozen assertion passes.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru; editorial readiness is incomplete and not graded by these assertions."
+      ]
+    },
+    {
+      "eval_id": 17,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "time_seconds": 167.854,
+        "tokens": 385409,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "premortem.md \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u0442 \u0446\u0435\u043b\u044c, \u0433\u0440\u0430\u043d\u0438\u0446\u044b \u0438 \u0447\u0435\u0442\u044b\u0440\u0435 \u0447\u0430\u0441\u0442\u0438 \u043d\u0430\u0445\u043e\u0434\u043a\u0438: \u043f\u0440\u043e\u0432\u0430\u043b, \u043f\u0440\u0435\u0434\u043f\u043e\u0441\u044b\u043b\u043a\u0430, \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f, \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435",
+          "dimension": "Structure",
+          "evidence": "The snapshot contains research.md and state.md, but no premortem.md. research.md does perform substantive failure analysis: the goal is fewer delays, the boundary is the sole docs/report.md source, the report arrives after assignment, and a concrete check compares availability/view/assignment/action times. Thus the content is substantially present elsewhere, but the required persistent premortem artifact is absent; this is an artifact-contract failure, not proof that the agent missed the business risk.",
+          "passed": false
+        },
+        {
+          "text": "\u0412 \u0440\u0430\u0437\u0434\u0435\u043b\u0435 \u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c state \u0442\u043e\u043b\u044c\u043a\u043e \u0438\u0442\u043e\u0433 \u0438 \u0440\u0430\u0431\u043e\u0447\u0430\u044f \u0441\u0441\u044b\u043b\u043a\u0430",
+          "dimension": "Structure",
+          "evidence": "state.md has sections \u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043e, \u041e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u043f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u0438\u044f, \u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0439 \u0448\u0430\u0433, \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u0438 \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u0438\u044f and \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0435\u043d\u0438\u0435. It links to existing research.md under \u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043e, but has no \u041f\u0440\u0435\u043c\u043e\u0440\u0442\u0435\u043c section or corresponding premortem checkpoint/link. A generic research link does not satisfy the requested stable section and artifact contract.",
+          "passed": false
+        },
+        {
+          "text": "\u0412\u043e\u043f\u0440\u043e\u0441 \u0441\u0432\u044f\u0437\u0430\u043d \u0441 Q-ID \u0432 state",
+          "dimension": "Completeness",
+          "evidence": "research.md explicitly names \u00ab\u0411\u043b\u043e\u043a\u0438\u0440\u0443\u044e\u0449\u0438\u0439 \u0432\u044b\u0431\u043e\u0440 Q-action-window\u00bb and asks whether the report supports assignment before 08:30 or redistribution after 09:00. state.md contains the matching sdd_record: question, id: Q-action-window, identical question text, blocking: true and status: open. The next-step text also refers to that ID, giving a concrete and consistent continuation link.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "No product code, runtime schedule verification or delivery statistics were available; hypotheses were distinguished from facts.",
+        "Mandatory humanizer-ru editorial dependency was missing; output is explicitly a draft.",
+        "Initial sandbox reads failed; subsequent reads and artifact writes succeeded."
+      ]
+    },
+    {
+      "eval_id": 18,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 361.205,
+        "tokens": 464322,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0417\u0430\u043a\u0440\u044b\u0442\u0430\u044f \u043d\u0430\u0445\u043e\u0434\u043a\u0430 \u0438 \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b \u0432 premortem.md",
+          "dimension": "Completeness",
+          "evidence": "Actual premortem.md retains the historical 09:00 versus 08:30 mismatch and its consequence, links docs/report.md and the dated user decision docs/decision.md, records the adopted 08:00 deadline and closure of Q-report-time, and states which normative documents were updated. The finding history is preserved rather than deleted.",
+          "passed": true
+        },
+        {
+          "text": "State \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u0435\u0442 \u0441\u0441\u044b\u043b\u043a\u0443 \u0438 \u043e\u0442\u043c\u0435\u0447\u0430\u0435\u0442 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u043d\u0430\u0445\u043e\u0434\u043e\u043a",
+          "dimension": "Completeness",
+          "evidence": "state.md retains [premortem.md](premortem.md), says the report/assignment contradiction is resolved, sets Q-report-time status to resolved and explicitly states \u00ab\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u0432\u043e\u043f\u0440\u043e\u0441\u043e\u0432 \u043d\u0435\u0442\u00bb. Together these substantively identify the only finding as closed; the assertion does not prescribe an exact heading or literal phrase.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru leaves mandatory editorial work incomplete; no overall readiness claim is graded.",
+        "Initial read permission errors recovered."
+      ]
+    },
+    {
+      "eval_id": 21,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 137.639,
+        "tokens": 196771,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0412\u044b\u0431\u0440\u0430\u043d\u043e C \u0438 \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430 \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0435\u043d\u0430",
+          "dimension": "Completeness",
+          "evidence": "Final response and actual state.md explicitly select C, preserve the manager proposals and Q-report-action, and continue independent CSV work. Actual proposal/design and specs document the three agreed columns with a matching acceptance criterion. This is substantive saved work, not just a promise to continue.",
+          "passed": true
+        },
+        {
+          "text": "\u041d\u0435\u0442 \u043d\u043e\u0432\u043e\u0433\u043e \u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f \u0438\u043b\u0438 \u0432\u044b\u0434\u0443\u043c\u0430\u043d\u043d\u043e\u0433\u043e \u0440\u0435\u0448\u0435\u043d\u0438\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+          "dimension": "Robustness",
+          "evidence": "Actual proposal, design and state all distinguish manager proposals A/B from user decisions. Automatic assignment is excluded, risk acceptance remains unresolved, and no USER decision or approval is fabricated. The CSV requirement only codifies the previously agreed three-column scope.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "A useful post-report dispatcher action remains unknown.",
+        "Missing humanizer-ru keeps editorial work incomplete."
+      ]
+    },
+    {
+      "eval_id": 22,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 135.138,
+        "tokens": 355916,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u043d\u044b \u0438\u0442\u043e\u0433, premortem.md \u043f\u043e \u0441\u0441\u044b\u043b\u043a\u0435 \u0438 \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a\u0438",
+          "dimension": "Completeness",
+          "evidence": "The transcript contains a successful combined Get-Content of state.md, proposal.md, design.md, spec.md, premortem.md, docs/decision.md and docs/report.md. The output state cites the same sources and accurately reconciles the prior 09:00 conflict with the saved 08:00 answer.",
+          "passed": true
+        },
+        {
+          "text": "\u0421\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0435 \u043e\u0442\u0432\u0435\u0442\u044b \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u044b \u0431\u0435\u0437 \u0438\u043d\u0442\u0435\u0440\u0432\u044c\u044e \u0438 \u0434\u0443\u0431\u043b\u0435\u0439 \u043d\u0430\u0445\u043e\u0434\u043e\u043a",
+          "dimension": "Robustness",
+          "evidence": "All messages preserve the saved 08:00 deadline and three-column CSV. No interview reopens report time or purpose, Q-report-time remains resolved, and premortem.md retains one historical closed timing finding without duplication. The final question concerns missing editorial infrastructure, not the answered product question.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Missing humanizer-ru blocks next editorial step; no readiness assertion graded."
+      ]
+    },
+    {
+      "eval_id": 25,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 142.184,
+        "tokens": 372446,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0430 \u043a\u043e\u0440\u043e\u0442\u043a\u0430\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043f\u043e \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u043c \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u0430\u043c",
+          "dimension": "Robustness",
+          "evidence": "Trace and output state verify src/labels.json, docs/labels.md and change.diff: only \u041e\u0442\u043f\u0430\u0432\u0438\u0442\u044c changes to \u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c. State records the bounded source check, and resume-check.json reports structural success. The check is materially limited to the supplied typo change rather than inventing product uncertainty.",
+          "passed": true
+        },
+        {
+          "text": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u0442\u0430\u0440\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u0438 \u043d\u0435 \u0432\u044b\u0437\u044b\u0432\u0430\u0435\u0442 \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u0438\u043d\u0442\u0435\u0440\u0432\u044c\u044e \u0438 \u043d\u0435 \u043e\u0442\u043c\u0435\u043d\u044f\u0435\u0442 \u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u0438\u044f",
+          "dimension": "Robustness",
+          "evidence": "State preserves USER-documents-approved, existing review links and matching normative hashes, explicitly saying absence of the old checkpoint does not cancel those records. No product interview is opened because of the missing checkpoint. A separate question asks about unavailable humanizer-ru, an editorial dependency; this is not caused by the absent premortem record.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru missing; editorial completeness not graded."
+      ]
+    },
+    {
+      "eval_id": 26,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 145.386,
+        "tokens": 354125,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439 premortem.md \u043f\u043e \u0441\u0441\u044b\u043b\u043a\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d, \u043f\u0440\u0435\u0436\u043d\u044f\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043d\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043d\u043d\u043e\u0439",
+          "dimension": "Robustness",
+          "evidence": "Trace detects missing premortem.md and docs/decision.md. Actual state quotes the historical link as history and explicitly says its completed-premise-check claim is unconfirmed; it does not fabricate a replacement finding history.",
+          "passed": true
+        },
+        {
+          "text": "\u0414\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0439 \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442 \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d, \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u043f\u0440\u043e\u0431\u0435\u043b \u043e\u0444\u043e\u0440\u043c\u043b\u0435\u043d Q",
+          "dimension": "Robustness",
+          "evidence": "State reconstructs the supported recipient, goal and three-column CSV from available documents, marks 08:00 as unsupported and creates blocking Q-report-before-assignment. The question asks the needed time/timezone before assignment and explains its effect on AC-report-delivered.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru missing; editorial completeness not graded."
+      ]
+    },
+    {
+      "eval_id": 27,
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 101.885,
+        "tokens": 278106,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "\u041d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0439 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a \u043d\u0435 \u043d\u0430\u0437\u0432\u0430\u043d \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u0435\u043c",
+          "dimension": "Robustness",
+          "evidence": "Actual state says docs/decision.md is absent and that historical statements in premortem.md are insufficient to verify 08:00/current08:30. It leaves the prior artifact as explicitly historical rather than claiming the missing source confirms the decision.",
+          "passed": true
+        },
+        {
+          "text": "\u041e\u0431\u043e\u0437\u043d\u0430\u0447\u0435\u043d\u043e \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u0438\u0435, \u0432\u043e\u043f\u0440\u043e\u0441 \u043a\u0430\u0441\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0431\u0435\u043b\u0430",
+          "dimension": "Robustness",
+          "evidence": "State preserves confirmed recipient/goal/CSV and reopens only Q-report-time concerning delivery time, timezone and assignment window. Trace asks this same material question; it does not restart an interview about the known report purpose or format.",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "Mandatory humanizer-ru missing; editorial completeness not graded."
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1,
+        "max": 1,
+        "n": 8
+      },
+      "time_seconds": {
+        "mean": 201.6043,
+        "stddev": 121.5749,
+        "min": 119.931,
+        "max": 475.083,
+        "n": 8
+      },
+      "tokens": {
+        "mean": 325017.0,
+        "stddev": 73323.0193,
+        "min": 243618,
+        "max": 464036,
+        "n": 8
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.8704,
+        "stddev": 0.2606,
+        "min": 0.3333,
+        "max": 1,
+        "n": 9
+      },
+      "time_seconds": {
+        "mean": 167.7886,
+        "stddev": 75.1191,
+        "min": 101.885,
+        "max": 361.205,
+        "n": 9
+      },
+      "tokens": {
+        "mean": 323575.8889,
+        "stddev": 84071.8075,
+        "min": 196771,
+        "max": 464322,
+        "n": 9
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.13",
+      "time_seconds": "+33.8",
+      "tokens": "+1441"
+    }
+  },
+  "notes": []
+}

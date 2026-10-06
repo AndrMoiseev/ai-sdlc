@@ -1,0 +1,56 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "Прочитаны итог, premortem.md по ссылке и источники",
+                             "dimension":  "Completeness",
+                             "evidence":  "The transcript contains a successful combined Get-Content of state.md, proposal.md, design.md, spec.md, premortem.md, docs/decision.md and docs/report.md. The output state cites the same sources and accurately reconciles the prior 09:00 conflict with the saved 08:00 answer.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Сохранённые ответы использованы без интервью и дублей находок",
+                             "dimension":  "Robustness",
+                             "evidence":  "Trace preserves the saved 08:00 deadline and three-column CSV without a repeated interview. Actual state keeps Q-report-time resolved and says open findings are absent; existing premortem.md retains the single closed historical finding, with no duplicate. Missing humanizer-ru is separately recorded as an editorial limitation.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  1,
+                                                "passed":  1
+                                            },
+                             "Completeness":  {
+                                                  "score":  1,
+                                                  "total":  1,
+                                                  "passed":  1
+                                              }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  119.931
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Missing humanizer-ru blocks next editorial step; no readiness assertion graded."
+                                                ]
+                           }
+}

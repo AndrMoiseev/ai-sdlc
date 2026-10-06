@@ -1,0 +1,5 @@
+Сохранил пересмотр в [delivery-report](C:/Users/Andrew/AppData/Local/Temp/sdd-premortem-old_skill-23-wv0u7r_j/sdd/changes/delivery-report/state.md): обновлены proposal, spec, design и premortem. Срок 08:00 снят, Q-report-time снова открыт. CSV, остальные основания и исторический ответ сохранены; код не изменён. Предварительная структурная проверка прошла.
+
+К какому времени нужен отчёт перед назначением в 07:30? Предлагаю 07:00 — с прежним запасом 30 минут.
+
+Документы остаются черновиком: humanizer-ru отсутствует. [Правила редактуры](C:/Users/Andrew/AppData/Local/Temp/sdd-premortem-old_skill-23-wv0u7r_j/.agents/skills/sdd-spec/references/editorial-pass.md) требуют: «Если humanizer или чистый контекст недоступен, сохрани черновик». Для завершения нужна эта зависимость либо ваше явное исключение.

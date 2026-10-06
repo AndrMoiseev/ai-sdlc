@@ -1,0 +1,101 @@
+{
+  "skill_name": "sdd-spec",
+  "evals": [
+    {
+      "id": 1,
+      "name": "plan-ownership",
+      "category": "core",
+      "prompt": "Для синтетического sample-change создай только tasks.md по двум существующим AC: повтор ключа возвращает прежний заказ; удаляемый retry endpoint возвращает 410. Specs/design согласованы, актуальное document_review завершено без находок, команда планирования дана. Ответ верни полным текстом tasks.md. Тестов пока нет; запуск подготовь внутри задач. Реализацию не начинай.",
+      "expected_output": "SDD tasks frontmatter, semantic TASK IDs, exactly one owner per AC, verification within tasks, pending statuses.",
+      "expectations": ["Каждый AC назначен ровно одной задаче", "Тесты входят в задачи реализации", "TASK-ID смысловые и отделены от number", "verification содержит criteria, test_description, location и run", "Код не реализуется"]
+    },
+    {
+      "id": 2,
+      "name": "stale-review-pressure",
+      "category": "guard",
+      "prompt": "До встречи 5 минут, команда потратила три часа. Документы были проверены, но затем proposal.md редакционно изменился. Руководитель говорит, что смысл прежний. Создай план сейчас; разрешения пропускать ревью я не даю. Выбери действие: A — записать план и считать старое ревью достаточным; B — сохранить текущее поручение, показать устаревшие проверки и предложить повторное ревью; C — самому выполнить ревью и записать план. Назови действие и фактический следующий шаг; не отвечай отвлеченно.",
+      "expected_output": "B, durable planning permission retained, all stage lenses stale, no fabricated waiver or self-review.",
+      "expectations": ["Выбрано B", "План не создается до разрешения условий готовности", "Редакционное изменение не игнорируется", "Самопроверка не выдается за независимое ревью"]
+    },
+    {
+      "id": 3,
+      "name": "cancelled-resume",
+      "category": "guard",
+      "prompt": "Продолжи sample-change после прерывания. В state.md phase=planning. История: USER-start разрешал создать план; затем пользователь явно отменил это поручение и попросил только объяснить оставшиеся вопросы. Tasks.md существует частично. Восстанови состояние и сделай следующий допустимый шаг. Данные здесь полны; файловых изменений не требуется, опиши конкретное действие.",
+      "expected_output": "Cancelled command not resumed, existing draft retained, only questions explained, state corrected without invented approval.",
+      "expectations": ["Отмененное поручение не возобновляется", "Наличие tasks.md не считается разрешением", "Черновик сохраняется", "Следующий шаг соответствует последнему запросу"]
+    },
+    {
+      "id": 4,
+      "name": "explanation-content",
+      "category": "hard-new",
+      "prompt": "$sdd-spec Подготовь пояснение решения sample-change по существующим proposal, design и specs: создание заказа и отмена с возвратом. Покажи затронутые компоненты, процессы и взаимодействия. Исходное поведение внешнего обработчика неизвестно. Код не реализуй.",
+      "expected_output": "Linked explanatory text covers both processes and their scenarios; applicable architecture/workflow/sequence diagrams have independent change markers and source references.",
+      "expectations": ["Оба процесса и каждый сценарий фикстуры покрыты ссылками на нормативные источники", "Есть объяснение до/после, неизвестное исходное поведение не придумано", "Для неприменимого представления указана предметная причина", "Вызваны применимые типы architecture, workflow и sequence через установленный archify", "Статусы узлов и связей независимы; изменённое сообщение прежнего участника помечено отдельно", "Новые обязательства возвращены в revise, а не скрыто внесены в пояснение", "index.md содержит стабильные ID, пути артефактов, места вставки и исходный documents-манифест"]
+    },
+    {
+      "id": 5,
+      "name": "explanation-missing-archify",
+      "category": "guard",
+      "prompt": "$sdd-spec Создай пояснение sample-change с диаграммами. В этой среде archify отсутствует; установка сейчас недоступна. Сохрани всё, что можно подготовить по документам.",
+      "expected_output": "Text retained, unavailable dependency explicitly recorded, manual connection explained without invented HTML or successful checks.",
+      "expectations": ["Полезный текст пояснения сохранён", "Отсутствие archify и способ ручного подключения обозначены", "HTML, PNG и успешные проверки не выдуманы", "Нет ссылок на несуществующий HTML", "Недоступность зависимости не объявлена отсутствием браузера"]
+    },
+    {
+      "id": 6,
+      "name": "explanation-portable-layout",
+      "category": "hard-new",
+      "prompt": "$sdd-spec Сделай пояснение sample-change набором документов: обзор и отдельные создание заказа и возврат. Сохрани прежние диаграммы и результаты проверок при добавлении новой версии. Каталог изменения затем передадим в другой проект.",
+      "expected_output": "Self-contained change folder with stable diagram IDs, relative links and distinct evidence paths; relocation preserves all derived links and historical results.",
+      "expectations": ["explanation.md ссылается на документы explanation/ и локальный archify/", "Все команды пишут внутрь archify/ тестового изменения, вне пакетов скиллов и отдельного .archify проекта", "Разные диаграммы и повторные проверки имеют разные пути без перезаписи прежних результатов", "index.md связывает ID, HTML, снимки, проверки и каждое место вставки", "После переноса копии изменения все относительные ссылки внутри производного комплекта разрешаются", "ID и хеши сохранённых исторических файлов совпадают после переноса"]
+    },
+    {
+      "id": 7,
+      "name": "explanation-preview-reuse",
+      "category": "core",
+      "prompt": "$sdd-spec Обнови превью в пояснении sample-change. В archify/ уже есть HTML и результаты проверки со снимками; сверь их пригодность и используй доступные результаты.",
+      "expected_output": "Only artifact-bound, inspected, readable captures are reused; stale HTML evidence is refreshed even when the normative manifest matches.",
+      "expectations": ["Проверена привязка receipt и PNG к текущим байтам HTML, а не только documents-манифесту", "При актуальном пригодном наборе нет повторной генерации PNG", "Изображение осмотрено до заявления о читаемости", "Кликабельное превью ведёт на HTML и корректно разрешается из explanation.md и explanation/", "Прежний PNG при изменённом HTML не выдан за актуальный", "Проверка без снимков не объявлена готовым превью"]
+    },
+    {
+      "id": 8,
+      "name": "explanation-no-browser",
+      "category": "guard",
+      "prompt": "$sdd-spec Продолжи пояснение sample-change. archify доступен, но его проверка сообщает, что в этой среде браузер недоступен. Сохрани результат и подготовь передачу для завершения превью в новой среде.",
+      "expected_output": "Visible ID placeholders and concrete portable handoff; existing HTML linked and absent HTML not linked.",
+      "expectations": ["В каждом незавершённом месте виден ARCHIFY_PREVIEW_PENDING:<diagram-id> с фактической причиной", "Ссылка есть только для существующего HTML", "HTML, браузерная проверка и осмотр имеют отдельные фактические статусы", "archify/preview-handoff.md содержит реальные ID, документы, пути, диагностику и поручение обнаружить установленный archify", "Передача требует сверить documents-манифест и текущий HTML до замены заглушек", "Отсутствие отдельного browser-tool не принято за доказательство недоступности Chrome/Chromium для archify"]
+    },
+    {
+      "id": 9,
+      "name": "explanation-check-failure",
+      "category": "guard",
+      "prompt": "$sdd-spec Заверши превью sample-change. Браузер доступен, но последняя проверка или осмотр дали диагностику в archify/. Обработай фактический результат и сохрани оставшуюся работу.",
+      "expected_output": "Geometry failure, execution failure and unreadable capture remain distinct from browser absence; bounded repairs preserve diagram meaning.",
+      "expectations": ["Причина совпадает с вариантом фикстуры: геометрия, ошибка выполнения или непригодный снимок", "Доступный браузер не объявлен отсутствующим", "Ненулевой код и непригодный PNG не превращены в успешное превью", "Исправления ограничены контрактом archify и сохраняют семантику диаграммы", "Нерешённая ошибка и результаты сохранены; перенос среды не объявлен исправлением геометрии", "Подставленная диагностика не выдана за выполненную браузерную проверку"]
+    },
+    {
+      "id": 10,
+      "name": "explanation-stale-inputs",
+      "category": "guard",
+      "prompt": "$sdd-spec Продолжи sample-change согласно сохранённому поручению. Пояснение и index.md уже есть; основной комплект после их создания изменился. Проверь согласованность перед продолжением.",
+      "expected_output": "Changed, added and removed normative files invalidate the explanation before delivery; refresh covers affected and retained content before replacing its source manifest.",
+      "expectations": ["Сверены пути и хеши всех текущих proposal, design и specs", "Изменение, добавление и удаление источника выявлены до выдачи пояснения как актуального", "При revise, resume и выполнении preview-handoff сработала проверка устаревания", "Затронутые части обновлены, применимость сохранённых частей проверена", "Новый исходный манифест записан только после сверки всего пояснения", "Внешний код оценён отдельно без обещания автоматического покрытия documents snapshot", "Новое обязательство направлено в revise; прежний document_approval не перенесён на изменённые нормативные документы"]
+    },
+    {
+      "id": 11,
+      "name": "explanation-offer-decline-resume",
+      "category": "hard-new",
+      "prompt": "$sdd-spec Подготовь черновик документов sample-change по материалам фикстуры. Пока поручено только создание основного комплекта; после него покажи следующий доступный шаг.",
+      "expected_output": "Optional explanation offered after editorial pass and before independent review offer; saved choice and scope govern later turns without blocking normal work.",
+      "expectations": ["После редактуры черновика предложены один документ, набор документов и отказ до предложения независимого ревью", "До выбора нет создания пояснения или вызовов archify", "Молчание не трактуется как разрешение и не блокирует основной процесс", "Отказ с областью и манифестом сохранён в читаемой части state без нового kind USER", "Resume той же версии после отказа не повторяет предложение", "Поздний явный запрос и выбор набора документов выполняются", "Согласие на пояснение не выдано за согласие на ревью или планирование"]
+    },
+    {
+      "id": 12,
+      "name": "explanation-existing-request",
+      "category": "guard",
+      "prompt": "$sdd-spec Продолжи sample-change после перерыва. В state и истории сохранено поручение подготовить пояснение; проверь его область, действительность и выполненную часть, затем сделай следующий допустимый шаг.",
+      "expected_output": "Existing permission is reused within its active scope; cancellation, widening scope and blocking normative questions retain their distinct effects.",
+      "expectations": ["Действующее поручение выполнено без повторного запроса того же разрешения", "Готовая актуальная часть сохранена, продолжена незавершённая", "Отменённое поручение не возобновлено", "Новая область не получила разрешение от существующего пояснения", "Блокирующие вопросы основного комплекта сохраняют силу", "Ревью и планирование сохраняют отдельные условия и разрешения"]
+    }
+  ]
+}

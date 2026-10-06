@@ -1,0 +1,219 @@
+{
+  "proposal.md.prose.md": {
+    "source": "proposal.md",
+    "yaml_fields": []
+  },
+  "specs__premortem__spec.md.prose.md": {
+    "source": "specs/premortem/spec.md",
+    "yaml_fields": [
+      {
+        "id": "AC-premortem-explore",
+        "field": "conditions",
+        "text": "В explore определены цель и контекст нового изменения."
+      },
+      {
+        "id": "AC-premortem-explore",
+        "field": "expected",
+        "text": "До подробной спецификации агент проводит премортем и сохраняет его итог."
+      },
+      {
+        "id": "AC-premortem-direct-draft",
+        "field": "conditions",
+        "text": "Пользователь сразу просит документы, актуального итога премортема нет."
+      },
+      {
+        "id": "AC-premortem-direct-draft",
+        "field": "expected",
+        "text": "Агент проводит короткую проверку до подробной спецификации; отсутствие explore не считается основанием для пропуска."
+      },
+      {
+        "id": "AC-premortem-small-change",
+        "field": "conditions",
+        "text": "Изменение исправляет опечатку, цель ясна, доступный diff подтверждает отсутствие изменения поведения."
+      },
+      {
+        "id": "AC-premortem-small-change",
+        "field": "expected",
+        "text": "Агент сохраняет краткий итог проверки без отдельного интервью и без выдуманных находок."
+      },
+      {
+        "id": "AC-premortem-known-answer",
+        "field": "conditions",
+        "text": "Основание предполагаемого риска можно проверить по доступному документу проекта или сохранённому ответу пользователя."
+      },
+      {
+        "id": "AC-premortem-known-answer",
+        "field": "expected",
+        "text": "Агент читает источник, учитывает найденный ответ и не просит пользователя повторить его."
+      },
+      {
+        "id": "AC-premortem-unknown-assumption",
+        "field": "conditions",
+        "text": "Для автоматического отчёта задана периодичность, но неизвестно, какое решение получатель принимает по его данным; доступные материалы этого не объясняют."
+      },
+      {
+        "id": "AC-premortem-unknown-assumption",
+        "field": "expected",
+        "text": "Агент обозначает гипотезу о бесполезности отчёта и задаёт вопрос о его назначении, не выдавая гипотезу за факт."
+      },
+      {
+        "id": "AC-premortem-no-quota",
+        "field": "conditions",
+        "text": "Короткая проверка по доступным вводным не выявила существенных находок."
+      },
+      {
+        "id": "AC-premortem-no-quota",
+        "field": "expected",
+        "text": "Агент фиксирует отсутствие находок и продолжает работу; он не дополняет список общими опасениями ради количества."
+      },
+      {
+        "id": "AC-premortem-empty-result",
+        "field": "conditions",
+        "text": "Премортем выполнен, находок нет, premortem.md ещё не существует."
+      },
+      {
+        "id": "AC-premortem-empty-result",
+        "field": "expected",
+        "text": "В state.md записано «Премортем: находок нет»; premortem.md не создаётся."
+      },
+      {
+        "id": "AC-premortem-findings-document",
+        "field": "conditions",
+        "text": "Премортем выявил существенную находку."
+      },
+      {
+        "id": "AC-premortem-findings-document",
+        "field": "expected",
+        "text": "Создан или обновлён premortem.md с четырьмя частями находки и контекстом; раздел премортема в state.md содержит только краткую отметку и рабочую ссылку на документ."
+      },
+      {
+        "id": "AC-premortem-closed-history",
+        "field": "conditions",
+        "text": "В premortem.md были находки, все они получили решение, новых находок нет."
+      },
+      {
+        "id": "AC-premortem-closed-history",
+        "field": "expected",
+        "text": "Документ и ссылка в state.md сохранены; краткий итог отмечает отсутствие открытых находок, а premortem.md содержит основания закрытия."
+      },
+      {
+        "id": "AC-premortem-block-dependent",
+        "field": "conditions",
+        "text": "Открытая находка требует решения пользователя об объёме, но другая часть черновика от этого решения не зависит."
+      },
+      {
+        "id": "AC-premortem-block-dependent",
+        "field": "expected",
+        "text": "Создан блокирующий Q; зависимое решение не утверждается, независимая работа продолжается, документы не объявлены готовыми к ревью."
+      },
+      {
+        "id": "AC-premortem-defer",
+        "field": "conditions",
+        "text": "Находка не мешает текущему решению и её вопрос отложен."
+      },
+      {
+        "id": "AC-premortem-defer",
+        "field": "expected",
+        "text": "В premortem.md и записи неблокирующего Q совпадают причина и условие возврата; риск не объявлен принятым без решения пользователя."
+      },
+      {
+        "id": "AC-premortem-no-scope-growth",
+        "field": "conditions",
+        "text": "Для снижения риска агент предлагает новую функцию или принятие оставшегося риска, пользователь ещё не выбрал вариант."
+      },
+      {
+        "id": "AC-premortem-no-scope-growth",
+        "field": "expected",
+        "text": "Предложение остаётся предложением; новая функция не включается в согласованный объём и риск не считается принятым."
+      },
+      {
+        "id": "AC-premortem-resume-current",
+        "field": "conditions",
+        "text": "Сессия возобновлена, итог и источники доступны, цель и существенные основания не изменились."
+      },
+      {
+        "id": "AC-premortem-resume-current",
+        "field": "expected",
+        "text": "Агент использует сохранённый разбор и ответы, не повторяет интервью и не создаёт дубли находок."
+      },
+      {
+        "id": "AC-premortem-revisit",
+        "field": "conditions",
+        "text": "В revise или при продолжении изменена существенная предпосылка одной находки; остальные основания сохранены."
+      },
+      {
+        "id": "AC-premortem-revisit",
+        "field": "expected",
+        "text": "Агент пересматривает затронутую часть, сохраняет остальные выводы и отражает последствия в зависимых документах."
+      },
+      {
+        "id": "AC-premortem-restore",
+        "field": "conditions",
+        "text": "В старом изменении нет итога премортема либо документ по сохранённой ссылке недоступен."
+      },
+      {
+        "id": "AC-premortem-restore",
+        "field": "expected",
+        "text": "Агент не заявляет о завершённой проверке, восстанавливает доступные основания и выполняет короткий премортем; оставшийся существенный пробел оформляет вопросом."
+      },
+      {
+        "id": "AC-premortem-normative-change",
+        "field": "conditions",
+        "text": "После ревью пользователь выбирает по находке премортема изменение поведения."
+      },
+      {
+        "id": "AC-premortem-normative-change",
+        "field": "expected",
+        "text": "Агент обновляет spec с проверяемым AC и связанные документы; прежние ревью и согласования изменённого комплекта становятся устаревшими по обычным правилам."
+      },
+      {
+        "id": "AC-premortem-no-gate-bypass",
+        "field": "conditions",
+        "text": "Премортем завершён, но независимое ревью или команда планирования ещё отсутствуют."
+      },
+      {
+        "id": "AC-premortem-no-gate-bypass",
+        "field": "expected",
+        "text": "Агент не подменяет отсутствующие основания результатом премортема и не создаёт tasks без разрешённого перехода."
+      }
+    ]
+  },
+  "design.md.prose.md": {
+    "source": "design.md",
+    "yaml_fields": []
+  },
+  "premortem.md.prose.md": {
+    "source": "premortem.md",
+    "yaml_fields": []
+  },
+  "state.md.prose.md": {
+    "source": "state.md",
+    "yaml_fields": [
+      {
+        "id": "Q-premortem-trigger",
+        "field": "text",
+        "text": "Когда sdd-spec должен включать премортем?"
+      },
+      {
+        "id": "Q-premortem-record",
+        "field": "text",
+        "text": "Где хранить результат премортема?"
+      },
+      {
+        "id": "Q-premortem-benefit",
+        "field": "text",
+        "text": "Помогает ли премортем обнаруживать существенные пропуски без лишних вопросов и расширения объёма?"
+      },
+      {
+        "id": "Q-premortem-benefit",
+        "field": "reason",
+        "text": "Инструкции кандидата ещё не реализованы; сравнительные прогоны нужны для проверки поведения, а не для выбора текущего контракта."
+      },
+      {
+        "id": "Q-premortem-benefit",
+        "field": "return_at",
+        "text": "После подготовки кандидата скилла, до принятия изменения по результатам поведенческих испытаний."
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "status": "graded",
+  "expectations": [
+    {
+      "text": "До подробной спецификации сохранён итог проверки предпосылок",
+      "dimension": "Robustness",
+      "evidence": "Trace item9 writes proposal, detailed spec, design and finally state. No premortem artifact or saved state result of a completed premise check exists. Proposal acknowledges that usefulness is unproven, which is relevant partial evidence, but this remains problem framing; the concrete risk discussion and Q-dispatcher-action are saved with/after detailed specification rather than as the required prior recorded check. The checkpoint has no premortem outcome or finding link.",
+      "passed": false
+    },
+    {
+      "text": "Зависимое поведение не выдумано",
+      "dimension": "Robustness",
+      "evidence": "Specification leaves selection/calculation/timezone/delivery rules unresolved and labels criteria as draft. Design calls contacting the responsible party an author hypothesis, not an agreed process, and excludes automatic reassignment. State Q-dispatcher-action is blocking/open; no dependent dispatch behavior is invented as a commitment.",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 1,
+    "total": 2,
+    "pass_rate": 0.5
+  },
+  "dimension_scores": {
+    "Robustness": {
+      "score": 0.5,
+      "passed": 1,
+      "total": 2
+    }
+  },
+  "failing": [
+    {
+      "text": "До подробной спецификации сохранён итог проверки предпосылок",
+      "dimension": "Robustness",
+      "evidence": "Trace item9 writes proposal, detailed spec, design and finally state. No premortem artifact or saved state result of a completed premise check exists. Proposal acknowledges that usefulness is unproven, which is relevant partial evidence, but this remains problem framing; the concrete risk discussion and Q-dispatcher-action are saved with/after detailed specification rather than as the required prior recorded check. The checkpoint has no premortem outcome or finding link.",
+      "passed": false
+    }
+  ],
+  "timing": {
+    "total_tokens": 355615,
+    "duration_ms": 185003,
+    "total_duration_seconds": 185.003
+  },
+  "limitations": [
+    "Fixture preparation copied only sdd-spec and omitted its available humanizer-ru dependency. Editorial completion is therefore not measured; this is an evaluation-fixture limitation, not a demonstrated platform or skill defect. Pre-editorial persistence remains observable."
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Evidence cites written artifacts and trace actions; a saved input alone is not treated as completed work."
+  }
+}

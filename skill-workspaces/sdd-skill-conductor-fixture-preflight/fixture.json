@@ -1,0 +1,12 @@
+{
+    "schema_version":  1,
+    "required_files":  [
+                           ".agents/skills/sdd-spec/SKILL.md",
+                           ".agents/skills/humanizer-ru/SKILL.md",
+                           ".agents/skills/humanizer-ru/references/patterns.md",
+                           ".agents/skills/humanizer-ru/scripts/lint.py"
+                       ],
+    "expected_missing_files":  [
+
+                               ]
+}

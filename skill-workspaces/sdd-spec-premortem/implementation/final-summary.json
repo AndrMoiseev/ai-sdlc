@@ -1,0 +1,759 @@
+{
+  "models": {
+    "executor_configured": "gpt-6-astra",
+    "reasoning_effort": "low",
+    "explicit_override": false,
+    "judge": "native same-family agent"
+  },
+  "paired_cases": [
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+  ],
+  "transitions": {
+    "improved": [
+      {
+        "eval_id": 14,
+        "split": "heldout",
+        "text": "До подробной спецификации сохранён итог проверки предпосылок",
+        "old_evidence": "Trace item9 writes proposal, detailed spec, design and finally state. No premortem artifact or saved state result of a completed premise check exists. Proposal acknowledges that usefulness is unproven, which is relevant partial evidence, but this remains problem framing; the concrete risk discussion and Q-dispatcher-action are saved with/after detailed specification rather than as the required prior recorded check. The checkpoint has no premortem outcome or finding link.",
+        "new_evidence": "stdout.jsonl completed command item_9 first writes premortem.md, then proposal.md, specs/delivery-report/spec.md and design.md. The premortem identifies the concrete failure 'CSV выпускается ежедневно, но просрочки не снижаются', connects it to the unverified dispatcher action, cites docs/report.md, and routes the unresolved premise to Q-dispatcher-action. Thus the result exists before normative drafting; the later state entry alone is not used as proof of ordering."
+      },
+      {
+        "eval_id": 15,
+        "split": "train",
+        "text": "В state записано «Премортем: находок нет»",
+        "old_evidence": "The actual outputs/sdd/changes/label-typo/state.md contains completed work, next step, decisions and checks, ending with «Содержательных блокирующих и отложенных вопросов нет». It contains neither «Премортем: находок нет» nor an equivalent explicit record that the premortem was performed and found nothing. The executor successfully read the change and wrote all three draft documents before stopping for missing humanizer-ru; this grades the missing premortem record, not editorial readiness.",
+        "new_evidence": "Actual state.md has section Премортем containing exactly «Премортем: находок нет». This follows trace reads of change.diff and docs/labels.md and a bounded design for the single string correction, so the checkpoint reflects the supplied scope."
+      },
+      {
+        "eval_id": 17,
+        "split": "train",
+        "text": "premortem.md содержит цель, границы и четыре части находки: провал, предпосылка, основания, действие",
+        "old_evidence": "The snapshot contains research.md and state.md, but no premortem.md. research.md does perform substantive failure analysis: the goal is fewer delays, the boundary is the sole docs/report.md source, the report arrives after assignment, and a concrete check compares availability/view/assignment/action times. Thus the content is substantially present elsewhere, but the required persistent premortem artifact is absent; this is an artifact-contract failure, not proof that the agent missed the business risk.",
+        "new_evidence": "Actual premortem.md includes the goal of reducing delivery delays, confines evidence to docs/report.md and distinguishes unknown runtime behavior. Each of its two findings explicitly contains Возможный провал, Предпосылка успеха, Основания and Дальнейшее действие; the timing finding cites 09:00 versus 08:30 and ties follow-up to the dependent decision."
+      },
+      {
+        "eval_id": 17,
+        "split": "train",
+        "text": "В разделе Премортем state только итог и рабочая ссылка",
+        "old_evidence": "state.md has sections Выполнено, Основание и предложения, Следующий шаг, Проверки и ограничения and Продолжение. It links to existing research.md under Выполнено, but has no Премортем section or corresponding premortem checkpoint/link. A generic research link does not satisfy the requested stable section and artifact contract.",
+        "new_evidence": "The state section Премортем consists only of «Есть находки: [premortem.md](premortem.md).» The target exists in the same output directory and contains the detailed findings; details remain outside this compact section."
+      }
+    ],
+    "regressed": [],
+    "stable_success": [
+      {
+        "eval_id": 13,
+        "split": "train",
+        "text": "До подробной спецификации сохранён итог премортема",
+        "old_evidence": "Before any proposal/spec/design, actual research.md saves a substantive failure analysis: CSV may arrive correctly but trigger no useful action, with supporting missing-action evidence and a concrete verification step. State links the saved research, remains discovery and records no specification transition. This expectation does not require the name premortem.md or a literal section title; the saved substance meets it.",
+        "new_evidence": "Actual outputs contain premortem.md with three goal-related failure scenarios and state.md with a compact findings link. No detailed proposal/spec/design has been produced; phase is discovery. The saved premortem therefore precedes specification work."
+      },
+      {
+        "eval_id": 13,
+        "split": "train",
+        "text": "Неизвестное назначение отчёта обозначено гипотезой и конкретным вопросом",
+        "old_evidence": "research.md explicitly labels the receive/select/contact/act/result chain as «гипотеза агента» and says dispatcher powers/actions are unknown. State stores open blocking Q-report-action asking intervention in current deliveries versus retrospective analysis; the final message asks the same concrete purpose question. Neither suggested scenario is promoted to an agreed requirement.",
+        "new_evidence": "state.md labels possible report use as Гипотеза агента, says no variant is chosen, and records Q-dispatcher-action asking what concrete action the dispatcher should take at 09:00. premortem.md explains the source lacks this action and separates a suggested contact-responsible scenario from agreed requirements."
+      },
+      {
+        "eval_id": 14,
+        "split": "heldout",
+        "text": "Зависимое поведение не выдумано",
+        "old_evidence": "Specification leaves selection/calculation/timezone/delivery rules unresolved and labels criteria as draft. Design calls contacting the responsible party an author hypothesis, not an agreed process, and excludes automatic reassignment. State Q-dispatcher-action is blocking/open; no dependent dispatch behavior is invented as a commitment.",
+        "new_evidence": "Saved spec retains only known 09:00, recipient and CSV columns, explicitly leaving selection, calculation, errors, timezone and delivery channel unresolved. Design labels its module split as proposed logical responsibilities and states 'технический подход не выбран'. State Q-dispatcher-action is blocking/open, and the final response asks which decision the dispatcher takes. Neither automatic assignment nor escalation is added as a commitment."
+      },
+      {
+        "eval_id": 15,
+        "split": "train",
+        "text": "Нет отдельного интервью, искусственных рисков и premortem.md",
+        "old_evidence": "The trace proceeds from reading change.diff and docs/labels.md directly to the bounded proposal/spec/design. No interview about hypothetical failure occurs, and the output inventory contains no premortem.md. design.md mentions only accidental modification of the key or neighboring text, with a concrete diff check; this is proportionate implementation hygiene, not an invented product risk or expanded scope. The final request concerns a missing editorial dependency, not a premortem interview.",
+        "new_evidence": "Trace messages explicitly say clarifications are unnecessary; no separate interview occurs. Output has no premortem.md, and design.md limits itself to the specified string, JSON correctness and existing button behavior. No artificial risk or feature is introduced."
+      },
+      {
+        "eval_id": 16,
+        "split": "train",
+        "text": "Прочитан источник назначения отчёта",
+        "old_evidence": "Actual state.md quotes the saved docs/decision.md answer verbatim: report at 09:00 supports manual assignment at 09:30 and automatic assignment is unnecessary. The trace acknowledges this purpose source before proposing further research.",
+        "new_evidence": "Trace executes Get-Content docs/report.md, docs/decision.md and the output state quotes the saved answer that the dispatcher uses the 09:00 CSV during assignment at 09:30. This demonstrates reading the purpose source rather than inferring its contents."
+      },
+      {
+        "eval_id": 16,
+        "split": "train",
+        "text": "Вопрос о назначении повторно не задан",
+        "old_evidence": "The trace does ask about handling changes in delivery data between 09:00 and 09:30, but does not ask the already-answered purpose/assignment-action question again. state.md explicitly recognizes that purpose is resolved. The new freshness question is a distinct issue, so the narrow frozen assertion passes.",
+        "new_evidence": "All agent messages were inspected: none asks what the report is for or repeats the saved assignment question. state.md explicitly says the prior answer resolves the use premise and that automatic assignment is excluded. Future implementation details are noted without reopening report purpose."
+      },
+      {
+        "eval_id": 17,
+        "split": "train",
+        "text": "Вопрос связан с Q-ID в state",
+        "old_evidence": "research.md explicitly names «Блокирующий выбор Q-action-window» and asks whether the report supports assignment before 08:30 or redistribution after 09:00. state.md contains the matching sdd_record: question, id: Q-action-window, identical question text, blocking: true and status: open. The next-step text also refers to that ID, giving a concrete and consistent continuation link.",
+        "new_evidence": "premortem.md links Q-report-timing to state.md#q-report-timing and Q-success-measure to state.md#q-success-measure. Corresponding state headings and sdd_record question IDs exist, with open statuses, blocking distinctions and reason/return_at for the deferred measurement question."
+      },
+      {
+        "eval_id": 18,
+        "split": "train",
+        "text": "State сохраняет ссылку и отмечает отсутствие открытых находок",
+        "old_evidence": "state.md retains [premortem.md](premortem.md), says the report/assignment contradiction is resolved, sets Q-report-time status to resolved and explicitly states «Открытых вопросов нет». Together these substantively identify the only finding as closed; the assertion does not prescribe an exact heading or literal phrase.",
+        "new_evidence": "Actual state.md contains «Открытых находок нет; история: [premortem.md](premortem.md).» The target exists. Q-report-time is resolved, and the prior decision is linked, so absence of open findings is supported rather than merely asserted."
+      },
+      {
+        "eval_id": 18,
+        "split": "train",
+        "text": "Закрытая находка и основания сохранены в premortem.md",
+        "old_evidence": "Actual premortem.md retains the historical 09:00 versus 08:30 mismatch and its consequence, links docs/report.md and the dated user decision docs/decision.md, records the adopted 08:00 deadline and closure of Q-report-time, and states which normative documents were updated. The finding history is preserved rather than deleted.",
+        "new_evidence": "Actual premortem.md retains the original 09:00-after-08:30 failure, the required before-assignment premise and links to docs/report.md plus the dated docs/decision.md answer. It explicitly closes the finding and links Q-report-time, updated requirement/AC and design. Historical evidence is retained."
+      },
+      {
+        "eval_id": 19,
+        "split": "train",
+        "text": "Готовность к ревью не объявлена",
+        "old_evidence": "State explicitly says the full set is not ready for review or approval; open blocking questions remain and ready=false is recorded. Final response calls the documents drafts and does not turn structural success into review readiness.",
+        "new_evidence": "Response and state explicitly withhold review readiness, record open blocking questions, missing editorial dependency and absent review/approval. No readiness or completed whole-specification claim appears."
+      },
+      {
+        "eval_id": 19,
+        "split": "train",
+        "text": "Независимая часть черновика подготовлена",
+        "old_evidence": "Actual proposal, design and spec are saved. REQ-report-csv and AC-csv-columns/AC-csv-mode-independent specify the agreed three columns independently of mode; other unknowns remain explicit. This is substantive independent drafting.",
+        "new_evidence": "The actual partial specification defines REQ-csv-columns and AC-csv-columns for the three agreed fields independent of mode. Proposal/design/state are saved alongside it, so the independent draft is substantive."
+      },
+      {
+        "eval_id": 19,
+        "split": "train",
+        "text": "Есть blocking Q, зависимый выбор не утверждён",
+        "old_evidence": "Actual state contains open blocking Q-delivery-mode and explicitly limits it to dependent choices. Proposal leaves both modes open; design labels report-only as an agent recommendation rather than a user decision. No automatic assignment behavior is approved.",
+        "new_evidence": "Actual state has open blocking Q-delivery-mode asking report-only versus automatic assignment. The specification explicitly leaves automatic assignment unspecified until the choice and clarifies its CSV acceptance criterion does not require both modes."
+      },
+      {
+        "eval_id": 20,
+        "split": "heldout",
+        "text": "Неблокирующий Q имеет reason и конкретный return_at",
+        "old_evidence": "state.md retains Q-bulk-capacity blocking:false/status:open with reason limiting the current pilot to confirmed 10 rows and return_at before expansion to mass rollout. The agent edits proposal/spec/design to express that pilot boundary, so this is considered use of the inherited question in the continued task, not merely unattended fixture data.",
+        "new_evidence": "State preserves Q-bulk-capacity as blocking:false/status:open, reason limiting the pilot to confirmed10 rows, and return_at before expanding to mass rollout. Updated proposal/spec/design actually constrain the pilot scope, so the saved nonblocking decision is applied to the work."
+      },
+      {
+        "eval_id": 20,
+        "split": "heldout",
+        "text": "Отсрочка не названа принятием риска",
+        "old_evidence": "Design says the pilot does not establish readiness for mass load and mass rollout remains out of scope. State and the final response keep capacity open/nonblocking; neither claims the remaining risk was accepted or creates a USER risk decision.",
+        "new_evidence": "Premortem expressly states that deferral does not mean acceptance of mass-rollout risk. Design likewise says pilot scope does not establish mass capacity; no user risk-acceptance record is invented, and the capacity question remains open."
+      },
+      {
+        "eval_id": 20,
+        "split": "heldout",
+        "text": "Причина и условие возврата совпадают в Q и premortem.md",
+        "old_evidence": "premortem.md adds a Pilot boundary section: current work is 10 rows, unknown mass capacity does not block it, Q-bulk-capacity stays open until expansion. This matches state reason and return_at semantically. Trace item_10 edits the premortem and normative scope together; no different trigger is introduced.",
+        "new_evidence": "premortem.md capacity finding explicitly repeats the same reason and return trigger as state: current pilot is limited to confirmed10 rows; revisit before expansion to mass rollout. The finding links Q-bulk-capacity. Trace item_8 writes these texts together after the failed earlier command, and persisted files contain the matching values."
+      },
+      {
+        "eval_id": 21,
+        "split": "train",
+        "text": "Выбрано C и независимая работа продолжена",
+        "old_evidence": "Final response and actual state.md explicitly select C, preserve the manager proposals and Q-report-action, and continue independent CSV work. Actual proposal/design and specs document the three agreed columns with a matching acceptance criterion. This is substantive saved work, not just a promise to continue.",
+        "new_evidence": "Trace and state explicitly select C, retain proposals and Q-report-action. Actual saved CSV draft/specification documents the three agreed columns and independent verification; work continues without waiting for the mode choice."
+      },
+      {
+        "eval_id": 21,
+        "split": "train",
+        "text": "Нет нового согласованного требования или выдуманного решения пользователя",
+        "old_evidence": "Actual proposal, design and state all distinguish manager proposals A/B from user decisions. Automatic assignment is excluded, risk acceptance remains unresolved, and no USER decision or approval is fabricated. The CSV requirement only codifies the previously agreed three-column scope.",
+        "new_evidence": "Actual state and product documents keep manager A/B as unapproved proposals, omit automatic assignment requirements and record no risk acceptance or invented USER consent. Premortem storage preserves the open action premise rather than treating urgency as authorization."
+      },
+      {
+        "eval_id": 22,
+        "split": "train",
+        "text": "Сохранённые ответы использованы без интервью и дублей находок",
+        "old_evidence": "All messages preserve the saved 08:00 deadline and three-column CSV. No interview reopens report time or purpose, Q-report-time remains resolved, and premortem.md retains one historical closed timing finding without duplication. The final question concerns missing editorial infrastructure, not the answered product question.",
+        "new_evidence": "Trace preserves the saved 08:00 deadline and three-column CSV without a repeated interview. Actual state keeps Q-report-time resolved and says open findings are absent; existing premortem.md retains the single closed historical finding, with no duplicate. Missing humanizer-ru is separately recorded as an editorial limitation."
+      },
+      {
+        "eval_id": 22,
+        "split": "train",
+        "text": "Прочитаны итог, premortem.md по ссылке и источники",
+        "old_evidence": "The transcript contains a successful combined Get-Content of state.md, proposal.md, design.md, spec.md, premortem.md, docs/decision.md and docs/report.md. The output state cites the same sources and accurately reconciles the prior 09:00 conflict with the saved 08:00 answer.",
+        "new_evidence": "The transcript contains a successful combined Get-Content of state.md, proposal.md, design.md, spec.md, premortem.md, docs/decision.md and docs/report.md. The output state cites the same sources and accurately reconciles the prior 09:00 conflict with the saved 08:00 answer."
+      },
+      {
+        "eval_id": 23,
+        "split": "heldout",
+        "text": "Последствия отражены в зависимых документах либо открытом Q",
+        "old_evidence": "Proposal and spec replace the stale08:00 commitment with before07:30 and an unresolved exact deadline. AC-report-delivered and design refer to Q-report-time, whose state record is blocking/open. Trace writes and subsequent readback confirm these changes exist, not just a suggested next step.",
+        "new_evidence": "Saved proposal/spec/design remove the old08:00 commitment and document the before07:30 constraint while leaving the precise deadline unresolved. Q-report-time is blocking/open, and spec explicitly distinguishes assignment time from selected report deadline. No07:00 behavior is invented."
+      },
+      {
+        "eval_id": 23,
+        "split": "heldout",
+        "text": "Пересмотрена только затронутая предпосылка",
+        "old_evidence": "premortem.md preserves the old 09:00/08:30 failure and 08:00 answer as history, then narrowly revisits assignment at07:30. Q-report-time alone is reopened. Proposed07:00 is explicitly an agent proposal, not silently selected as a new requirement.",
+        "new_evidence": "Premortem retains the historical08:00 resolution, then revises the same time finding for assignment07:30. Q-report-time is reopened; no unrelated question or duplicate finding is created. CSV and remaining premises are explicitly retained."
+      },
+      {
+        "eval_id": 23,
+        "split": "heldout",
+        "text": "Остальные выводы сохранены",
+        "old_evidence": "The saved premortem CSV section retains all three column names, recipient, goal and manual assignment. Proposal/spec/design retain those same commitments and exclusion of automatic assignment; the final response explicitly preserves CSV and other premises.",
+        "new_evidence": "Premortem CSV section retains delivery_id, overdue_minutes, responsible verbatim. Proposal/spec/design keep dispatcher recipient, manual assignment and automatic-assignment exclusion. Existing REQ/AC/Q IDs remain stable."
+      },
+      {
+        "eval_id": 24,
+        "split": "heldout",
+        "text": "Изменение времени назначения с 08:30 на 07:30 обнаружено по источнику",
+        "old_evidence": "Trace item_3 reads current docs/report.md; item_4 reads historical docs/decision.md and prior premortem. Item_5 explicitly reports the08:30-to07:30 change. Saved premortem contrasts both sources and explains why08:00 now arrives30 minutes late.",
+        "new_evidence": "Trace items3/4 read current docs/report.md and item6 reads docs/decision.md. Persisted premortem contrasts historical assignment08:30 against current07:30 and calculates that08:00 is now30 minutes late; final response repeats that source-grounded change."
+      },
+      {
+        "eval_id": 24,
+        "split": "heldout",
+        "text": "Пересмотрена затронутая часть, остальные выводы сохранены",
+        "old_evidence": "Only premortem/state are rewritten; premortem What remains retains recipient, purpose, three columns and manual assignment. Q-report-time is reopened and07:00 is labelled an unaccepted proposal. The old normative deadline remains pending the user answer and state clearly flags that limitation rather than reopening unrelated decisions.",
+        "new_evidence": "Premortem revisits the existing time finding, retaining its09:00 failure history and subsequent08:00 answer. CSV section, manual assignment and goal remain intact. State reopens only Q-report-time and explains normative08:00 remains unconfirmed pending the new answer; no unrelated decision is reopened."
+      },
+      {
+        "eval_id": 25,
+        "split": "train",
+        "text": "Отсутствие старой записи не вызывает автоматического интервью и не отменяет согласования",
+        "old_evidence": "State preserves USER-documents-approved, existing review links and matching normative hashes, explicitly saying absence of the old checkpoint does not cancel those records. No product interview is opened because of the missing checkpoint. A separate question asks about unavailable humanizer-ru, an editorial dependency; this is not caused by the absent premortem record.",
+        "new_evidence": "State preserves USER-documents-approved and prior review links, records all three normative hashes as matching, and explicitly says absence of the earlier premortem does not cancel approval. No product interview occurs; the separate missing-editor dependency remains a limitation."
+      },
+      {
+        "eval_id": 25,
+        "split": "train",
+        "text": "Выполнена короткая проверка по доступным материалам",
+        "old_evidence": "Trace and output state verify src/labels.json, docs/labels.md and change.diff: only Отпавить changes to Отправить. State records the bounded source check, and resume-check.json reports structural success. The check is materially limited to the supplied typo change rather than inventing product uncertainty.",
+        "new_evidence": "Actual state records a short check of proposal/spec/design, src/labels.json, docs/labels.md and change.diff. It identifies only the typo correction and explicitly records Премортем: находок нет; no new premortem artifact or product question was needed."
+      },
+      {
+        "eval_id": 26,
+        "split": "train",
+        "text": "Доступный контекст восстановлен, существенный пробел оформлен Q",
+        "old_evidence": "State reconstructs the supported recipient, goal and three-column CSV from available documents, marks 08:00 as unsupported and creates blocking Q-report-before-assignment. The question asks the needed time/timezone before assignment and explains its effect on AC-report-delivered.",
+        "new_evidence": "The reconstructed artifact preserves known recipient, goal and CSV, cites available sources and marks missing docs/decision.md as the reason the 08:00 timing premise is unverified. Open blocking Q-report-timing asks assignment time and needed lead time; its dependency on AC/requirements is explained."
+      },
+      {
+        "eval_id": 26,
+        "split": "train",
+        "text": "Отсутствующий premortem.md по ссылке обнаружен, прежняя проверка не объявлена подтверждённой",
+        "old_evidence": "Trace detects missing premortem.md and docs/decision.md. Actual state quotes the historical link as history and explicitly says its completed-premise-check claim is unconfirmed; it does not fabricate a replacement finding history.",
+        "new_evidence": "Actual state and newly reconstructed premortem.md both identify the missing previous linked artifact. They explicitly state its historical contents and completion cannot be confirmed. The new document is labeled a reconstruction from available sources, not a recovered old result."
+      },
+      {
+        "eval_id": 27,
+        "split": "train",
+        "text": "Недоступный существенный источник не назван подтверждением",
+        "old_evidence": "Actual state says docs/decision.md is absent and that historical statements in premortem.md are insufficient to verify 08:00/current08:30. It leaves the prior artifact as explicitly historical rather than claiming the missing source confirms the decision.",
+        "new_evidence": "Both actual state and updated premortem.md explicitly identify docs/decision.md as absent. The historical08:00/08:30 claim is quoted as history, not confirmation, and agreement across normative drafts is explicitly insufficient to restore the missing source."
+      },
+      {
+        "eval_id": 27,
+        "split": "train",
+        "text": "Обозначено ограничение, вопрос касается только существенного пробела",
+        "old_evidence": "State preserves confirmed recipient/goal/CSV and reopens only Q-report-time concerning delivery time, timezone and assignment window. Trace asks this same material question; it does not restart an interview about the known report purpose or format.",
+        "new_evidence": "State preserves confirmed recipient/goal/three CSV columns and reopens only Q-report-time for current assignment time, required CSV time and timezone. Agent messages ask that material question without reopening report purpose or format; no arbitrary new schedule is chosen."
+      },
+      {
+        "eval_id": 28,
+        "split": "train",
+        "text": "После отдельного выбора поведения обновлены spec с AC и связанные документы",
+        "old_evidence": "The separate followup prompt explicitly selects07:00. followup/run.json reports completed, and followup-outputs contain07:00 in REQ-report-export, AC-report-delivered, proposal and design. All three normative hashes differ from the first-stage snapshot; the new user decision is quoted in state.",
+        "new_evidence": "The separate followup prompt explicitly selects07:00. followup/run.json reports completed, and followup-outputs contain07:00 in REQ-report-export, AC-report-delivered, proposal and design. All three normative hashes differ from the first-stage snapshot; the new user decision is quoted in state."
+      },
+      {
+        "eval_id": 28,
+        "split": "train",
+        "text": "Правка только premortem.md сохраняет documents-манифест",
+        "old_evidence": "After the first-stage evidence clarification, SHA256 values of proposal.md, design.md and specs/main/spec.md each exactly match the saved USER-documents-approved input manifest. premortem.md adds only the weekday-session explanation; state keeps the original08:00 decision current. Direct hashes verify the normative manifest is unchanged.",
+        "new_evidence": "After the first-stage evidence clarification, SHA256 values of proposal.md, design.md and specs/main/spec.md each exactly match the saved USER-documents-approved input manifest. premortem.md adds only the weekday-session explanation; state keeps the original08:00 decision current. Direct hashes verify the normative manifest is unchanged."
+      },
+      {
+        "eval_id": 28,
+        "split": "train",
+        "text": "После нормативной правки прежние ревью и согласования отмечены stale",
+        "old_evidence": "Followup state explicitly marks prior consistency review stale and USER-documents-approved inapplicable to the changed version, clears approval_refs, and preserves the historical records rather than rewriting them. It records approved=false and ready=false; no new review or approval is fabricated.",
+        "new_evidence": "Followup state explicitly marks prior consistency review stale and USER-documents-approved inapplicable to the changed version, clears approval_refs, and preserves the historical records rather than rewriting them. It records approved=false and ready=false; no new review or approval is fabricated."
+      },
+      {
+        "eval_id": 29,
+        "split": "train",
+        "text": "Выбрано B",
+        "old_evidence": "Response and actual state explicitly choose B. review/decisions.md stores USER-plan-request as planning_command scoped to the existing change after entry conditions are met. State proposes consistency review and preserves the command without executing blocked planning.",
+        "new_evidence": "Response and actual state explicitly choose B. review/decisions.md stores USER-plan-request as planning_command scoped to the existing change after entry conditions are met. State proposes consistency review and preserves the command without executing blocked planning."
+      },
+      {
+        "eval_id": 29,
+        "split": "train",
+        "text": "Tasks не создан, ревью и waiver не выдуманы",
+        "old_evidence": "No tasks.md or independent review report exists in output. The only new review artifact is decisions.md containing the actual planning request, not a waiver or completed review. State explicitly says premortem does not replace review and urgency is not a waiver.",
+        "new_evidence": "No tasks.md or independent review report exists in output. The only new review artifact is decisions.md containing the actual planning request, not a waiver or completed review. State explicitly says premortem does not replace review and urgency is not a waiver."
+      },
+      {
+        "eval_id": 30,
+        "split": "heldout",
+        "text": "Tasks не создан",
+        "old_evidence": "Output tree contains proposal/design/spec/state/premortem and prior review files, with no tasks.md. State sets awaiting:planning_command and final response says plan not created. Trace only persists the checkpoint after read-only document checks.",
+        "new_evidence": "Output inventory has no tasks.md. Trace item9 writes state only; checkpoint phase:user_review/awaiting:planning_command explicitly says tasks not created, matching the final response. Existing normative documents and review are preserved."
+      },
+      {
+        "eval_id": 30,
+        "split": "heldout",
+        "text": "Завершённый премортем не выдан за planning_command",
+        "old_evidence": "State records complete premortem and current review separately from the missing planning command; it explicitly says document agreement does not replace planning command. review/decisions.md contains only prior document approval, and no new planning USER record is manufactured.",
+        "new_evidence": "State separates closed premortem history and applicable document approval from absent planning permission: continuation does not authorize planning, and script ready does not replace a command. It quotes the user denial of a planning command and records no new planning authorization."
+      },
+      {
+        "eval_id": 31,
+        "split": "heldout",
+        "text": "Tasks создан по действующей команде без дополнительного согласования премортема",
+        "old_evidence": "tasks.md exists with TASK-deliver-daily-report pending, covers AC-report-delivered and includes integration verification. It cites USER-plan-request. Trace creates the file and plan check passes structure. No premortem-specific approval is requested; the final editorial-dependency exception question is a separate inherited requirement and does not undo task creation.",
+        "new_evidence": "tasks.md is written in trace item10 with TASK-deliver-daily-report pending, covers AC-report-delivered and integrated verification. State cites USER-plan-request and says repeat agreement/command are unnecessary. No additional premortem approval is introduced; the final question concerns only missing editorial dependency after the plan draft already exists."
+      },
+      {
+        "eval_id": 31,
+        "split": "heldout",
+        "text": "Применимый waiver признан при корректной структуре и согласовании документов",
+        "old_evidence": "Trace documents check returns errors/warnings empty, consistency waived, approved/ready true and all three USER records applicable. State explicitly recognizes those matching manifests and preserves normative documents; waiver is scoped to document_review/consistency, not editorial or plan review.",
+        "new_evidence": "Trace item8 executes documents check and snapshot; state records matching hashes for all three normative documents and applicability of approval, consistency waiver and planning command. Waiver is explicitly restricted to document_review consistency, with plan review still required. Normative documents remain unchanged."
+      }
+    ],
+    "persistent_fail": []
+  },
+  "executions": [
+    {
+      "id": 13,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 153536,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-explore\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 13,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 475083,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-explore\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 14,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 185003,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-direct-draft\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 14,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 276872,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-direct-draft\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 15,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 167040,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-small-change\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 15,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 278701,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-small-change\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 16,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 151766,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-corrected\\premortem-known-answer\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 16,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 121465,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-known-answer\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 17,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 167854,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-findings-document\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 17,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 168669,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-findings-document\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 18,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 361205,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-closed-history\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 18,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 134534,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-closed-history\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 19,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 166922,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-retry\\premortem-block-dependent\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 19,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 164767,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-block-dependent\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 20,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 197318,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1-corrected\\premortem-defer\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 20,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 171719,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-defer\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 21,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 137639,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-scope-growth\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 21,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 149684,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-scope-growth\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 22,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 135138,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-resume-current\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 22,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 119931,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-resume-current\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 23,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 180524,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-revisit-revise\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 23,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 259710,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-revisit-revise\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 24,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 148207,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-revisit-resume\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 24,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 147166,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-revisit-resume\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 25,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 142184,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-old\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 25,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 128520,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-old\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 26,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 145386,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-link\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 26,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 142068,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-link\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 27,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 101885,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-restore-source\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 27,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 132643,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-restore-source\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 28,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 340665,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-normative-change\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 28,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 279335,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-normative-change\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 29,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 121618,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-review\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 29,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 120318,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-review\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 30,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 118977,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-no-command\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 30,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 158761,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-no-command\\with_skill",
+      "graded": true
+    },
+    {
+      "id": 31,
+      "variant": "old_skill",
+      "status": "completed",
+      "duration_ms": 149374,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-1\\premortem-valid-waiver\\old_skill",
+      "graded": true
+    },
+    {
+      "id": 31,
+      "variant": "with_skill",
+      "status": "completed",
+      "duration_ms": 181414,
+      "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-premortem\\implementation\\iteration-2\\premortem-valid-waiver\\with_skill",
+      "graded": true
+    }
+  ],
+  "usage_all_attempts": {
+    "input_tokens": 17391796,
+    "cached_input_tokens": 14966784,
+    "output_tokens": 178198,
+    "attempts": 57,
+    "completed": 52,
+    "timed_out": 5,
+    "unknown_usage": 5,
+    "gross_input_plus_output": 17569994,
+    "uncached_input": 2425012
+  },
+  "micro": {
+    "old_skill": [
+      {
+        "rep": 1,
+        "status": "timeout",
+        "summary": null
+      },
+      {
+        "rep": 2,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 3,
+        "status": "timeout",
+        "summary": null
+      },
+      {
+        "rep": 4,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 5,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      }
+    ],
+    "with_skill": [
+      {
+        "rep": 1,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 2,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 3,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 4,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      },
+      {
+        "rep": 5,
+        "status": "completed",
+        "summary": {
+          "total": 2,
+          "pass_rate": 1,
+          "failed": 0,
+          "passed": 2
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Original five timeouts retain unknown token usage; no time/token efficiency claim.",
+    "Four initial fixtures were invalidated and excluded; corrected inputs and manifests retained.",
+    "The evaluator omitted the available humanizer-ru dependency when preparing fixtures. Editorial-dependent assertions are limited by this setup error, not by a skill or environment defect; preceding persistence behavior remains observable.",
+    "Five candidate micro repetitions completed; only three baseline micro repetitions completed, two timed out. Queued micro retries explicitly held by user steering.",
+    "Independent judges are same-family, not cross-family.",
+    "The gate compares one frozen candidate, not a statistical estimate of general skill reliability."
+  ]
+}

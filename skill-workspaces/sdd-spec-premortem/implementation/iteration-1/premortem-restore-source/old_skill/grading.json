@@ -1,0 +1,51 @@
+﻿{
+    "expectations":  [
+                         {
+                             "text":  "Недоступный существенный источник не назван подтверждением",
+                             "dimension":  "Robustness",
+                             "evidence":  "Actual state says docs/decision.md is absent and that historical statements in premortem.md are insufficient to verify 08:00/current08:30. It leaves the prior artifact as explicitly historical rather than claiming the missing source confirms the decision.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Обозначено ограничение, вопрос касается только существенного пробела",
+                             "dimension":  "Robustness",
+                             "evidence":  "State preserves confirmed recipient/goal/CSV and reopens only Q-report-time concerning delivery time, timezone and assignment window. Trace asks this same material question; it does not restart an interview about the known report purpose or format.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "dimension_scores":  {
+                             "Robustness":  {
+                                                "score":  1,
+                                                "total":  2,
+                                                "passed":  2
+                                            }
+                         },
+    "failing":  [
+
+                ],
+    "timing":  {
+                   "grader_duration_seconds":  null,
+                   "total_duration_seconds":  null,
+                   "executor_duration_seconds":  101.885
+               },
+    "claims":  [
+
+               ],
+    "user_notes_summary":  {
+                               "uncertainties":  [
+
+                                                 ],
+                               "workarounds":  [
+
+                                               ],
+                               "needs_review":  [
+                                                    "Mandatory humanizer-ru missing; editorial completeness not graded."
+                                                ]
+                           }
+}
