@@ -88,6 +88,59 @@ def test_record_position(bundle):
         read_document(path)
 
 
+def nested_spec(change, records):
+    path = write_doc(change / "specs/feature/spec.md", "spec", records, capability="feature")
+    text = path.read_text(encoding="utf-8")
+    text = text.replace("### Record\n\n```yaml\nsdd_record: requirement", "## Record\n\n```yaml\nsdd_record: requirement")
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def test_nested_requirements_with_multiple_criteria(bundle):
+    _, change, records, _ = bundle
+    records += [dict(records[1], id="AC-feature-error"),
+                dict(records[0], id="REQ-second"),
+                dict(records[1], id="AC-second", requirement="REQ-second")]
+    assert read_document(nested_spec(change, records)).records == records
+
+
+@pytest.mark.parametrize("case", ["wrong_parent", "before_requirement", "outside_requirement", "mixed_levels"])
+def test_nested_spec_rejects_misleading_hierarchy(bundle, case):
+    _, change, records, _ = bundle
+    if case == "wrong_parent":
+        records += [dict(records[0], id="REQ-second"), dict(records[1], id="AC-second")]
+    elif case == "before_requirement":
+        records.reverse()
+    path = nested_spec(change, records)
+    text = path.read_text(encoding="utf-8")
+    if case == "outside_requirement":
+        text = text.replace("### Record", "## Other section\n\n### Record")
+    elif case == "mixed_levels":
+        text += "\n### Legacy requirement\n\n```yaml\nsdd_record: requirement\nid: REQ-other\noperation: add\n```\n"
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(ValidationError) as caught:
+        read_document(path)
+    assert caught.value.code == ("record_position" if case == "mixed_levels" else "acceptance_parent")
+
+
+def test_flat_legacy_spec_remains_readable(bundle):
+    _, change, records, _ = bundle
+    assert read_document(change / "specs/feature/spec.md").records == records
+
+
+@pytest.mark.parametrize("kind", ["requirement", "acceptance"])
+def test_spec_rejects_level_four_records(bundle, kind):
+    _, change, records, _ = bundle
+    path = nested_spec(change, records)
+    text = path.read_text(encoding="utf-8")
+    heading = "##" if kind == "requirement" else "###"
+    text = text.replace(f"{heading} Record\n\n```yaml\nsdd_record: {kind}", f"#### Record\n\n```yaml\nsdd_record: {kind}")
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(ValidationError) as caught:
+        read_document(path)
+    assert caught.value.code == "record_position"
+
+
 def test_quoted_marker_is_not_silently_ignored(bundle):
     _, change, _, _ = bundle
     path = change / "specs/feature/spec.md"

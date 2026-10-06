@@ -137,7 +137,12 @@ def read_document(path):
                 raise ValidationError("capability", "Invalid capability path")
         tokens = parse_markdown("".join(lines[end + 1:]))
         records, seen = [], set()
+        parent_requirement = None
+        positions = []
         for i, token in enumerate(tokens):
+            if token.type == "heading_open" and token.level == 0:
+                if token.tag in {"h1", "h2"}:
+                    parent_requirement = None
             if token.type != "fence" or token.info.strip() != "yaml":
                 continue
             try:
@@ -148,8 +153,10 @@ def read_document(path):
                 raise
             if "sdd_record" not in record:
                 continue
-            if i < 3 or tokens[i - 1].type != "heading_close" or tokens[i - 1].tag != "h3" or token.level != 0:
-                raise ValidationError("record_position", "A record must immediately follow a level-three heading")
+            spec_requirement = kind == "spec" and record.get("sdd_record") == "requirement"
+            allowed_headings = {"h2", "h3"} if spec_requirement else {"h3"}
+            if i < 3 or tokens[i - 1].type != "heading_close" or tokens[i - 1].tag not in allowed_headings or token.level != 0:
+                raise ValidationError("record_position", "A record must immediately follow a level-three heading (level two is allowed for spec requirements)")
             if token.map[0] > tokens[i - 3].map[1] + 1:
                 raise ValidationError("record_position", "Only a blank line may separate heading and record")
             rid, record_kind = record.get("id"), record.get("sdd_record")
@@ -165,7 +172,18 @@ def read_document(path):
                     raise ValidationError("record_fields", f"Invalid fields for {record_kind}", element_id=rid)
                 if not valid_id(rid, prefix):
                     raise ValidationError("invalid_id", f"Invalid {prefix} ID: {rid}", element_id=rid)
+            heading = tokens[i - 1].tag
+            positions.append((record, heading, parent_requirement))
+            if spec_requirement and heading == "h2":
+                parent_requirement = rid
             records.append(record)
+        # Legacy v1 specs have only h3 records. New specs use h2 requirements.
+        if kind == "spec" and any(heading == "h2" for _, heading, _ in positions):
+            for record, heading, parent in positions:
+                if record["sdd_record"] == "requirement" and heading != "h2":
+                    raise ValidationError("record_position", "Use level-two headings for all requirements in a nested spec", element_id=record["id"])
+                if record["sdd_record"] == "acceptance" and (parent is None or record["requirement"] != parent):
+                    raise ValidationError("acceptance_parent", "Nested acceptance must reference its enclosing requirement", element_id=record["id"])
         return Document(path, meta, records)
     except ValidationError as exc:
         exc.path = exc.path or str(path)
