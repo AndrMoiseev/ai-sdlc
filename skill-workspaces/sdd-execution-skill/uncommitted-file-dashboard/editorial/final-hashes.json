@@ -1,0 +1,22 @@
+[
+  {
+    "path": "design.md",
+    "sha256": "36b85b703851b61d6118ff957de5b06f20a0bb5f13b7435b3e729d4059876739"
+  },
+  {
+    "path": "premortem.md",
+    "sha256": "95ed48bcdb849cd1ae16ba7171ecb233c1b7f654d4fa02fc391db15d262885d7"
+  },
+  {
+    "path": "proposal.md",
+    "sha256": "7a5190748ed2a003dbc56119d41e2129b6fbbf4a1f2cad4a3bca32a3d89618f7"
+  },
+  {
+    "path": "research.md",
+    "sha256": "f404c1afb41a12fdb649d725e5c39347cd1d7654213c2be800f018c0d5d214e6"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "sha256": "51f4610dfdbf6763a2bc9fd9b4ed442a6691bf41a2026c4a03df1f9253fd351a"
+  }
+]

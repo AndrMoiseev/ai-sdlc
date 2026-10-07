@@ -5,7 +5,7 @@
 # ///
 """Smoke tests for sdd-skill-conductor scripts.
 
-Run: uv run scripts/test_smoke.py
+Run: uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/test_smoke.py
 
 Tests verify the most critical scripts execute successfully on a known-good
 skill, fail loudly on a known-bad skill, and produce expected output shapes.
@@ -15,8 +15,6 @@ broken scripts. Real behavior is verified by Mode 3 VALIDATE on real skills.
 """
 
 import json
-import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -25,7 +23,8 @@ from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = SKILL_DIR / "scripts"
-UV_BIN = shutil.which("uv") or os.path.expanduser("~/.local/bin/uv")
+# Child checks inherit the interpreter selected by the outer uv run.
+PYTHON = [sys.executable, "-X", "utf8", "-B"]
 RESULTS = []
 
 
@@ -105,8 +104,8 @@ def test_eval_skill_good_passes():
     with tempfile.TemporaryDirectory() as tmp:
         skill = make_good_skill(Path(tmp))
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
-            capture_output=True, text=True, timeout=30,
+            [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
         )
         assert result.returncode == 0, f"exit {result.returncode}: {result.stderr}"
         assert "10/10" in result.stdout or "PASS" in result.stdout.upper(), \
@@ -117,8 +116,8 @@ def test_eval_skill_bad_fails():
     with tempfile.TemporaryDirectory() as tmp:
         skill = make_bad_skill(Path(tmp))
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
-            capture_output=True, text=True, timeout=30,
+            [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
         )
         # bad skill must either exit non-zero or report failures
         combined = result.stdout + result.stderr
@@ -141,8 +140,8 @@ def test_eval_skill_detects_secret_leak():
             "export API_KEY=sk-abcdef0123456789ABCDEF\n"
         )
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
-            capture_output=True, text=True, timeout=30,
+            [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
         )
         combined = (result.stdout + result.stderr).lower()
         assert "leak" in combined or "secret" in combined, \
@@ -163,8 +162,8 @@ def test_eval_skill_list_description_no_crash():
             "# Bracket Skill\n\n## Usage\n\nTest.\n"
         )
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
-            capture_output=True, text=True, timeout=30,
+            [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
         )
         assert "Traceback" not in result.stderr, f"eval crashed: {result.stderr[:400]}"
         assert "must be a string" in result.stdout, \
@@ -180,8 +179,8 @@ def test_eval_skill_json_emits_all_det_ids():
     finally:
         sys.path.pop(0)
     result = subprocess.run(
-        [UV_BIN, "run", str(SCRIPTS_DIR / "eval_skill.py"), str(SKILL_DIR), "--json"],
-        capture_output=True, text=True, timeout=30,
+        [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(SKILL_DIR), "--json"],
+        capture_output=True, text=True, encoding="utf-8", timeout=30,
     )
     records = json.loads(result.stdout)
     ids = [r["id"] for r in records]
@@ -200,8 +199,8 @@ def test_quick_validate_good_passes():
     with tempfile.TemporaryDirectory() as tmp:
         skill = make_good_skill(Path(tmp))
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "quick_validate.py"), str(skill)],
-            capture_output=True, text=True, timeout=15,
+            [*PYTHON, str(SCRIPTS_DIR / "quick_validate.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=15,
         )
         assert result.returncode == 0, f"exit {result.returncode}: {result.stderr[:300]}"
 
@@ -210,8 +209,8 @@ def test_quick_validate_bad_fails():
     with tempfile.TemporaryDirectory() as tmp:
         skill = make_bad_skill(Path(tmp))
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "quick_validate.py"), str(skill)],
-            capture_output=True, text=True, timeout=15,
+            [*PYTHON, str(SCRIPTS_DIR / "quick_validate.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=15,
         )
         assert result.returncode != 0, "expected non-zero exit on bad skill"
 
@@ -221,9 +220,9 @@ def test_quick_validate_bad_fails():
 def test_init_skill_creates_structure():
     with tempfile.TemporaryDirectory() as tmp:
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "init_skill.py"),
+            [*PYTHON, str(SCRIPTS_DIR / "init_skill.py"),
              "smoke-init-test", "--path", tmp],
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", timeout=15,
         )
         assert result.returncode == 0, f"exit {result.returncode}: {result.stderr}"
         created = Path(tmp) / "smoke-init-test"
@@ -243,9 +242,9 @@ def test_package_skill_creates_zip():
         out_dir = Path(tmp) / "dist"
         out_dir.mkdir()
         result = subprocess.run(
-            [UV_BIN, "run", str(SCRIPTS_DIR / "package_skill.py"),
+            [*PYTHON, str(SCRIPTS_DIR / "package_skill.py"),
              str(skill), str(out_dir)],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
         )
         assert result.returncode == 0, f"exit {result.returncode}: {result.stderr[:500]}"
         produced = list(out_dir.glob("*.skill"))
@@ -259,8 +258,8 @@ def test_package_skill_creates_zip():
 
 def test_aggregate_benchmark_help():
     result = subprocess.run(
-        [UV_BIN, "run", str(SCRIPTS_DIR / "aggregate_benchmark.py"), "--help"],
-        capture_output=True, text=True, timeout=15,
+        [*PYTHON, str(SCRIPTS_DIR / "aggregate_benchmark.py"), "--help"],
+        capture_output=True, text=True, encoding="utf-8", timeout=15,
     )
     assert result.returncode == 0, f"--help failed: {result.stderr}"
     assert "skill" in result.stdout.lower() or "benchmark" in result.stdout.lower()
@@ -308,4 +307,5 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
     main()

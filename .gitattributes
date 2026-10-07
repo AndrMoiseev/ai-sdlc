@@ -1,6 +1,9 @@
 # Keep APM deployment hashes stable across Windows and Unix checkouts.
 /apm.yml text eol=lf
 /apm.lock.yaml text eol=lf
+/pyproject.toml text eol=lf
+/uv.lock text eol=lf
+/uv.toml text eol=lf
 /packages/** text=auto eol=lf
 /skills/** text=auto eol=lf
 /.agents/skills/sdd-doc/** text=auto eol=lf

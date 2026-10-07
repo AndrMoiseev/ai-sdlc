@@ -1,0 +1,476 @@
+[
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-approved-start",
+    "field": "conditions",
+    "value": "Пользователь явно поручил выполнить выбранное изменение с актуальным согласованным планом"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-approved-start",
+    "field": "expected",
+    "value": "Скилл сохраняет манифест входов и основание поручения, проверяет среду и начинает доступные задачи"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-invalid-input",
+    "field": "conditions",
+    "value": "План существует, но согласование отсутствует, устарело или не выполнено другое условие готовности"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-invalid-input",
+    "field": "expected",
+    "value": "Реализация не начинается; сохранены конкретная причина и следующий шаг восстановления через sdd-spec"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-existing-work",
+    "field": "conditions",
+    "value": "При запуске обнаружены незакоммиченные изменения или исходно падающие проверки"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-existing-work",
+    "field": "expected",
+    "value": "Исходное состояние сохранено; чужие правки не удалены и не включены в результат задачи; затронутые работы отделены или заблокированы с причиной"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-companion-scope",
+    "field": "conditions",
+    "value": "Скилл обрабатывает выбранное изменение от проверки входов до завершения исполнения"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-companion-scope",
+    "field": "expected",
+    "value": "Подготовка и пересмотр спецификации и плана остаются в sdd-spec; новый скилл их не создаёт и не запускает автоматическое переписывание проектных инструкций"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-continue-plan",
+    "field": "conditions",
+    "value": "Предыдущая задача принята, осталась доступная задача согласованного плана"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-continue-plan",
+    "field": "expected",
+    "value": "Следующая задача запускается без нового согласия пользователя и с необходимыми входами"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-block-dependents",
+    "field": "conditions",
+    "value": "Предшественник заблокирован, завершился ошибкой или ещё проходит ревью"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-block-dependents",
+    "field": "expected",
+    "value": "Зависимая задача не запускается; независимые доступные задачи могут продолжаться"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-isolated-work",
+    "field": "conditions",
+    "value": "Пользователь явно запросил параллельный режим, но изоляция изменений или проверок недоступна"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-isolated-work",
+    "field": "expected",
+    "value": "Скилл сообщает причину и выполняет задачи последовательно с соблюдением ограничений плана"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-sequential-default",
+    "field": "conditions",
+    "value": "Несколько независимых задач готовы к запуску и изоляция доступна, но пользователь не запрашивал параллельный режим"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-sequential-default",
+    "field": "expected",
+    "value": "Одновременно ведётся одна задача, включая проверки, ревью и исправления; следующий запуск не перекрывается с её выполнением"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-explicit-parallel",
+    "field": "conditions",
+    "value": "Пользователь явно запросил параллельное выполнение, есть независимые задачи и доступна изоляция"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-explicit-parallel",
+    "field": "expected",
+    "value": "Скилл сохраняет запрос как основание режима и может запускать задачи одновременно в пределах зависимостей и ограничений изоляции"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-mode-resume",
+    "field": "conditions",
+    "value": "Скилл продолжает прерванное исполнение с сохранённым режимом"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-mode-resume",
+    "field": "expected",
+    "value": "Параллельный режим сохраняется только при подтверждённом действующем явном запросе пользователя; иначе используется последовательный режим без перекрытия новых запусков с активными задачами"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-task-worktree",
+    "field": "conditions",
+    "value": "В разрешённом параллельном режиме запускаются две независимые задачи"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-task-worktree",
+    "field": "expected",
+    "value": "У каждой задачи зарегистрирован отдельный Git worktree в detached HEAD с исходным SHA; ветки задач и коммиты исполнителей не создаются; рабочие файлы и индекс разделены, общие ресурсы проверок разделены или используются последовательно"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-worktree-integration",
+    "field": "conditions",
+    "value": "Задача прошла проверки в своём worktree и готова к переносу, а ветка исполнения уже содержит другие принятые задачи"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-worktree-integration",
+    "field": "expected",
+    "value": "Оркестратор переносит незакоммиченные изменения только этой задачи без потери новых, удалённых и бинарных файлов и ранее принятой работы; независимый проверяющий проверяет интегрированный кандидат, рецензент проверяет изменения при переносе; после успеха оркестратор создаёт коммит в рабочей ветке и фиксирует приёмку"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-worktree-recovery",
+    "field": "conditions",
+    "value": "Исполнение прервано либо выполняется очистка после приёмки задачи"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-worktree-recovery",
+    "field": "expected",
+    "value": "При продолжении сверяются пути, исходный SHA, пакет переноса, фактические изменения и история рабочей ветки; перенос и коммит не дублируются; worktree удаляется только после подтверждённого коммита и приёмки, при отсутствии активного писателя и неучтённых данных; незавершённая работа сохраняется"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-stable-plan",
+    "field": "conditions",
+    "value": "Задача запущена, проверена и принята"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-stable-plan",
+    "field": "expected",
+    "value": "Запись исполнения отражает прогресс, а байты proposal, specs, design и tasks и их исходный манифест не изменились"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-no-unproven-done",
+    "field": "conditions",
+    "value": "Исполнитель сообщает DONE без подтверждённой проверки обязательного критерия"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-no-unproven-done",
+    "field": "expected",
+    "value": "Задача остаётся непринятой; запись указывает, какого доказательства недостаёт"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-review-repair",
+    "field": "conditions",
+    "value": "Независимый рецензент обнаружил подтверждённое нарушение обязательного критерия"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-review-repair",
+    "field": "expected",
+    "value": "Замечание передано исполнителю; задача принимается только после исправления, соответствующих проверок и повторного независимого ревью"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-review-freshness",
+    "field": "conditions",
+    "value": "После успешного ревью изменился код, от которого зависит проверенный результат"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-review-freshness",
+    "field": "expected",
+    "value": "Прежнее ревью не подтверждает новую версию; перед приёмкой выполнены затронутые проверки"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-bounded-repair",
+    "field": "conditions",
+    "value": "Очередная попытка не устранила блокирующий дефект, бюджет попыток исчерпан"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-bounded-repair",
+    "field": "expected",
+    "value": "Задача заблокирована с сохранением причин и результатов попыток; её потомки не запускаются"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-independent-test-run",
+    "field": "conditions",
+    "value": "Исполнитель представил успешные результаты тестов и линтеров для готовой задачи"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-independent-test-run",
+    "field": "expected",
+    "value": "Свежий проверяющий самостоятельно запускает обязательные команды на зафиксированной версии и сохраняет исходные логи; до этого задача не принимается, отсутствие доступного проверяющего фиксируется как блокировка"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-test-integrity",
+    "field": "conditions",
+    "value": "Команды завершаются успешно, но тесты не проверяют обязательный AC либо изменения отключили или ослабили обязательную проверку"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-test-integrity",
+    "field": "expected",
+    "value": "Независимое ревью отклоняет приёмку с конкретным основанием; исполнитель устраняет пробел, после чего проверки и ревью выполняются заново для изменённой области"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-required-check-blocker",
+    "field": "conditions",
+    "value": "Обязательный тест или линтер падает, пропущен, нестабилен либо недоступен, в том числе до начала реализации"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-required-check-blocker",
+    "field": "expected",
+    "value": "Сохранены исходное состояние и все попытки; соответствующая задача или итоговая приёмка остаётся заблокированной до устранения причины и успешной проверки без ослабления согласованного контракта"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-verification-snapshot",
+    "field": "conditions",
+    "value": "После успешной проверки изменились её входы, конфигурация, основание интеграции или содержимое коммита"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-verification-snapshot",
+    "field": "expected",
+    "value": "Оркестратор отклоняет устаревшее доказательство; независимый проверяющий повторяет затронутые проверки на принимаемой версии, при неизвестной области влияния запускает полный обязательный набор"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-test-run",
+    "field": "conditions",
+    "value": "Все задачи имеют локальные коммиты, скилл готовится объявить план выполненным"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-test-run",
+    "field": "expected",
+    "value": "Свежий итоговый проверяющий самостоятельно запускает полный обязательный набор тестов и линтеров и сценарии плана на итоговом HEAD; completed допустим только при их успехе и подтверждении всех AC"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-spec-conflict",
+    "field": "conditions",
+    "value": "Исполнитель доказал невозможность согласованного решения без изменения обязательного контракта"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-spec-conflict",
+    "field": "expected",
+    "value": "Сохранены доказательство и затронутые задачи; соответствующая цепочка приостановлена; подготовлено обращение к sdd-spec без подмены документов"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-revised-plan",
+    "field": "conditions",
+    "value": "После пересмотра получен новый согласованный комплект и поручение продолжить прежнюю работу"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-revised-plan",
+    "field": "expected",
+    "value": "Скилл фиксирует новое основание, пересматривает затронутые задачи и доказательства, сохраняет историю и продолжает оставшуюся разрешённую работу"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-lost-executor",
+    "field": "conditions",
+    "value": "Сессия прервана во время задачи, прежний исполнитель недоступен"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-lost-executor",
+    "field": "expected",
+    "value": "Частичные правки и доказательства сверены и сохранены; новый исполнитель получает точку продолжения, а задача не остаётся фиктивно активной"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-resume-drift",
+    "field": "conditions",
+    "value": "При продолжении обнаружено неподтверждённое изменение нормативного комплекта"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-resume-drift",
+    "field": "expected",
+    "value": "Работа на прежнем основании не возобновляется автоматически; скилл показывает расхождение и что нужно для восстановления согласования"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-task-commit",
+    "field": "conditions",
+    "value": "Реализация задачи прошла обязательные проверки и независимое ревью"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-task-commit",
+    "field": "expected",
+    "value": "В ветке исполнения создан отдельный коммит с TASK-ID; сохранён SHA, содержимое соответствует проверенной задаче и не содержит чужих правок; затем задача принята"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-commit-recovery",
+    "field": "conditions",
+    "value": "Создание коммита завершилось ошибкой либо сессия прервана между созданием коммита и записью его SHA"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-commit-recovery",
+    "field": "expected",
+    "value": "Скилл сверяет историю и содержимое изменений, сохраняет найденный коммит без дублирования либо блокирует задачу с причиной; неподтверждённый коммит не закрывает задачу"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-followup-commit",
+    "field": "conditions",
+    "value": "Итоговая проверка обнаружила дефект в уже закоммиченной задаче"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-followup-commit",
+    "field": "expected",
+    "value": "Исправление проходит проверки и ревью и сохраняется новым коммитом с TASK-ID; исходный коммит остаётся в истории, запись приёмки обновляется"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-start",
+    "field": "conditions",
+    "value": "Согласованный план принят к исполнению и первая задача ещё не запущена"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-start",
+    "field": "expected",
+    "value": "HTML-дашборд создан, содержит весь список задач и выбранный режим, пользователь получил ссылку или локальный путь для открытия"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-progress",
+    "field": "conditions",
+    "value": "В сохранённом состоянии задача перешла к ревью, исправлению, блокировке или приёмке с коммитом"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-progress",
+    "field": "expected",
+    "value": "Скрипт обновляет dashboard-state.js; открытый с диска HTML без сервера подхватывает новую версию по таймеру и обновляет элементы без перезагрузки страницы; результаты проверок и коммиты актуальны, число завершённых задач соответствует принятым задачам"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-snapshot",
+    "field": "conditions",
+    "value": "Соседний файл данных недоступен либо итоговый HTML открыт отдельно от него"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-snapshot",
+    "field": "expected",
+    "value": "Дашборд показывает последнее сохранённое состояние с отметкой снимка или потери связи и временем обновления; итоговый снимок содержит результат и коммиты, незавершённая работа не выглядит принятой"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-recovery",
+    "field": "conditions",
+    "value": "Генерация или локальный просмотр дашборда прерваны, затем исполнение продолжено либо завершено"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-recovery",
+    "field": "expected",
+    "value": "Состояния задач сохранены, ограничение показано пользователю; JS-файл и HTML-снимок восстанавливаются скриптом из state.json, обычный просмотр возобновляет обновления с диска; после завершения останавливается только запасной сервер этого исполнения, если он запускался"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-generated-data",
+    "field": "conditions",
+    "value": "Состояние содержит кавычки и HTML-фрагменты в сообщениях, генерация прервана либо браузер получил старый файл данных"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-dashboard-generated-data",
+    "field": "expected",
+    "value": "Содержимое отображается как текст; основной JSON остаётся источником истины, устаревшая версия не заменяет свежую; частично записанный JS не публикуется, производные файлы восстанавливаются скриптом из актуального состояния"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-complete",
+    "field": "conditions",
+    "value": "Все задачи приняты, их коммиты находятся в ветке исполнения и все обязательные AC подтверждены на итоговой версии"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-complete",
+    "field": "expected",
+    "value": "Отчёт и итоговый дашборд содержат набор коммитов по TASK-ID и SHA, ссылки на доказательства и оставшиеся рекомендации; выполнение плана завершено без последующих этапов доставки"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-incomplete",
+    "field": "conditions",
+    "value": "Обязательный сценарий не работает или его проверка недоступна"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-final-incomplete",
+    "field": "expected",
+    "value": "Отчёт явно обозначает частичный результат и затронутые AC; план не объявляется выполненным"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-host-limits",
+    "field": "conditions",
+    "value": "Среда не позволяет получить требуемого отдельного исполнителя или независимого рецензента"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-host-limits",
+    "field": "expected",
+    "value": "Скилл сохраняет прогресс и способ восстановления, не заявляя о проведённом независимом ревью или выполнении недоступного шага"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-clean-install",
+    "field": "conditions",
+    "value": "Документированные команды выполнены из установленной копии и стороннего рабочего каталога"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "id": "AC-clean-install",
+    "field": "expected",
+    "value": "Пути разрешаются корректно; исходный и установленный пакеты не содержат созданных окружений, кэшей, байткода и результатов запусков"
+  },
+  {
+    "path": "state.md",
+    "id": "Q-execution-model",
+    "field": "text",
+    "value": "Какую модель выполнения берём за основу нового скилла?"
+  }
+]

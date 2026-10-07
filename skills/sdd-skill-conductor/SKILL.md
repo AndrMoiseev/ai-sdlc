@@ -19,7 +19,14 @@ One skill to rule them all — from architecture to packaging. The core loop is 
 
 ## Runtime requirements (pre-flight)
 
-Before running scripts or evaluations, read **`references/runtime-setup.md`**. Prefer clean native subagents in the current harness (Codex or Claude Code); use the matching CLI when native execution cannot provide the required isolation. Structural checks need `uv`, not LLM credentials. Run script examples from this skill's directory, or use absolute script paths.
+Launch Python scripts through `uv` in the project's shared environment. Apply this
+rule to this skill's scripts and to script commands you author for other skills.
+Before execution, follow [runtime-setup.md](references/runtime-setup.md) for the
+exact command and preparation steps. If uv or the environment is unavailable,
+report the missing prerequisite and preparation command.
+
+Prefer clean native subagents in the current harness (Codex or Claude Code);
+use the matching CLI when native execution cannot provide the required isolation.
 
 ## Package runtime requirements
 
@@ -102,7 +109,7 @@ Choose degrees of freedom — this determines how much control vs. flexibility t
 ### Step 4: Scaffold
 
 ```bash
-uv run scripts/init_skill.py <skill-name> --path <output-dir> [--resources scripts,references,assets]
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/init_skill.py <skill-name> --path <output-dir> [--resources scripts,references,assets]
 ```
 
 Or create manually:
@@ -200,9 +207,9 @@ If any item fails — fix before proceeding. A missing workspace dir mid-run los
 
 - [ ] All `timing.json` files written (one per run)
 - [ ] Each run has a `grading.json` with fields `text`, `passed`, `evidence` (not `name`/`met`)
-- [ ] `benchmark.json` aggregated: `uv run scripts/aggregate_benchmark.py <workspace>/iteration-N --skill-name <name>`
+- [ ] `benchmark.json` aggregated: `uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/aggregate_benchmark.py <workspace>/iteration-N --skill-name <name>`
 - [ ] Analyst pass done — see `agents/analyzer.md` for what to look for (non-discriminating assertions, high-variance evals, time/token tradeoffs)
-- [ ] Eval viewer launched: `uv run eval-viewer/generate_review.py <workspace> --skill-name <name> --benchmark <path>`
+- [ ] Eval viewer launched: `uv run --directory <repo> --locked --offline python -B <skill-root>/eval-viewer/generate_review.py <workspace> --skill-name <name> --benchmark <path>`
   - In headless mode: `--static <output.html>` and send file to user
   - For iteration 2+: add `--previous-workspace <previous-iteration-path>`
 - [ ] User saw the viewer **before** I started editing the skill
@@ -249,7 +256,7 @@ The improvement cycle mirrors CREATE Step 6, but focused on the broken behavior.
 1. Run the failing case with current skill → document failure
 2. Apply fix using writing rules from CREATE Step 5
 3. Run eval again → grade with `agents/grader.md`
-4. Launch viewer: `uv run eval-viewer/generate_review.py <workspace>`
+4. Launch viewer: `uv run --directory <repo> --locked --offline python -B <skill-root>/eval-viewer/generate_review.py <workspace>`
    - **Headless/Cowork:** use `--static <output.html>` instead of live server
 5. Review, provide feedback, iterate
 
@@ -257,7 +264,7 @@ The improvement cycle mirrors CREATE Step 6, but focused on the broken behavior.
 
 Drive iteration off failing BinEval questions, not taste — and accept edits only against evidence the editor never saw. Full rules: `references/bineval-method.md` § Gated self-update loop.
 
-1. **Freeze the split once per session:** `uv run scripts/split_evals.py evals/evals.json --holdout 0.4 --write <workspace>/split.json` — deterministic, stratified by the optional per-eval `category`. Never re-split after seeing results
+1. **Freeze the split once per session:** `uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/split_evals.py <skill-root>/evals/evals.json --holdout 0.4 --write <workspace>/split.json` — deterministic, stratified by the optional per-eval `category`. Never re-split after seeing results
 2. Run ALL evals on the current version and grade (see Mode 3 Stage 3 + `references/bineval-method.md`) → collect `failing[]`
 3. Analyze failures on TRAIN cases only: spawn `agents/analyzer.md` with train transcripts + gradings to produce generalized, deduped lessons. Held-out grading stays unopened until the gate
 4. Apply **at most 3 atomic edits** (add/delete/replace one rule, paragraph, or table row; one edit = one lesson, labeled). No wholesale rewrites — small diffs keep cause and effect attributable at the gate
@@ -286,7 +293,7 @@ Three stages, run in order.
 ### Stage 1: Structural Validation
 
 ```bash
-uv run scripts/eval_skill.py <skill-folder>
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/eval_skill.py <skill-folder>
 ```
 
 Checks: frontmatter, naming, description quality, process leak detection, body size, structure, scripts. Target: 10/10, no warnings.
@@ -305,7 +312,7 @@ Run each in clean session. Target: 6/6 correct.
 For automated trigger testing at scale, use:
 
 ```bash
-uv run scripts/run_eval.py --harness auto --eval-set <path> --skill-path <path> --runs-per-query 3
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/run_eval.py --harness auto --eval-set <path> --skill-path <path> --runs-per-query 3
 ```
 
 ### Stage 3: BinEval Scoring
@@ -378,7 +385,7 @@ Queries must be realistic — concrete, detailed, with file paths, context, abbr
 3. Run the optimization loop:
 
 ```bash
-uv run scripts/run_loop.py \
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/run_loop.py \
   --harness auto \
   --eval-set evals/eval_set.json \
   --skill-path <skill-dir> \
@@ -412,13 +419,13 @@ The loop:
 2. Validate:
 
 ```bash
-uv run scripts/quick_validate.py <skill-folder>
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/quick_validate.py <skill-folder>
 ```
 
 3. Package:
 
 ```bash
-uv run scripts/package_skill.py <skill-folder> [output-dir]
+uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/package_skill.py <skill-folder> [output-dir]
 ```
 
 Creates `skill-name.skill` (zip with .skill extension). Verify: unzip in temp dir, check structure intact.

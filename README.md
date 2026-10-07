@@ -71,28 +71,40 @@ apm audit --ci
 Файл `.gitattributes` фиксирует LF для исходников и установленных скиллов,
 чтобы преобразование окончаний строк в Git не нарушало хеши APM.
 
-### Окружение и кэши проверок
+### Python-скрипты: подготовка и запуск
 
-Для `sdd-spec` используйте запускатель, который автоматически размещает
-окружение uv, байткод Python и кэш pytest вне `skills/`:
+Установите [uv](https://docs.astral.sh/uv/getting-started/installation/)
+(на Windows: `winget install --id=astral-sh.uv -e`). Из корня проекта
+подготовьте общее окружение:
 
 ```text
-python skills/sdd-spec/scripts/run.py test
-python skills/sdd-spec/scripts/run.py cache-dir
+uv sync --locked
 ```
 
-Вторая команда показывает каталог кэша этой копии скилла. На Windows он
-находится в `%LOCALAPPDATA%/ai-sdlc/sdd-spec/`; расположение для других ОС
-и команды `check`/`snapshot` описаны в
-[runtime-setup](skills/sdd-spec/references/runtime-setup.md).
-Запускатель также входит в установленные копии пакета. Он создаёт отдельное
-окружение для каждой копии и восстанавливает зависимости по `uv.lock`.
+Повторяйте эту команду после обновления зависимостей. `uv` сам подберёт
+Python 3.11+ и при необходимости скачает его. Отдельно устанавливать
+Python и готовить окружения для Codex и Claude не нужно.
 
-APM 0.32.0 копирует локальные зависимости целиком, без учёта `.gitignore`.
-Поэтому запускайте проверки через `run.py`, а результаты ручных прогонов
-храните вне `skills/`. Старый прямой вызов `uv run --project skills/sdd-spec`
-снова создаст `.venv` в исходниках. Режим APM `--root` не решает эту проблему
-для вложенных локальных зависимостей.
+Агент запускает скрипты из корня проекта без сетевых обращений самого uv:
+
+```text
+uv run --project . --locked --offline python -B .agents/skills/sdd-spec/scripts/check.py --project-root . --change <id> --stage documents
+uv run --project . --locked --offline python -B -m pytest
+```
+
+Для исходников или Claude замените путь скрипта на `skills/...` или
+`.claude/skills/...`. Окружение остаётся общим: `.venv/`, кэш uv — `.cache/uv/`.
+Оба каталога исключены из Git и находятся вне пакетов скиллов.
+`--locked` сохраняет версии из корневого `uv.lock`, `--offline` запрещает
+uv обращаться к сети, `-B` отключает запись байткода в пакеты.
+Если не хватает локальных зависимостей, повторите `uv sync --locked`
+в своём терминале с доступом к сети.
+
+Из другой директории используйте `uv run --directory <repo> --locked --offline`
+с абсолютным путём скрипта: uv перейдёт в корень проекта, сохранив общий кэш.
+Примеры других команд — в [runtime-setup](skills/sdd-spec/references/runtime-setup.md).
+APM копирует каталоги скиллов целиком, поэтому результаты прогонов и окружения
+храните вне `skills/`, `.agents/skills/` и `.claude/skills/`.
 
 Правки вносите в `skills/`. Перед установкой сравнивайте существующие
 копии с исходниками и сохраняйте локальные изменения по [AGENTS.md](AGENTS.md).

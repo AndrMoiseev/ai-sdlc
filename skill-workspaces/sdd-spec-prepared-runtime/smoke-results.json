@@ -1,0 +1,65 @@
+[
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "version",
+    "exit_code": 0,
+    "stdout": "Python 3.14.7\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "check",
+    "exit_code": 0,
+    "stdout": "{\n  \"schema_version\": 1,\n  \"stage\": \"documents\",\n  \"errors\": [],\n  \"warnings\": [\n    {\n      \"code\": \"state_recovery\",\n      \"path\": \"C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-spec-prepared-runtime\\\\fixture\\\\sdd\\\\changes\\\\demo\\\\state.md\",\n      \"element_id\": null,\n      \"message\": \"State is missing; recover a draft checkpoint without inferring approvals.\"\n    }\n  ],\n  \"review_status\": {\n    \"required_lenses\": [\n      \"consistency\"\n    ],\n    \"coverage\": {\n      \"consistency\": \"missing\"\n    },\n    \"reports\": {},\n    \"complete\": false,\n    \"unresolved_findings\": [],\n    \"unfinished_fixes\": []\n  },\n  \"approval_status\": {\n    \"approved\": false,\n    \"ready\": false,\n    \"applicability\": {},\n    \"work_authorizations\": {},\n    \"provenance\": \"Recorded decisions; user authorship and change provenance are not verified.\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "snapshot",
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"path\": \"design.md\",\n    \"sha256\": \"6df71c179eff9ee3ab19430e232f9ae548fb15cfdd057f7bcfebbcab77880ce0\"\n  },\n  {\n    \"path\": \"proposal.md\",\n    \"sha256\": \"ed55a8aafe33e7c32fffdbbf42e1997da8df2954cef1a545001d6e6b576ddad3\"\n  },\n  {\n    \"path\": \"specs/feature/spec.md\",\n    \"sha256\": \"3a67169037542c376883b2d924a0465f65bfee250b3a96b785e5f8ef9ac0e69e\"\n  }\n]\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.agents\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "version",
+    "exit_code": 0,
+    "stdout": "Python 3.14.7\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.agents\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "check",
+    "exit_code": 0,
+    "stdout": "{\n  \"schema_version\": 1,\n  \"stage\": \"documents\",\n  \"errors\": [],\n  \"warnings\": [\n    {\n      \"code\": \"state_recovery\",\n      \"path\": \"C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-spec-prepared-runtime\\\\fixture\\\\sdd\\\\changes\\\\demo\\\\state.md\",\n      \"element_id\": null,\n      \"message\": \"State is missing; recover a draft checkpoint without inferring approvals.\"\n    }\n  ],\n  \"review_status\": {\n    \"required_lenses\": [\n      \"consistency\"\n    ],\n    \"coverage\": {\n      \"consistency\": \"missing\"\n    },\n    \"reports\": {},\n    \"complete\": false,\n    \"unresolved_findings\": [],\n    \"unfinished_fixes\": []\n  },\n  \"approval_status\": {\n    \"approved\": false,\n    \"ready\": false,\n    \"applicability\": {},\n    \"work_authorizations\": {},\n    \"provenance\": \"Recorded decisions; user authorship and change provenance are not verified.\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.agents\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "snapshot",
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"path\": \"design.md\",\n    \"sha256\": \"6df71c179eff9ee3ab19430e232f9ae548fb15cfdd057f7bcfebbcab77880ce0\"\n  },\n  {\n    \"path\": \"proposal.md\",\n    \"sha256\": \"ed55a8aafe33e7c32fffdbbf42e1997da8df2954cef1a545001d6e6b576ddad3\"\n  },\n  {\n    \"path\": \"specs/feature/spec.md\",\n    \"sha256\": \"3a67169037542c376883b2d924a0465f65bfee250b3a96b785e5f8ef9ac0e69e\"\n  }\n]\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.claude\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "version",
+    "exit_code": 0,
+    "stdout": "Python 3.14.7\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.claude\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "check",
+    "exit_code": 0,
+    "stdout": "{\n  \"schema_version\": 1,\n  \"stage\": \"documents\",\n  \"errors\": [],\n  \"warnings\": [\n    {\n      \"code\": \"state_recovery\",\n      \"path\": \"C:\\\\Users\\\\Andrew\\\\repos\\\\ai-sdlc\\\\skill-workspaces\\\\sdd-spec-prepared-runtime\\\\fixture\\\\sdd\\\\changes\\\\demo\\\\state.md\",\n      \"element_id\": null,\n      \"message\": \"State is missing; recover a draft checkpoint without inferring approvals.\"\n    }\n  ],\n  \"review_status\": {\n    \"required_lenses\": [\n      \"consistency\"\n    ],\n    \"coverage\": {\n      \"consistency\": \"missing\"\n    },\n    \"reports\": {},\n    \"complete\": false,\n    \"unresolved_findings\": [],\n    \"unfinished_fixes\": []\n  },\n  \"approval_status\": {\n    \"approved\": false,\n    \"ready\": false,\n    \"applicability\": {},\n    \"work_authorizations\": {},\n    \"provenance\": \"Recorded decisions; user authorship and change provenance are not verified.\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "launcher": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.claude\\skills\\sdd-spec\\scripts\\run.py",
+    "command": "snapshot",
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"path\": \"design.md\",\n    \"sha256\": \"6df71c179eff9ee3ab19430e232f9ae548fb15cfdd057f7bcfebbcab77880ce0\"\n  },\n  {\n    \"path\": \"proposal.md\",\n    \"sha256\": \"ed55a8aafe33e7c32fffdbbf42e1997da8df2954cef1a545001d6e6b576ddad3\"\n  },\n  {\n    \"path\": \"specs/feature/spec.md\",\n    \"sha256\": \"3a67169037542c376883b2d924a0465f65bfee250b3a96b785e5f8ef9ac0e69e\"\n  }\n]\n",
+    "stderr": ""
+  }
+]

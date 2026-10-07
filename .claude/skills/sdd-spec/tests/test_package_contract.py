@@ -46,7 +46,7 @@ def test_every_local_markdown_link_resolves_inside_package():
 
 
 def test_required_resources_ship_together():
-    files = ["README.md", "pyproject.toml", "uv.lock", "scripts/check.py", "scripts/snapshot.py", "scripts/run.py"]
+    files = ["README.md", "pyproject.toml", "scripts/check.py", "scripts/snapshot.py"]
     files += [f"flows/{name}.md" for name in
               ("explore", "draft", "revise", "review", "user-review", "resume", "plan", "explain")]
     files += [f"templates/{name}.md" for name in

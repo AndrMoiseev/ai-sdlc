@@ -37,9 +37,9 @@ Use these EXACT names everywhere — in `dimension`, `dimension_scores`, and `fa
 
 1. Run the script and capture its JSON:
    ```
-   uv run scripts/eval_skill.py <skill_path> --json
+   uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/eval_skill.py <skill_path> --json
    ```
-   (If `uv` is unavailable, stop and report it — do not fall back to `python3`: the scripts carry inline dependencies that require `uv run`. See `references/runtime-setup.md`.)
+   (If `uv` is unavailable, stop and report it — do not fall back to `python3`: the scripts use the prepared project environment through `uv run`. See `references/runtime-setup.md`.)
 2. The script emits deterministic question records with the EXACT ids, dimensions, and `critical` flags from the contract (e.g. `DET-STRUCT-SKILLMD-EXISTS`, `DET-DISCOVERY-DESC-PRESENT`, `DET-ROBUST-NO-SECRETS`). Each already carries `source: "deterministic"`, an `answer` (1/0), and an `explanation`.
 3. Copy these records VERBATIM into your `questions[]`. **Never recompute or override a deterministic answer** — the script owns them. If the script fails to run, stop and report the error; do not fabricate deterministic answers.
 

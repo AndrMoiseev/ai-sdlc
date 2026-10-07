@@ -1,2 +1,4 @@
 /.idea/
 apm_modules/
+/.venv/
+/.cache/

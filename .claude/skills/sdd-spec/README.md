@@ -4,11 +4,30 @@
 
 ## Ручное подключение
 
-Скопируйте **весь** каталог `skills/sdd-spec/`, включая скрытые файлы при наличии, `agents/openai.yaml`, flows, references, templates, scripts, pyproject.toml и uv.lock. Для Codex выберите `.agents/skills/sdd-spec/` проекта либо `~/.agents/skills/sdd-spec/`; для Claude Code — `.claude/skills/sdd-spec/` либо `~/.claude/skills/sdd-spec/`. Если целевой каталог уже существует, сравните версии и сохраните собственные изменения до замены. Не перезаписывайте чужие настройки, AGENTS.md, CLAUDE.md или определения агентов. Автоустановщика нет. Пути подключения подтверждены [OpenAI](https://learn.chatgpt.com/docs/build-skills) и [Claude Code](https://code.claude.com/docs/en/skills).
+Скопируйте **весь** каталог `skills/sdd-spec/`, включая скрытые файлы при наличии, `agents/openai.yaml`, flows, references, templates, scripts и pyproject.toml. Для Codex выберите `.agents/skills/sdd-spec/` проекта либо `~/.agents/skills/sdd-spec/`; для Claude Code — `.claude/skills/sdd-spec/` либо `~/.claude/skills/sdd-spec/`. Если целевой каталог уже существует, сравните версии и сохраните собственные изменения до замены. Не перезаписывайте чужие настройки, AGENTS.md, CLAUDE.md или определения агентов. Автоустановщика нет. Пути подключения подтверждены [OpenAI](https://learn.chatgpt.com/docs/build-skills) и [Claude Code](https://code.claude.com/docs/en/skills).
 
 Откройте новую сессию и вызовите `$sdd-spec`/выберите скилл в Codex либо `/sdd-spec` в Claude Code. Например: «`$sdd-spec` исследуй экспорт заказов» или «`/sdd-spec` продолжи order-export». После запуска достаточно обычного диалога. Общая просьба «спланируй изменение» в новой сессии не активирует скилл. Не копируйте только SKILL.md: это потеряет инструкции и политику явного входа.
 
-Понадобятся uv и Python 3.11+; зависимости закреплены локальным lockfile. Команды проверки из любой директории и устранение ошибок — в [runtime-setup](references/runtime-setup.md). OpenSpec не требуется. При отключении пакета сохраните рабочее дерево `sdd/` проекта: в нем документы и история решений.
+В этом репозитории выполните из корня `uv sync --locked`: окружение общее
+для исходников, Codex и Claude. Команды запуска приведены в
+[runtime-setup](references/runtime-setup.md).
+
+В другом проекте подключите одну установленную копию к корневому uv-проекту.
+Если корневого pyproject.toml ещё нет, создайте его командой `uv init --bare --no-workspace`.
+Задайте `cache-dir = ".cache/uv"` в корневом uv.toml и добавьте `.venv/`
+и `.cache/` в корневой .gitignore. Затем из корня выполните:
+
+```text
+uv add --no-workspace ./.agents/skills/sdd-spec
+```
+
+Для Claude укажите `.claude/skills/sdd-spec`; обе копии подключать не нужно.
+Команда добавляет зависимости скилла в общее окружение. Сохраните корневые
+pyproject.toml и uv.lock; последующая подготовка выполняется через
+`uv sync --locked`. Эти операции выполняются в терминале с доступом к сети.
+Для тестов самого скилла дополнительно подключите `uv add --dev pytest==8.4.2`.
+OpenSpec не требуется. При отключении скилла сохраните рабочее дерево `sdd/`:
+в нём документы и история решений.
 
 Для редактуры русских документов требуется установленный `humanizer-ru` и
 возможность запускать свежих субагентов. В APM эта зависимость входит в
@@ -50,7 +69,8 @@ Chrome/Chromium. Снимки получают при проверке archify, 
 Локальные проверки:
 
 ```text
-python skills/sdd-spec/scripts/run.py test
+uv sync --locked
+uv run --project . --locked --offline python -B -m pytest
 ```
 
 [Ручные процедуры](evals/manual.md) разделяют статическую проверку инструкций и фактическое выполнение; [происхождение](references/openspec-origin.md) содержит адаптации OpenSpec и лицензию.

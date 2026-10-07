@@ -1,0 +1,16 @@
+[project]
+name = "ai-sdlc-runtime"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["sdd-checks"]
+
+[tool.uv.sources]
+sdd-checks = { path = "skills/sdd-spec" }
+
+[dependency-groups]
+dev = ["pytest==8.4.2"]
+
+[tool.pytest.ini_options]
+pythonpath = ["skills/sdd-spec/scripts"]
+testpaths = ["skills/sdd-spec/tests"]
+cache_dir = ".cache/pytest"
