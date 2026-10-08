@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDD execution event envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "run_id", "expected_revision", "owner", "type", "task_id", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]+$"},
+    "run_id": {"type": "string", "minLength": 1},
+    "expected_revision": {"type": "integer", "minimum": 0},
+    "owner": {"type": "string", "minLength": 1},
+    "type": {"enum": ["block", "resume", "spec_conflict", "revised_plan", "handoff", "mode", "budget_extend", "role_register", "role_result", "review_start", "review_result", "checks_register", "checks_extend", "check_setup", "check_run", "procedure_begin", "procedure_result", "candidate", "start", "repair", "commit", "accept", "worktree_create", "worktree_remove", "integrate", "integration_resolve", "transfer", "finalize"]},
+    "task_id": {"type": ["string", "null"]},
+    "payload": {"type": "object"}
+  }
+}

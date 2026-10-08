@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDD execution state; semantic invariants are enforced by state.py",
+  "type": "object",
+  "required": ["schema_version", "change_id", "run_id", "revision", "status", "owner", "basis", "mode", "tasks", "roles", "events", "blockers", "integrity"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "change_id": {"type": "string"},
+    "run_id": {"type": "string"},
+    "revision": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["active", "blocked", "completed"]},
+    "mode": {"enum": ["sequential", "parallel"]},
+    "tasks": {"type": "object", "additionalProperties": {"type": "object", "required": ["plan", "status", "attempt", "candidate", "checks", "evidence", "reviews", "commits", "review_limit", "test_repair_limit"], "properties": {"status": {"enum": ["pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"]}}}},
+    "roles": {"type": "object"},
+    "events": {"type": "array"},
+    "blockers": {"type": "array"},
+    "integrity": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "SDD Apply"
+  short_description: "Execute an approved SDD plan"
+  default_prompt: "Use $sdd-apply to execute the approved plan for the selected change."
+policy:
+  allow_implicit_invocation: false
