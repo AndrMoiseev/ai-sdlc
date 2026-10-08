@@ -6,7 +6,7 @@
 """Freeze a deterministic train/held-out split of an evals.json file.
 
 Usage:
-    uv run --locked --offline --script <skill-root>/scripts/split_evals.py <evals.json> --holdout 0.4 [--seed 42] [--write split.json]
+    uv run --locked --script <skill-root>/scripts/split_evals.py <evals.json> --holdout 0.4 [--seed 42] [--write split.json]
 
 Stratifies by the optional per-eval `category` field (evals without one form
 their own stratum). Items are sorted by id before shuffling, so the split does

@@ -10,28 +10,25 @@ references, templates, scripts, соседних script lock-файлов и м�
 Каждая точка входа объявляет Python 3.11+ и зависимости в формате PEP 723.
 Рядом поставляется `<script>.lock`. uv создаёт отдельное окружение в пользовательском
 кэше; Python-настройки проверяемого проекта не нужны. Проверь `uv --version`,
-`uv cache dir` и наличие скрипта с его lock-файлом. Для подготовки установленной
-копии в терминале с доступом к сети выполни:
+`uv cache dir` и наличие скрипта с его lock-файлом. Запускай нужную команду сразу
+через `uv run --locked --script`: uv проверяет lock-файл, создаёт окружение и
+автоматически скачивает недостающие зависимости и подходящий Python.
+Отдельный `uv sync` не требуется. После очистки кэша или переноса копии та же
+команда восстановит окружение.
 
-```text
-uv sync --locked --script "<skill-root>/scripts/check.py"
-uv sync --locked --script "<skill-root>/scripts/snapshot.py"
-```
-
-Подготовка устанавливает зависимости без выполнения скрипта. Повтори её после
-очистки кэша, переноса копии или при недостающих пакетах. Для обычного запуска
-используй `uv run --locked --offline --script`: uv читает метаданные самого
-скрипта, проверяет его lock-файл и работает с локальными зависимостями.
-Передавай скрипт непосредственно uv. При ошибке сообщи причину и команду
-подготовки; устаревший lock-файл обновляй явно через `uv lock --script` при
-изменении зависимостей. `--offline` ограничивает uv, а не сетевые запросы скрипта.
+Передавай скрипт непосредственно uv. При ограничении сети или файлового доступа
+сообщи фактическую причину и используй штатный механизм разрешений среды.
+Устаревший lock-файл обновляй явно через `uv lock --script` при изменении
+зависимостей. Флаг `--offline` добавляй только при явном требовании работать
+без сети или в офлайн-тестах с локальными зависимостями. Он ограничивает uv,
+а не сетевые запросы скрипта; отсутствие пакета в этом режиме означает ошибку.
 
 Расположение кэша задаётся один раз для пользователя через `UV_CACHE_DIR`.
 На Windows используй абсолютный путь к `uv-runtime/cache` в системной временной
 папке; для сторонних `uvx` также задай `UV_TOOL_DIR` на соседний `uv-runtime/tools`.
 После изменения пользовательских переменных перезапусти приложение агента и
-проверь полученные пути. Нужные версии Python устанавливай в пользовательском
-терминале. Настройки агента и проекта не нужны, если среда уже разрешает запись
+проверь полученные пути. При скачивании Python uv также нужен доступ к каталогу
+интерпретаторов. Настройки проекта не нужны, если среда уже разрешает запись
 во временную папку; иначе сообщи ограничение среды. Система может очистить эти
 каталоги, поэтому сохраняй отчёты вне них. Скрипты отключают запись байткода
 перед локальными импортами; тестовый скрипт отключает кэш pytest.
@@ -41,15 +38,15 @@ uv sync --locked --script "<skill-root>/scripts/snapshot.py"
 Запускай из любой директории, подставляя абсолютные пути в кавычках:
 
 ```text
-uv run --locked --offline --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage documents
-uv run --locked --offline --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage plan
-uv run --locked --offline --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage documents
-uv run --locked --offline --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage plan
-uv run --locked --offline --script "<skill-root>/scripts/test.py" -q
+uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage documents
+uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage plan
+uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage documents
+uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage plan
+uv run --locked --script "<skill-root>/scripts/test.py" -q
 ```
 
-Для последней команды подготовь `uv sync --locked --script "<skill-root>/scripts/test.py"`.
-Её зависимости, включая pytest, объявлены в самом тестовом скрипте.
+Зависимости последней команды, включая pytest, объявлены в самом тестовом
+скрипте и устанавливаются при запуске.
 
 Check и snapshot только читают проект; JSON идёт в stdout. Snapshot сам
 не сохраняет файлы. Основной агент переносит манифест в отчёт/решение.

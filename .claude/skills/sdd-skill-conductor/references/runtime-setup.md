@@ -24,28 +24,32 @@ For CLI selection, `scripts/harness.py` applies this precedence:
 Verify `uv --version`, `uv cache dir`, the required script and its adjacent
 `<script>.lock`. Each entry point declares Python 3.10+ and its dependencies in
 PEP 723 metadata. uv creates its environment in the user cache, independently of
-the consuming project. Prepare each required script in a terminal with network
-access, including installed copies at their actual paths:
+the consuming project. Run the required script directly, including installed
+copies at their actual paths:
 
 ```text
-uv sync --locked --script "<skill-root>/scripts/eval_skill.py"
+uv run --locked --script "<skill-root>/scripts/eval_skill.py" "<skill-path>"
 ```
 
-Run it with `uv run --locked --offline --script "<script>"`. Pass the script
-directly to uv so its metadata and lockfile are applied. Entry points disable
-bytecode before importing local modules. Preparation executes no script code;
-repeat it for missing dependencies, a moved copy or a cleared cache. If offline
-execution fails, report the specific error and preparation command. Change a
-stale lockfile only as an explicit dependency update, using `uv lock --script`.
-`--offline` limits uv's network access, not the script or a spawned model CLI.
+uv downloads missing dependencies and a suitable Python when needed, then executes
+the script. The same command rebuilds its environment after a move or cache cleanup;
+no separate sync is required. Pass the script directly to uv so its metadata and
+lockfile are applied. Entry points disable bytecode before importing local modules.
+If network or filesystem permissions block installation, report the actual error
+and use the host's normal permission mechanism. Change a stale lockfile only as an
+explicit dependency update, using `uv lock --script`.
+
+Add `--offline` only for explicitly requested offline work or offline regression
+tests with locally available dependencies. It limits uv's network access, not the
+script or a spawned model CLI. A missing package in that mode is an expected error.
 
 Cache placement is a once-per-user uv setting. On Windows, set `UV_CACHE_DIR`
 to an absolute `uv-runtime/cache` directory under the system temporary directory.
 Set `UV_TOOL_DIR` to its `uv-runtime/tools` sibling for third-party `uvx` calls,
 which also need a writable tools lock. Restart the agent application after setting
 user variables and confirm the inherited paths. These disposable directories may
-be cleared by the system; keep retained reports elsewhere. Install required Python
-versions in a user terminal. Agent permissions and project files need no changes
+be cleared by the system; keep retained reports elsewhere. uv also needs access to
+its Python installation directory when downloading an interpreter. Project files need no changes
 when the host already permits writing to its temporary directory; if it does not,
 report that restriction rather than claiming the setup succeeded.
 
@@ -107,7 +111,7 @@ with the small read-only probe above before scaling up.
 Prepare `prompt.txt` and a disposable fixture workspace. In the with-skill prompt, explicitly invoke or reference the skill using the selected harness's supported mechanism. Use the same task without the skill instruction for the baseline.
 
 ```bash
-uv run --locked --offline --script <skill-root>/scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --fixture-manifest fixture.json --output-dir <run-artifacts>
+uv run --locked --script <skill-root>/scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --fixture-manifest fixture.json --output-dir <run-artifacts>
 ```
 
 Add `--allow-writes` for scenarios that edit fixture files. `--model` and `--timeout` are optional. Keep output artifacts outside the fixture when the task must not read its own trace. The runner saves the response, execution trace, run metadata, and timing; inspect completion/error status before grading. A timeout, permission failure, or authentication error is a failed execution, not a negative skill-discovery result.

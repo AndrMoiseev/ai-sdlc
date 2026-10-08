@@ -19,14 +19,16 @@ skill directories, including files ignored by Git.
    once-per-user `UV_CACHE_DIR` setting for writable external storage; on Windows
    the agreed location is `uv-runtime/cache` under the system temporary directory.
    `UV_TOOL_DIR` can point to its `uv-runtime/tools` sibling for third-party uvx
-   calls. Document disposable storage and preparation after cleanup. Keep reports
+   calls. Document disposable storage and automatic restoration on the next run. Keep reports
    in an explicit workspace outside the cache. Check the actual host's write access.
-4. Prepare dependencies in a user terminal with network access:
-   `uv sync --locked --script "<script>"`. For ordinary execution use
-   `uv run --locked --offline --script "<script>"` with absolute paths outside
+4. For ordinary execution use
+   `uv run --locked --script "<script>"` with absolute paths outside
    the working directory. uv applies the script's metadata and lockfile, ignoring
-   the consuming project's dependencies. Offline mode blocks uv's network access,
-   not the script's. Report missing packages and the preparation command. Update
+   the consuming project's dependencies. uv automatically downloads missing packages
+   and restores environments after cache cleanup. No separate sync is required.
+   Report actual network or filesystem restrictions and use the host's normal
+   permission mechanism. Add `--offline` only for deliberately offline execution
+   with cached dependencies; it blocks uv's network access, not the script's. Update
    lockfiles explicitly when changing dependencies; never silently regenerate them
    during ordinary execution.
 5. Disable bytecode in each entry point before local imports with
@@ -43,12 +45,14 @@ skill directories, including files ignored by Git.
 
 ## Verify before installation or packaging
 
-- Exercise documented preparation and offline execution from source and installed
+- Exercise automatic installation on first run with an empty cache, then cached
+  execution from source and installed
   copies, including a directory without a Python project and a project with
   conflicting dependencies. Confirm environments and caches stay outside the
   packages and the consuming project is unchanged.
-- Check missing local dependencies and stale script lockfiles: the command must fail
-  without downloading or silently changing the lockfile.
+- Check an empty cache with explicit `--offline`: the command must fail without
+  downloading. Check stale script lockfiles: `--locked` must fail without rewriting
+  them. Ordinary first-run installation must leave supplied lockfiles unchanged.
 - Inspect hidden and Git-ignored package contents for generated state; git status
   alone does not prove package cleanliness. Bundle script lockfiles with scripts.
 - Preserve existing user data when moving or cleaning runtime files. Record the

@@ -5,7 +5,7 @@
 # ///
 """Smoke tests for sdd-skill-conductor scripts.
 
-Run: uv run --locked --offline --script <skill-root>/scripts/test_smoke.py
+Run: uv run --locked --script <skill-root>/scripts/test_smoke.py
 
 Tests verify the most critical scripts execute successfully on a known-good
 skill, fail loudly on a known-bad skill, and produce expected output shapes.

@@ -341,7 +341,7 @@ def init_skill(skill_name, path, resources, include_examples):
         print("2. Create resource directories only if needed (scripts/, references/, assets/)")
     if "scripts" in resources:
         print('3. Declare each script\'s dependencies, then run uv lock --script "<script.py>"')
-        print('   Prepare it with uv sync --locked --script "<script.py>" and ship its .py.lock')
+        print('   Ship its .py.lock; uv run --locked --script "<script.py>" installs dependencies automatically')
         print("4. Run the validator when ready to check the skill structure")
     else:
         print("3. Run the validator when ready to check the skill structure")
