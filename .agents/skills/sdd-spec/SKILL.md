@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 Запускай только по явному `$sdd-spec`, `/sdd-spec` или выбору пользователем этого скилла. Последующие сообщения продолжают выбранный процесс без повторного вызова. В новой сессии обычная просьба спланировать изменение не активирует sdd.
 
-Перед работой прочитай [условия запуска](references/runtime-setup.md), [формат документов](references/document-format.md) и адаптер среды: [Codex](references/codex.md) или [Claude Code](references/claude-code.md). Выбери изменение и проверь сохраненные основания через [resume](flows/resume.md), затем открой нужный флоу.
+Перед работой прочитай [условия запуска](references/runtime-setup.md), [формат документов](references/document-format.md) и адаптер среды: [Codex](references/codex.md), [Claude Code](references/claude-code.md) или [произвольный агент](references/generic.md), если ни одна из этих сред не установлена достоверно. Выбери изменение и проверь сохраненные основания через [resume](flows/resume.md), затем открой нужный флоу.
 
 ## Выбор флоу
 
