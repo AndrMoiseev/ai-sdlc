@@ -74,35 +74,92 @@ apm audit --ci
 ### Python-скрипты: подготовка и запуск
 
 Установите [uv](https://docs.astral.sh/uv/getting-started/installation/)
-(на Windows: `winget install --id=astral-sh.uv -e`). Из корня проекта
-подготовьте общее окружение:
+(на Windows: `winget install --id=astral-sh.uv -e`). Проверенная версия — uv 0.12.5.
+Наши скрипты объявляют зависимости в формате PEP 723 и поставляются с соседними
+`.py.lock`-файлами. uv создаёт изолированные окружения в пользовательском кэше.
+Проекту, в котором используется скилл, не нужны Python-манифест, lock-файл или `.venv`.
 
-```text
-uv sync --locked
+На Windows один раз настройте пользовательские переменные uv в обычном PowerShell:
+
+```powershell
+./scripts/setup-uv.ps1
 ```
 
-Повторяйте эту команду после обновления зависимостей. `uv` сам подберёт
-Python 3.11+ и при необходимости скачает его. Отдельно устанавливать
-Python и готовить окружения для Codex и Claude не нужно.
+Скрипт задаёт `UV_CACHE_DIR` на `uv-runtime/cache`, а `UV_TOOL_DIR` на
+`uv-runtime/tools` внутри системной временной папки. Он сохраняет абсолютные пути
+в пользовательских переменных Windows и применяет их к текущему PowerShell.
+Настройки агента и каждого проекта не меняются. Для установки без клонирования
+репозитория можно выполнить тот же код вручную:
 
-Агент запускает скрипты из корня проекта без сетевых обращений самого uv:
-
-```text
-uv run --project . --locked --offline python -B .agents/skills/sdd-spec/scripts/check.py --project-root . --change <id> --stage documents
-uv run --project . --locked --offline python -B -m pytest
+```powershell
+$runtimeRoot = Join-Path ([System.IO.Path]::GetTempPath()) 'uv-runtime'
+$settings = @{
+    UV_CACHE_DIR = Join-Path $runtimeRoot 'cache'
+    UV_TOOL_DIR = Join-Path $runtimeRoot 'tools'
+}
+foreach ($name in $settings.Keys) {
+    $value = [System.IO.Path]::GetFullPath($settings[$name])
+    New-Item -ItemType Directory -Path $value -Force | Out-Null
+    [Environment]::SetEnvironmentVariable($name, $value, 'User')
+    [Environment]::SetEnvironmentVariable($name, $value, 'Process')
+}
 ```
 
-Для исходников или Claude замените путь скрипта на `skills/...` или
-`.claude/skills/...`. Окружение остаётся общим: `.venv/`, кэш uv — `.cache/uv/`.
-Оба каталога исключены из Git и находятся вне пакетов скиллов.
-`--locked` сохраняет версии из корневого `uv.lock`, `--offline` запрещает
-uv обращаться к сети, `-B` отключает запись байткода в пакеты.
-Если не хватает локальных зависимостей, повторите `uv sync --locked`
-в своём терминале с доступом к сети.
+Перезапустите приложение агента и другие терминалы, чтобы они получили переменные.
+Проверьте `uv cache dir` и `uv tool dir` из нового процесса. Сторонние `uv run`
+и `uvx` используют те же переменные; явные параметры команд или переназначение
+переменных могут их переопределить. `UV_TOOL_DIR` нужен также для файла блокировки
+инструментов. Старые кэши и установленные инструменты не перемещаются и не удаляются;
+инструменты из прежнего `UV_TOOL_DIR` при необходимости установите заново.
 
-Из другой директории используйте `uv run --directory <repo> --locked --offline`
-с абсолютным путём скрипта: uv перейдёт в корень проекта, сохранив общий кэш.
-Примеры других команд — в [runtime-setup](skills/sdd-spec/references/runtime-setup.md).
+Системная временная папка должна быть доступна песочнице для записи. Если среда
+запрещает запись и туда, настройка uv сама по себе не даёт разрешений.
+На других ОС используйте доступный пользовательский кэш uv; при необходимости
+задайте те же переменные абсолютными путями к разрешённым каталогам.
+Общий `UV_PROJECT_ENVIRONMENT` для разных проектов не задавайте.
+
+В терминале с доступом к сети подготовьте нужные скрипты по их установленным путям:
+
+```text
+uv sync --locked --script .agents/skills/sdd-spec/scripts/check.py
+uv sync --locked --script .agents/skills/sdd-spec/scripts/snapshot.py
+uv sync --locked --script .agents/skills/sdd-skill-conductor/scripts/eval_skill.py
+```
+
+`uv sync --script` устанавливает зависимости без выполнения скрипта и при
+необходимости скачивает подходящий Python. Для исходников или Claude замените
+путь на `skills/...` или `.claude/skills/...`. Остальные скрипты готовятся так же.
+Повторите подготовку после обновления зависимостей, переноса копии или очистки
+кэша. Временную папку может очистить система: офлайн-запуск тогда потребует
+повторной подготовки. Установки `uv tool install` в этом каталоге тоже временные.
+
+Обычный запуск агента использует подготовленные зависимости:
+
+```text
+uv run --locked --offline --script .agents/skills/sdd-spec/scripts/check.py --project-root . --change <id> --stage documents
+```
+
+Из другой директории укажите абсолютные пути к скрипту и `--project-root`.
+`--locked` проверяет lock-файл скрипта, `--offline` запрещает сетевые обращения uv,
+а сами точки входа отключают запись байткода. Зависимости проекта пользователя
+не участвуют в запуске. При недостающих пакетах повторите подготовку в терминале
+с сетью. При изменении зависимостей автор обновляет соответствующий lock-файл
+командой `uv lock --script <script.py>` и сохраняет его вместе со скриптом.
+
+Регрессионные тесты также запускаются автономно:
+
+```text
+uv sync --locked --script skills/sdd-spec/scripts/test.py
+uv run --locked --offline --script skills/sdd-spec/scripts/test.py -q
+uv sync --locked --script skills/sdd-skill-conductor/scripts/test_harness.py
+uv run --locked --offline --script skills/sdd-skill-conductor/scripts/test_harness.py
+uv sync --locked --script skills/sdd-skill-conductor/scripts/test_smoke.py
+uv run --locked --offline --script skills/sdd-skill-conductor/scripts/test_smoke.py
+```
+
+Корневые `pyproject.toml` и `uv.lock` остаются для разработки этого репозитория;
+потребителям скиллов они не нужны. Примеры остальных команд — в
+[runtime-setup](skills/sdd-spec/references/runtime-setup.md).
 APM копирует каталоги скиллов целиком, поэтому результаты прогонов и окружения
 храните вне `skills/`, `.agents/skills/` и `.claude/skills/`.
 

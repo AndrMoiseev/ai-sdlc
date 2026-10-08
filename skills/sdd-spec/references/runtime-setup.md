@@ -1,48 +1,55 @@
 # Условия запуска и проверки
 
-Определи абсолютные `<skill-root>` (каталог скилла), `<repo>` (корень проекта
-с общим окружением uv) и безопасный `<id>`. Проверь комплектность flows,
-references, templates, scripts, pyproject.toml и метаданных хоста, доступ
+Определи абсолютные `<skill-root>` (каталог скилла), `<repo>` (корень проверяемого
+проекта) и безопасный `<id>`. Проверь комплектность flows,
+references, templates, scripts, соседних script lock-файлов и метаданных хоста, доступ
 к источникам и запись в `sdd/changes/`. Существующее изменение сохраняй.
 
-## Общее окружение проекта
+## Автономные скрипты uv
 
-Все копии скилла используют окружение `.venv/` проекта и его `uv.lock`.
-Зависимости скилла объявлены в его pyproject.toml; корневой проект подключает
-одну копию как локальную зависимость. Для подготовки в терминале с доступом
-к сети выполни из корня проекта:
+Каждая точка входа объявляет Python 3.11+ и зависимости в формате PEP 723.
+Рядом поставляется `<script>.lock`. uv создаёт отдельное окружение в пользовательском
+кэше; Python-настройки проверяемого проекта не нужны. Проверь `uv --version`,
+`uv cache dir` и наличие скрипта с его lock-файлом. Для подготовки установленной
+копии в терминале с доступом к сети выполни:
 
 ```text
-uv sync --locked
+uv sync --locked --script "<skill-root>/scripts/check.py"
+uv sync --locked --script "<skill-root>/scripts/snapshot.py"
 ```
 
-uv подбирает Python 3.11+ и устанавливает зависимости. При обычном запуске
-используй `--directory <repo> --locked --offline`: uv переходит в корень проекта и проверяет окружение по
-его lock-файлу и может восстановить пакеты из кэша без обращения к сети.
-При недостающих пакетах или устаревшем lock-файле сообщи ошибку. Подготовку
-повторяют в пользовательском терминале; изменение зависимостей и обновление
-lock-файла выполняют явно. Не переключайся на проект внутри каталога скилла.
+Подготовка устанавливает зависимости без выполнения скрипта. Повтори её после
+очистки кэша, переноса копии или при недостающих пакетах. Для обычного запуска
+используй `uv run --locked --offline --script`: uv читает метаданные самого
+скрипта, проверяет его lock-файл и работает с локальными зависимостями.
+Передавай скрипт непосредственно uv. При ошибке сообщи причину и команду
+подготовки; устаревший lock-файл обновляй явно через `uv lock --script` при
+изменении зависимостей. `--offline` ограничивает uv, а не сетевые запросы скрипта.
 
-Кэш uv задаётся в корневом `uv.toml`: `cache-dir = ".cache/uv"`.
-Окружение и кэш доступны агенту для записи и исключены из Git.
-Флаг Python `-B` отключает запись байткода. Для тестов направляй кэш pytest
-в `<repo>/.cache/pytest`; файлы проверяемого проекта создаются только в
-выбранной фикстуре. `--offline` ограничивает uv, а не сетевые запросы скрипта.
+Расположение кэша задаётся один раз для пользователя через `UV_CACHE_DIR`.
+На Windows используй абсолютный путь к `uv-runtime/cache` в системной временной
+папке; для сторонних `uvx` также задай `UV_TOOL_DIR` на соседний `uv-runtime/tools`.
+После изменения пользовательских переменных перезапусти приложение агента и
+проверь полученные пути. Нужные версии Python устанавливай в пользовательском
+терминале. Настройки агента и проекта не нужны, если среда уже разрешает запись
+во временную папку; иначе сообщи ограничение среды. Система может очистить эти
+каталоги, поэтому сохраняй отчёты вне них. Скрипты отключают запись байткода
+перед локальными импортами; тестовый скрипт отключает кэш pytest.
 
 ## Команды
 
 Запускай из любой директории, подставляя абсолютные пути в кавычках:
 
 ```text
-uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/check.py --project-root <repo> --change <id> --stage documents
-uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/check.py --project-root <repo> --change <id> --stage plan
-uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/snapshot.py --project-root <repo> --change <id> --stage documents
-uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/snapshot.py --project-root <repo> --change <id> --stage plan
-uv run --directory <repo> --locked --offline python -B -m pytest <skill-root>/tests -o cache_dir=<repo>/.cache/pytest
+uv run --locked --offline --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage documents
+uv run --locked --offline --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage plan
+uv run --locked --offline --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage documents
+uv run --locked --offline --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage plan
+uv run --locked --offline --script "<skill-root>/scripts/test.py" -q
 ```
 
-Для последней команды нужен pytest в общем окружении проекта; в этом
-репозитории он входит в стандартную подготовку `uv sync --locked`.
+Для последней команды подготовь `uv sync --locked --script "<skill-root>/scripts/test.py"`.
+Её зависимости, включая pytest, объявлены в самом тестовом скрипте.
 
 Check и snapshot только читают проект; JSON идёт в stdout. Snapshot сам
 не сохраняет файлы. Основной агент переносит манифест в отчёт/решение.

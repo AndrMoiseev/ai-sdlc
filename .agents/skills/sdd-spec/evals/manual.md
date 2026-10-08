@@ -96,7 +96,7 @@
 
 ## Пакет и хосты
 
-Статически проверь метаданные, доступность локальных ссылок/шаблонов и отсутствие обязательных openspec-вызовов командой `uv run --directory <repo> --locked --offline python -B -m pytest <skill-root>/tests -k package_contract -o cache_dir=<repo>/.cache/pytest`. Для среды отдельно проверь: явный вызов загружает карту; следующий обычный ответ продолжает процесс; новая сессия без вызова не запускает его; отсутствие чистого субагента дает incomplete, а не саморевью.
+Статически проверь метаданные, доступность локальных ссылок/шаблонов и отсутствие обязательных openspec-вызовов командой `uv run --locked --offline --script "<skill-root>/scripts/test.py" -k package_contract`. Для среды отдельно проверь: явный вызов загружает карту; следующий обычный ответ продолжает процесс; новая сессия без вызова не запускает его; отсутствие чистого субагента дает incomplete, а не саморевью.
 
 Технически 2026-09-29 прочитаны `codex --version` (0.159.0), `codex exec --help` и официальные страницы обоих хостов. Claude Code отсутствовал в PATH; реальный прогон в нем не выполнен. Проверка текста адаптеров и порога не равна runtime-пилоту. Фактические результаты поведенческих запусков ведите отдельно от этой процедуры.
 
@@ -124,7 +124,7 @@
 выбранного CLI выполни из внешнего рабочего каталога:
 
 ```text
-uv run --directory <repo> --locked --offline python -B <conductor-root>/scripts/run_task.py --harness codex --prompt-file <prompt.txt> --workspace <fixture-copy> --fixture-manifest <fixture.json> --output-dir <run-artifacts> --allow-writes
+uv run --locked --offline --script <conductor-root>/scripts/run_task.py --harness codex --prompt-file <prompt.txt> --workspace <fixture-copy> --fixture-manifest <fixture.json> --output-dir <run-artifacts> --allow-writes
 ```
 
 Подставь фактические абсолютные пути; для Claude Code выбери `claude-code`
@@ -264,8 +264,8 @@ proposal.md, design.md, specs/orders/spec.md, specs/refunds/spec.md и state.md
    всех specs и существующего tasks, снимок и вывод check вне change:
 
    ```text
-   uv run --directory <repo> --locked --offline python -B <sdd-spec-root>/scripts/snapshot.py --project-root <fixture-root> --change sample-change --stage documents
-   uv run --directory <repo> --locked --offline python -B <sdd-spec-root>/scripts/check.py --project-root <fixture-root> --change sample-change --stage documents
+   uv run --locked --offline --script <sdd-spec-root>/scripts/snapshot.py --project-root <fixture-root> --change sample-change --stage documents
+   uv run --locked --offline --script <sdd-spec-root>/scripts/check.py --project-root <fixture-root> --change sample-change --stage documents
    ```
 
 2. Замени заглушку через новый маршрут на реально проверенное и осмотренное
@@ -281,7 +281,7 @@ proposal.md, design.md, specs/orders/spec.md, specs/refunds/spec.md и state.md
 
 ### Завершение проверки пакета
 
-Выполни package_contract, затем полную регрессию через общее окружение uv по runtime-setup из исходной
+Выполни package_contract, затем полную регрессию через автономный scripts/test.py по runtime-setup из исходной
 и перемещённой копий пакета с внешним рабочим каталогом и внешними кэшами.
 В перемещённой копии прочитай новые flows, references и templates без доступа
 к авторскому пути. Проверь скрытые и игнорируемые файлы обоих пакетов:

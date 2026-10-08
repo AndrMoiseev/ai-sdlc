@@ -8,24 +8,21 @@
 
 Откройте новую сессию и вызовите `$sdd-spec`/выберите скилл в Codex либо `/sdd-spec` в Claude Code. Например: «`$sdd-spec` исследуй экспорт заказов» или «`/sdd-spec` продолжи order-export». После запуска достаточно обычного диалога. Общая просьба «спланируй изменение» в новой сессии не активирует скилл. Не копируйте только SKILL.md: это потеряет инструкции и политику явного входа.
 
-В этом репозитории выполните из корня `uv sync --locked`: окружение общее
-для исходников, Codex и Claude. Команды запуска приведены в
-[runtime-setup](references/runtime-setup.md).
-
-В другом проекте подключите одну установленную копию к корневому uv-проекту.
-Если корневого pyproject.toml ещё нет, создайте его командой `uv init --bare --no-workspace`.
-Задайте `cache-dir = ".cache/uv"` в корневом uv.toml и добавьте `.venv/`
-и `.cache/` в корневой .gitignore. Затем из корня выполните:
+Скрипты запускаются автономно через uv: зависимости объявлены внутри каждого
+скрипта в формате PEP 723 и закреплены соседним `.py.lock`. Скопируйте эти файлы
+вместе со скриптами. Python-настройки проекта-потребителя не требуются.
+Команды подготовки и запуска, а также пользовательские настройки `UV_CACHE_DIR`
+и `UV_TOOL_DIR` описаны в [runtime-setup](references/runtime-setup.md).
+В терминале с доступом к сети подготовьте установленную копию:
 
 ```text
-uv add --no-workspace ./.agents/skills/sdd-spec
+uv sync --locked --script .agents/skills/sdd-spec/scripts/check.py
+uv sync --locked --script .agents/skills/sdd-spec/scripts/snapshot.py
 ```
 
-Для Claude укажите `.claude/skills/sdd-spec`; обе копии подключать не нужно.
-Команда добавляет зависимости скилла в общее окружение. Сохраните корневые
-pyproject.toml и uv.lock; последующая подготовка выполняется через
-`uv sync --locked`. Эти операции выполняются в терминале с доступом к сети.
-Для тестов самого скилла дополнительно подключите `uv add --dev pytest==8.4.2`.
+Для Claude укажите `.claude/skills/sdd-spec`, для исходников — `skills/sdd-spec`.
+При запуске из другой директории используйте абсолютные пути. После очистки
+пользовательского кэша или переноса копии повторите подготовку.
 OpenSpec не требуется. При отключении скилла сохраните рабочее дерево `sdd/`:
 в нём документы и история решений.
 
@@ -69,8 +66,8 @@ Chrome/Chromium. Снимки получают при проверке archify, 
 Локальные проверки:
 
 ```text
-uv sync --locked
-uv run --project . --locked --offline python -B -m pytest
+uv sync --locked --script skills/sdd-spec/scripts/test.py
+uv run --locked --offline --script skills/sdd-spec/scripts/test.py -q
 ```
 
 [Ручные процедуры](evals/manual.md) разделяют статическую проверку инструкций и фактическое выполнение; [происхождение](references/openspec-origin.md) содержит адаптации OpenSpec и лицензию.

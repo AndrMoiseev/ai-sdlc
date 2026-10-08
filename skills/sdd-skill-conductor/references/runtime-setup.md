@@ -1,6 +1,6 @@
 # Runtime setup (pre-flight)
 
-Read before running scripts or evaluations. Resolve `<skill-root>` from the loaded SKILL.md and `<repo>` as the project root with the shared uv environment. Examples use explicit project and script paths, so they also work for installed copies and from another directory.
+Read before running scripts or evaluations. Resolve `<skill-root>` from the loaded SKILL.md. Use absolute script, fixture and output paths when working outside their directories. The consuming project needs no Python manifest, lockfile or environment.
 
 ## Choose the execution path
 
@@ -21,22 +21,33 @@ For CLI selection, `scripts/harness.py` applies this precedence:
 
 ## Check prerequisites
 
-For scripts, verify `uv --version` and the required script paths. Use the project's
-shared environment through `uv run --directory <repo> --locked --offline python -B`.
-In this repository, `uv sync --locked` prepares the required dependencies.
+Verify `uv --version`, `uv cache dir`, the required script and its adjacent
+`<script>.lock`. Each entry point declares Python 3.10+ and its dependencies in
+PEP 723 metadata. uv creates its environment in the user cache, independently of
+the consuming project. Prepare each required script in a terminal with network
+access, including installed copies at their actual paths:
 
-For a standalone installation, use the consuming project's root pyproject.toml
-(create it with `uv init --bare --no-workspace` only if absent), configure `cache-dir = ".cache/uv"`
-in root uv.toml, and add the scripts' dependency with `uv add "pyyaml>=6.0"`.
-The root project's requires-python must require Python 3.10 or newer. When calling
-`python -B`, uv does not apply the script's inline Python or dependency metadata;
-the root project must cover those requirements. Quote paths containing spaces.
-Ignore .venv/ and .cache/ in the consuming project's Git configuration. Save its
-manifest and lockfile; subsequent preparation is `uv sync --locked`. Preparation
-needs network and filesystem access in a user terminal. Ordinary commands use
-only locally available dependencies. If preparation is missing, report the error
-and setup command instead of retrying with network access. Passing `python -B`
-executes the script in the shared project and disables bytecode writes.
+```text
+uv sync --locked --script "<skill-root>/scripts/eval_skill.py"
+```
+
+Run it with `uv run --locked --offline --script "<script>"`. Pass the script
+directly to uv so its metadata and lockfile are applied. Entry points disable
+bytecode before importing local modules. Preparation executes no script code;
+repeat it for missing dependencies, a moved copy or a cleared cache. If offline
+execution fails, report the specific error and preparation command. Change a
+stale lockfile only as an explicit dependency update, using `uv lock --script`.
+`--offline` limits uv's network access, not the script or a spawned model CLI.
+
+Cache placement is a once-per-user uv setting. On Windows, set `UV_CACHE_DIR`
+to an absolute `uv-runtime/cache` directory under the system temporary directory.
+Set `UV_TOOL_DIR` to its `uv-runtime/tools` sibling for third-party `uvx` calls,
+which also need a writable tools lock. Restart the agent application after setting
+user variables and confirm the inherited paths. These disposable directories may
+be cleared by the system; keep retained reports elsewhere. Install required Python
+versions in a user terminal. Agent permissions and project files need no changes
+when the host already permits writing to its temporary directory; if it does not,
+report that restriction rather than claiming the setup succeeded.
 
 For a CLI path, verify the selected CLI's version and existing login, then run a small read-only prompt before starting the batch. Codex uses `codex exec --json`; Claude Code uses `claude -p --output-format stream-json`. Authentication follows that CLI's existing configuration. Do not require an Anthropic API key for Codex or native subagents, copy credentials into fixtures, print secrets, or add flags that bypass permissions. If login is missing, report the selected CLI's authentication requirement.
 
@@ -96,7 +107,7 @@ with the small read-only probe above before scaling up.
 Prepare `prompt.txt` and a disposable fixture workspace. In the with-skill prompt, explicitly invoke or reference the skill using the selected harness's supported mechanism. Use the same task without the skill instruction for the baseline.
 
 ```bash
-uv run --directory <repo> --locked --offline python -B <skill-root>/scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --fixture-manifest fixture.json --output-dir <run-artifacts>
+uv run --locked --offline --script <skill-root>/scripts/run_task.py --harness auto --prompt-file prompt.txt --workspace <fixture-copy> --fixture-manifest fixture.json --output-dir <run-artifacts>
 ```
 
 Add `--allow-writes` for scenarios that edit fixture files. `--model` and `--timeout` are optional. Keep output artifacts outside the fixture when the task must not read its own trace. The runner saves the response, execution trace, run metadata, and timing; inspect completion/error status before grading. A timeout, permission failure, or authentication error is a failed execution, not a negative skill-discovery result.

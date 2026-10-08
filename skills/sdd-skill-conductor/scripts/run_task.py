@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
 """Run a prepared behavioral eval with the selected CLI and save evidence."""
 
 import argparse
