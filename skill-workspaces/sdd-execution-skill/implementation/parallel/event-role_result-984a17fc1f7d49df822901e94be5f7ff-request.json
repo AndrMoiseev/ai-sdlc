@@ -1,0 +1,65 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "exec_add",
+                                               "result":  {
+                                                              "task_id":  "TASK-add",
+                                                              "role_id":  "exec_add",
+                                                              "context_id":  "/root/parallel_eval/exec_add",
+                                                              "status":  "DONE",
+                                                              "owned_paths":  [
+                                                                                  "calculator.py",
+                                                                                  "check.py",
+                                                                                  "check.py.lock"
+                                                                              ],
+                                                              "check_id":  "plan-1",
+                                                              "command":  "uv run --locked --script check.py",
+                                                              "cwd":  "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-add",
+                                                              "lock_result":  {
+                                                                                  "chunk_id":  "f8a6d1",
+                                                                                  "wall_time_seconds":  0.1716862,
+                                                                                  "exit_code":  0,
+                                                                                  "original_token_count":  4,
+                                                                                  "output":  "Resolved in 1ms\n"
+                                                                              },
+                                                              "tests_run":  [
+                                                                                "uv run --locked --script check.py: 5 unittest methods passed; exit 0"
+                                                                            ],
+                                                              "failed_test_attempts":  [
+
+                                                                                       ],
+                                                              "limitations":  [
+                                                                                  "Read-only git status returned fatal: not a git repository: (NULL); source changes remain uncommitted.",
+                                                                                  "Inherited session instructions and skill catalog; inspected only executor contract, roles reference, assigned packet and fixture task/design/spec/proposal plus owned calculator.py.",
+                                                                                  "Initial helper call 3beba3 exited 1 before tests due TEMP state read permission; authorized escalation 8f34b9 succeeded. uv warned --locked has no effect outside a project; exact registered command preserved and lockfile exists."
+                                                                              ],
+                                                              "self_check":  {
+                                                                                 "source_snapshot":  "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce",
+                                                                                 "AC_invalid":  "test_invalid_types_in_each_position; test_nonfinite_operands_in_each_position; test_nonfinite_results",
+                                                                                 "outcome":  "passed",
+                                                                                 "trace_ids":  [
+                                                                                                   "3beba3",
+                                                                                                   "8f34b9",
+                                                                                                   "203b9f"
+                                                                                               ],
+                                                                                 "AC_add":  "test_arithmetic_sum; test_arbitrary_precision_integers",
+                                                                                 "remaining_ac":  [
+
+                                                                                                  ],
+                                                                                 "log":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+                                                                             }
+                                                          },
+                                               "trace":  "Native /root/parallel_eval/exec_add final DONE; raw tool IDs retained in report."
+                                           },
+                               "expected_revision":  15,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "984a17fc1f7d49df822901e94be5f7ff",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

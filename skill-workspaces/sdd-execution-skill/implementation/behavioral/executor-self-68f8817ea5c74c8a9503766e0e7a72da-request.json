@@ -1,0 +1,18 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "executor",
+                                               "stage":  "self"
+                                           },
+                               "expected_revision":  6,
+                               "task_id":  "TASK-add",
+                               "type":  "check_run",
+                               "event_id":  "68f8817ea5c74c8a9503766e0e7a72da",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

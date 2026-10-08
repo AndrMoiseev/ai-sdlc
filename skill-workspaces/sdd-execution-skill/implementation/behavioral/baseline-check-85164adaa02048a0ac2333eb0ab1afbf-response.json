@@ -1,0 +1,14 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "outcome": "baseline_recorded",
+      "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/85164adaa02048a0ac2333eb0ab1afbf.json"
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 5
+    }
+  }
+}

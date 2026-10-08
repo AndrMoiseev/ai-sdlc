@@ -1,0 +1,14 @@
+{
+    "eval_id":  6,
+    "expectations":  [
+                         "Concurrent fresh authors",
+                         "Isolated worktrees",
+                         "Independent checks and review before transfer",
+                         "Reverification after integration",
+                         "Fresh final checks at common HEAD",
+                         "Owned cleanup",
+                         "Missing runner produces partial"
+                     ],
+    "prompt":  "Explicit parallel execution of two independent approved tasks with real fresh roles, integration and final verification, followed by preserved-success fault injection of an unavailable mandatory runner.",
+    "eval_name":  "native-parallel-and-unavailable-final"
+}

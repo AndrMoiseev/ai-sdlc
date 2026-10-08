@@ -1,0 +1,20 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "check_id":  "plan-1",
+                                               "command":  "uv run --locked --script check.py",
+                                               "description":  "Executor created approved PEP723 standard-library check.py plus adjacent lock; five unittest methods for all task AC.",
+                                               "cwd":  "."
+                                           },
+                               "expected_revision":  12,
+                               "task_id":  "TASK-add",
+                               "type":  "check_setup",
+                               "event_id":  "adade397d6cc44b585f14fc0b5c4a42a",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

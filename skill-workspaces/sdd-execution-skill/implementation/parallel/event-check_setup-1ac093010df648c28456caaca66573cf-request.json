@@ -1,0 +1,20 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "check_id":  "plan-1",
+                                               "command":  "uv run --locked --script alternate_check.py",
+                                               "description":  "Executor prepared planned finite-add assertions in PEP723 script plus lockfile.",
+                                               "cwd":  "."
+                                           },
+                               "expected_revision":  13,
+                               "task_id":  "TASK-alternate",
+                               "type":  "check_setup",
+                               "event_id":  "1ac093010df648c28456caaca66573cf",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

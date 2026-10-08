@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project",
+  "change_id": "add",
+  "change_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add",
+  "instruction": {
+    "text": "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture in parallel; local task commits included.",
+    "source": "parent-native-behavioral-evaluation-assignment"
+  },
+  "sdd_spec": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec",
+  "checks": {
+    "documents": {
+      "schema_version": 1,
+      "stage": "documents",
+      "errors": [],
+      "warnings": [],
+      "review_status": {
+        "required_lenses": [
+          "consistency"
+        ],
+        "coverage": {
+          "consistency": "waived"
+        },
+        "reports": {},
+        "complete": true,
+        "unresolved_findings": [],
+        "unfinished_fixes": []
+      },
+      "approval_status": {
+        "approved": true,
+        "ready": true,
+        "applicability": {
+          "USER-document-review-document-approval": true,
+          "USER-document-review-review-waiver": true,
+          "USER-plan-review-plan-approval": true,
+          "USER-plan-review-review-waiver": true
+        },
+        "work_authorizations": {},
+        "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+      }
+    },
+    "plan": {
+      "schema_version": 1,
+      "stage": "plan",
+      "errors": [],
+      "warnings": [],
+      "review_status": {
+        "required_lenses": [
+          "plan"
+        ],
+        "coverage": {
+          "plan": "waived"
+        },
+        "reports": {},
+        "complete": true,
+        "unresolved_findings": [],
+        "unfinished_fixes": []
+      },
+      "approval_status": {
+        "approved": true,
+        "ready": true,
+        "applicability": {
+          "USER-document-review-document-approval": true,
+          "USER-document-review-review-waiver": true,
+          "USER-plan-review-plan-approval": true,
+          "USER-plan-review-review-waiver": true
+        },
+        "work_authorizations": {},
+        "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+      },
+      "tasks": {
+        "available_by_graph": [
+          "TASK-add",
+          "TASK-alternate"
+        ],
+        "cannot_parallel_with": {
+          "TASK-add": [],
+          "TASK-alternate": []
+        },
+        "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+      },
+      "progress": {
+        "done": 0,
+        "total": 2
+      }
+    }
+  },
+  "manifest": [
+    {
+      "path": "design.md",
+      "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd"
+    },
+    {
+      "path": "proposal.md",
+      "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+    },
+    {
+      "path": "specs/alternate/spec.md",
+      "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956"
+    },
+    {
+      "path": "specs/calculator/spec.md",
+      "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+    },
+    {
+      "path": "tasks.md",
+      "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421"
+    }
+  ],
+  "tasks": [
+    {
+      "covers": [
+        "AC-add",
+        "AC-invalid"
+      ],
+      "depends_on": [],
+      "id": "TASK-add",
+      "number": 1,
+      "sdd_record": "task",
+      "status": "pending",
+      "verification": [
+        {
+          "criteria": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "location": "check.py",
+          "run": {
+            "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+          },
+          "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+        }
+      ]
+    },
+    {
+      "covers": [
+        "AC-alternate"
+      ],
+      "depends_on": [],
+      "id": "TASK-alternate",
+      "number": 2,
+      "sdd_record": "task",
+      "status": "pending",
+      "verification": [
+        {
+          "criteria": [
+            "AC-alternate"
+          ],
+          "location": "alternate_check.py",
+          "run": {
+            "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+          },
+          "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+        }
+      ]
+    }
+  ],
+  "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+  "branch": "main",
+  "dirty_paths": [],
+  "index_patch": "",
+  "status": "",
+  "working_patch": ""
+}

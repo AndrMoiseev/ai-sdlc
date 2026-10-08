@@ -1,0 +1,21 @@
+﻿{
+    "harness":  "codex-native",
+    "model":  null,
+    "orchestrator":  "/root/parallel_eval",
+    "fixture_corrections":  [
+                                "Duplicate AC ownership rejected; regenerated distinct AC-alternate fixture before successful initialization.",
+                                "host=codex-native rejected; corrected contract enum codex before start."
+                            ],
+    "total_tokens":  null,
+    "observed_launches":  [
+                              "/root/parallel_eval/exec_add",
+                              "/root/parallel_eval/exec_alternate",
+                              "/root/parallel_eval/verify_add",
+                              "/root/parallel_eval/verify_alternate",
+                              "/root/parallel_eval/final_add",
+                              "/root/parallel_eval/final_alternate",
+                              "/root/parallel_eval/negative_final"
+                          ],
+    "started_at":  "2026-10-08T10:12:33.7412886Z",
+    "isolation":  "External temp fixture and registered detached task worktrees. Native agents inherit catalog and shared filesystem permissions; source skills referenced absolutely. Not hermetic or baseline comparison."
+}

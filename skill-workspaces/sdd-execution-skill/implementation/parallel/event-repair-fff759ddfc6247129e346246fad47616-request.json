@@ -1,0 +1,23 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "reason":  "Normalize UTF8 BOM in approved PEP723 check runner; sibling experiment removed uv locked warning",
+                                               "defect_evidence":  {
+                                                                       "bytes":  "EF-BB-BF-23-20-2F",
+                                                                       "tool_trace":  "a7bcf3",
+                                                                       "independent_log":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/e2744512aad745bc8924cd7a0ea1cce9.json",
+                                                                       "comparison":  "TASK-add BOM removal/regenerate lock removed warning with identical test assertions"
+                                                                   }
+                                           },
+                               "expected_revision":  25,
+                               "task_id":  "TASK-alternate",
+                               "type":  "repair",
+                               "event_id":  "fff759ddfc6247129e346246fad47616",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

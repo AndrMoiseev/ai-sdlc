@@ -1,0 +1,7 @@
+name: sdd-apply-installation-fixture
+version: 0.1.0
+targets: [codex, claude]
+dependencies:
+  apm:
+    - path: ../../../../skills/sdd-spec
+    - path: ../../../../skills/sdd-apply

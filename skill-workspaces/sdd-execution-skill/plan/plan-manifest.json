@@ -1,0 +1,18 @@
+[
+  {
+    "path": "design.md",
+    "sha256": "0993479b60d37f0a4ff6d3f6bbaaa37c123f358334d29afa3c44588c6def6ff6"
+  },
+  {
+    "path": "proposal.md",
+    "sha256": "11d13ef344135c80044d31bceda1edea2f420105023e124dc161323cb77e540d"
+  },
+  {
+    "path": "specs/sdd-execution/spec.md",
+    "sha256": "1ecf3038c4544cfd59389a031c953bf83fc295d1a7a40767168d351ee978de0e"
+  },
+  {
+    "path": "tasks.md",
+    "sha256": "607c8034f5212615e0e718db6598e2f9286ef46e91d17b8a1f723b3f71203826"
+  }
+]

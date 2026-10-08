@@ -1,0 +1,96 @@
+﻿{
+    "task_id":  "TASK-alternate",
+    "role_id":  "exec_alternate",
+    "context_id":  "/root/parallel_eval/exec_alternate",
+    "status":  "DONE implementation claim; independent acceptance pending",
+    "candidate":  "uncommitted snapshot 727922f4c1044e185ad85f50ae28c0128b2a0e1ffc83f3e29a563456260d7eec",
+    "owned_paths":  [
+                        "alternate.py",
+                        "alternate_check.py",
+                        "alternate_check.py.lock"
+                    ],
+    "changes":  {
+                    "binary":  [
+
+                               ],
+                    "new":  [
+                                "alternate_check.py",
+                                "alternate_check.py.lock"
+                            ],
+                    "deleted":  [
+
+                                ],
+                    "modified":  [
+                                     "alternate.py"
+                                 ]
+                },
+    "commands":  [
+                     {
+                         "tool_trace":  "6c3f2d",
+                         "command":  "uv lock --script alternate_check.py",
+                         "exit_code":  0
+                     },
+                     {
+                         "command":  "uv run --locked --script alternate_check.py",
+                         "exit_code":  0,
+                         "tool_trace":  "ad6bb2",
+                         "log":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+                     }
+                 ],
+    "proposed_check_setup":  {
+                                 "configuration":  {
+
+                                                   },
+                                 "command":  "uv run --locked --script alternate_check.py",
+                                 "cwd":  ".",
+                                 "check_id":  "plan-1"
+                             },
+    "tests_run":  [
+                      "test_invalid_types_in_both_positions",
+                      "test_nonfinite_operands_in_both_positions",
+                      "test_nonfinite_results_and_conversion_overflow",
+                      "test_numeric_values_and_types"
+                  ],
+    "failed_test_attempts":  [
+
+                             ],
+    "remaining_acceptance":  [
+                                 "AC-alternate self-check passed; independent verification and review pending"
+                             ],
+    "limitations":  [
+                        "Initial sandbox read denied; authorized escalation permitted disposable worktree operations.",
+                        "uv emitted warning: --locked has no effect when used outside of a project; exact required command retained, dependency-free PEP 723 script and lock present.",
+                        "Historical --locked warning resolved by reserved BOM-only repair; latest registered run has no warning."
+                    ],
+    "host_trace":  "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+    "acceptance_evidence":  {
+                                "AC-alternate":  "plan-1 passed: 4 unittest methods cover integer precision, mixed arithmetic, invalid types, non-finite inputs/results, conversion overflow; check left snapshot unchanged."
+                            },
+    "repair":  {
+                   "description":  "Reserved UTF-8 BOM removal only; no code/assertion changes. Regenerated lock.",
+                   "lock_trace":  "23d6d7",
+                   "lock_exit":  0,
+                   "raw_outputs":  [
+                                       {
+                                           "command":  "uv run --locked --script alternate_check.py",
+                                           "cwd":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+                                           "started_at":  "2026-10-08T10:29:50.897332+00:00",
+                                           "duration_seconds":  0.3267300000297837,
+                                           "exit_code":  0,
+                                           "stdout":  "",
+                                           "stderr":  "test_invalid_types_in_both_positions (__main__.AddContract.test_invalid_types_in_both_positions) ... ok\r\ntest_nonfinite_operands_in_both_positions (__main__.AddContract.test_nonfinite_operands_in_both_positions) ... ok\r\ntest_nonfinite_results_and_conversion_overflow (__main__.AddContract.test_nonfinite_results_and_conversion_overflow) ... ok\r\ntest_numeric_values_and_types (__main__.AddContract.test_numeric_values_and_types) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 0.001s\r\n\r\nOK\r\n",
+                                           "outcome":  "passed",
+                                           "check_id":  "plan-1",
+                                           "configuration":  {
+
+                                                             },
+                                           "criteria":  [
+                                                            "AC-alternate"
+                                                        ]
+                                       }
+                                   ],
+                   "warning_present":  false,
+                   "self_check_trace":  "7cd24a",
+                   "log":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/33ea354e41ea42ff8897212d8e439fa7.json"
+               }
+}

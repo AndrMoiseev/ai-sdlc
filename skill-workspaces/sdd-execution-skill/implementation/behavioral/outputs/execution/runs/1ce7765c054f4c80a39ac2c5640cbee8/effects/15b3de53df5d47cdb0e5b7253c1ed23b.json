@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "request": {
+    "operation": "commit",
+    "task_id": "TASK-add",
+    "event": {
+      "owner": "/root/behavioral_eval",
+      "payload": {},
+      "expected_revision": 16,
+      "task_id": "TASK-add",
+      "type": "commit",
+      "event_id": "15b3de53df5d47cdb0e5b7253c1ed23b",
+      "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+    },
+    "precondition": {
+      "parent": "50c8fdb3955ec385aa2ef9cc05d1547baf0f75c2",
+      "tree": "414706b20dc9bc8328d8367e8e07fda1feb0e379",
+      "candidate": {
+        "source": {
+          "files": {
+            "calculator.py": {
+              "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+              "executable": false
+            },
+            "check.py": {
+              "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+              "executable": false
+            },
+            "check.py.lock": {
+              "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+              "executable": false
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+              "executable": false
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+              "executable": false
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+              "executable": false
+            }
+          },
+          "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+        },
+        "manifest": "520134b46a1aa1c50f71efa3f26d5507649da132c6eee32fcf58129d7cbe7776",
+        "checks": "d1f8b06c1dc3b9e768e847fbf776b4e8dd9f2372a304d26a6215ab6141bf7870",
+        "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project"
+      }
+    }
+  },
+  "fingerprint": "dbeef8a51362c81e568eb35b99d64141af7f697db62f9f0bf90a36c09f97f7b3",
+  "phase": "observed",
+  "result": {
+    "sha": "2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+    "parent": "50c8fdb3955ec385aa2ef9cc05d1547baf0f75c2",
+    "tree": "414706b20dc9bc8328d8367e8e07fda1feb0e379",
+    "candidate": {
+      "source": {
+        "files": {
+          "calculator.py": {
+            "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+            "executable": false
+          },
+          "check.py": {
+            "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+            "executable": false
+          },
+          "check.py.lock": {
+            "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+            "executable": false
+          },
+          "sdd/changes/add/design.md": {
+            "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+            "executable": false
+          },
+          "sdd/changes/add/proposal.md": {
+            "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "executable": false
+          },
+          "sdd/changes/add/review/decisions.md": {
+            "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+            "executable": false
+          },
+          "sdd/changes/add/specs/calculator/spec.md": {
+            "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+            "executable": false
+          },
+          "sdd/changes/add/state.md": {
+            "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "executable": false
+          },
+          "sdd/changes/add/tasks.md": {
+            "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+            "executable": false
+          }
+        },
+        "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+      },
+      "manifest": "520134b46a1aa1c50f71efa3f26d5507649da132c6eee32fcf58129d7cbe7776",
+      "checks": "d1f8b06c1dc3b9e768e847fbf776b4e8dd9f2372a304d26a6215ab6141bf7870",
+      "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project"
+    },
+    "operation": "SDD-Operation: 1ce7765c054f4c80a39ac2c5640cbee8/15b3de53df5d47cdb0e5b7253c1ed23b"
+  }
+}

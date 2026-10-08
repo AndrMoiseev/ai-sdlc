@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "change_id": "add",
+  "run_id": "c0d2875802aa4e91a5628c5251981565",
+  "task_id": "TASK-alternate",
+  "role_id": "verify_alternate",
+  "stage": "integration",
+  "candidate": {
+    "source": {
+      "files": {
+        "alternate.py": {
+          "sha256": "f321d3f20f3100c20151a441b85b99e6d4b2717514bf6c657838d5173290e373",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "alternate_check.py": {
+          "sha256": "0d25318d3fdefab1dc9da0366a10cb6eef3d767c4541638d9a62b2a51400bf3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "alternate_check.py.lock": {
+          "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "calculator.py": {
+          "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py": {
+          "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py.lock": {
+          "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/alternate/spec.md": {
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+          "executable": false,
+          "git_mode": "100644"
+        }
+      },
+      "digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105"
+    },
+    "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+    "checks": "b9b07718f5ef135229f7f5997e9894c9bb396191f625cabd5343d419c79c537e",
+    "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project"
+  },
+  "before": {
+    "files": {
+      "alternate.py": {
+        "sha256": "f321d3f20f3100c20151a441b85b99e6d4b2717514bf6c657838d5173290e373",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "alternate_check.py": {
+        "sha256": "0d25318d3fdefab1dc9da0366a10cb6eef3d767c4541638d9a62b2a51400bf3a",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "alternate_check.py.lock": {
+        "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "calculator.py": {
+        "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "check.py": {
+        "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "check.py.lock": {
+        "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/specs/alternate/spec.md": {
+        "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+        "executable": false,
+        "git_mode": "100644"
+      }
+    },
+    "digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105"
+  },
+  "after": {
+    "files": {
+      "alternate.py": {
+        "sha256": "f321d3f20f3100c20151a441b85b99e6d4b2717514bf6c657838d5173290e373",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "alternate_check.py": {
+        "sha256": "0d25318d3fdefab1dc9da0366a10cb6eef3d767c4541638d9a62b2a51400bf3a",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "alternate_check.py.lock": {
+        "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "calculator.py": {
+        "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "check.py": {
+        "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "check.py.lock": {
+        "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/specs/alternate/spec.md": {
+        "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false,
+        "git_mode": "100644"
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+        "executable": false,
+        "git_mode": "100644"
+      }
+    },
+    "digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105"
+  },
+  "outputs": [
+    {
+      "command": "uv run --locked --script alternate_check.py",
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project",
+      "started_at": "2026-10-08T10:33:56.685988+00:00",
+      "duration_seconds": 0.31822070002090186,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_invalid_types_in_both_positions (__main__.AddContract.test_invalid_types_in_both_positions) ... ok\r\ntest_nonfinite_operands_in_both_positions (__main__.AddContract.test_nonfinite_operands_in_both_positions) ... ok\r\ntest_nonfinite_results_and_conversion_overflow (__main__.AddContract.test_nonfinite_results_and_conversion_overflow) ... ok\r\ntest_numeric_values_and_types (__main__.AddContract.test_numeric_values_and_types) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 0.001s\r\n\r\nOK\r\n",
+      "outcome": "passed",
+      "check_id": "plan-1",
+      "configuration": {},
+      "criteria": [
+        "AC-alternate"
+      ]
+    }
+  ]
+}

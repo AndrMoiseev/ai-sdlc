@@ -1,0 +1,8 @@
+{
+    "total_tokens":  null,
+    "model":  null,
+    "ended_at":  "2026-10-08T10:07:56.797808+00:00",
+    "measurement":  "initialize response timestamp to final read state timestamp; excludes preparation",
+    "duration_seconds":  1492.745964,
+    "started_at":  "2026-10-08T09:43:04.051844+00:00"
+}

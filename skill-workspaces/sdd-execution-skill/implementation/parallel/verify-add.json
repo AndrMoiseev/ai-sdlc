@@ -1,0 +1,26 @@
+{
+  "task_id": "TASK-add",
+  "role_id": "verify_add",
+  "context_id": "/root/parallel_eval/verify_add",
+  "stage": "independent",
+  "status": "passed",
+  "outcome": "passed",
+  "source_digest": "832403aa9df9b298263af7908c66b8444bbde0fc9217264b4e6ffc5fc0b52163",
+  "candidate_manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+  "candidate_checks": "e2c061ed067d3ffd915b40ce3f34d29b5d0f80ec797ff94773dcb6fd4736844e",
+  "command": "uv run --locked --script check.py",
+  "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-add",
+  "configuration": {},
+  "exit_code": 0,
+  "tests_run": 5,
+  "ac_evidence": {
+    "AC-add": ["test_arithmetic_sum", "test_arbitrary_precision_integers"],
+    "AC-invalid": ["test_invalid_types_in_each_position", "test_nonfinite_operands_in_each_position", "test_nonfinite_results"]
+  },
+  "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/ee089a08b3bd4147be2b256edce7e4a1.json",
+  "snapshots_unchanged": true,
+  "inspected_paths": ["specs/calculator/spec.md", "design.md", "check.py", "execution/state.json", "execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/ee089a08b3bd4147be2b256edce7e4a1.json"],
+  "host_trace": ["27eea7", "44e975", "87e4bb"],
+  "limitations": ["Task-stage verification only; integration and final verification not performed.", "No substantive implementation review performed.", "Inherited session instructions and shared workspace access; fresh native context differs from executor. Initial state read also exposed executor evidence, but verdict relies on this role's independent run and inspected assertions.", "Temporary fixture access required approved escalation; role remains active."],
+  "blockers": []
+}

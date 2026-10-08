@@ -1,0 +1,545 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "status": "active",
+      "issues": [],
+      "preserved_roles": {
+        "exec_add": {
+          "role_id": "exec_add",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+          "context_id": "/root/parallel_eval/exec_add",
+          "fresh": true,
+          "kind": "executor",
+          "host": "codex",
+          "task_id": "TASK-add",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:14:23.638718+00:00",
+          "result": {
+            "task_id": "TASK-add",
+            "role_id": "exec_add",
+            "context_id": "/root/parallel_eval/exec_add",
+            "status": "DONE",
+            "owned_paths": [
+              "calculator.py",
+              "check.py",
+              "check.py.lock"
+            ],
+            "check_id": "plan-1",
+            "command": "uv run --locked --script check.py",
+            "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-add",
+            "lock_result": {
+              "chunk_id": "f8a6d1",
+              "wall_time_seconds": 0.1716862,
+              "exit_code": 0,
+              "original_token_count": 4,
+              "output": "Resolved in 1ms\n"
+            },
+            "tests_run": [
+              "uv run --locked --script check.py: 5 unittest methods passed; exit 0"
+            ],
+            "failed_test_attempts": [],
+            "limitations": [
+              "Read-only git status returned fatal: not a git repository: (NULL); source changes remain uncommitted.",
+              "Inherited session instructions and skill catalog; inspected only executor contract, roles reference, assigned packet and fixture task/design/spec/proposal plus owned calculator.py.",
+              "Initial helper call 3beba3 exited 1 before tests due TEMP state read permission; authorized escalation 8f34b9 succeeded. uv warned --locked has no effect outside a project; exact registered command preserved and lockfile exists."
+            ],
+            "self_check": {
+              "source_snapshot": "832403aa9df9b298263af7908c66b8444bbde0fc9217264b4e6ffc5fc0b52163",
+              "AC_invalid": "test_invalid_types_in_each_position; test_nonfinite_operands_in_each_position; test_nonfinite_results",
+              "outcome": "passed",
+              "trace_ids": [
+                "3beba3",
+                "8f34b9",
+                "203b9f"
+              ],
+              "AC_add": "test_arithmetic_sum; test_arbitrary_precision_integers",
+              "remaining_ac": [],
+              "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/fe83123e595b41da8562e81a9e6450c0.json"
+            },
+            "encoding_repair": {
+              "lock_exit": 0,
+              "description": "Removed check.py UTF8 BOM; test logic unchanged; regenerated lock",
+              "raw_check_log": {
+                "schema_version": 1,
+                "change_id": "add",
+                "run_id": "c0d2875802aa4e91a5628c5251981565",
+                "task_id": "TASK-add",
+                "role_id": "exec_add",
+                "stage": "self",
+                "candidate": null,
+                "before": {
+                  "files": {
+                    "alternate.py": {
+                      "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "calculator.py": {
+                      "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "check.py": {
+                      "sha256": "feb73389edb889f75d96bbd71442c8616ad94d37cb79f2535e59233aefe5dec7",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "check.py.lock": {
+                      "sha256": "50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/design.md": {
+                      "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/proposal.md": {
+                      "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/review/decisions.md": {
+                      "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/specs/alternate/spec.md": {
+                      "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/specs/calculator/spec.md": {
+                      "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/state.md": {
+                      "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/tasks.md": {
+                      "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                      "executable": false,
+                      "git_mode": "100644"
+                    }
+                  },
+                  "digest": "832403aa9df9b298263af7908c66b8444bbde0fc9217264b4e6ffc5fc0b52163"
+                },
+                "after": {
+                  "files": {
+                    "alternate.py": {
+                      "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "calculator.py": {
+                      "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "check.py": {
+                      "sha256": "feb73389edb889f75d96bbd71442c8616ad94d37cb79f2535e59233aefe5dec7",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "check.py.lock": {
+                      "sha256": "50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/design.md": {
+                      "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/proposal.md": {
+                      "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/review/decisions.md": {
+                      "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/specs/alternate/spec.md": {
+                      "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/specs/calculator/spec.md": {
+                      "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/state.md": {
+                      "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                      "executable": false,
+                      "git_mode": "100644"
+                    },
+                    "sdd/changes/add/tasks.md": {
+                      "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                      "executable": false,
+                      "git_mode": "100644"
+                    }
+                  },
+                  "digest": "832403aa9df9b298263af7908c66b8444bbde0fc9217264b4e6ffc5fc0b52163"
+                },
+                "outputs": [
+                  {
+                    "command": "uv run --locked --script check.py",
+                    "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add",
+                    "started_at": "2026-10-08T10:27:48.151889+00:00",
+                    "duration_seconds": 0.32251699996413663,
+                    "exit_code": 0,
+                    "stdout": "",
+                    "stderr": "test_arbitrary_precision_integers (__main__.AdditionContract.test_arbitrary_precision_integers) ... ok\r\ntest_arithmetic_sum (__main__.AdditionContract.test_arithmetic_sum) ... ok\r\ntest_invalid_types_in_each_position (__main__.AdditionContract.test_invalid_types_in_each_position) ... ok\r\ntest_nonfinite_operands_in_each_position (__main__.AdditionContract.test_nonfinite_operands_in_each_position) ... ok\r\ntest_nonfinite_results (__main__.AdditionContract.test_nonfinite_results) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 5 tests in 0.001s\r\n\r\nOK\r\n",
+                    "outcome": "passed",
+                    "check_id": "plan-1",
+                    "configuration": {},
+                    "criteria": [
+                      "AC-add",
+                      "AC-invalid"
+                    ]
+                  }
+                ]
+              },
+              "log": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/fe83123e595b41da8562e81a9e6450c0.json",
+              "trace_ids": [
+                "22f7e0",
+                "c616fa"
+              ]
+            }
+          },
+          "trace": "Native exec_add repair DONE: BOM removal; uv warning absent;5 tests passed."
+        },
+        "exec_alternate": {
+          "role_id": "exec_alternate",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+          "context_id": "/root/parallel_eval/exec_alternate",
+          "fresh": true,
+          "kind": "executor",
+          "host": "codex",
+          "task_id": "TASK-alternate",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:14:24.558341+00:00",
+          "result": {
+            "task_id": "TASK-alternate",
+            "role_id": "exec_alternate",
+            "context_id": "/root/parallel_eval/exec_alternate",
+            "status": "DONE implementation claim; independent acceptance pending",
+            "candidate": "uncommitted snapshot 727922f4c1044e185ad85f50ae28c0128b2a0e1ffc83f3e29a563456260d7eec",
+            "owned_paths": [
+              "alternate.py",
+              "alternate_check.py",
+              "alternate_check.py.lock"
+            ],
+            "changes": {
+              "binary": [],
+              "new": [
+                "alternate_check.py",
+                "alternate_check.py.lock"
+              ],
+              "deleted": [],
+              "modified": [
+                "alternate.py"
+              ]
+            },
+            "commands": [
+              {
+                "tool_trace": "6c3f2d",
+                "command": "uv lock --script alternate_check.py",
+                "exit_code": 0
+              },
+              {
+                "command": "uv run --locked --script alternate_check.py",
+                "exit_code": 0,
+                "tool_trace": "ad6bb2",
+                "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+              }
+            ],
+            "proposed_check_setup": {
+              "configuration": {},
+              "command": "uv run --locked --script alternate_check.py",
+              "cwd": ".",
+              "check_id": "plan-1"
+            },
+            "tests_run": [
+              "test_invalid_types_in_both_positions",
+              "test_nonfinite_operands_in_both_positions",
+              "test_nonfinite_results_and_conversion_overflow",
+              "test_numeric_values_and_types"
+            ],
+            "failed_test_attempts": [],
+            "remaining_acceptance": [
+              "AC-alternate self-check passed; independent verification and review pending"
+            ],
+            "limitations": [
+              "Initial sandbox read denied; authorized escalation permitted disposable worktree operations.",
+              "uv emitted warning: --locked has no effect when used outside of a project; exact required command retained, dependency-free PEP 723 script and lock present.",
+              "Historical --locked warning resolved by reserved BOM-only repair; latest registered run has no warning."
+            ],
+            "host_trace": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+            "acceptance_evidence": {
+              "AC-alternate": "plan-1 passed: 4 unittest methods cover integer precision, mixed arithmetic, invalid types, non-finite inputs/results, conversion overflow; check left snapshot unchanged."
+            },
+            "repair": {
+              "description": "Reserved UTF-8 BOM removal only; no code/assertion changes. Regenerated lock.",
+              "lock_trace": "23d6d7",
+              "lock_exit": 0,
+              "raw_outputs": [
+                {
+                  "command": "uv run --locked --script alternate_check.py",
+                  "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+                  "started_at": "2026-10-08T10:29:50.897332+00:00",
+                  "duration_seconds": 0.3267300000297837,
+                  "exit_code": 0,
+                  "stdout": "",
+                  "stderr": "test_invalid_types_in_both_positions (__main__.AddContract.test_invalid_types_in_both_positions) ... ok\r\ntest_nonfinite_operands_in_both_positions (__main__.AddContract.test_nonfinite_operands_in_both_positions) ... ok\r\ntest_nonfinite_results_and_conversion_overflow (__main__.AddContract.test_nonfinite_results_and_conversion_overflow) ... ok\r\ntest_numeric_values_and_types (__main__.AddContract.test_numeric_values_and_types) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 0.001s\r\n\r\nOK\r\n",
+                  "outcome": "passed",
+                  "check_id": "plan-1",
+                  "configuration": {},
+                  "criteria": [
+                    "AC-alternate"
+                  ]
+                }
+              ],
+              "warning_present": false,
+              "self_check_trace": "7cd24a",
+              "log": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/33ea354e41ea42ff8897212d8e439fa7.json"
+            }
+          },
+          "trace": "Native exec_alternate repair DONE;4 tests pass without uv warning."
+        },
+        "verify_add": {
+          "role_id": "verify_add",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add",
+          "context_id": "/root/parallel_eval/verify_add",
+          "fresh": true,
+          "kind": "verifier",
+          "host": "codex",
+          "task_id": "TASK-add",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:14:56.993216+00:00",
+          "result": {
+            "status": "DONE",
+            "independent": "5 tests passed",
+            "integration": "5 tests passed",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "report": "integration-add.json"
+          },
+          "trace": "Native /root/parallel_eval/verify_add final completion; actual evidence dab2c95513854a13a8245846bc282a35.json"
+        },
+        "verify_alternate": {
+          "role_id": "verify_alternate",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate",
+          "context_id": "/root/parallel_eval/verify_alternate",
+          "fresh": true,
+          "kind": "verifier",
+          "host": "codex",
+          "task_id": "TASK-alternate",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:14:57.419170+00:00",
+          "result": {
+            "status": "DONE",
+            "independent": "4 tests 39 cases passed",
+            "integration": "4 tests 39 cases passed",
+            "criteria": [
+              "AC-alternate"
+            ],
+            "report": "integration-alternate.json"
+          },
+          "trace": "Native /root/parallel_eval/verify_alternate final completion; event1f52301bfe5d422ebecef3ff6d5ad5c7"
+        },
+        "review_add_tree": {
+          "role_id": "review_add_tree",
+          "kind": "reviewer",
+          "context_id": "/root/parallel_eval/verify_add",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add; distinct reviewer role in same independent verifier context",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-add",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:29:38.666825+00:00"
+        },
+        "review_alternate_tree": {
+          "role_id": "review_alternate_tree",
+          "kind": "reviewer",
+          "context_id": "/root/parallel_eval/verify_alternate",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate; separate reviewer role",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-alternate",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:30:36.587213+00:00"
+        },
+        "review_add_integrated": {
+          "role_id": "review_add_integrated",
+          "kind": "reviewer",
+          "context_id": "/root/parallel_eval/verify_add",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add; separate integrated reviewer role",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-add",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:31:32.797386+00:00"
+        },
+        "review_alternate_integrated": {
+          "role_id": "review_alternate_integrated",
+          "kind": "reviewer",
+          "context_id": "/root/parallel_eval/verify_alternate",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate; separate integrated reviewer role",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-alternate",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:32:52.577450+00:00"
+        },
+        "final_add": {
+          "role_id": "final_add",
+          "kind": "final_verifier",
+          "context_id": "/root/parallel_eval/final_add",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/final_add",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-add",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:34:05.411768+00:00",
+          "result": {
+            "task_id": "TASK-add",
+            "role_id": "final_add",
+            "context_id": "/root/parallel_eval/final_add",
+            "stage": "final",
+            "outcome": "passed",
+            "head": "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+            "snapshot_digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105",
+            "before_after_equal": true,
+            "command": "uv run --locked --script check.py",
+            "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project",
+            "configuration": {},
+            "exit_code": 0,
+            "raw_log": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/a035dcc4e37d4b8fa0ab666968b72fc1.json",
+            "evidence": {
+              "AC-add": "Executed arithmetic and arbitrary-precision tests: 10 finite arithmetic cases including mixed operand order, cancellation and tiny floats; 3 huge integer cases with exact int type assertions.",
+              "AC-invalid": "Executed 26 invalid-type cases, 6 non-finite operand cases, and 4 overflow cases, with specific TypeError/ValueError assertions. All five unittest methods passed; no skips.",
+              "coverage": "All TASK-add registered commands and criteria covered. Original tasks, design and both specs inspected; no linter or additional prepared procedure registered. Current state had both tasks accepted before run. Actual git HEAD checked before and after final command. Raw log and exact candidate before/after snapshots inspected."
+            },
+            "inspected_paths": [
+              "sdd/changes/add/tasks.md",
+              "sdd/changes/add/design.md",
+              "sdd/changes/add/specs/calculator/spec.md",
+              "sdd/changes/add/specs/alternate/spec.md",
+              "calculator.py",
+              "check.py"
+            ],
+            "limitations": [
+              "Final packet predates last commit; explicit assignment and current state superseded its candidate. Verification used actual final HEAD and current complete snapshot.",
+              "Native fresh context is separate from executors, but inherited skill catalog, repository instructions and shared workspace access remain visible; this is not a filesystem-isolated read-only sandbox. External fixture read required escalation, and orchestrator command writes evidence. No implementation edits made.",
+              "Current-state read exposed earlier evidence summaries; final verdict rests on freshly initiated run and direct inspection, not those summaries.",
+              "TASK-alternate final execution is assigned separately; this report alone does not certify its final command.",
+              "Raw log contains candidate and snapshots but no HEAD field; actual HEAD was independently queried before and after the run."
+            ],
+            "host_trace": "Native registered launch /root/parallel_eval/final_add; READY waiting phase followed by assigned packet. check_run event a035dcc4e37d4b8fa0ab666968b72fc1 executed by final_add, stage final; result revision 61. No role_result API submitted."
+          },
+          "trace": "Actual native final_add completion: final HEAD4252002;5 tests49cases, raw trace in report."
+        },
+        "final_alternate": {
+          "role_id": "final_alternate",
+          "kind": "final_verifier",
+          "context_id": "/root/parallel_eval/final_alternate",
+          "fresh": true,
+          "host": "codex",
+          "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/final_alternate",
+          "capabilities": {
+            "fresh_context": true
+          },
+          "task_id": "TASK-alternate",
+          "status": "finished",
+          "registered_at": "2026-10-08T10:34:18.504013+00:00",
+          "result": {
+            "task_id": "TASK-alternate",
+            "role_id": "final_alternate",
+            "context_id": "/root/parallel_eval/final_alternate",
+            "stage": "final",
+            "status": "passed",
+            "head": "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+            "source_digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105",
+            "snapshots_unchanged": true,
+            "command": "uv run --locked --script alternate_check.py",
+            "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project",
+            "configuration": {},
+            "exit_code": 0,
+            "tests_run": 4,
+            "ac_evidence": {
+              "AC-alternate": "Four executed unittest methods cover numeric int/float addition, arbitrary precision integer addition, bool and other invalid types in both positions, nonfinite operands in both positions, nonfinite results and mixed conversion overflow."
+            },
+            "raw_log": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/88e7f13cb459448f87ab8e91720bd23d.json",
+            "inspected_paths": [
+              "skills/sdd-apply/agents/verifier.md",
+              "skills/sdd-apply/references/roles.md",
+              "roles/final_alternate.json",
+              "sdd/changes/add/tasks.md",
+              "sdd/changes/add/design.md",
+              "sdd/changes/add/specs/alternate/spec.md",
+              "sdd/changes/add/state.md",
+              "sdd/changes/add/execution/state.json",
+              "alternate.py",
+              "alternate_check.py"
+            ],
+            "blockers": [],
+            "limitations": [
+              "This task-scoped final verifier covers AC-alternate; TASK-add final evidence is collected by a separate fresh verifier.",
+              "Default sandbox denied temp reads; authorized escalated access was used. Read-only behavior is procedural, not an OS read-only sandbox."
+            ],
+            "host_trace": [
+              "Fresh launch /root/parallel_eval/final_alternate, registered role packet final_alternate; no executor context inherited.",
+              "functions.exec chunk ab6788: actual final check_run API returned passed, revision 62.",
+              "functions.exec chunk 238800: raw logs and HEAD inspected."
+            ],
+            "implementation_edits": false,
+            "review_performed": false
+          },
+          "trace": "Actual native final_alternate completion final HEAD4252002;4 tests passed; raw trace in report."
+        }
+      }
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 67
+    }
+  }
+}

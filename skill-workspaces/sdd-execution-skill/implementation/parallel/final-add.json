@@ -1,0 +1,29 @@
+{
+  "task_id": "TASK-add",
+  "role_id": "final_add",
+  "context_id": "/root/parallel_eval/final_add",
+  "stage": "final",
+  "outcome": "passed",
+  "head": "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+  "snapshot_digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105",
+  "before_after_equal": true,
+  "command": "uv run --locked --script check.py",
+  "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project",
+  "configuration": {},
+  "exit_code": 0,
+  "raw_log": "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/a035dcc4e37d4b8fa0ab666968b72fc1.json",
+  "evidence": {
+    "AC-add": "Executed arithmetic and arbitrary-precision tests: 10 finite arithmetic cases including mixed operand order, cancellation and tiny floats; 3 huge integer cases with exact int type assertions.",
+    "AC-invalid": "Executed 26 invalid-type cases, 6 non-finite operand cases, and 4 overflow cases, with specific TypeError/ValueError assertions. All five unittest methods passed; no skips.",
+    "coverage": "All TASK-add registered commands and criteria covered. Original tasks, design and both specs inspected; no linter or additional prepared procedure registered. Current state had both tasks accepted before run. Actual git HEAD checked before and after final command. Raw log and exact candidate before/after snapshots inspected."
+  },
+  "inspected_paths": ["sdd/changes/add/tasks.md", "sdd/changes/add/design.md", "sdd/changes/add/specs/calculator/spec.md", "sdd/changes/add/specs/alternate/spec.md", "calculator.py", "check.py"],
+  "limitations": [
+    "Final packet predates last commit; explicit assignment and current state superseded its candidate. Verification used actual final HEAD and current complete snapshot.",
+    "Native fresh context is separate from executors, but inherited skill catalog, repository instructions and shared workspace access remain visible; this is not a filesystem-isolated read-only sandbox. External fixture read required escalation, and orchestrator command writes evidence. No implementation edits made.",
+    "Current-state read exposed earlier evidence summaries; final verdict rests on freshly initiated run and direct inspection, not those summaries.",
+    "TASK-alternate final execution is assigned separately; this report alone does not certify its final command.",
+    "Raw log contains candidate and snapshots but no HEAD field; actual HEAD was independently queried before and after the run."
+  ],
+  "host_trace": "Native registered launch /root/parallel_eval/final_add; READY waiting phase followed by assigned packet. check_run event a035dcc4e37d4b8fa0ab666968b72fc1 executed by final_add, stage final; result revision 61. No role_result API submitted."
+}

@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "request": {
+    "operation": "integrate",
+    "task_id": "TASK-alternate",
+    "event": {
+      "owner": "/root/parallel_eval",
+      "payload": {},
+      "expected_revision": 50,
+      "task_id": "TASK-alternate",
+      "type": "integrate",
+      "event_id": "f0b505b9a7264e62984385f454ce18ae",
+      "run_id": "c0d2875802aa4e91a5628c5251981565"
+    },
+    "precondition": {
+      "head": "b4452b04d79810b7eff7d5ba2b72aa5bf8a65c95",
+      "before": {
+        "files": {
+          "alternate.py": {
+            "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "calculator.py": {
+            "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "check.py": {
+            "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "check.py.lock": {
+            "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/design.md": {
+            "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/proposal.md": {
+            "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/review/decisions.md": {
+            "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/specs/alternate/spec.md": {
+            "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/specs/calculator/spec.md": {
+            "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/state.md": {
+            "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "executable": false,
+            "git_mode": "100644"
+          },
+          "sdd/changes/add/tasks.md": {
+            "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "executable": false,
+            "git_mode": "100644"
+          }
+        },
+        "digest": "8b6c53756b9eed1de222915e3fbd900419903592e972b521b15f48eb84c75fed"
+      },
+      "package": "7a7d5315cfa847cdd6456b75fc27098196c9798877bf27816081c0e08650ee58"
+    }
+  },
+  "fingerprint": "ecc8e7fbc74a93adc4599330ee47d6a59b1799f35d43cd9a11cc83cf3d21de9a",
+  "phase": "observed",
+  "result": {
+    "before": {
+      "files": {
+        "alternate.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "calculator.py": {
+          "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py": {
+          "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py.lock": {
+          "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/alternate/spec.md": {
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+          "executable": false,
+          "git_mode": "100644"
+        }
+      },
+      "digest": "8b6c53756b9eed1de222915e3fbd900419903592e972b521b15f48eb84c75fed"
+    },
+    "after": {
+      "files": {
+        "alternate.py": {
+          "sha256": "f321d3f20f3100c20151a441b85b99e6d4b2717514bf6c657838d5173290e373",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "alternate_check.py": {
+          "sha256": "0d25318d3fdefab1dc9da0366a10cb6eef3d767c4541638d9a62b2a51400bf3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "alternate_check.py.lock": {
+          "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "calculator.py": {
+          "sha256": "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py": {
+          "sha256": "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "check.py.lock": {
+          "sha256": "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/alternate/spec.md": {
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+          "executable": false,
+          "git_mode": "100644"
+        }
+      },
+      "digest": "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105"
+    },
+    "head": "b4452b04d79810b7eff7d5ba2b72aa5bf8a65c95"
+  }
+}

@@ -1,0 +1,70 @@
+﻿{
+    "outputs":  [
+                    {
+                        "command":  "uv run --locked --script alternate_check.py",
+                        "cwd":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+                        "started_at":  "2026-10-08T10:30:54.086664+00:00",
+                        "duration_seconds":  0.36561930004972965,
+                        "exit_code":  0,
+                        "stdout":  "",
+                        "stderr":  "test_invalid_types_in_both_positions (__main__.AddContract.test_invalid_types_in_both_positions) ... ok\r\ntest_nonfinite_operands_in_both_positions (__main__.AddContract.test_nonfinite_operands_in_both_positions) ... ok\r\ntest_nonfinite_results_and_conversion_overflow (__main__.AddContract.test_nonfinite_results_and_conversion_overflow) ... ok\r\ntest_numeric_values_and_types (__main__.AddContract.test_numeric_values_and_types) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 0.001s\r\n\r\nOK\r\n",
+                        "outcome":  "passed",
+                        "check_id":  "plan-1",
+                        "configuration":  {
+
+                                          },
+                        "criteria":  [
+                                         "AC-alternate"
+                                     ]
+                    }
+                ],
+    "stage":  "independent",
+    "snapshot_unchanged":  true,
+    "host_trace":  "check_run fe1418a587534b848f49ce79c8e18f49",
+    "subtest_cases":  39,
+    "log":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/fe1418a587534b848f49ce79c8e18f49.json",
+    "limitations":  [
+                        "No code review performed."
+                    ],
+    "task_id":  "TASK-alternate",
+    "ac_evidence":  {
+                        "AC-alternate":  "9 numeric value/type cases including arbitrary precision integer arithmetic; 20 invalid-type cases in both positions; 6 nonfinite operand cases; 4 result/conversion overflow cases. All passed."
+                    },
+    "status":  "passed",
+    "prior_evidence":  {
+                           "test_methods":  4,
+                           "context_id":  "/root/parallel_eval/verify_alternate",
+                           "command":  "uv run --locked --script alternate_check.py",
+                           "log":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/e2744512aad745bc8924cd7a0ea1cce9.json",
+                           "subtest_cases":  39,
+                           "exit_code":  0,
+                           "task_id":  "TASK-alternate",
+                           "configuration":  {
+
+                                             },
+                           "snapshot_unchanged":  true,
+                           "inspected_paths":  [
+                                                   "alternate.py",
+                                                   "alternate_check.py",
+                                                   "sdd/changes/add/specs/alternate/spec.md",
+                                                   "sdd/changes/add/design.md"
+                                               ],
+                           "stage":  "independent",
+                           "limitations":  [
+                                               "uv warns --locked has no effect outside a project; behavioral tests passed, but this run does not establish lock enforcement. Script dependencies are empty.",
+                                               "No code review performed; awaiting review_start."
+                                           ],
+                           "source_digest":  "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a",
+                           "role_id":  "verify_alternate",
+                           "cwd":  "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-alternate",
+                           "status":  "passed",
+                           "host_trace":  "Native fresh verifier /root/parallel_eval/verify_alternate; check_run e2744512aad745bc8924cd7a0ea1cce9; temp fixture access used approved escalation.",
+                           "ac_evidence":  {
+                                               "AC-alternate":  "9 numeric value/type cases including arbitrary precision integer arithmetic; 20 invalid-type cases in both positions; 6 nonfinite operand cases; 4 result/conversion overflow cases. All passed."
+                                           }
+                       },
+    "test_methods":  4,
+    "source_digest":  "727922f4c1044e185ad85f50ae28c0128b2a0e1ffc83f3e29a563456260d7eec",
+    "role_id":  "verify_alternate",
+    "context_id":  "/root/parallel_eval/verify_alternate"
+}

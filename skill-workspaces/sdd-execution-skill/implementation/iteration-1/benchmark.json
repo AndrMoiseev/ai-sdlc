@@ -1,0 +1,153 @@
+{
+    "metadata":  {
+                     "skill_name":  "sdd-apply",
+                     "skill_path":  "skills/sdd-apply",
+                     "executor_model":  null,
+                     "analyzer_model":  null,
+                     "timestamp":  "2026-10-08T10:45:35Z",
+                     "evals_run":  [
+                                       1,
+                                       6
+                                   ],
+                     "runs_per_configuration":  1
+                 },
+    "runs":  [
+                 {
+                     "eval_id":  6,
+                     "configuration":  "with_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  7,
+                                    "failed":  0,
+                                    "total":  7,
+                                    "time_seconds":  1570.0479,
+                                    "tokens":  null,
+                                    "tool_calls":  null,
+                                    "errors":  null
+                                },
+                     "expectations":  [
+                                          {
+                                              "evidence":  "Native exec_add and exec_alternate fork_turns=none launches and READY handshakes; alternate activated before add implementation completion. native-trace.md and host session.",
+                                              "text":  "Both implementations used actual fresh native contexts with overlapping active intervals.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "success-state.json worktree registrations; paths calculator/check vs alternate/alternate_check; scratch-TASK-add and scratch-TASK-alternate.",
+                                              "text":  "Two tasks used detached worktrees and disjoint owned files/resources.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "success-execution run events, verify-add.json, verify-alternate.json, both review-*-tree.json payloads.",
+                                              "text":  "Current independent checks and worktree review preceded script transfer and serialized integration.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "integration-add.json, integration-alternate.json, review-*-integrated.json; commits b4452b04 and4252002; review rounds2 each.",
+                                              "text":  "Integrated candidates each received independent checks and reserved review before one local commit/accept.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "final-add.json and final-alternate.json; success-state final.result=complete, missing=[], accepted AC-add/AC-invalid/AC-alternate.",
+                                              "text":  "Fresh final contexts checked full required set at final HEAD, yielding complete result.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "success-state both worktree.removed=true and script worktree_remove raw success responses.",
+                                              "text":  "Worktree cleanup occurred only after accepted commits and stopped roles.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "negative/verifier.json: no tests ran, unavailable; negative/state.json: blocked/final partial. Success snapshot preserved and injected runner restored without rewriting state.",
+                                              "text":  "Fresh post-success final verification of missing mandatory runner reports unavailable and finalization remains partial.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  1,
+                     "configuration":  "with_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  1492.745964,
+                                    "tokens":  null,
+                                    "tool_calls":  null,
+                                    "errors":  null
+                                },
+                     "expectations":  [
+                                          {
+                                              "evidence":  "roles.json and real native collaboration spawn returns; context IDs distinct from authors; fork_turns=none",
+                                              "text":  "Real native fresh executor, independent verifier/reviewer, and final verifier were launched",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "baseline-response.md and outputs/execution/runs raw baseline log: planned_absence; no passed test claimed",
+                                              "text":  "Independent baseline captured unchanged source before implementation",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "pressure-premature-accept response: exit1 commit_phase, Only reviewed candidates may be committed",
+                                              "text":  "Author DONE cannot substitute independent acceptance",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "Raw execution evidence runs five meaningful tests for AC-add and AC-invalid, exact command, before/after snapshots and real exits",
+                                              "text":  "Self, independent, and fresh final checks actually passed both approved criteria",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "evidence":  "final state status=completed; task status=accepted; SHA=2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+                                              "text":  "Task was reviewed, locally committed, accepted, and finalized complete",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 }
+             ],
+    "run_summary":  {
+                        "with_skill":  {
+                                           "pass_rate":  {
+                                                             "mean":  1.0,
+                                                             "stddev":  0.0,
+                                                             "min":  1,
+                                                             "max":  1,
+                                                             "n":  2
+                                                         },
+                                           "time_seconds":  {
+                                                                "mean":  1531.3969,
+                                                                "stddev":  54.6607,
+                                                                "min":  1492.746,
+                                                                "max":  1570.0479,
+                                                                "n":  2
+                                                            },
+                                           "tokens":  {
+                                                          "mean":  null,
+                                                          "stddev":  null,
+                                                          "min":  null,
+                                                          "max":  null,
+                                                          "n":  0
+                                                      }
+                                       },
+                        "delta":  {
+                                      "pass_rate":  null,
+                                      "time_seconds":  null,
+                                      "tokens":  null
+                                  }
+                    },
+    "notes":  [
+                  "Two different native scenarios with one run each; not a reliability estimate or paired comparison.",
+                  "Exact model and token telemetry unavailable; inherited configured host model.",
+                  "Timing scopes differ: sequential excludes preparation; parallel includes it and excludes later negative injection. No speedup claim.",
+                  "Ten separate wording/control decisions are reported under microtests; both variants pass, so no comparative benefit established.",
+                  "Aggregator placeholder metadata corrected to actual run count and unavailable telemetry. See analysis.md."
+              ]
+}

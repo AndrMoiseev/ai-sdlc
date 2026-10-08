@@ -1,0 +1,86 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "exec_alternate",
+                                               "result":  {
+                                                              "task_id":  "TASK-alternate",
+                                                              "role_id":  "exec_alternate",
+                                                              "context_id":  "/root/parallel_eval/exec_alternate",
+                                                              "status":  "DONE implementation claim; independent acceptance pending",
+                                                              "candidate":  "uncommitted snapshot 0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a",
+                                                              "owned_paths":  [
+                                                                                  "alternate.py",
+                                                                                  "alternate_check.py",
+                                                                                  "alternate_check.py.lock"
+                                                                              ],
+                                                              "changes":  {
+                                                                              "binary":  [
+
+                                                                                         ],
+                                                                              "new":  [
+                                                                                          "alternate_check.py",
+                                                                                          "alternate_check.py.lock"
+                                                                                      ],
+                                                                              "deleted":  [
+
+                                                                                          ],
+                                                                              "modified":  [
+                                                                                               "alternate.py"
+                                                                                           ]
+                                                                          },
+                                                              "commands":  [
+                                                                               {
+                                                                                   "tool_trace":  "6c3f2d",
+                                                                                   "command":  "uv lock --script alternate_check.py",
+                                                                                   "exit_code":  0
+                                                                               },
+                                                                               {
+                                                                                   "command":  "uv run --locked --script alternate_check.py",
+                                                                                   "exit_code":  0,
+                                                                                   "tool_trace":  "ad6bb2",
+                                                                                   "log":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+                                                                               }
+                                                                           ],
+                                                              "proposed_check_setup":  {
+                                                                                           "configuration":  {
+
+                                                                                                             },
+                                                                                           "command":  "uv run --locked --script alternate_check.py",
+                                                                                           "cwd":  ".",
+                                                                                           "check_id":  "plan-1"
+                                                                                       },
+                                                              "tests_run":  [
+                                                                                "test_invalid_types_in_both_positions",
+                                                                                "test_nonfinite_operands_in_both_positions",
+                                                                                "test_nonfinite_results_and_conversion_overflow",
+                                                                                "test_numeric_values_and_types"
+                                                                            ],
+                                                              "failed_test_attempts":  [
+
+                                                                                       ],
+                                                              "remaining_acceptance":  [
+                                                                                           "AC-alternate self-check passed; independent verification and review pending"
+                                                                                       ],
+                                                              "limitations":  [
+                                                                                  "Initial sandbox read denied; authorized escalation permitted disposable worktree operations.",
+                                                                                  "uv emitted warning: --locked has no effect when used outside of a project; exact required command retained, dependency-free PEP 723 script and lock present."
+                                                                              ],
+                                                              "host_trace":  "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+                                                              "acceptance_evidence":  {
+                                                                                          "AC-alternate":  "plan-1 passed: 4 unittest methods cover integer precision, mixed arithmetic, invalid types, non-finite inputs/results, conversion overflow; check left snapshot unchanged."
+                                                                                      }
+                                                          },
+                                               "trace":  "Native /root/parallel_eval/exec_alternate final DONE; raw tool IDs in report."
+                                           },
+                               "expected_revision":  19,
+                               "task_id":  "TASK-alternate",
+                               "type":  "role_result",
+                               "event_id":  "04dfc3bbc35941e4addd5f98993f3167",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

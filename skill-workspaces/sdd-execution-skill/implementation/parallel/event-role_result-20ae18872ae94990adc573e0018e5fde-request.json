@@ -1,0 +1,27 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "verify_alternate",
+                                               "result":  {
+                                                              "status":  "DONE",
+                                                              "independent":  "4 tests 39 cases passed",
+                                                              "integration":  "4 tests 39 cases passed",
+                                                              "criteria":  [
+                                                                               "AC-alternate"
+                                                                           ],
+                                                              "report":  "integration-alternate.json"
+                                                          },
+                                               "trace":  "Native /root/parallel_eval/verify_alternate final completion; event1f52301bfe5d422ebecef3ff6d5ad5c7"
+                                           },
+                               "expected_revision":  57,
+                               "task_id":  "TASK-alternate",
+                               "type":  "role_result",
+                               "event_id":  "20ae18872ae94990adc573e0018e5fde",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

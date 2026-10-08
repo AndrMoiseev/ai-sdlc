@@ -1,0 +1,123 @@
+[
+    {
+        "role_id":  "executor",
+        "kind":  "executor",
+        "context_id":  "/root/behavioral_eval/executor",
+        "fresh":  true,
+        "host":  "codex",
+        "launch_ref":  "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+        "capabilities":  {
+                             "fresh_context":  true
+                         },
+        "task_id":  "TASK-add",
+        "status":  "finished",
+        "registered_at":  "2026-10-08T09:43:40.364171+00:00",
+        "result":  {
+                       "status":  "DONE",
+                       "source":  "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743",
+                       "owned_paths":  [
+                                           "calculator.py",
+                                           "check.py",
+                                           "check.py.lock"
+                                       ],
+                       "criteria":  [
+                                        "AC-add",
+                                        "AC-invalid"
+                                    ],
+                       "self_check_exit":  0,
+                       "tests":  5,
+                       "writes_stopped":  true
+                   },
+        "trace":  "native /root/behavioral_eval/executor final response; behavioral/executor-response.md; actual requested self-check 68f8817ea5c74c8a9503766e0e7a72da"
+    },
+    {
+        "role_id":  "baseline",
+        "kind":  "verifier",
+        "context_id":  "/root/behavioral_eval/baseline",
+        "fresh":  true,
+        "host":  "codex",
+        "launch_ref":  "native collaboration.spawn_agent task_name=baseline fork_turns=none returned /root/behavioral_eval/baseline",
+        "capabilities":  {
+                             "fresh_context":  true
+                         },
+        "task_id":  "TASK-add",
+        "status":  "finished",
+        "registered_at":  "2026-10-08T09:44:00.771658+00:00",
+        "result":  {
+                       "status":  "baseline_recorded",
+                       "outcome":  "planned_absence",
+                       "before_after":  "equal",
+                       "commands_executed":  0,
+                       "criteria_passed":  [
+
+                                           ]
+                   },
+        "trace":  "native /root/behavioral_eval/baseline personally requested check_run; behavioral/baseline-response.md; baseline-check-85164adaa02048a0ac2333eb0ab1afbf-request.json and response"
+    },
+    {
+        "role_id":  "verifier",
+        "kind":  "verifier",
+        "context_id":  "/root/behavioral_eval/verify_review",
+        "fresh":  true,
+        "host":  "codex",
+        "launch_ref":  "native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review",
+        "capabilities":  {
+                             "fresh_context":  true
+                         },
+        "task_id":  "TASK-add",
+        "status":  "finished",
+        "registered_at":  "2026-10-08T09:58:10.815939+00:00",
+        "result":  {
+                       "status":  "passed",
+                       "source":  "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743",
+                       "exit_code":  0,
+                       "tests":  5,
+                       "criteria":  [
+                                        "AC-add",
+                                        "AC-invalid"
+                                    ],
+                       "limitation":  "stdlib uv runner warned --locked has no effect outside a project"
+                   },
+        "trace":  "native /root/behavioral_eval/verify_review personally requested check_run and inspected a8f9c768515e4078937159c5b90d2d48; native tool chunks 3cc049,716591,752373"
+    },
+    {
+        "role_id":  "reviewer",
+        "kind":  "reviewer",
+        "context_id":  "/root/behavioral_eval/verify_review",
+        "fresh":  true,
+        "host":  "codex",
+        "launch_ref":  "same actual native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review; second permitted independent role",
+        "capabilities":  {
+                             "fresh_context":  true
+                         },
+        "task_id":  "TASK-add",
+        "status":  "finished",
+        "registered_at":  "2026-10-08T09:59:19.449963+00:00"
+    },
+    {
+        "role_id":  "final_verifier",
+        "kind":  "final_verifier",
+        "context_id":  "/root/behavioral_eval/final_verifier",
+        "fresh":  true,
+        "host":  "codex",
+        "launch_ref":  "native collaboration.spawn_agent task_name=final_verifier fork_turns=none returned /root/behavioral_eval/final_verifier",
+        "capabilities":  {
+                             "fresh_context":  true
+                         },
+        "task_id":  "TASK-add",
+        "status":  "finished",
+        "registered_at":  "2026-10-08T10:04:44.262248+00:00",
+        "result":  {
+                       "status":  "passed",
+                       "head":  "2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+                       "tests":  5,
+                       "exit_code":  0,
+                       "criteria":  [
+                                        "AC-add",
+                                        "AC-invalid"
+                                    ],
+                       "before_after":  "equal"
+                   },
+        "trace":  "actual fresh native /root/behavioral_eval/final_verifier personally requested final check_run; inspected raw log 1acda81e13624fa2b93c318de24f5a9e; behavioral/final-verifier-response.md"
+    }
+]

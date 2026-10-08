@@ -1,0 +1,13 @@
+﻿{
+    "args":  {
+                 "instruction":  {
+                                     "text":  "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture sequentially; local task commits included.",
+                                     "source":  "parent-native-behavioral-evaluation-assignment"
+                                 },
+                 "project_root":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project",
+                 "change":  "add",
+                 "owner":  "/root/behavioral_eval",
+                 "sdd_spec":  "C:/Users/Andrew/repos/ai-sdlc/skills/sdd-spec"
+             },
+    "operation":  "initialize"
+}

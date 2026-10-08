@@ -1,0 +1,90 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "negative_final",
+                                               "result":  {
+                                                              "schema_version":  1,
+                                                              "task_id":  "TASK-add",
+                                                              "role_id":  "negative_final",
+                                                              "context_id":  "/root/parallel_eval/negative_final",
+                                                              "stage":  "final",
+                                                              "status":  "unavailable",
+                                                              "outcome":  "unavailable",
+                                                              "head":  "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+                                                              "source_digest":  "b42a0309c9ef29e8f89aafd96af2c270a995b7e70e2fba8c5978637dd224bb19",
+                                                              "before_digest":  "b42a0309c9ef29e8f89aafd96af2c270a995b7e70e2fba8c5978637dd224bb19",
+                                                              "after_digest":  "b42a0309c9ef29e8f89aafd96af2c270a995b7e70e2fba8c5978637dd224bb19",
+                                                              "source_note":  "Current working tree at accepted HEAD has tracked check.py deleted; prior success and packet historical candidate cannot establish current verification.",
+                                                              "criteria":  [
+                                                                               {
+                                                                                   "status":  "unavailable",
+                                                                                   "evidence":  "plan-1 could not execute: check.py is missing; no arithmetic assertions ran",
+                                                                                   "id":  "AC-add"
+                                                                               },
+                                                                               {
+                                                                                   "status":  "unavailable",
+                                                                                   "evidence":  "plan-1 could not execute: check.py is missing; no invalid-input assertions ran",
+                                                                                   "id":  "AC-invalid"
+                                                                               }
+                                                                           ],
+                                                              "commands":  [
+                                                                               {
+                                                                                   "exit_code":  null,
+                                                                                   "configuration":  {
+
+                                                                                                     },
+                                                                                   "check_id":  "plan-1",
+                                                                                   "cwd":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project",
+                                                                                   "executed":  false,
+                                                                                   "description":  "Previously prepared required check location is missing",
+                                                                                   "command":  "uv run --locked --script check.py",
+                                                                                   "outcome":  "unavailable"
+                                                                               }
+                                                                           ],
+                                                              "orchestrator_exit_code":  0,
+                                                              "raw_log":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/000485c740004b71a7ca3f058753b1b2.json",
+                                                              "host_trace":  {
+                                                                                 "raw_evidence_inspection_tool_chunk":  "252427",
+                                                                                 "request":  "C:/Users/Andrew/repos/ai-sdlc/skill-workspaces/sdd-execution-skill/implementation/parallel/event-check_run-000485c740004b71a7ca3f058753b1b2-request.json",
+                                                                                 "launch_ref":  "collaboration.spawn_agent returned /root/parallel_eval/negative_final",
+                                                                                 "timing":  "C:/Users/Andrew/repos/ai-sdlc/skill-workspaces/sdd-execution-skill/implementation/parallel/event-check_run-000485c740004b71a7ca3f058753b1b2-timing.json",
+                                                                                 "check_run_tool_chunk":  "5d73a2",
+                                                                                 "response":  "C:/Users/Andrew/repos/ai-sdlc/skill-workspaces/sdd-execution-skill/implementation/parallel/event-check_run-000485c740004b71a7ca3f058753b1b2-response.json",
+                                                                                 "stderr":  "C:/Users/Andrew/repos/ai-sdlc/skill-workspaces/sdd-execution-skill/implementation/parallel/event-check_run-000485c740004b71a7ca3f058753b1b2-stderr.txt"
+                                                                             },
+                                                              "inspected_paths":  [
+                                                                                      "skills/sdd-apply/agents/verifier.md",
+                                                                                      "skills/sdd-apply/references/roles.md",
+                                                                                      "roles/negative_final.json",
+                                                                                      "sdd/changes/add/specs/calculator/spec.md",
+                                                                                      "sdd/changes/add/design.md",
+                                                                                      "sdd/changes/add/tasks.md",
+                                                                                      "sdd/changes/add/state.md",
+                                                                                      "calculator.py",
+                                                                                      "execution/state.json"
+                                                                                  ],
+                                                              "limitations":  [
+                                                                                  "Fresh native role context differs from executors; inherited shared workspace and skill catalog remain visible.",
+                                                                                  "Filesystem is workspace-write, not read-only; external fixture access required approved escalation.",
+                                                                                  "Missing check.py belongs to TASK-add. No implementation defect inferred from unavailable runner.",
+                                                                                  "No repair, retry, implementation edit, or role_result API performed.",
+                                                                                  "TASK-alternate is outside this assigned verification."
+                                                                              ],
+                                                              "blockers":  [
+                                                                               "Required check.py is absent; restore through orchestrator repair reservation before any retry."
+                                                                           ]
+                                                          },
+                                               "trace":  "Actual native negative_final completion: unavailable required check.py; no tests ran, no retry."
+                                           },
+                               "expected_revision":  69,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "b9c662d2e55747a5ae61079927dcf3ea",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

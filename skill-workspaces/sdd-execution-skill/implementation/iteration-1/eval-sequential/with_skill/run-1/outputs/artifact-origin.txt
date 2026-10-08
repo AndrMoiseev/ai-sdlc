@@ -1,0 +1,1 @@
+Copied from implementation/behavioral. Full request-response and native role evidence remain in C:/Users/Andrew/repos/ai-sdlc/skill-workspaces/sdd-execution-skill/implementation/behavioral/. This is a retained actual run, not newly generated evidence.

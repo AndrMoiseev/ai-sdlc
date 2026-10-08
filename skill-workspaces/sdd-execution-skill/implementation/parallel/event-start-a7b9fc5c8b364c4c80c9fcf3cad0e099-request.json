@@ -1,0 +1,22 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "exec_add",
+                                               "paths":  [
+                                                             "calculator.py",
+                                                             "check.py",
+                                                             "check.py.lock"
+                                                         ]
+                                           },
+                               "expected_revision":  5,
+                               "task_id":  "TASK-add",
+                               "type":  "start",
+                               "event_id":  "a7b9fc5c8b364c4c80c9fcf3cad0e099",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

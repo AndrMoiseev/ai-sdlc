@@ -1,0 +1,2722 @@
+﻿{
+  "ok": true,
+  "result": {
+    "schema_version": 1,
+    "change_id": "add",
+    "run_id": "c0d2875802aa4e91a5628c5251981565",
+    "revision": 23,
+    "status": "active",
+    "owner": "/root/parallel_eval",
+    "basis": {
+      "schema_version": 1,
+      "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project",
+      "change_id": "add",
+      "change_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add",
+      "instruction": {
+        "text": "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture in parallel; local task commits included.",
+        "source": "parent-native-behavioral-evaluation-assignment"
+      },
+      "sdd_spec": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec",
+      "checks": {
+        "documents": {
+          "schema_version": 1,
+          "stage": "documents",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "consistency"
+            ],
+            "coverage": {
+              "consistency": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          }
+        },
+        "plan": {
+          "schema_version": 1,
+          "stage": "plan",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "plan"
+            ],
+            "coverage": {
+              "plan": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          },
+          "tasks": {
+            "available_by_graph": [
+              "TASK-add",
+              "TASK-alternate"
+            ],
+            "cannot_parallel_with": {
+              "TASK-add": [],
+              "TASK-alternate": []
+            },
+            "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+          },
+          "progress": {
+            "done": 0,
+            "total": 2
+          }
+        }
+      },
+      "manifest": [
+        {
+          "path": "design.md",
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd"
+        },
+        {
+          "path": "proposal.md",
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+        },
+        {
+          "path": "specs/alternate/spec.md",
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956"
+        },
+        {
+          "path": "specs/calculator/spec.md",
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+        },
+        {
+          "path": "tasks.md",
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421"
+        }
+      ],
+      "tasks": [
+        {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        {
+          "covers": [
+            "AC-alternate"
+          ],
+          "depends_on": [],
+          "id": "TASK-alternate",
+          "number": 2,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-alternate"
+              ],
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        }
+      ],
+      "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+      "branch": "main",
+      "dirty_paths": [],
+      "index_patch": "",
+      "status": "",
+      "working_patch": ""
+    },
+    "mode": "parallel",
+    "parallel_request": {
+      "text": "Run the two independent fixture tasks in parallel using isolated worktrees.",
+      "source": "parent evaluation assignment"
+    },
+    "mode_reason": null,
+    "tasks": {
+      "TASK-add": {
+        "plan": {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        "status": "repairing",
+        "attempt": 1,
+        "candidate": null,
+        "evidence": [
+          {
+            "check_id": "plan-1",
+            "stage": "self",
+            "role_id": "exec_add",
+            "candidate": null,
+            "outcome": "passed",
+            "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json",
+            "log_hash": "cf1a9c56ca303e759ea93bb999fd2cc19812a9bd8a121fd96a750d4ab3ecbbcf",
+            "time": "2026-10-08T10:24:22.701580+00:00",
+            "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c"
+          },
+          {
+            "check_id": "plan-1",
+            "stage": "self",
+            "role_id": "exec_add",
+            "candidate": null,
+            "outcome": "passed",
+            "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/fe83123e595b41da8562e81a9e6450c0.json",
+            "log_hash": "3881b6a26a2b785c3eff3c2451032b0680e5f88749fd4131a9ae83aff8654dce",
+            "time": "2026-10-08T10:27:48.545985+00:00",
+            "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c"
+          }
+        ],
+        "reviews": [],
+        "commits": [],
+        "blockers": [],
+        "review_limit": 3,
+        "review_rounds_started": 0,
+        "review_rounds_completed": 0,
+        "active_review": null,
+        "test_repair_limit": 5,
+        "test_repair_cycles_started": 0,
+        "active_repair": null,
+        "repair_cycles": [],
+        "budget_decisions": [],
+        "checks": [
+          {
+            "id": "plan-1",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "source": "tasks.md",
+            "location": "check.py",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Executor created approved PEP723 standard-library check.py plus adjacent lock; five unittest methods for all task AC.",
+              "before": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+              },
+              "after": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "check.py": {
+                    "sha256": "f5fd2fea63c893a9f609e51803970f8e3e9eaf890e58127356f466c3af33a187",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce"
+              }
+            }
+          }
+        ],
+        "worktree": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-add"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "roles": [
+          "exec_add",
+          "verify_add"
+        ],
+        "paths": [
+          "calculator.py",
+          "check.py",
+          "check.py.lock"
+        ],
+        "inventory": {
+          "instructions": [],
+          "ci": []
+        },
+        "executor": "exec_add",
+        "start_snapshot": {
+          "files": {
+            "alternate.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "calculator.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/alternate/spec.md": {
+              "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+              "executable": false,
+              "git_mode": "100644"
+            }
+          },
+          "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+        },
+        "baseline_checks": {
+          "schema_version": 1,
+          "change_id": "add",
+          "run_id": "c0d2875802aa4e91a5628c5251981565",
+          "task_id": "TASK-add",
+          "role_id": "verify_add",
+          "stage": "baseline",
+          "candidate": null,
+          "before": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "after": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "outputs": [
+            {
+              "check_id": "plan-1",
+              "outcome": "planned_absence",
+              "description": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            }
+          ]
+        }
+      },
+      "TASK-alternate": {
+        "plan": {
+          "covers": [
+            "AC-alternate"
+          ],
+          "depends_on": [],
+          "id": "TASK-alternate",
+          "number": 2,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-alternate"
+              ],
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        "status": "verifying",
+        "attempt": 1,
+        "candidate": {
+          "source": {
+            "files": {
+              "alternate.py": {
+                "sha256": "0ff9d51c78e71fd3c746ea24040fc41bebd4d44883f9e0b158c1fe79019095df",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "alternate_check.py": {
+                "sha256": "fc34a4213cdd2a82d848a593984c818b936bf1b5aef3b1c8bee7d582fe485111",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "alternate_check.py.lock": {
+                "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a"
+          },
+          "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+          "checks": "b9b07718f5ef135229f7f5997e9894c9bb396191f625cabd5343d419c79c537e",
+          "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate"
+        },
+        "evidence": [
+          {
+            "check_id": "plan-1",
+            "stage": "self",
+            "role_id": "exec_alternate",
+            "candidate": null,
+            "outcome": "passed",
+            "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json",
+            "log_hash": "8693ed6043bf9cfd0bfd7bfea8d3e0e0bc99cfdc52e134ade782ebad427141bd",
+            "time": "2026-10-08T10:26:22.399053+00:00",
+            "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c"
+          },
+          {
+            "check_id": "plan-1",
+            "stage": "independent",
+            "role_id": "verify_alternate",
+            "candidate": {
+              "source": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "0ff9d51c78e71fd3c746ea24040fc41bebd4d44883f9e0b158c1fe79019095df",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py": {
+                    "sha256": "fc34a4213cdd2a82d848a593984c818b936bf1b5aef3b1c8bee7d582fe485111",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a"
+              },
+              "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+              "checks": "b9b07718f5ef135229f7f5997e9894c9bb396191f625cabd5343d419c79c537e",
+              "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate"
+            },
+            "outcome": "passed",
+            "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/e2744512aad745bc8924cd7a0ea1cce9.json",
+            "log_hash": "46428984e81475f45b1f19d65d6f3a705850967556ff48cc79ed3c2bb2cb67a4",
+            "time": "2026-10-08T10:28:33.575418+00:00",
+            "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c"
+          }
+        ],
+        "reviews": [],
+        "commits": [],
+        "blockers": [],
+        "review_limit": 3,
+        "review_rounds_started": 0,
+        "review_rounds_completed": 0,
+        "active_review": null,
+        "test_repair_limit": 5,
+        "test_repair_cycles_started": 0,
+        "active_repair": null,
+        "repair_cycles": [],
+        "budget_decisions": [],
+        "checks": [
+          {
+            "id": "plan-1",
+            "criteria": [
+              "AC-alternate"
+            ],
+            "source": "tasks.md",
+            "location": "alternate_check.py",
+            "run": {
+              "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script alternate_check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Executor prepared planned finite-add assertions in PEP723 script plus lockfile.",
+              "before": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+              },
+              "after": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "0ff9d51c78e71fd3c746ea24040fc41bebd4d44883f9e0b158c1fe79019095df",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py": {
+                    "sha256": "fc34a4213cdd2a82d848a593984c818b936bf1b5aef3b1c8bee7d582fe485111",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a"
+              }
+            }
+          }
+        ],
+        "worktree": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-alternate"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "roles": [
+          "exec_alternate",
+          "verify_alternate"
+        ],
+        "paths": [
+          "alternate.py",
+          "alternate_check.py",
+          "alternate_check.py.lock"
+        ],
+        "inventory": {
+          "instructions": [],
+          "ci": []
+        },
+        "executor": "exec_alternate",
+        "start_snapshot": {
+          "files": {
+            "alternate.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "calculator.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/alternate/spec.md": {
+              "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+              "executable": false,
+              "git_mode": "100644"
+            }
+          },
+          "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+        },
+        "baseline_checks": {
+          "schema_version": 1,
+          "change_id": "add",
+          "run_id": "c0d2875802aa4e91a5628c5251981565",
+          "task_id": "TASK-alternate",
+          "role_id": "verify_alternate",
+          "stage": "baseline",
+          "candidate": null,
+          "before": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "after": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "outputs": [
+            {
+              "check_id": "plan-1",
+              "outcome": "planned_absence",
+              "description": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+            }
+          ]
+        },
+        "last_check_failed": false
+      }
+    },
+    "roles": {
+      "exec_add": {
+        "role_id": "exec_add",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+        "context_id": "/root/parallel_eval/exec_add",
+        "fresh": true,
+        "kind": "executor",
+        "host": "codex",
+        "task_id": "TASK-add",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:23.638718+00:00",
+        "result": {
+          "task_id": "TASK-add",
+          "role_id": "exec_add",
+          "context_id": "/root/parallel_eval/exec_add",
+          "status": "DONE",
+          "owned_paths": [
+            "calculator.py",
+            "check.py",
+            "check.py.lock"
+          ],
+          "check_id": "plan-1",
+          "command": "uv run --locked --script check.py",
+          "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-add",
+          "lock_result": {
+            "chunk_id": "f8a6d1",
+            "wall_time_seconds": 0.1716862,
+            "exit_code": 0,
+            "original_token_count": 4,
+            "output": "Resolved in 1ms\n"
+          },
+          "tests_run": [
+            "uv run --locked --script check.py: 5 unittest methods passed; exit 0"
+          ],
+          "failed_test_attempts": [],
+          "limitations": [
+            "Read-only git status returned fatal: not a git repository: (NULL); source changes remain uncommitted.",
+            "Inherited session instructions and skill catalog; inspected only executor contract, roles reference, assigned packet and fixture task/design/spec/proposal plus owned calculator.py.",
+            "Initial helper call 3beba3 exited 1 before tests due TEMP state read permission; authorized escalation 8f34b9 succeeded. uv warned --locked has no effect outside a project; exact registered command preserved and lockfile exists."
+          ],
+          "self_check": {
+            "source_snapshot": "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce",
+            "AC_invalid": "test_invalid_types_in_each_position; test_nonfinite_operands_in_each_position; test_nonfinite_results",
+            "outcome": "passed",
+            "trace_ids": [
+              "3beba3",
+              "8f34b9",
+              "203b9f"
+            ],
+            "AC_add": "test_arithmetic_sum; test_arbitrary_precision_integers",
+            "remaining_ac": [],
+            "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+          }
+        },
+        "trace": "Native /root/parallel_eval/exec_add final DONE; raw tool IDs retained in report."
+      },
+      "exec_alternate": {
+        "role_id": "exec_alternate",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+        "context_id": "/root/parallel_eval/exec_alternate",
+        "fresh": true,
+        "kind": "executor",
+        "host": "codex",
+        "task_id": "TASK-alternate",
+        "status": "finished",
+        "registered_at": "2026-10-08T10:14:24.558341+00:00",
+        "result": {
+          "task_id": "TASK-alternate",
+          "role_id": "exec_alternate",
+          "context_id": "/root/parallel_eval/exec_alternate",
+          "status": "DONE implementation claim; independent acceptance pending",
+          "candidate": "uncommitted snapshot 0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a",
+          "owned_paths": [
+            "alternate.py",
+            "alternate_check.py",
+            "alternate_check.py.lock"
+          ],
+          "changes": {
+            "binary": [],
+            "new": [
+              "alternate_check.py",
+              "alternate_check.py.lock"
+            ],
+            "deleted": [],
+            "modified": [
+              "alternate.py"
+            ]
+          },
+          "commands": [
+            {
+              "tool_trace": "6c3f2d",
+              "command": "uv lock --script alternate_check.py",
+              "exit_code": 0
+            },
+            {
+              "command": "uv run --locked --script alternate_check.py",
+              "exit_code": 0,
+              "tool_trace": "ad6bb2",
+              "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+            }
+          ],
+          "proposed_check_setup": {
+            "configuration": {},
+            "command": "uv run --locked --script alternate_check.py",
+            "cwd": ".",
+            "check_id": "plan-1"
+          },
+          "tests_run": [
+            "test_invalid_types_in_both_positions",
+            "test_nonfinite_operands_in_both_positions",
+            "test_nonfinite_results_and_conversion_overflow",
+            "test_numeric_values_and_types"
+          ],
+          "failed_test_attempts": [],
+          "remaining_acceptance": [
+            "AC-alternate self-check passed; independent verification and review pending"
+          ],
+          "limitations": [
+            "Initial sandbox read denied; authorized escalation permitted disposable worktree operations.",
+            "uv emitted warning: --locked has no effect when used outside of a project; exact required command retained, dependency-free PEP 723 script and lock present."
+          ],
+          "host_trace": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+          "acceptance_evidence": {
+            "AC-alternate": "plan-1 passed: 4 unittest methods cover integer precision, mixed arithmetic, invalid types, non-finite inputs/results, conversion overflow; check left snapshot unchanged."
+          }
+        },
+        "trace": "Native /root/parallel_eval/exec_alternate final DONE; raw tool IDs in report."
+      },
+      "verify_add": {
+        "role_id": "verify_add",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add",
+        "context_id": "/root/parallel_eval/verify_add",
+        "fresh": true,
+        "kind": "verifier",
+        "host": "codex",
+        "task_id": "TASK-add",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:56.993216+00:00"
+      },
+      "verify_alternate": {
+        "role_id": "verify_alternate",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate",
+        "context_id": "/root/parallel_eval/verify_alternate",
+        "fresh": true,
+        "kind": "verifier",
+        "host": "codex",
+        "task_id": "TASK-alternate",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:57.419170+00:00"
+      }
+    },
+    "events": [
+      {
+        "event_id": "a1314da0a1e044948beace71e94eae79",
+        "fingerprint": "b247019ce12d6127f32521ff1ab6855ca3811f06453830eb3bf5a4bec8e7a238",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "resources": [
+              "scratch-TASK-add"
+            ],
+            "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees"
+          },
+          "expected_revision": 0,
+          "task_id": "TASK-add",
+          "type": "worktree_create",
+          "event_id": "a1314da0a1e044948beace71e94eae79",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 1,
+        "previous": null,
+        "result": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-add"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "time": "2026-10-08T10:14:04.249364+00:00",
+        "hash": "bce374ccaef8b95c96ac18fc473cc57af7ad6d38b29fe426bf668649d5c39162"
+      },
+      {
+        "event_id": "dd15b62e90d24f2b9d987fbeb522e6e9",
+        "fingerprint": "9a7ff09b8e05741fe89684d2cf4328f39a46d70c5cd79e3e2b9e5900cc517f5f",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "inventory": {
+              "instructions": [],
+              "ci": []
+            },
+            "additional": []
+          },
+          "expected_revision": 1,
+          "task_id": "TASK-add",
+          "type": "checks_register",
+          "event_id": "dd15b62e90d24f2b9d987fbeb522e6e9",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 2,
+        "previous": "bce374ccaef8b95c96ac18fc473cc57af7ad6d38b29fe426bf668649d5c39162",
+        "result": {
+          "checks": [
+            {
+              "id": "plan-1",
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "source": "tasks.md",
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "cwd": ".",
+              "configuration": {},
+              "setup": null
+            }
+          ]
+        },
+        "time": "2026-10-08T10:14:04.659966+00:00",
+        "hash": "acd6201ba0369707de4c4edcd52e015f0f04b42d50a00db7c6306f84ac0b5470"
+      },
+      {
+        "event_id": "536c0c3959144b6b94d3f413d7481e0f",
+        "fingerprint": "31f8cedb894b68663491ac8ba6b136169afacd4dc2d0952727f54df109b4602a",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "resources": [
+              "scratch-TASK-alternate"
+            ],
+            "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees"
+          },
+          "expected_revision": 2,
+          "task_id": "TASK-alternate",
+          "type": "worktree_create",
+          "event_id": "536c0c3959144b6b94d3f413d7481e0f",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 3,
+        "previous": "acd6201ba0369707de4c4edcd52e015f0f04b42d50a00db7c6306f84ac0b5470",
+        "result": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-alternate"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "time": "2026-10-08T10:14:06.117265+00:00",
+        "hash": "2911d0c02fa6abc4278ec7eb106645ace5e148e9db3319f861dfe0dee3b22176"
+      },
+      {
+        "event_id": "b6754d2dff2c47899924208eff3d458a",
+        "fingerprint": "0169aa5c1cf7bde5a7954dbaec432f3c5861126b9acc094f6632448fe2fe6193",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "inventory": {
+              "instructions": [],
+              "ci": []
+            },
+            "additional": []
+          },
+          "expected_revision": 3,
+          "task_id": "TASK-alternate",
+          "type": "checks_register",
+          "event_id": "b6754d2dff2c47899924208eff3d458a",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 4,
+        "previous": "2911d0c02fa6abc4278ec7eb106645ace5e148e9db3319f861dfe0dee3b22176",
+        "result": {
+          "checks": [
+            {
+              "id": "plan-1",
+              "criteria": [
+                "AC-alternate"
+              ],
+              "source": "tasks.md",
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "cwd": ".",
+              "configuration": {},
+              "setup": null
+            }
+          ]
+        },
+        "time": "2026-10-08T10:14:06.534962+00:00",
+        "hash": "c83a1c154842d53300190304708b9571e649de9742b216cdf93e7a3cf85c312f"
+      },
+      {
+        "event_id": "0feceb3f917744fa85b779a928e02dcc",
+        "fingerprint": "01c880a731f3195e0071ab36e0a8a1d61568c883dae498b67666225bbb83c127",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+            "context_id": "/root/parallel_eval/exec_add",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex"
+          },
+          "expected_revision": 4,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "0feceb3f917744fa85b779a928e02dcc",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 5,
+        "previous": "c83a1c154842d53300190304708b9571e649de9742b216cdf93e7a3cf85c312f",
+        "result": {
+          "role": {
+            "role_id": "exec_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+            "context_id": "/root/parallel_eval/exec_add",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex",
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:23.638718+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\exec_add.json"
+        },
+        "time": "2026-10-08T10:14:23.641863+00:00",
+        "hash": "635313644b9fefa92b180f0b04bf8bc89cee3b95b1d1fa4fbbd27f1b9c927807"
+      },
+      {
+        "event_id": "a7b9fc5c8b364c4c80c9fcf3cad0e099",
+        "fingerprint": "3d5bcb9f549295087d2e35e0f0ac3ed1af4e1aa475179c30c3a7f01bd20a834a",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "paths": [
+              "calculator.py",
+              "check.py",
+              "check.py.lock"
+            ]
+          },
+          "expected_revision": 5,
+          "task_id": "TASK-add",
+          "type": "start",
+          "event_id": "a7b9fc5c8b364c4c80c9fcf3cad0e099",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 6,
+        "previous": "635313644b9fefa92b180f0b04bf8bc89cee3b95b1d1fa4fbbd27f1b9c927807",
+        "result": {
+          "status": "running"
+        },
+        "time": "2026-10-08T10:14:24.127784+00:00",
+        "hash": "5463663b0852b1c32d660cad5d6ebc0a9278afcb130f2a395e5e54449b6374c1"
+      },
+      {
+        "event_id": "f2ec7e1698064832a95bf831c3071da3",
+        "fingerprint": "bcdba44d1521ed01ec341309cb42e1bf75b7f1d47687ce3c0edc30370ef3a397",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+            "context_id": "/root/parallel_eval/exec_alternate",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex"
+          },
+          "expected_revision": 6,
+          "task_id": "TASK-alternate",
+          "type": "role_register",
+          "event_id": "f2ec7e1698064832a95bf831c3071da3",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 7,
+        "previous": "5463663b0852b1c32d660cad5d6ebc0a9278afcb130f2a395e5e54449b6374c1",
+        "result": {
+          "role": {
+            "role_id": "exec_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+            "context_id": "/root/parallel_eval/exec_alternate",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex",
+            "task_id": "TASK-alternate",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:24.558341+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\exec_alternate.json"
+        },
+        "time": "2026-10-08T10:14:24.561005+00:00",
+        "hash": "4a323b4b4c815076b4970f46ec378f37445ecbd6d8829c67d157ea048de4d237"
+      },
+      {
+        "event_id": "eb38a1a4e78a4ae4a3de1503ff1e560b",
+        "fingerprint": "a53cecb07edf15485d60bf646e536bb95cdc5a69f2d834bcbb58d6ab071458e1",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "paths": [
+              "alternate.py",
+              "alternate_check.py",
+              "alternate_check.py.lock"
+            ]
+          },
+          "expected_revision": 7,
+          "task_id": "TASK-alternate",
+          "type": "start",
+          "event_id": "eb38a1a4e78a4ae4a3de1503ff1e560b",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 8,
+        "previous": "4a323b4b4c815076b4970f46ec378f37445ecbd6d8829c67d157ea048de4d237",
+        "result": {
+          "status": "running"
+        },
+        "time": "2026-10-08T10:14:25.039835+00:00",
+        "hash": "de850d325acf70565910f3be1ab555cb82b65d0693c9436d9701e371e1cac302"
+      },
+      {
+        "event_id": "bd1038c2fb3e44df8fa9afe7e18bcd4d",
+        "fingerprint": "8f8f0b0bc05182ff381617e98968d2ed5da8864b4d333188a3c5d290f425cea3",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "verify_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add",
+            "context_id": "/root/parallel_eval/verify_add",
+            "fresh": true,
+            "kind": "verifier",
+            "host": "codex"
+          },
+          "expected_revision": 8,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "bd1038c2fb3e44df8fa9afe7e18bcd4d",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 9,
+        "previous": "de850d325acf70565910f3be1ab555cb82b65d0693c9436d9701e371e1cac302",
+        "result": {
+          "role": {
+            "role_id": "verify_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_add",
+            "context_id": "/root/parallel_eval/verify_add",
+            "fresh": true,
+            "kind": "verifier",
+            "host": "codex",
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:56.993216+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\verify_add.json"
+        },
+        "time": "2026-10-08T10:14:56.995790+00:00",
+        "hash": "a1f494eb8863a260f1a6b46f66fe0d04ca9e9c923feff06f62573899b99ff460"
+      },
+      {
+        "event_id": "fcea58749a4f46148512e47523c28509",
+        "fingerprint": "0fd31c6d23cfc1c2f4c3eb142b129a6623ca771db1f984c4707b4d0f6bbc1968",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "verify_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate",
+            "context_id": "/root/parallel_eval/verify_alternate",
+            "fresh": true,
+            "kind": "verifier",
+            "host": "codex"
+          },
+          "expected_revision": 9,
+          "task_id": "TASK-alternate",
+          "type": "role_register",
+          "event_id": "fcea58749a4f46148512e47523c28509",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 10,
+        "previous": "a1f494eb8863a260f1a6b46f66fe0d04ca9e9c923feff06f62573899b99ff460",
+        "result": {
+          "role": {
+            "role_id": "verify_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate",
+            "context_id": "/root/parallel_eval/verify_alternate",
+            "fresh": true,
+            "kind": "verifier",
+            "host": "codex",
+            "task_id": "TASK-alternate",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:57.419170+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\verify_alternate.json"
+        },
+        "time": "2026-10-08T10:14:57.421984+00:00",
+        "hash": "172eae773cfe34abab3b4db20e8efd02b5c88984ba4a4edd7c62ffcddadda795"
+      },
+      {
+        "event_id": "0d9d3ca74be04e9b891575bf5adad828",
+        "fingerprint": "28650a2365b10fa4f11b86d15000d1900ce25ce73b24a800ebc50baf41894a07",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "verify_add",
+            "stage": "baseline"
+          },
+          "expected_revision": 10,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "0d9d3ca74be04e9b891575bf5adad828",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 11,
+        "previous": "172eae773cfe34abab3b4db20e8efd02b5c88984ba4a4edd7c62ffcddadda795",
+        "result": {
+          "outcome": "baseline_recorded",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/0d9d3ca74be04e9b891575bf5adad828.json"
+        },
+        "time": "2026-10-08T10:15:39.124595+00:00",
+        "hash": "8c32e2d570b78155878f937121f13b1a325eac2b05df20ecb69c29fb5c8410ab"
+      },
+      {
+        "event_id": "4e12769c8b4944a6bfd280327d663aa7",
+        "fingerprint": "2d4523ba0b3ab5a961dd6603d166a2057fd2f986aa3d3aba0424357b2b82788b",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "verify_alternate",
+            "stage": "baseline"
+          },
+          "expected_revision": 11,
+          "task_id": "TASK-alternate",
+          "type": "check_run",
+          "event_id": "4e12769c8b4944a6bfd280327d663aa7",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 12,
+        "previous": "8c32e2d570b78155878f937121f13b1a325eac2b05df20ecb69c29fb5c8410ab",
+        "result": {
+          "outcome": "baseline_recorded",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/4e12769c8b4944a6bfd280327d663aa7.json"
+        },
+        "time": "2026-10-08T10:16:38.808020+00:00",
+        "hash": "c2118f65d071e340c32da8bee3810589026881d997ceb891a27c40111c972807"
+      },
+      {
+        "event_id": "adade397d6cc44b585f14fc0b5c4a42a",
+        "fingerprint": "e13fb0ba3e9afe64b16d1cd2dbba84c14704e506f1ff4f24fbab313805b09225",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "check_id": "plan-1",
+            "command": "uv run --locked --script check.py",
+            "description": "Executor created approved PEP723 standard-library check.py plus adjacent lock; five unittest methods for all task AC.",
+            "cwd": "."
+          },
+          "expected_revision": 12,
+          "task_id": "TASK-add",
+          "type": "check_setup",
+          "event_id": "adade397d6cc44b585f14fc0b5c4a42a",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 13,
+        "previous": "c2118f65d071e340c32da8bee3810589026881d997ceb891a27c40111c972807",
+        "result": {
+          "setup": {
+            "id": "plan-1",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "source": "tasks.md",
+            "location": "check.py",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Executor created approved PEP723 standard-library check.py plus adjacent lock; five unittest methods for all task AC.",
+              "before": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+              },
+              "after": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "check.py": {
+                    "sha256": "f5fd2fea63c893a9f609e51803970f8e3e9eaf890e58127356f466c3af33a187",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce"
+              }
+            }
+          }
+        },
+        "time": "2026-10-08T10:18:13.138254+00:00",
+        "hash": "e93656e7a630f4e624456aaf3d185adea3b54965c2b8a3e9b9b0cc11cbc489f1"
+      },
+      {
+        "event_id": "1ac093010df648c28456caaca66573cf",
+        "fingerprint": "51fe97aedb3d9c9e52eeff9e3a6737eebd34a2f48c0027eb00a413fa9b50c933",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "check_id": "plan-1",
+            "command": "uv run --locked --script alternate_check.py",
+            "description": "Executor prepared planned finite-add assertions in PEP723 script plus lockfile.",
+            "cwd": "."
+          },
+          "expected_revision": 13,
+          "task_id": "TASK-alternate",
+          "type": "check_setup",
+          "event_id": "1ac093010df648c28456caaca66573cf",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 14,
+        "previous": "e93656e7a630f4e624456aaf3d185adea3b54965c2b8a3e9b9b0cc11cbc489f1",
+        "result": {
+          "setup": {
+            "id": "plan-1",
+            "criteria": [
+              "AC-alternate"
+            ],
+            "source": "tasks.md",
+            "location": "alternate_check.py",
+            "run": {
+              "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script alternate_check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Executor prepared planned finite-add assertions in PEP723 script plus lockfile.",
+              "before": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+              },
+              "after": {
+                "files": {
+                  "alternate.py": {
+                    "sha256": "0ff9d51c78e71fd3c746ea24040fc41bebd4d44883f9e0b158c1fe79019095df",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py": {
+                    "sha256": "fc34a4213cdd2a82d848a593984c818b936bf1b5aef3b1c8bee7d582fe485111",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "alternate_check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/alternate/spec.md": {
+                    "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false,
+                    "git_mode": "100644"
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                    "executable": false,
+                    "git_mode": "100644"
+                  }
+                },
+                "digest": "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a"
+              }
+            }
+          }
+        },
+        "time": "2026-10-08T10:23:57.170540+00:00",
+        "hash": "0abf4086627317a7ba2cb04ea2454fa88d0cefcf0f10bb23d00c12f064b5ba00"
+      },
+      {
+        "event_id": "842acc97b319414d8be67d7f665deda3",
+        "fingerprint": "04875e2b660d17688eaaf0d388a0c8dcd9dccb8118534bd409fce382f8aa6ef8",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "stage": "self"
+          },
+          "expected_revision": 14,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "842acc97b319414d8be67d7f665deda3",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 15,
+        "previous": "0abf4086627317a7ba2cb04ea2454fa88d0cefcf0f10bb23d00c12f064b5ba00",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+        },
+        "time": "2026-10-08T10:24:22.732415+00:00",
+        "hash": "3d9fecf7a935aec2b15bda67a59c34b1264628a3e458217dd7916e65825f6b9e"
+      },
+      {
+        "event_id": "984a17fc1f7d49df822901e94be5f7ff",
+        "fingerprint": "26639e6103211db297210dd6ef937fd9d27effc373db091c3f449ee4bc18aed7",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "result": {
+              "task_id": "TASK-add",
+              "role_id": "exec_add",
+              "context_id": "/root/parallel_eval/exec_add",
+              "status": "DONE",
+              "owned_paths": [
+                "calculator.py",
+                "check.py",
+                "check.py.lock"
+              ],
+              "check_id": "plan-1",
+              "command": "uv run --locked --script check.py",
+              "cwd": "C:/Users/Andrew/AppData/Local/Temp/sdd-parallel-worktrees/c0d2875802aa4e91a5628c5251981565/TASK-add",
+              "lock_result": {
+                "chunk_id": "f8a6d1",
+                "wall_time_seconds": 0.1716862,
+                "exit_code": 0,
+                "original_token_count": 4,
+                "output": "Resolved in 1ms\n"
+              },
+              "tests_run": [
+                "uv run --locked --script check.py: 5 unittest methods passed; exit 0"
+              ],
+              "failed_test_attempts": [],
+              "limitations": [
+                "Read-only git status returned fatal: not a git repository: (NULL); source changes remain uncommitted.",
+                "Inherited session instructions and skill catalog; inspected only executor contract, roles reference, assigned packet and fixture task/design/spec/proposal plus owned calculator.py.",
+                "Initial helper call 3beba3 exited 1 before tests due TEMP state read permission; authorized escalation 8f34b9 succeeded. uv warned --locked has no effect outside a project; exact registered command preserved and lockfile exists."
+              ],
+              "self_check": {
+                "source_snapshot": "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce",
+                "AC_invalid": "test_invalid_types_in_each_position; test_nonfinite_operands_in_each_position; test_nonfinite_results",
+                "outcome": "passed",
+                "trace_ids": [
+                  "3beba3",
+                  "8f34b9",
+                  "203b9f"
+                ],
+                "AC_add": "test_arithmetic_sum; test_arbitrary_precision_integers",
+                "remaining_ac": [],
+                "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+              }
+            },
+            "trace": "Native /root/parallel_eval/exec_add final DONE; raw tool IDs retained in report."
+          },
+          "expected_revision": 15,
+          "task_id": "TASK-add",
+          "type": "role_result",
+          "event_id": "984a17fc1f7d49df822901e94be5f7ff",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 16,
+        "previous": "3d9fecf7a935aec2b15bda67a59c34b1264628a3e458217dd7916e65825f6b9e",
+        "result": {
+          "role_finished": "exec_add",
+          "task_status": "running"
+        },
+        "time": "2026-10-08T10:25:16.948371+00:00",
+        "hash": "58b229d99b0180d4e957b83b15ff47bcca7d7259b0ad83907b018b5d9ac96fd8"
+      },
+      {
+        "event_id": "efe173f658574385a7eadcea4027f501",
+        "fingerprint": "f372855048d121e94083553d99ca5c35a22ca29044d1db098580bc7d31cde6fd",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {},
+          "expected_revision": 16,
+          "task_id": "TASK-add",
+          "type": "candidate",
+          "event_id": "efe173f658574385a7eadcea4027f501",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 17,
+        "previous": "58b229d99b0180d4e957b83b15ff47bcca7d7259b0ad83907b018b5d9ac96fd8",
+        "result": {
+          "candidate": {
+            "source": {
+              "files": {
+                "alternate.py": {
+                  "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "calculator.py": {
+                  "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "check.py": {
+                  "sha256": "f5fd2fea63c893a9f609e51803970f8e3e9eaf890e58127356f466c3af33a187",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "check.py.lock": {
+                  "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/design.md": {
+                  "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/proposal.md": {
+                  "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/review/decisions.md": {
+                  "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/specs/alternate/spec.md": {
+                  "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/specs/calculator/spec.md": {
+                  "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/state.md": {
+                  "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/tasks.md": {
+                  "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                  "executable": false,
+                  "git_mode": "100644"
+                }
+              },
+              "digest": "afe8d430ec34494b508e3d2fb309a2ddc36e5b5231cce99ab2bea60a3da384ce"
+            },
+            "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+            "checks": "e2c061ed067d3ffd915b40ce3f34d29b5d0f80ec797ff94773dcb6fd4736844e",
+            "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add"
+          }
+        },
+        "time": "2026-10-08T10:25:17.455379+00:00",
+        "hash": "579ab7180d436917b2910e5ea9f8cf003b714ee7f13b756dff2995b718fc8a2b"
+      },
+      {
+        "event_id": "f2e25ae717a546239e3cc7e5de8dce46",
+        "fingerprint": "514df9d3273c1fee9989731b2d6884d7fa8a714d1ed88e1b3e66027534fa5bd2",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "stage": "self"
+          },
+          "expected_revision": 17,
+          "task_id": "TASK-alternate",
+          "type": "check_run",
+          "event_id": "f2e25ae717a546239e3cc7e5de8dce46",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 18,
+        "previous": "579ab7180d436917b2910e5ea9f8cf003b714ee7f13b756dff2995b718fc8a2b",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+        },
+        "time": "2026-10-08T10:26:22.428249+00:00",
+        "hash": "a5c8edab1f1dc6cd7c6425b756de07a7a0c565b4cb365cf861a1680cd0864371"
+      },
+      {
+        "event_id": "944a4cc85a484c99bfdfdf73dc3f0569",
+        "fingerprint": "543a7684ca3165157a5fdb0ba29f0a71c9373b53ed987246f8e18e40bb671ca0",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "reason": "Prepared PEP723 runner begins with UTF8 BOM and uv ignores locked script metadata",
+            "defect_evidence": {
+              "bytes": "EF-BB-BF-23-20-2F",
+              "tool_trace": "7ab012",
+              "stderr": "--locked has no effect outside a project",
+              "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+            }
+          },
+          "expected_revision": 18,
+          "task_id": "TASK-add",
+          "type": "repair",
+          "event_id": "944a4cc85a484c99bfdfdf73dc3f0569",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 19,
+        "previous": "a5c8edab1f1dc6cd7c6425b756de07a7a0c565b4cb365cf861a1680cd0864371",
+        "result": {
+          "status": "repairing",
+          "cycle": null
+        },
+        "time": "2026-10-08T10:27:11.907335+00:00",
+        "hash": "fc6765074834692d0c1022663ea562d3632eb47c8608088072b123ee5ec38c1b"
+      },
+      {
+        "event_id": "04dfc3bbc35941e4addd5f98993f3167",
+        "fingerprint": "c48bf027124bea040d80b667dd81eb5a341ab83c4033ab4301bc71a62b886ddc",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "result": {
+              "task_id": "TASK-alternate",
+              "role_id": "exec_alternate",
+              "context_id": "/root/parallel_eval/exec_alternate",
+              "status": "DONE implementation claim; independent acceptance pending",
+              "candidate": "uncommitted snapshot 0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a",
+              "owned_paths": [
+                "alternate.py",
+                "alternate_check.py",
+                "alternate_check.py.lock"
+              ],
+              "changes": {
+                "binary": [],
+                "new": [
+                  "alternate_check.py",
+                  "alternate_check.py.lock"
+                ],
+                "deleted": [],
+                "modified": [
+                  "alternate.py"
+                ]
+              },
+              "commands": [
+                {
+                  "tool_trace": "6c3f2d",
+                  "command": "uv lock --script alternate_check.py",
+                  "exit_code": 0
+                },
+                {
+                  "command": "uv run --locked --script alternate_check.py",
+                  "exit_code": 0,
+                  "tool_trace": "ad6bb2",
+                  "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/f2e25ae717a546239e3cc7e5de8dce46.json"
+                }
+              ],
+              "proposed_check_setup": {
+                "configuration": {},
+                "command": "uv run --locked --script alternate_check.py",
+                "cwd": ".",
+                "check_id": "plan-1"
+              },
+              "tests_run": [
+                "test_invalid_types_in_both_positions",
+                "test_nonfinite_operands_in_both_positions",
+                "test_nonfinite_results_and_conversion_overflow",
+                "test_numeric_values_and_types"
+              ],
+              "failed_test_attempts": [],
+              "remaining_acceptance": [
+                "AC-alternate self-check passed; independent verification and review pending"
+              ],
+              "limitations": [
+                "Initial sandbox read denied; authorized escalation permitted disposable worktree operations.",
+                "uv emitted warning: --locked has no effect when used outside of a project; exact required command retained, dependency-free PEP 723 script and lock present."
+              ],
+              "host_trace": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+              "acceptance_evidence": {
+                "AC-alternate": "plan-1 passed: 4 unittest methods cover integer precision, mixed arithmetic, invalid types, non-finite inputs/results, conversion overflow; check left snapshot unchanged."
+              }
+            },
+            "trace": "Native /root/parallel_eval/exec_alternate final DONE; raw tool IDs in report."
+          },
+          "expected_revision": 19,
+          "task_id": "TASK-alternate",
+          "type": "role_result",
+          "event_id": "04dfc3bbc35941e4addd5f98993f3167",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 20,
+        "previous": "fc6765074834692d0c1022663ea562d3632eb47c8608088072b123ee5ec38c1b",
+        "result": {
+          "role_finished": "exec_alternate",
+          "task_status": "running"
+        },
+        "time": "2026-10-08T10:27:38.851760+00:00",
+        "hash": "26a70658ec24b411b4f6d3b6b1cc223dc0c29d0428ee7aade2d407b101d8cd45"
+      },
+      {
+        "event_id": "5ddd6922dbcb401eb71ae440b5514dac",
+        "fingerprint": "2eef3e01e47c015ac1d1243b97794cfbed6a90dcb70257be156f71f874530614",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {},
+          "expected_revision": 20,
+          "task_id": "TASK-alternate",
+          "type": "candidate",
+          "event_id": "5ddd6922dbcb401eb71ae440b5514dac",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 21,
+        "previous": "26a70658ec24b411b4f6d3b6b1cc223dc0c29d0428ee7aade2d407b101d8cd45",
+        "result": {
+          "candidate": {
+            "source": {
+              "files": {
+                "alternate.py": {
+                  "sha256": "0ff9d51c78e71fd3c746ea24040fc41bebd4d44883f9e0b158c1fe79019095df",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "alternate_check.py": {
+                  "sha256": "fc34a4213cdd2a82d848a593984c818b936bf1b5aef3b1c8bee7d582fe485111",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "alternate_check.py.lock": {
+                  "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "calculator.py": {
+                  "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/design.md": {
+                  "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/proposal.md": {
+                  "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/review/decisions.md": {
+                  "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/specs/alternate/spec.md": {
+                  "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/specs/calculator/spec.md": {
+                  "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/state.md": {
+                  "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                  "executable": false,
+                  "git_mode": "100644"
+                },
+                "sdd/changes/add/tasks.md": {
+                  "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                  "executable": false,
+                  "git_mode": "100644"
+                }
+              },
+              "digest": "0fcb58ec271acb900b1561ed29c8386595551a783ac6ce5b1883f962ae2b975a"
+            },
+            "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+            "checks": "b9b07718f5ef135229f7f5997e9894c9bb396191f625cabd5343d419c79c537e",
+            "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate"
+          }
+        },
+        "time": "2026-10-08T10:27:39.371482+00:00",
+        "hash": "0c787dd2823592ec893bc321d6487b821d4dd9097eddef2206a6a30098a702ed"
+      },
+      {
+        "event_id": "fe83123e595b41da8562e81a9e6450c0",
+        "fingerprint": "4450da58961e6bcbb9b3b9288840c6dfab442d16c83355edd5c9781b0acbaee1",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "stage": "self"
+          },
+          "expected_revision": 21,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "fe83123e595b41da8562e81a9e6450c0",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 22,
+        "previous": "0c787dd2823592ec893bc321d6487b821d4dd9097eddef2206a6a30098a702ed",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/fe83123e595b41da8562e81a9e6450c0.json"
+        },
+        "time": "2026-10-08T10:27:48.576189+00:00",
+        "hash": "ca3b6e58e26fe10eb0b72ca8e08c0c91f5c79345e10eb71569e4fd540a89afd9"
+      },
+      {
+        "event_id": "e2744512aad745bc8924cd7a0ea1cce9",
+        "fingerprint": "3ab074696312c776dfa68dbed486a2b7a54207710c2465be641caafaa79c198c",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "verify_alternate",
+            "stage": "independent"
+          },
+          "expected_revision": 22,
+          "task_id": "TASK-alternate",
+          "type": "check_run",
+          "event_id": "e2744512aad745bc8924cd7a0ea1cce9",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 23,
+        "previous": "ca3b6e58e26fe10eb0b72ca8e08c0c91f5c79345e10eb71569e4fd540a89afd9",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/e2744512aad745bc8924cd7a0ea1cce9.json"
+        },
+        "time": "2026-10-08T10:28:33.604630+00:00",
+        "hash": "f7a85240d344ca75250520253883893a303cecf8e345576b9488d5943d220a1d"
+      }
+    ],
+    "blockers": [],
+    "updated_at": "2026-10-08T10:28:33.604630+00:00",
+    "final": null,
+    "baseline": {
+      "files": {
+        "alternate.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "calculator.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/alternate/spec.md": {
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+          "executable": false,
+          "git_mode": "100644"
+        }
+      },
+      "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+    },
+    "integrity": "24d2e8bb67bc861a6fbcbca4917f1f4b4241b9a460dd2131007257f0b8424dc5"
+  }
+}

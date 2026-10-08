@@ -1,0 +1,99 @@
+diff --git a/alternate.py b/alternate.py
+index e1090e39598e6ab527371e7fed277e3dd66e6613..dd6f411a2be144910c746f49b4240ec731c4a386 100644
+--- a/alternate.py
++++ b/alternate.py
+@@ -1,2 +1,24 @@
++﻿# /// script
++# requires-python = ">=3.11"
++# dependencies = []
++# ///
++"""Finite numeric addition without loss of integer precision."""
++
++import math
++
++
+ def add(a, b):
+-    return str(a) + str(b)
++    """Add integers or finite floats, excluding booleans."""
++    for value in (a, b):
++        if isinstance(value, bool) or not isinstance(value, (int, float)):
++            raise TypeError("operands must be int or float, excluding bool")
++    for value in (a, b):
++        if isinstance(value, float) and not math.isfinite(value):
++            raise ValueError("operands must be finite")
++    try:
++        result = a + b
++    except OverflowError as exc:
++        raise ValueError("result must be finite") from exc
++    if isinstance(result, float) and not math.isfinite(result):
++        raise ValueError("result must be finite")
++    return result
+diff --git a/alternate_check.py b/alternate_check.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..75d8740c7d283f809b86e68fc81a9f4b39e8e154
+--- /dev/null
++++ b/alternate_check.py
+@@ -0,0 +1,54 @@
++# /// script
++# requires-python = ">=3.11"
++# dependencies = []
++# ///
++"""Complete contract checks for alternate.add."""
++
++import sys
++sys.dont_write_bytecode = True
++
++import unittest
++from decimal import Decimal
++from fractions import Fraction
++from alternate import add
++
++
++class AddContract(unittest.TestCase):
++    def test_numeric_values_and_types(self):
++        for a, b, expected, kind in [
++            (2, 3, 5, int), (-7, 3, -4, int), (0, 0, 0, int),
++            (1.5, 2.25, 3.75, float), (2, 0.5, 2.5, float),
++            (0.5, 2, 2.5, float), (-1.5, 1.5, 0.0, float),
++            (10**1000, 10**1000, 2 * 10**1000, int),
++            (10**1000, -(10**1000), 0, int),
++        ]:
++            with self.subTest(a=a, b=b):
++                result = add(a, b)
++                self.assertEqual(result, expected)
++                self.assertIs(type(result), kind)
++
++    def test_invalid_types_in_both_positions(self):
++        for value in [True, False, "2", None, [], {}, object(), 1j,
++                      Decimal("2"), Fraction(1, 2)]:
++            for a, b in [(value, 1), (1, value)]:
++                with self.subTest(a=a, b=b):
++                    with self.assertRaises(TypeError):
++                        add(a, b)
++
++    def test_nonfinite_operands_in_both_positions(self):
++        for value in [float("inf"), float("-inf"), float("nan")]:
++            for a, b in [(value, 1), (1, value)]:
++                with self.subTest(a=a, b=b):
++                    with self.assertRaises(ValueError):
++                        add(a, b)
++
++    def test_nonfinite_results_and_conversion_overflow(self):
++        for a, b in [(1e308, 1e308), (-1e308, -1e308),
++                     (10**1000, 0.5), (0.5, 10**1000)]:
++            with self.subTest(a=a, b=b):
++                with self.assertRaises(ValueError):
++                    add(a, b)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+diff --git a/alternate_check.py.lock b/alternate_check.py.lock
+new file mode 100644
+index 0000000000000000000000000000000000000000..9431a635b11c9d9012aadf511f90c19be8aed737
+--- /dev/null
++++ b/alternate_check.py.lock
+@@ -0,0 +1,3 @@
++version = 1
++revision = 3
++requires-python = ">=3.11"

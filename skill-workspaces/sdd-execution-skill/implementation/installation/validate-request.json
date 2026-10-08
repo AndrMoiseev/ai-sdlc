@@ -1,0 +1,10 @@
+{
+    "args":  {
+                 "project_root":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-native-754imw39/project",
+                 "instruction":  {
+                                     "text":  "Validate the retained authorized native evaluation fixture through installed packages",
+                                     "source":  "implementation installation verification"
+                                 }
+             },
+    "operation":  "validate"
+}

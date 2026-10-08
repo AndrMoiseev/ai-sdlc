@@ -1,0 +1,18 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "verify_add",
+                                               "stage":  "independent"
+                                           },
+                               "expected_revision":  26,
+                               "task_id":  "TASK-add",
+                               "type":  "check_run",
+                               "event_id":  "ee089a08b3bd4147be2b256edce7e4a1",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

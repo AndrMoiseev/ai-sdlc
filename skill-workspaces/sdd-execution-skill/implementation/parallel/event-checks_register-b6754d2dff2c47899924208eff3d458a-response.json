@@ -1,0 +1,28 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "checks": [
+        {
+          "id": "plan-1",
+          "criteria": [
+            "AC-alternate"
+          ],
+          "source": "tasks.md",
+          "location": "alternate_check.py",
+          "run": {
+            "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+          },
+          "cwd": ".",
+          "configuration": {},
+          "setup": null
+        }
+      ]
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 4
+    }
+  }
+}

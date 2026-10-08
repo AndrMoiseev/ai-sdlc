@@ -1,0 +1,11 @@
+{
+    "eval_id":  1,
+    "expectations":  [
+                         "Independent baseline before writes",
+                         "Independent candidate and final checks",
+                         "Reject premature acceptance",
+                         "Task-local commit and final complete"
+                     ],
+    "prompt":  "Explicitly invoke sdd-apply on an approved finite numeric add and input rejection plan. Fresh executor, independent verifier/reviewer and final verifier; local commit and final acceptance. Actual native run; not a paired control experiment.",
+    "eval_name":  "native-sequential"
+}

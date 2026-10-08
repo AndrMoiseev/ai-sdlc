@@ -1,0 +1,1166 @@
+﻿{
+  "ok": true,
+  "result": {
+    "schema_version": 1,
+    "change_id": "add",
+    "run_id": "1ce7765c054f4c80a39ac2c5640cbee8",
+    "revision": 12,
+    "status": "active",
+    "owner": "/root/behavioral_eval",
+    "basis": {
+      "schema_version": 1,
+      "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project",
+      "change_id": "add",
+      "change_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add",
+      "instruction": {
+        "text": "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture sequentially; local task commits included.",
+        "source": "parent-native-behavioral-evaluation-assignment"
+      },
+      "sdd_spec": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec",
+      "checks": {
+        "documents": {
+          "schema_version": 1,
+          "stage": "documents",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "consistency"
+            ],
+            "coverage": {
+              "consistency": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          }
+        },
+        "plan": {
+          "schema_version": 1,
+          "stage": "plan",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "plan"
+            ],
+            "coverage": {
+              "plan": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          },
+          "tasks": {
+            "available_by_graph": [
+              "TASK-add"
+            ],
+            "cannot_parallel_with": {
+              "TASK-add": []
+            },
+            "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+          },
+          "progress": {
+            "done": 0,
+            "total": 1
+          }
+        }
+      },
+      "manifest": [
+        {
+          "path": "design.md",
+          "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc"
+        },
+        {
+          "path": "proposal.md",
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+        },
+        {
+          "path": "specs/calculator/spec.md",
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+        },
+        {
+          "path": "tasks.md",
+          "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89"
+        }
+      ],
+      "tasks": [
+        {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        }
+      ],
+      "head": "50c8fdb3955ec385aa2ef9cc05d1547baf0f75c2",
+      "branch": "main",
+      "index_patch": "",
+      "status": "",
+      "working_patch": ""
+    },
+    "mode": "sequential",
+    "parallel_request": null,
+    "mode_reason": null,
+    "tasks": {
+      "TASK-add": {
+        "plan": {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        "status": "verifying",
+        "attempt": 1,
+        "candidate": {
+          "source": {
+            "files": {
+              "calculator.py": {
+                "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+                "executable": false
+              },
+              "check.py": {
+                "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+                "executable": false
+              },
+              "check.py.lock": {
+                "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                "executable": false
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                "executable": false
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                "executable": false
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                "executable": false
+              }
+            },
+            "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+          },
+          "manifest": "520134b46a1aa1c50f71efa3f26d5507649da132c6eee32fcf58129d7cbe7776",
+          "checks": "d1f8b06c1dc3b9e768e847fbf776b4e8dd9f2372a304d26a6215ab6141bf7870",
+          "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project"
+        },
+        "evidence": [
+          {
+            "check_id": "plan-1",
+            "stage": "self",
+            "role_id": "executor",
+            "candidate": null,
+            "outcome": "passed",
+            "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/68f8817ea5c74c8a9503766e0e7a72da.json",
+            "log_hash": "367db556cf51e25b29d888d252a1889f6de156d0c26334e95397af543b529adf",
+            "time": "2026-10-08T09:55:03.667605+00:00",
+            "head": "50c8fdb3955ec385aa2ef9cc05d1547baf0f75c2"
+          },
+          {
+            "check_id": "plan-1",
+            "stage": "independent",
+            "role_id": "verifier",
+            "candidate": {
+              "source": {
+                "files": {
+                  "calculator.py": {
+                    "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+                    "executable": false
+                  },
+                  "check.py": {
+                    "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+                    "executable": false
+                  },
+                  "check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                    "executable": false
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                    "executable": false
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                    "executable": false
+                  }
+                },
+                "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+              },
+              "manifest": "520134b46a1aa1c50f71efa3f26d5507649da132c6eee32fcf58129d7cbe7776",
+              "checks": "d1f8b06c1dc3b9e768e847fbf776b4e8dd9f2372a304d26a6215ab6141bf7870",
+              "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project"
+            },
+            "outcome": "passed",
+            "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/a8f9c768515e4078937159c5b90d2d48.json",
+            "log_hash": "5655a3a67e15009e55526eaa7d080c87099cdd3886cfc266cb94550b77151ed8",
+            "time": "2026-10-08T09:58:55.583269+00:00",
+            "head": "50c8fdb3955ec385aa2ef9cc05d1547baf0f75c2"
+          }
+        ],
+        "reviews": [],
+        "commits": [],
+        "blockers": [],
+        "review_limit": 3,
+        "review_rounds_started": 0,
+        "review_rounds_completed": 0,
+        "active_review": null,
+        "test_repair_limit": 5,
+        "test_repair_cycles_started": 0,
+        "active_repair": null,
+        "repair_cycles": [],
+        "budget_decisions": [],
+        "checks": [
+          {
+            "id": "plan-1",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "source": "tasks.md",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Fresh executor created planned PEP723 check.py and lockfile after independently captured planned-absence baseline.",
+              "before": {
+                "files": {
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                    "executable": false
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                    "executable": false
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                    "executable": false
+                  }
+                },
+                "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+              },
+              "after": {
+                "files": {
+                  "calculator.py": {
+                    "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+                    "executable": false
+                  },
+                  "check.py": {
+                    "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+                    "executable": false
+                  },
+                  "check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                    "executable": false
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                    "executable": false
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                    "executable": false
+                  }
+                },
+                "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+              }
+            }
+          }
+        ],
+        "worktree": null,
+        "roles": [
+          "executor",
+          "baseline",
+          "verifier"
+        ],
+        "paths": [
+          "calculator.py",
+          "check.py",
+          "check.py.lock"
+        ],
+        "inventory": {
+          "instructions": [],
+          "ci": []
+        },
+        "executor": "executor",
+        "start_snapshot": {
+          "files": {
+            "calculator.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+              "executable": false
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+              "executable": false
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+              "executable": false
+            }
+          },
+          "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+        },
+        "baseline_checks": {
+          "schema_version": 1,
+          "change_id": "add",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8",
+          "task_id": "TASK-add",
+          "role_id": "baseline",
+          "stage": "baseline",
+          "candidate": null,
+          "before": {
+            "files": {
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                "executable": false
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                "executable": false
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                "executable": false
+              }
+            },
+            "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+          },
+          "after": {
+            "files": {
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                "executable": false
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                "executable": false
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                "executable": false
+              }
+            },
+            "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+          },
+          "outputs": [
+            {
+              "check_id": "plan-1",
+              "outcome": "planned_absence",
+              "description": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            }
+          ]
+        },
+        "last_check_failed": false
+      }
+    },
+    "roles": {
+      "executor": {
+        "role_id": "executor",
+        "kind": "executor",
+        "context_id": "/root/behavioral_eval/executor",
+        "fresh": true,
+        "host": "codex",
+        "launch_ref": "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "task_id": "TASK-add",
+        "status": "finished",
+        "registered_at": "2026-10-08T09:43:40.364171+00:00",
+        "result": {
+          "status": "DONE",
+          "source": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743",
+          "owned_paths": [
+            "calculator.py",
+            "check.py",
+            "check.py.lock"
+          ],
+          "criteria": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "self_check_exit": 0,
+          "tests": 5,
+          "writes_stopped": true
+        },
+        "trace": "native /root/behavioral_eval/executor final response; behavioral/executor-response.md; actual requested self-check 68f8817ea5c74c8a9503766e0e7a72da"
+      },
+      "baseline": {
+        "role_id": "baseline",
+        "kind": "verifier",
+        "context_id": "/root/behavioral_eval/baseline",
+        "fresh": true,
+        "host": "codex",
+        "launch_ref": "native collaboration.spawn_agent task_name=baseline fork_turns=none returned /root/behavioral_eval/baseline",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "task_id": "TASK-add",
+        "status": "finished",
+        "registered_at": "2026-10-08T09:44:00.771658+00:00",
+        "result": {
+          "status": "baseline_recorded",
+          "outcome": "planned_absence",
+          "before_after": "equal",
+          "commands_executed": 0,
+          "criteria_passed": []
+        },
+        "trace": "native /root/behavioral_eval/baseline personally requested check_run; behavioral/baseline-response.md; baseline-check-85164adaa02048a0ac2333eb0ab1afbf-request.json and response"
+      },
+      "verifier": {
+        "role_id": "verifier",
+        "kind": "verifier",
+        "context_id": "/root/behavioral_eval/verify_review",
+        "fresh": true,
+        "host": "codex",
+        "launch_ref": "native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "task_id": "TASK-add",
+        "status": "active",
+        "registered_at": "2026-10-08T09:58:10.815939+00:00"
+      }
+    },
+    "events": [
+      {
+        "event_id": "635e2d6cab9349e7856e51223bc8033a",
+        "fingerprint": "f4292113181caa110b69597b1da8c1410796760a1924f945f2a2512832c85419",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "inventory": {
+              "instructions": [],
+              "ci": []
+            },
+            "additional": []
+          },
+          "expected_revision": 0,
+          "task_id": "TASK-add",
+          "type": "checks_register",
+          "event_id": "635e2d6cab9349e7856e51223bc8033a",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 1,
+        "previous": null,
+        "result": {
+          "checks": [
+            {
+              "id": "plan-1",
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "source": "tasks.md",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "cwd": ".",
+              "configuration": {},
+              "setup": null
+            }
+          ]
+        },
+        "time": "2026-10-08T09:43:39.963174+00:00",
+        "hash": "b558a83bc46105592db72abacd7d21b3d4bec67ceab2328923494386bfa62df1"
+      },
+      {
+        "event_id": "d425aedf84e64575891a6c19efa0e5c8",
+        "fingerprint": "b26696235995900e15f22f5b71fd7f9e6ec17a11d34ba2652fc49a7721d00c8d",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "executor",
+            "kind": "executor",
+            "context_id": "/root/behavioral_eval/executor",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+            "capabilities": {
+              "fresh_context": true
+            }
+          },
+          "expected_revision": 1,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "d425aedf84e64575891a6c19efa0e5c8",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 2,
+        "previous": "b558a83bc46105592db72abacd7d21b3d4bec67ceab2328923494386bfa62df1",
+        "result": {
+          "role": {
+            "role_id": "executor",
+            "kind": "executor",
+            "context_id": "/root/behavioral_eval/executor",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T09:43:40.364171+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\runs\\1ce7765c054f4c80a39ac2c5640cbee8\\roles\\executor.json"
+        },
+        "time": "2026-10-08T09:43:40.366740+00:00",
+        "hash": "f6065d69342e8d1efc1177542f931e6ac216759fffebcd3c356390e215ab1eba"
+      },
+      {
+        "event_id": "6b1e0e0c45c04c1881e1927f721b0187",
+        "fingerprint": "fb667d1144693d515b497f1d78713ef20e9202f71ad0ca9d4bf9554cee8bbabd",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "executor",
+            "paths": [
+              "calculator.py",
+              "check.py",
+              "check.py.lock"
+            ]
+          },
+          "expected_revision": 2,
+          "task_id": "TASK-add",
+          "type": "start",
+          "event_id": "6b1e0e0c45c04c1881e1927f721b0187",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 3,
+        "previous": "f6065d69342e8d1efc1177542f931e6ac216759fffebcd3c356390e215ab1eba",
+        "result": {
+          "status": "running"
+        },
+        "time": "2026-10-08T09:43:40.802459+00:00",
+        "hash": "3f28cbb9b37e21a931911685c871ba1ef610b44846b96a734ba3773780d76367"
+      },
+      {
+        "event_id": "49d7efa64ee54339a939da431c19cace",
+        "fingerprint": "d50b9fb181162713f2cbf90f96426bb7f926da907c284a607cb7e15cb14eb32b",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "baseline",
+            "kind": "verifier",
+            "context_id": "/root/behavioral_eval/baseline",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=baseline fork_turns=none returned /root/behavioral_eval/baseline",
+            "capabilities": {
+              "fresh_context": true
+            }
+          },
+          "expected_revision": 3,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "49d7efa64ee54339a939da431c19cace",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 4,
+        "previous": "3f28cbb9b37e21a931911685c871ba1ef610b44846b96a734ba3773780d76367",
+        "result": {
+          "role": {
+            "role_id": "baseline",
+            "kind": "verifier",
+            "context_id": "/root/behavioral_eval/baseline",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=baseline fork_turns=none returned /root/behavioral_eval/baseline",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T09:44:00.771658+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\runs\\1ce7765c054f4c80a39ac2c5640cbee8\\roles\\baseline.json"
+        },
+        "time": "2026-10-08T09:44:00.774288+00:00",
+        "hash": "f37bdb4604ef6c5491f9b7c5c1310b1ccbce812cb72f62da291a3818f1b10424"
+      },
+      {
+        "event_id": "85164adaa02048a0ac2333eb0ab1afbf",
+        "fingerprint": "15437e29ccd9c127a9eb4b6d6829e8e64047a4f75b231d04cf35fb9a4b63b576",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "baseline",
+            "stage": "baseline"
+          },
+          "expected_revision": 4,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "85164adaa02048a0ac2333eb0ab1afbf",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 5,
+        "previous": "f37bdb4604ef6c5491f9b7c5c1310b1ccbce812cb72f62da291a3818f1b10424",
+        "result": {
+          "outcome": "baseline_recorded",
+          "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/85164adaa02048a0ac2333eb0ab1afbf.json"
+        },
+        "time": "2026-10-08T09:52:40.465688+00:00",
+        "hash": "d2f40ba87d7b0f9a5b7ac70973d456d8f2078576830a8441b6f04fe426d03bdb"
+      },
+      {
+        "event_id": "37aa2121252e4c13aeface08c4ad8284",
+        "fingerprint": "20e1e211ab8a48cefa4df073c59898a3c430fbde956e6333e883c9a4f7009891",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "check_id": "plan-1",
+            "command": "uv run --locked --script check.py",
+            "description": "Fresh executor created planned PEP723 check.py and lockfile after independently captured planned-absence baseline.",
+            "cwd": "."
+          },
+          "expected_revision": 5,
+          "task_id": "TASK-add",
+          "type": "check_setup",
+          "event_id": "37aa2121252e4c13aeface08c4ad8284",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 6,
+        "previous": "d2f40ba87d7b0f9a5b7ac70973d456d8f2078576830a8441b6f04fe426d03bdb",
+        "result": {
+          "setup": {
+            "id": "plan-1",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "source": "tasks.md",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": {
+              "command": "uv run --locked --script check.py",
+              "cwd": ".",
+              "configuration": {},
+              "description": "Fresh executor created planned PEP723 check.py and lockfile after independently captured planned-absence baseline.",
+              "before": {
+                "files": {
+                  "calculator.py": {
+                    "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                    "executable": false
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                    "executable": false
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                    "executable": false
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                    "executable": false
+                  }
+                },
+                "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+              },
+              "after": {
+                "files": {
+                  "calculator.py": {
+                    "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+                    "executable": false
+                  },
+                  "check.py": {
+                    "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+                    "executable": false
+                  },
+                  "check.py.lock": {
+                    "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                    "executable": false
+                  },
+                  "sdd/changes/add/design.md": {
+                    "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                    "executable": false
+                  },
+                  "sdd/changes/add/proposal.md": {
+                    "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                    "executable": false
+                  },
+                  "sdd/changes/add/review/decisions.md": {
+                    "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                    "executable": false
+                  },
+                  "sdd/changes/add/specs/calculator/spec.md": {
+                    "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                    "executable": false
+                  },
+                  "sdd/changes/add/state.md": {
+                    "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                    "executable": false
+                  },
+                  "sdd/changes/add/tasks.md": {
+                    "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                    "executable": false
+                  }
+                },
+                "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+              }
+            }
+          }
+        },
+        "time": "2026-10-08T09:55:03.000206+00:00",
+        "hash": "03da25b9b7ec2c6623b0590e3ab63f5ba1cba15e484f5cd08da4a92bd8f8fd3c"
+      },
+      {
+        "event_id": "68f8817ea5c74c8a9503766e0e7a72da",
+        "fingerprint": "541d152f8a4bd78589f7b21636c3b0cd750c9b214d73cdb9ad42ec43092bae30",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "executor",
+            "stage": "self"
+          },
+          "expected_revision": 6,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "68f8817ea5c74c8a9503766e0e7a72da",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 7,
+        "previous": "03da25b9b7ec2c6623b0590e3ab63f5ba1cba15e484f5cd08da4a92bd8f8fd3c",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/68f8817ea5c74c8a9503766e0e7a72da.json"
+        },
+        "time": "2026-10-08T09:55:03.695344+00:00",
+        "hash": "7f7cd5855a1f1756c752caa9e62b76be8d944cd7d723f0754ad96ab2cc9e7e6c"
+      },
+      {
+        "event_id": "139630f3b5a44f2dbfe7c4ae72c3e357",
+        "fingerprint": "06a448e749835de0dc2c2a20a4a4d884b3304fd890b642bc5540b00985e6a0f1",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "baseline",
+            "result": {
+              "status": "baseline_recorded",
+              "outcome": "planned_absence",
+              "before_after": "equal",
+              "commands_executed": 0,
+              "criteria_passed": []
+            },
+            "trace": "native /root/behavioral_eval/baseline personally requested check_run; behavioral/baseline-response.md; baseline-check-85164adaa02048a0ac2333eb0ab1afbf-request.json and response"
+          },
+          "expected_revision": 7,
+          "task_id": "TASK-add",
+          "type": "role_result",
+          "event_id": "139630f3b5a44f2dbfe7c4ae72c3e357",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 8,
+        "previous": "7f7cd5855a1f1756c752caa9e62b76be8d944cd7d723f0754ad96ab2cc9e7e6c",
+        "result": {
+          "role_finished": "baseline",
+          "task_status": "running"
+        },
+        "time": "2026-10-08T09:55:28.135672+00:00",
+        "hash": "752473f01a573b63b7e3c5c8d250894911ab665af51e7e9e2841c357453c5f84"
+      },
+      {
+        "event_id": "34bb069e00bb4e7f82f18aef9e4443b8",
+        "fingerprint": "f167a9aad1b1bd5c042373daa6b341cb4ba406187760cc1f89b2b57a548fe3a7",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "executor",
+            "result": {
+              "status": "DONE",
+              "source": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743",
+              "owned_paths": [
+                "calculator.py",
+                "check.py",
+                "check.py.lock"
+              ],
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "self_check_exit": 0,
+              "tests": 5,
+              "writes_stopped": true
+            },
+            "trace": "native /root/behavioral_eval/executor final response; behavioral/executor-response.md; actual requested self-check 68f8817ea5c74c8a9503766e0e7a72da"
+          },
+          "expected_revision": 8,
+          "task_id": "TASK-add",
+          "type": "role_result",
+          "event_id": "34bb069e00bb4e7f82f18aef9e4443b8",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 9,
+        "previous": "752473f01a573b63b7e3c5c8d250894911ab665af51e7e9e2841c357453c5f84",
+        "result": {
+          "role_finished": "executor",
+          "task_status": "running"
+        },
+        "time": "2026-10-08T09:57:01.949207+00:00",
+        "hash": "ffa1666a24fd5be4a25caafdbaa78f8a23b11ff283e197d9f9df8127a9719a76"
+      },
+      {
+        "event_id": "611efc579ec14e35996a26ba380d423e",
+        "fingerprint": "2fe57054e849ce4ae7e56980103c30049f64b93c8db80471dcfe68811b0be9ec",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {},
+          "expected_revision": 9,
+          "task_id": "TASK-add",
+          "type": "candidate",
+          "event_id": "611efc579ec14e35996a26ba380d423e",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 10,
+        "previous": "ffa1666a24fd5be4a25caafdbaa78f8a23b11ff283e197d9f9df8127a9719a76",
+        "result": {
+          "candidate": {
+            "source": {
+              "files": {
+                "calculator.py": {
+                  "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+                  "executable": false
+                },
+                "check.py": {
+                  "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+                  "executable": false
+                },
+                "check.py.lock": {
+                  "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+                  "executable": false
+                },
+                "sdd/changes/add/design.md": {
+                  "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+                  "executable": false
+                },
+                "sdd/changes/add/proposal.md": {
+                  "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                  "executable": false
+                },
+                "sdd/changes/add/review/decisions.md": {
+                  "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+                  "executable": false
+                },
+                "sdd/changes/add/specs/calculator/spec.md": {
+                  "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                  "executable": false
+                },
+                "sdd/changes/add/state.md": {
+                  "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                  "executable": false
+                },
+                "sdd/changes/add/tasks.md": {
+                  "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+                  "executable": false
+                }
+              },
+              "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+            },
+            "manifest": "520134b46a1aa1c50f71efa3f26d5507649da132c6eee32fcf58129d7cbe7776",
+            "checks": "d1f8b06c1dc3b9e768e847fbf776b4e8dd9f2372a304d26a6215ab6141bf7870",
+            "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project"
+          }
+        },
+        "time": "2026-10-08T09:57:02.420241+00:00",
+        "hash": "e8fd49640313e2355c44905550f037cc71427c38e97a664acd797f04ded8c5f1"
+      },
+      {
+        "event_id": "a2218f197a2f48608634a9c435499661",
+        "fingerprint": "49b6dc29dbbd01a22adfbd897e8a4e6b1bd1cbdcf621772a8582103132877b23",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "verifier",
+            "kind": "verifier",
+            "context_id": "/root/behavioral_eval/verify_review",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review",
+            "capabilities": {
+              "fresh_context": true
+            }
+          },
+          "expected_revision": 10,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "a2218f197a2f48608634a9c435499661",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 11,
+        "previous": "e8fd49640313e2355c44905550f037cc71427c38e97a664acd797f04ded8c5f1",
+        "result": {
+          "role": {
+            "role_id": "verifier",
+            "kind": "verifier",
+            "context_id": "/root/behavioral_eval/verify_review",
+            "fresh": true,
+            "host": "codex",
+            "launch_ref": "native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T09:58:10.815939+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\runs\\1ce7765c054f4c80a39ac2c5640cbee8\\roles\\verifier.json"
+        },
+        "time": "2026-10-08T09:58:10.819382+00:00",
+        "hash": "f72923c3562a04b0436225ff370d3691d993767d2eb1b663b867e34f50ae537a"
+      },
+      {
+        "event_id": "a8f9c768515e4078937159c5b90d2d48",
+        "fingerprint": "d37cb1b0ab3f05528c6cd624956a855867390af13914cbb0d18fc3ea511380cd",
+        "event": {
+          "owner": "/root/behavioral_eval",
+          "payload": {
+            "role_id": "verifier",
+            "stage": "independent"
+          },
+          "expected_revision": 11,
+          "task_id": "TASK-add",
+          "type": "check_run",
+          "event_id": "a8f9c768515e4078937159c5b90d2d48",
+          "run_id": "1ce7765c054f4c80a39ac2c5640cbee8"
+        },
+        "revision": 12,
+        "previous": "f72923c3562a04b0436225ff370d3691d993767d2eb1b663b867e34f50ae537a",
+        "result": {
+          "outcome": "passed",
+          "log": "runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/a8f9c768515e4078937159c5b90d2d48.json"
+        },
+        "time": "2026-10-08T09:58:55.611405+00:00",
+        "hash": "963651074d84f4d82a39963812567671bb04fe8fe810b22986f065f10f3e1f6c"
+      }
+    ],
+    "blockers": [],
+    "updated_at": "2026-10-08T09:58:55.611405+00:00",
+    "final": null,
+    "baseline": {
+      "files": {
+        "calculator.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+          "executable": false
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+          "executable": false
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+          "executable": false
+        }
+      },
+      "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+    },
+    "integrity": "d6b6e108d93eb97dad15f1fb6af9db9f073bf2f154ad683dbc54d844025fa944"
+  }
+}

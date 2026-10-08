@@ -1,0 +1,1063 @@
+﻿{
+  "ok": true,
+  "result": {
+    "schema_version": 1,
+    "change_id": "add",
+    "run_id": "c0d2875802aa4e91a5628c5251981565",
+    "revision": 8,
+    "status": "active",
+    "owner": "/root/parallel_eval",
+    "basis": {
+      "schema_version": 1,
+      "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project",
+      "change_id": "add",
+      "change_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add",
+      "instruction": {
+        "text": "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture in parallel; local task commits included.",
+        "source": "parent-native-behavioral-evaluation-assignment"
+      },
+      "sdd_spec": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\sdd-spec",
+      "checks": {
+        "documents": {
+          "schema_version": 1,
+          "stage": "documents",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "consistency"
+            ],
+            "coverage": {
+              "consistency": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          }
+        },
+        "plan": {
+          "schema_version": 1,
+          "stage": "plan",
+          "errors": [],
+          "warnings": [],
+          "review_status": {
+            "required_lenses": [
+              "plan"
+            ],
+            "coverage": {
+              "plan": "waived"
+            },
+            "reports": {},
+            "complete": true,
+            "unresolved_findings": [],
+            "unfinished_fixes": []
+          },
+          "approval_status": {
+            "approved": true,
+            "ready": true,
+            "applicability": {
+              "USER-document-review-document-approval": true,
+              "USER-document-review-review-waiver": true,
+              "USER-plan-review-plan-approval": true,
+              "USER-plan-review-review-waiver": true
+            },
+            "work_authorizations": {},
+            "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+          },
+          "tasks": {
+            "available_by_graph": [
+              "TASK-add",
+              "TASK-alternate"
+            ],
+            "cannot_parallel_with": {
+              "TASK-add": [],
+              "TASK-alternate": []
+            },
+            "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+          },
+          "progress": {
+            "done": 0,
+            "total": 2
+          }
+        }
+      },
+      "manifest": [
+        {
+          "path": "design.md",
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd"
+        },
+        {
+          "path": "proposal.md",
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+        },
+        {
+          "path": "specs/alternate/spec.md",
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956"
+        },
+        {
+          "path": "specs/calculator/spec.md",
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+        },
+        {
+          "path": "tasks.md",
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421"
+        }
+      ],
+      "tasks": [
+        {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        {
+          "covers": [
+            "AC-alternate"
+          ],
+          "depends_on": [],
+          "id": "TASK-alternate",
+          "number": 2,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-alternate"
+              ],
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        }
+      ],
+      "head": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+      "branch": "main",
+      "dirty_paths": [],
+      "index_patch": "",
+      "status": "",
+      "working_patch": ""
+    },
+    "mode": "parallel",
+    "parallel_request": {
+      "text": "Run the two independent fixture tasks in parallel using isolated worktrees.",
+      "source": "parent evaluation assignment"
+    },
+    "mode_reason": null,
+    "tasks": {
+      "TASK-add": {
+        "plan": {
+          "covers": [
+            "AC-add",
+            "AC-invalid"
+          ],
+          "depends_on": [],
+          "id": "TASK-add",
+          "number": 1,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        "status": "running",
+        "attempt": 1,
+        "candidate": null,
+        "evidence": [],
+        "reviews": [],
+        "commits": [],
+        "blockers": [],
+        "review_limit": 3,
+        "review_rounds_started": 0,
+        "review_rounds_completed": 0,
+        "active_review": null,
+        "test_repair_limit": 5,
+        "test_repair_cycles_started": 0,
+        "active_repair": null,
+        "repair_cycles": [],
+        "budget_decisions": [],
+        "checks": [
+          {
+            "id": "plan-1",
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "source": "tasks.md",
+            "location": "check.py",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": null
+          }
+        ],
+        "worktree": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-add"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "roles": [
+          "exec_add"
+        ],
+        "paths": [
+          "calculator.py",
+          "check.py",
+          "check.py.lock"
+        ],
+        "inventory": {
+          "instructions": [],
+          "ci": []
+        },
+        "executor": "exec_add",
+        "start_snapshot": {
+          "files": {
+            "alternate.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "calculator.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/alternate/spec.md": {
+              "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+              "executable": false,
+              "git_mode": "100644"
+            }
+          },
+          "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+        }
+      },
+      "TASK-alternate": {
+        "plan": {
+          "covers": [
+            "AC-alternate"
+          ],
+          "depends_on": [],
+          "id": "TASK-alternate",
+          "number": 2,
+          "sdd_record": "task",
+          "status": "pending",
+          "verification": [
+            {
+              "criteria": [
+                "AC-alternate"
+              ],
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+            }
+          ]
+        },
+        "status": "running",
+        "attempt": 1,
+        "candidate": null,
+        "evidence": [],
+        "reviews": [],
+        "commits": [],
+        "blockers": [],
+        "review_limit": 3,
+        "review_rounds_started": 0,
+        "review_rounds_completed": 0,
+        "active_review": null,
+        "test_repair_limit": 5,
+        "test_repair_cycles_started": 0,
+        "active_repair": null,
+        "repair_cycles": [],
+        "budget_decisions": [],
+        "checks": [
+          {
+            "id": "plan-1",
+            "criteria": [
+              "AC-alternate"
+            ],
+            "source": "tasks.md",
+            "location": "alternate_check.py",
+            "run": {
+              "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+            },
+            "cwd": ".",
+            "configuration": {},
+            "setup": null
+          }
+        ],
+        "worktree": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-alternate"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "roles": [
+          "exec_alternate"
+        ],
+        "paths": [
+          "alternate.py",
+          "alternate_check.py",
+          "alternate_check.py.lock"
+        ],
+        "inventory": {
+          "instructions": [],
+          "ci": []
+        },
+        "executor": "exec_alternate",
+        "start_snapshot": {
+          "files": {
+            "alternate.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "calculator.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/alternate/spec.md": {
+              "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+              "executable": false,
+              "git_mode": "100644"
+            }
+          },
+          "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+        }
+      }
+    },
+    "roles": {
+      "exec_add": {
+        "role_id": "exec_add",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+        "context_id": "/root/parallel_eval/exec_add",
+        "fresh": true,
+        "kind": "executor",
+        "host": "codex",
+        "task_id": "TASK-add",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:23.638718+00:00"
+      },
+      "exec_alternate": {
+        "role_id": "exec_alternate",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+        "context_id": "/root/parallel_eval/exec_alternate",
+        "fresh": true,
+        "kind": "executor",
+        "host": "codex",
+        "task_id": "TASK-alternate",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:24.558341+00:00"
+      }
+    },
+    "events": [
+      {
+        "event_id": "a1314da0a1e044948beace71e94eae79",
+        "fingerprint": "b247019ce12d6127f32521ff1ab6855ca3811f06453830eb3bf5a4bec8e7a238",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "resources": [
+              "scratch-TASK-add"
+            ],
+            "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees"
+          },
+          "expected_revision": 0,
+          "task_id": "TASK-add",
+          "type": "worktree_create",
+          "event_id": "a1314da0a1e044948beace71e94eae79",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 1,
+        "previous": null,
+        "result": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-add"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "time": "2026-10-08T10:14:04.249364+00:00",
+        "hash": "bce374ccaef8b95c96ac18fc473cc57af7ad6d38b29fe426bf668649d5c39162"
+      },
+      {
+        "event_id": "dd15b62e90d24f2b9d987fbeb522e6e9",
+        "fingerprint": "9a7ff09b8e05741fe89684d2cf4328f39a46d70c5cd79e3e2b9e5900cc517f5f",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "inventory": {
+              "instructions": [],
+              "ci": []
+            },
+            "additional": []
+          },
+          "expected_revision": 1,
+          "task_id": "TASK-add",
+          "type": "checks_register",
+          "event_id": "dd15b62e90d24f2b9d987fbeb522e6e9",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 2,
+        "previous": "bce374ccaef8b95c96ac18fc473cc57af7ad6d38b29fe426bf668649d5c39162",
+        "result": {
+          "checks": [
+            {
+              "id": "plan-1",
+              "criteria": [
+                "AC-add",
+                "AC-invalid"
+              ],
+              "source": "tasks.md",
+              "location": "check.py",
+              "run": {
+                "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+              },
+              "cwd": ".",
+              "configuration": {},
+              "setup": null
+            }
+          ]
+        },
+        "time": "2026-10-08T10:14:04.659966+00:00",
+        "hash": "acd6201ba0369707de4c4edcd52e015f0f04b42d50a00db7c6306f84ac0b5470"
+      },
+      {
+        "event_id": "536c0c3959144b6b94d3f413d7481e0f",
+        "fingerprint": "31f8cedb894b68663491ac8ba6b136169afacd4dc2d0952727f54df109b4602a",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "resources": [
+              "scratch-TASK-alternate"
+            ],
+            "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees"
+          },
+          "expected_revision": 2,
+          "task_id": "TASK-alternate",
+          "type": "worktree_create",
+          "event_id": "536c0c3959144b6b94d3f413d7481e0f",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 3,
+        "previous": "acd6201ba0369707de4c4edcd52e015f0f04b42d50a00db7c6306f84ac0b5470",
+        "result": {
+          "path": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-alternate",
+          "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees",
+          "base": "6288e2805e67cea78d7cf55f891f9293cc2eb44c",
+          "owner": "/root/parallel_eval",
+          "integrated": false,
+          "resources": [
+            "scratch-TASK-alternate"
+          ],
+          "snapshot": {
+            "files": {
+              "alternate.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "calculator.py": {
+                "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/design.md": {
+                "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/proposal.md": {
+                "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/review/decisions.md": {
+                "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/alternate/spec.md": {
+                "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/specs/calculator/spec.md": {
+                "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/state.md": {
+                "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                "executable": false,
+                "git_mode": "100644"
+              },
+              "sdd/changes/add/tasks.md": {
+                "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                "executable": false,
+                "git_mode": "100644"
+              }
+            },
+            "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+          },
+          "inventory": {
+            "alternate.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "calculator.py": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+            "sdd/changes/add/design.md": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+            "sdd/changes/add/proposal.md": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+            "sdd/changes/add/state.md": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+            "sdd/changes/add/tasks.md": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+            "sdd/changes/add/review/decisions.md": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+            "sdd/changes/add/specs/alternate/spec.md": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+            "sdd/changes/add/specs/calculator/spec.md": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+          }
+        },
+        "time": "2026-10-08T10:14:06.117265+00:00",
+        "hash": "2911d0c02fa6abc4278ec7eb106645ace5e148e9db3319f861dfe0dee3b22176"
+      },
+      {
+        "event_id": "b6754d2dff2c47899924208eff3d458a",
+        "fingerprint": "0169aa5c1cf7bde5a7954dbaec432f3c5861126b9acc094f6632448fe2fe6193",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "inventory": {
+              "instructions": [],
+              "ci": []
+            },
+            "additional": []
+          },
+          "expected_revision": 3,
+          "task_id": "TASK-alternate",
+          "type": "checks_register",
+          "event_id": "b6754d2dff2c47899924208eff3d458a",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 4,
+        "previous": "2911d0c02fa6abc4278ec7eb106645ace5e148e9db3319f861dfe0dee3b22176",
+        "result": {
+          "checks": [
+            {
+              "id": "plan-1",
+              "criteria": [
+                "AC-alternate"
+              ],
+              "source": "tasks.md",
+              "location": "alternate_check.py",
+              "run": {
+                "setup_required": "Create alternate_check.py PEP 723 plus lockfile and check alternate.py add contract. Run uv run --locked --script alternate_check.py"
+              },
+              "cwd": ".",
+              "configuration": {},
+              "setup": null
+            }
+          ]
+        },
+        "time": "2026-10-08T10:14:06.534962+00:00",
+        "hash": "c83a1c154842d53300190304708b9571e649de9742b216cdf93e7a3cf85c312f"
+      },
+      {
+        "event_id": "0feceb3f917744fa85b779a928e02dcc",
+        "fingerprint": "01c880a731f3195e0071ab36e0a8a1d61568c883dae498b67666225bbb83c127",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+            "context_id": "/root/parallel_eval/exec_add",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex"
+          },
+          "expected_revision": 4,
+          "task_id": "TASK-add",
+          "type": "role_register",
+          "event_id": "0feceb3f917744fa85b779a928e02dcc",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 5,
+        "previous": "c83a1c154842d53300190304708b9571e649de9742b216cdf93e7a3cf85c312f",
+        "result": {
+          "role": {
+            "role_id": "exec_add",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+            "context_id": "/root/parallel_eval/exec_add",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex",
+            "task_id": "TASK-add",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:23.638718+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\exec_add.json"
+        },
+        "time": "2026-10-08T10:14:23.641863+00:00",
+        "hash": "635313644b9fefa92b180f0b04bf8bc89cee3b95b1d1fa4fbbd27f1b9c927807"
+      },
+      {
+        "event_id": "a7b9fc5c8b364c4c80c9fcf3cad0e099",
+        "fingerprint": "3d5bcb9f549295087d2e35e0f0ac3ed1af4e1aa475179c30c3a7f01bd20a834a",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_add",
+            "paths": [
+              "calculator.py",
+              "check.py",
+              "check.py.lock"
+            ]
+          },
+          "expected_revision": 5,
+          "task_id": "TASK-add",
+          "type": "start",
+          "event_id": "a7b9fc5c8b364c4c80c9fcf3cad0e099",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 6,
+        "previous": "635313644b9fefa92b180f0b04bf8bc89cee3b95b1d1fa4fbbd27f1b9c927807",
+        "result": {
+          "status": "running"
+        },
+        "time": "2026-10-08T10:14:24.127784+00:00",
+        "hash": "5463663b0852b1c32d660cad5d6ebc0a9278afcb130f2a395e5e54449b6374c1"
+      },
+      {
+        "event_id": "f2ec7e1698064832a95bf831c3071da3",
+        "fingerprint": "bcdba44d1521ed01ec341309cb42e1bf75b7f1d47687ce3c0edc30370ef3a397",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+            "context_id": "/root/parallel_eval/exec_alternate",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex"
+          },
+          "expected_revision": 6,
+          "task_id": "TASK-alternate",
+          "type": "role_register",
+          "event_id": "f2ec7e1698064832a95bf831c3071da3",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 7,
+        "previous": "5463663b0852b1c32d660cad5d6ebc0a9278afcb130f2a395e5e54449b6374c1",
+        "result": {
+          "role": {
+            "role_id": "exec_alternate",
+            "capabilities": {
+              "fresh_context": true
+            },
+            "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/exec_alternate",
+            "context_id": "/root/parallel_eval/exec_alternate",
+            "fresh": true,
+            "kind": "executor",
+            "host": "codex",
+            "task_id": "TASK-alternate",
+            "status": "active",
+            "registered_at": "2026-10-08T10:14:24.558341+00:00"
+          },
+          "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\exec_alternate.json"
+        },
+        "time": "2026-10-08T10:14:24.561005+00:00",
+        "hash": "4a323b4b4c815076b4970f46ec378f37445ecbd6d8829c67d157ea048de4d237"
+      },
+      {
+        "event_id": "eb38a1a4e78a4ae4a3de1503ff1e560b",
+        "fingerprint": "a53cecb07edf15485d60bf646e536bb95cdc5a69f2d834bcbb58d6ab071458e1",
+        "event": {
+          "owner": "/root/parallel_eval",
+          "payload": {
+            "role_id": "exec_alternate",
+            "paths": [
+              "alternate.py",
+              "alternate_check.py",
+              "alternate_check.py.lock"
+            ]
+          },
+          "expected_revision": 7,
+          "task_id": "TASK-alternate",
+          "type": "start",
+          "event_id": "eb38a1a4e78a4ae4a3de1503ff1e560b",
+          "run_id": "c0d2875802aa4e91a5628c5251981565"
+        },
+        "revision": 8,
+        "previous": "4a323b4b4c815076b4970f46ec378f37445ecbd6d8829c67d157ea048de4d237",
+        "result": {
+          "status": "running"
+        },
+        "time": "2026-10-08T10:14:25.039835+00:00",
+        "hash": "de850d325acf70565910f3be1ab555cb82b65d0693c9436d9701e371e1cac302"
+      }
+    ],
+    "blockers": [],
+    "updated_at": "2026-10-08T10:14:25.039835+00:00",
+    "final": null,
+    "baseline": {
+      "files": {
+        "alternate.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "calculator.py": {
+          "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/design.md": {
+          "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/proposal.md": {
+          "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/review/decisions.md": {
+          "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/alternate/spec.md": {
+          "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/specs/calculator/spec.md": {
+          "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/state.md": {
+          "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+          "executable": false,
+          "git_mode": "100644"
+        },
+        "sdd/changes/add/tasks.md": {
+          "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+          "executable": false,
+          "git_mode": "100644"
+        }
+      },
+      "digest": "67b5e6822ad4ecf5033fad412f5c3acb4649e28cc08113a33e93ca2aa8a96f5c"
+    },
+    "integrity": "c43be5a4b5add1200e1b5fe6e6025023be8e285c82725ee0157a63c00f68130d"
+  }
+}

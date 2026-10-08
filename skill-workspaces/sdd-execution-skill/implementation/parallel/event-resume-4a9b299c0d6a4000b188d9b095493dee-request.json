@@ -1,0 +1,20 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "host_trace":  "Native host observed all successful execution roles completed; negative_final separately launched READY. Parent explicitly authorized post-success fault injection preserving success snapshot.",
+                                               "live_contexts":  [
+                                                                     "/root/parallel_eval/negative_final"
+                                                                 ]
+                                           },
+                               "expected_revision":  66,
+                               "task_id":  null,
+                               "type":  "resume",
+                               "event_id":  "4a9b299c0d6a4000b188d9b095493dee",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

@@ -1,0 +1,16 @@
+{
+  "extractions": [
+    "skill-workspaces\\sdd-execution-skill\\plan\\editorial\\tasks-prose.md",
+    "skill-workspaces\\sdd-execution-skill\\plan\\editorial\\state-prose.md",
+    "skill-workspaces\\sdd-execution-skill\\plan\\editorial\\summary-prose.md"
+  ],
+  "coverage": 61,
+  "unique_coverage": 61,
+  "protected_task_data": "unchanged",
+  "lint_exit": 0,
+  "hashes": {
+    "tasks.md": "607c8034f5212615e0e718db6598e2f9286ef46e91d17b8a1f723b3f71203826",
+    "state.md": "8fc5f09bc94f58108246de9a965bea51e05ec4434cb99423a804054545017abb",
+    "review\\summary.md": "e231c4d47b2b1dc573b47533aa7f6d7a21ca8bdcc05a42e345f8af6e0bc78351"
+  }
+}
