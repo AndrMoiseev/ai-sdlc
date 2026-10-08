@@ -1,0 +1,6 @@
+interface:
+  display_name: "SDD Spec"
+  short_description: "Спецификации, дизайн и согласованный план"
+  default_prompt: "Используй $sdd-spec для подготовки или продолжения изменения."
+policy:
+  allow_implicit_invocation: false

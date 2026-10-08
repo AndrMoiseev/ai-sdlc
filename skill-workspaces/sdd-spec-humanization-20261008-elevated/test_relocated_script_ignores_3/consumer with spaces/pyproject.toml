@@ -1,0 +1,5 @@
+[project]
+name = "consumer"
+version = "1.0"
+requires-python = ">=3.11"
+dependencies = ["PyYAML==0.0.0"]
