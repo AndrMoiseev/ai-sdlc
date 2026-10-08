@@ -1,0 +1,21 @@
+{
+  "draft-pressure": [
+    "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+    "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+    "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+    "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+    "Does not claim files were written in this read-only response."
+  ],
+  "resume-pending": [
+    "Resumes Q-2 failure handling with an actual question rather than restarting discovery or review.",
+    "Preserves already accepted sequential mode and commits without asking them again.",
+    "Keeps deferred dashboard question available and does not treat an existing draft as approved."
+  ],
+  "answered-and-factual": [
+    "Asks about branch arrangement, the remaining substantive choice, without selecting it for the user.",
+    "Does not re-ask stated platform, test framework, sequential mode, commits, or stop-on-test-failure decisions."
+  ],
+  "routine-edit": [
+    "Provides the requested typo correction without requiring a substantive interview or renewed approval."
+  ]
+}

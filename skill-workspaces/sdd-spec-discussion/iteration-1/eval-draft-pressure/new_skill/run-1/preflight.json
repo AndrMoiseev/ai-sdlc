@@ -1,0 +1,320 @@
+{
+  "status": "passed",
+  "workspace": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-1",
+  "manifest": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-1-manifest.json",
+  "checked": [
+    {
+      "path": ".agents/skills/humanizer-ru/banner.webp",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/CHANGELOG.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/LICENSE",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/README.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/SKILL.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/evals/evals.json",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/knowledge/corrections.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/references/patterns.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/humanizer-ru/scripts/lint.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/.gitignore",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/pyproject.toml",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/README.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/SKILL.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/agents/openai.yaml",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/evals/evals.json",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/evals/manual.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/draft.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/explain.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/explore.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/plan.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/resume.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/review.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/revise.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/flows/user-review.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/claude-code.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/codex.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/consistency.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/discussion.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/document-format.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/editorial-pass.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/explanation.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/generic.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/openspec-origin.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/premortem.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/reviewer-documents.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/reviewer-plan.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/references/runtime-setup.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/check.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/check.py.lock",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/snapshot.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/snapshot.py.lock",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/test.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/test.py.lock",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/documents.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/paths.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/reviews.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/snapshots.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/validation.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/scripts/lib/__init__.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/decisions.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/design.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/discussion-decisions.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/explanation.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/lens-index.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/premortem.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/preview-handoff.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/proposal.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/questions.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/review-report.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/review-summary.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/spec.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/state.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/templates/tasks.md",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/conftest.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_authorizations.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_check_command.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_document_records.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_lens_index.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_package_contract.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_questions.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_review_records.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_runtime.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_snapshots.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_task_coverage.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_task_graph.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_task_verification.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_template_contract.py",
+      "expected": "readable"
+    },
+    {
+      "path": ".agents/skills/sdd-spec/tests/test_traceability.py",
+      "expected": "readable"
+    }
+  ],
+  "errors": []
+}

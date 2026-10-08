@@ -1,0 +1,9 @@
+{
+  "harness": "codex",
+  "model": null,
+  "status": "error",
+  "usage": null,
+  "duration_ms": 2498,
+  "returncode": 1,
+  "error": "codex exited with code 1: WARNING: failed to clean up stale arg0 temp dirs: Отказано в доступе. (os error 5)\nWARNING: proceeding, even though we could not create PATH aliases: Отказано в доступе. (os error 5) at path \"C:\\\\Users\\\\Andrew\\\\.codex\\\\tmp\\\\arg0\\\\codex-arg0eTTnPS\"\nError: failed to initialize in-process app-server client: Отказано в доступе. (os error 5)\n"
+}

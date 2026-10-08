@@ -1,0 +1,45 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md asks a concrete result-boundary question: **Что считать результатом по умолчанию: проверенный PR, уже слитое изменение или задеплоенный релиз?**",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Does not claim files were written in this read-only response.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  5,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  5
+                },
+    "failing":  [
+
+                ],
+    "grading_method":  "Manual reading of each response; predeclared assertions; evaluator is separate from skill author, not blind to variant",
+    "scope":  "Conversational behavior and proposed records, not executed file writes or full end-to-end SDD"
+}

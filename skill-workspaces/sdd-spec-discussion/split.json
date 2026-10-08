@@ -1,0 +1,7 @@
+{
+  "frozen_before_candidate_execution": true,
+  "purpose": "Focused user-directed behavior change; not full existing eval-suite optimization",
+  "train": ["draft-pressure", "resume-pending"],
+  "holdout": ["answered-and-factual", "routine-edit"],
+  "notes": "Five fresh samples of the same pressure prompt per variant. Three additional focused scenarios per variant. Author receives train findings only until the candidate is frozen."
+}

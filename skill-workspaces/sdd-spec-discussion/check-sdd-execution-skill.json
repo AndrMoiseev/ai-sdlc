@@ -1,0 +1,109 @@
+﻿{
+  "schema_version": 1,
+  "stage": "plan",
+  "errors": [],
+  "warnings": [],
+  "discussion_status": {
+    "open_questions": [],
+    "blocking_questions": [],
+    "complete": true,
+    "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."
+  },
+  "review_status": {
+    "required_lenses": [
+      "plan"
+    ],
+    "coverage": {
+      "plan": "missing"
+    },
+    "reports": {
+      "20261008T045227Z-consistency/consistency": {
+        "stage": "document_review",
+        "lens_id": "consistency",
+        "result": "completed_with_findings",
+        "freshness": "stale",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "486f91d196faa88c1ddb0a05628f722bd9af151bfe2c583384836a4068053ab0"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "7feaad798051759240656d325705b8cdfb256c2a6f54fecd1deb49ee58d0655c"
+          },
+          {
+            "path": "specs/sdd-execution/spec.md",
+            "sha256": "b66b39f80241b3a60b0226dd0048521d7ce2687dbdf3ba278febaf741c16448a"
+          }
+        ]
+      },
+      "20261008T052536Z-consistency/consistency": {
+        "stage": "document_review",
+        "lens_id": "consistency",
+        "result": "completed_with_findings",
+        "freshness": "stale",
+        "inputs": [
+          {
+            "path": "design.md",
+            "sha256": "70de94f20be9c5139d5b92746f4fa21ee9b969441f7f9658dbe28c03d2054bec"
+          },
+          {
+            "path": "proposal.md",
+            "sha256": "0007194da44d1739f1d0e8373ef16d07ad26d96679bb52308ab5b986469732fc"
+          },
+          {
+            "path": "specs/sdd-execution/spec.md",
+            "sha256": "5b9621f163c4d16c202801baba330f6c896fedab7e719c77f08b274235df493d"
+          }
+        ]
+      }
+    },
+    "complete": false,
+    "unresolved_findings": [],
+    "unfinished_fixes": []
+  },
+  "approval_status": {
+    "approved": false,
+    "ready": false,
+    "applicability": {
+      "USER-review-consistency-20261008": true,
+      "USER-fix-sequential-blocked-stop": true,
+      "USER-fix-test-repair-and-runtime": true,
+      "USER-review-consistency-second": true,
+      "USER-reject-mode-switch-worktree": true,
+      "USER-fix-verification-setup-order": true,
+      "USER-waive-documents-for-plan": false,
+      "USER-approve-documents-for-plan": false,
+      "USER-create-execution-plan": true,
+      "USER-waive-prepared-plan": false
+    },
+    "work_authorizations": {},
+    "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+  },
+  "tasks": {
+    "available_by_graph": [
+      "TASK-validated-input"
+    ],
+    "cannot_parallel_with": {
+      "TASK-validated-input": [],
+      "TASK-state-store": [],
+      "TASK-verification-evidence": [],
+      "TASK-independent-roles": [],
+      "TASK-repair-budgets": [],
+      "TASK-task-commits": [],
+      "TASK-sequential-execution": [],
+      "TASK-worktree-lifecycle": [],
+      "TASK-worktree-integration": [],
+      "TASK-execution-modes": [],
+      "TASK-resume-and-revision": [],
+      "TASK-progress-dashboard": [],
+      "TASK-final-acceptance": [],
+      "TASK-portable-installation": []
+    },
+    "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+  },
+  "progress": {
+    "done": 0,
+    "total": 14
+  }
+}
