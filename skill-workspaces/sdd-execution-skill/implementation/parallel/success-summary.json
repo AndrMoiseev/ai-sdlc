@@ -1,0 +1,30 @@
+﻿{
+    "accepted":  [
+                     "AC-add",
+                     "AC-alternate",
+                     "AC-invalid"
+                 ],
+    "status":  "completed",
+    "tasks":  [
+                  {
+                      "removed":  true,
+                      "test_repairs":  0,
+                      "reviews":  2,
+                      "commits":  "b4452b04d79810b7eff7d5ba2b72aa5bf8a65c95",
+                      "status":  "accepted",
+                      "task":  "TASK-add"
+                  },
+                  {
+                      "removed":  true,
+                      "test_repairs":  0,
+                      "reviews":  2,
+                      "commits":  "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+                      "status":  "accepted",
+                      "task":  "TASK-alternate"
+                  }
+              ],
+    "missing":  [
+
+                ],
+    "final_result":  "complete"
+}

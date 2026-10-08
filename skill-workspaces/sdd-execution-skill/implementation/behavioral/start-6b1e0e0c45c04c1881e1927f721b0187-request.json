@@ -1,0 +1,22 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "executor",
+                                               "paths":  [
+                                                             "calculator.py",
+                                                             "check.py",
+                                                             "check.py.lock"
+                                                         ]
+                                           },
+                               "expected_revision":  2,
+                               "task_id":  "TASK-add",
+                               "type":  "start",
+                               "event_id":  "6b1e0e0c45c04c1881e1927f721b0187",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

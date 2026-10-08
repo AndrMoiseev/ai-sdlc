@@ -1,0 +1,27 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "baseline",
+                                               "result":  {
+                                                              "status":  "baseline_recorded",
+                                                              "outcome":  "planned_absence",
+                                                              "before_after":  "equal",
+                                                              "commands_executed":  0,
+                                                              "criteria_passed":  [
+
+                                                                                  ]
+                                                          },
+                                               "trace":  "native /root/behavioral_eval/baseline personally requested check_run; behavioral/baseline-response.md; baseline-check-85164adaa02048a0ac2333eb0ab1afbf-request.json and response"
+                                           },
+                               "expected_revision":  7,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "139630f3b5a44f2dbfe7c4ae72c3e357",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

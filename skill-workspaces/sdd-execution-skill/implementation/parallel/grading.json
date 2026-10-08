@@ -1,0 +1,47 @@
+﻿{
+    "summary":  {
+                    "total":  7,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  7
+                },
+    "expectations":  [
+                         {
+                             "evidence":  "Native exec_add and exec_alternate fork_turns=none launches and READY handshakes; alternate activated before add implementation completion. native-trace.md and host session.",
+                             "text":  "Both implementations used actual fresh native contexts with overlapping active intervals.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "success-state.json worktree registrations; paths calculator/check vs alternate/alternate_check; scratch-TASK-add and scratch-TASK-alternate.",
+                             "text":  "Two tasks used detached worktrees and disjoint owned files/resources.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "success-execution run events, verify-add.json, verify-alternate.json, both review-*-tree.json payloads.",
+                             "text":  "Current independent checks and worktree review preceded script transfer and serialized integration.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "integration-add.json, integration-alternate.json, review-*-integrated.json; commits b4452b04 and4252002; review rounds2 each.",
+                             "text":  "Integrated candidates each received independent checks and reserved review before one local commit/accept.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "final-add.json and final-alternate.json; success-state final.result=complete, missing=[], accepted AC-add/AC-invalid/AC-alternate.",
+                             "text":  "Fresh final contexts checked full required set at final HEAD, yielding complete result.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "success-state both worktree.removed=true and script worktree_remove raw success responses.",
+                             "text":  "Worktree cleanup occurred only after accepted commits and stopped roles.",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "negative/verifier.json: no tests ran, unavailable; negative/state.json: blocked/final partial. Success snapshot preserved and injected runner restored without rewriting state.",
+                             "text":  "Fresh post-success final verification of missing mandatory runner reports unavailable and finalization remains partial.",
+                             "passed":  true
+                         }
+                     ],
+    "negative_scenario":  "passed expected fail-closed behavior",
+    "grading_mode":  "Evidence-based orchestrator assessment; not blinded"
+}

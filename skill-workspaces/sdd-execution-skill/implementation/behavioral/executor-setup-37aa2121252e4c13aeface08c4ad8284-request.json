@@ -1,0 +1,20 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "check_id":  "plan-1",
+                                               "command":  "uv run --locked --script check.py",
+                                               "description":  "Fresh executor created planned PEP723 check.py and lockfile after independently captured planned-absence baseline.",
+                                               "cwd":  "."
+                                           },
+                               "expected_revision":  5,
+                               "task_id":  "TASK-add",
+                               "type":  "check_setup",
+                               "event_id":  "37aa2121252e4c13aeface08c4ad8284",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

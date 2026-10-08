@@ -1,0 +1,25 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "exec_add",
+                                               "capabilities":  {
+                                                                    "fresh_context":  true
+                                                                },
+                                               "launch_ref":  "collaboration.spawn_agent returned /root/parallel_eval/exec_add",
+                                               "context_id":  "/root/parallel_eval/exec_add",
+                                               "fresh":  true,
+                                               "kind":  "executor",
+                                               "host":  "codex-native"
+                                           },
+                               "expected_revision":  2,
+                               "task_id":  "TASK-add",
+                               "type":  "role_register",
+                               "event_id":  "0d5c91ea5aba430c8b4ad2651f081a02",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

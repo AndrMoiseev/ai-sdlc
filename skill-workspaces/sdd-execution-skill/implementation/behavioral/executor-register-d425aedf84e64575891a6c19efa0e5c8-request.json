@@ -1,0 +1,25 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "executor",
+                                               "kind":  "executor",
+                                               "context_id":  "/root/behavioral_eval/executor",
+                                               "fresh":  true,
+                                               "host":  "codex",
+                                               "launch_ref":  "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+                                               "capabilities":  {
+                                                                    "fresh_context":  true
+                                                                }
+                                           },
+                               "expected_revision":  1,
+                               "task_id":  "TASK-add",
+                               "type":  "role_register",
+                               "event_id":  "d425aedf84e64575891a6c19efa0e5c8",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

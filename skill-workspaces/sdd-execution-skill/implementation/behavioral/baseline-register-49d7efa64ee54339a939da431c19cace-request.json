@@ -1,0 +1,25 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "baseline",
+                                               "kind":  "verifier",
+                                               "context_id":  "/root/behavioral_eval/baseline",
+                                               "fresh":  true,
+                                               "host":  "codex",
+                                               "launch_ref":  "native collaboration.spawn_agent task_name=baseline fork_turns=none returned /root/behavioral_eval/baseline",
+                                               "capabilities":  {
+                                                                    "fresh_context":  true
+                                                                }
+                                           },
+                               "expected_revision":  3,
+                               "task_id":  "TASK-add",
+                               "type":  "role_register",
+                               "event_id":  "49d7efa64ee54339a939da431c19cace",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

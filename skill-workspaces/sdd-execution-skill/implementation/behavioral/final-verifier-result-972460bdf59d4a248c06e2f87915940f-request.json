@@ -1,0 +1,29 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "final_verifier",
+                                               "result":  {
+                                                              "status":  "passed",
+                                                              "head":  "2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+                                                              "tests":  5,
+                                                              "exit_code":  0,
+                                                              "criteria":  [
+                                                                               "AC-add",
+                                                                               "AC-invalid"
+                                                                           ],
+                                                              "before_after":  "equal"
+                                                          },
+                                               "trace":  "actual fresh native /root/behavioral_eval/final_verifier personally requested final check_run; inspected raw log 1acda81e13624fa2b93c318de24f5a9e; behavioral/final-verifier-response.md"
+                                           },
+                               "expected_revision":  20,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "972460bdf59d4a248c06e2f87915940f",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

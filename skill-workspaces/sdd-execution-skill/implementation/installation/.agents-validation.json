@@ -1,0 +1,155 @@
+{
+  "ok": true,
+  "result": {
+    "schema_version": 1,
+    "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project",
+    "change_id": "add",
+    "change_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add",
+    "instruction": {
+      "text": "Validate the retained authorized native evaluation fixture through installed packages",
+      "source": "implementation installation verification"
+    },
+    "sdd_spec": "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-execution-skill\\implementation\\installation\\.agents\\skills\\sdd-spec",
+    "checks": {
+      "documents": {
+        "schema_version": 1,
+        "stage": "documents",
+        "errors": [],
+        "warnings": [],
+        "review_status": {
+          "required_lenses": [
+            "consistency"
+          ],
+          "coverage": {
+            "consistency": "waived"
+          },
+          "reports": {},
+          "complete": true,
+          "unresolved_findings": [],
+          "unfinished_fixes": []
+        },
+        "approval_status": {
+          "approved": true,
+          "ready": true,
+          "applicability": {
+            "USER-document-review-document-approval": true,
+            "USER-document-review-review-waiver": true,
+            "USER-plan-review-plan-approval": true,
+            "USER-plan-review-review-waiver": true
+          },
+          "work_authorizations": {},
+          "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+        }
+      },
+      "plan": {
+        "schema_version": 1,
+        "stage": "plan",
+        "errors": [],
+        "warnings": [],
+        "review_status": {
+          "required_lenses": [
+            "plan"
+          ],
+          "coverage": {
+            "plan": "waived"
+          },
+          "reports": {},
+          "complete": true,
+          "unresolved_findings": [],
+          "unfinished_fixes": []
+        },
+        "approval_status": {
+          "approved": true,
+          "ready": true,
+          "applicability": {
+            "USER-document-review-document-approval": true,
+            "USER-document-review-review-waiver": true,
+            "USER-plan-review-plan-approval": true,
+            "USER-plan-review-review-waiver": true
+          },
+          "work_authorizations": {},
+          "provenance": "Recorded decisions; user authorship and change provenance are not verified."
+        },
+        "tasks": {
+          "available_by_graph": [
+            "TASK-add"
+          ],
+          "cannot_parallel_with": {
+            "TASK-add": []
+          },
+          "parallel_safety": "Requires reviewer assessment of shared files and other conflicts"
+        },
+        "progress": {
+          "done": 0,
+          "total": 1
+        }
+      }
+    },
+    "manifest": [
+      {
+        "path": "design.md",
+        "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc"
+      },
+      {
+        "path": "proposal.md",
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+      },
+      {
+        "path": "specs/calculator/spec.md",
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+      },
+      {
+        "path": "tasks.md",
+        "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89"
+      }
+    ],
+    "tasks": [
+      {
+        "covers": [
+          "AC-add",
+          "AC-invalid"
+        ],
+        "depends_on": [],
+        "id": "TASK-add",
+        "number": 1,
+        "sdd_record": "task",
+        "status": "pending",
+        "verification": [
+          {
+            "criteria": [
+              "AC-add",
+              "AC-invalid"
+            ],
+            "location": "check.py",
+            "run": {
+              "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+            },
+            "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+          }
+        ]
+      }
+    ],
+    "head": "2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+    "branch": "main",
+    "dirty_paths": [
+      "sdd/changes/add/execution/dashboard-state.js",
+      "sdd/changes/add/execution/dashboard.html",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/effects/15b3de53df5d47cdb0e5b7253c1ed23b.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/input.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/roles/baseline.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/roles/executor.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/roles/final_verifier.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/roles/reviewer.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/roles/verifier.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/1acda81e13624fa2b93c318de24f5a9e.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/68f8817ea5c74c8a9503766e0e7a72da.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/85164adaa02048a0ac2333eb0ab1afbf.json",
+      "sdd/changes/add/execution/runs/1ce7765c054f4c80a39ac2c5640cbee8/tasks/TASK-add/1/a8f9c768515e4078937159c5b90d2d48.json",
+      "sdd/changes/add/execution/state.json",
+      "sdd/changes/add/execution/summary.md"
+    ],
+    "index_patch": "",
+    "status": "?? sdd/changes/add/execution/\u0000",
+    "working_patch": ""
+  }
+}

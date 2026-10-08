@@ -1,0 +1,86 @@
+{
+    "role_id":  "review_add_integrated",
+    "candidate":  {
+                      "source":  {
+                                     "files":  {
+                                                   "alternate.py":  {
+                                                                        "sha256":  "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+                                                                        "executable":  false,
+                                                                        "git_mode":  "100644"
+                                                                    },
+                                                   "calculator.py":  {
+                                                                         "sha256":  "14b4877e4e332bf7f94268812a139b1f310e7f63e760665d7b6fc1c6c6e22616",
+                                                                         "executable":  false,
+                                                                         "git_mode":  "100644"
+                                                                     },
+                                                   "check.py":  {
+                                                                    "sha256":  "57f6838bfeafc91bd8a7b0837d45aeb13dc33172abf620042d9c4230928fb93e",
+                                                                    "executable":  false,
+                                                                    "git_mode":  "100644"
+                                                                },
+                                                   "check.py.lock":  {
+                                                                         "sha256":  "cb08fc595bd91bd7f32957ac0744b2f9d514ab24d64a51d01794b563d321204e",
+                                                                         "executable":  false,
+                                                                         "git_mode":  "100644"
+                                                                     },
+                                                   "sdd/changes/add/design.md":  {
+                                                                                     "sha256":  "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+                                                                                     "executable":  false,
+                                                                                     "git_mode":  "100644"
+                                                                                 },
+                                                   "sdd/changes/add/proposal.md":  {
+                                                                                       "sha256":  "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+                                                                                       "executable":  false,
+                                                                                       "git_mode":  "100644"
+                                                                                   },
+                                                   "sdd/changes/add/review/decisions.md":  {
+                                                                                               "sha256":  "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+                                                                                               "executable":  false,
+                                                                                               "git_mode":  "100644"
+                                                                                           },
+                                                   "sdd/changes/add/specs/alternate/spec.md":  {
+                                                                                                   "sha256":  "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+                                                                                                   "executable":  false,
+                                                                                                   "git_mode":  "100644"
+                                                                                               },
+                                                   "sdd/changes/add/specs/calculator/spec.md":  {
+                                                                                                    "sha256":  "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+                                                                                                    "executable":  false,
+                                                                                                    "git_mode":  "100644"
+                                                                                                },
+                                                   "sdd/changes/add/state.md":  {
+                                                                                    "sha256":  "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+                                                                                    "executable":  false,
+                                                                                    "git_mode":  "100644"
+                                                                                },
+                                                   "sdd/changes/add/tasks.md":  {
+                                                                                    "sha256":  "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+                                                                                    "executable":  false,
+                                                                                    "git_mode":  "100644"
+                                                                                }
+                                               },
+                                     "digest":  "8b6c53756b9eed1de222915e3fbd900419903592e972b521b15f48eb84c75fed"
+                                 },
+                      "manifest":  "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+                      "checks":  "e2c061ed067d3ffd915b40ce3f34d29b5d0f80ec797ff94773dcb6fd4736844e",
+                      "root":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project"
+                  },
+    "verdict":  "pass",
+    "findings":  [
+
+                 ],
+    "test_integrity":  {
+                           "details":  "All three owned files match previously reviewed worktree content after CRLF normalization. Integration inventory contains exactly calculator.py modification and new check.py plus check.py.lock. Five assertion-bearing unittest methods unchanged, no skips or weakened assertions; dependency-free PEP723 metadata and lock agree. Integration run in project root passed 5 tests, exit 0, with stable candidate snapshots.",
+                           "assessment":  "preserved"
+                       },
+    "trace":  {
+                  "tool_ids":  [
+                                   "23b2f4",
+                                   "e8026c",
+                                   "b5189e"
+                               ],
+                  "evidence":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/dab2c95513854a13a8245846bc282a35.json",
+                  "context_id":  "/root/parallel_eval/verify_add",
+                  "assessment":  "No integration deviation beyond line ending normalization. AC-add and AC-invalid remain satisfied. Execution metadata is untracked and outside implementation candidate. No unresolved blockers."
+              }
+}

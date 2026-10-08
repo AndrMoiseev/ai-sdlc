@@ -1,0 +1,8 @@
+{
+    "finished_at":  "2026-10-08T10:38:43.7891886Z",
+    "total_tokens":  null,
+    "duration_seconds":  1570.0479,
+    "scope":  "Parallel success scenario from fixture preparer creation to preserved completed state; excludes later negative fault injection",
+    "started_at":  "2026-10-08T10:12:33.7412886Z",
+    "total_duration_seconds":  1570.0479
+}

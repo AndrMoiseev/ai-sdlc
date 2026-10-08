@@ -1,0 +1,23 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "reason":  "Prepared PEP723 runner begins with UTF8 BOM and uv ignores locked script metadata",
+                                               "defect_evidence":  {
+                                                                       "bytes":  "EF-BB-BF-23-20-2F",
+                                                                       "tool_trace":  "7ab012",
+                                                                       "stderr":  "--locked has no effect outside a project",
+                                                                       "log":  "runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-add/1/842acc97b319414d8be67d7f665deda3.json"
+                                                                   }
+                                           },
+                               "expected_revision":  18,
+                               "task_id":  "TASK-add",
+                               "type":  "repair",
+                               "event_id":  "944a4cc85a484c99bfdfdf73dc3f0569",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

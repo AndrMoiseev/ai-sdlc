@@ -1,0 +1,29 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "verifier",
+                                               "result":  {
+                                                              "status":  "passed",
+                                                              "source":  "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743",
+                                                              "exit_code":  0,
+                                                              "tests":  5,
+                                                              "criteria":  [
+                                                                               "AC-add",
+                                                                               "AC-invalid"
+                                                                           ],
+                                                              "limitation":  "stdlib uv runner warned --locked has no effect outside a project"
+                                                          },
+                                               "trace":  "native /root/behavioral_eval/verify_review personally requested check_run and inspected a8f9c768515e4078937159c5b90d2d48; native tool chunks 3cc049,716591,752373"
+                                           },
+                               "expected_revision":  14,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "8202b4de425a403b921a7534c558671f",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

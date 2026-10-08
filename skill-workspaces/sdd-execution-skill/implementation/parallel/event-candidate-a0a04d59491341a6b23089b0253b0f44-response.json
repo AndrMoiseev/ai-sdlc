@@ -1,0 +1,77 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "candidate": {
+        "source": {
+          "files": {
+            "alternate.py": {
+              "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "calculator.py": {
+              "sha256": "358dd12d907d8d8d4445753670d08b8ca01d5e58e78201adade57e1defa65430",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "check.py": {
+              "sha256": "feb73389edb889f75d96bbd71442c8616ad94d37cb79f2535e59233aefe5dec7",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "check.py.lock": {
+              "sha256": "50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/design.md": {
+              "sha256": "ab616e881064abd123cb0fefd184e9a4f6dfc8c7b614bde0a84227e8858f92cd",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/proposal.md": {
+              "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/review/decisions.md": {
+              "sha256": "0b1f9870fc3931eaa3c3f1ac83db6f62173e2d62b2ace73587d13011b9691c3a",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/alternate/spec.md": {
+              "sha256": "05b0fcafebe5f56cdd24204052013a03890ff66f3888738c9cbe4d9cd5c69956",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/specs/calculator/spec.md": {
+              "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/state.md": {
+              "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+              "executable": false,
+              "git_mode": "100644"
+            },
+            "sdd/changes/add/tasks.md": {
+              "sha256": "ddfb3a8695d4338ad88a84f0a7281733073783d75de747ff5747349e2ca72421",
+              "executable": false,
+              "git_mode": "100644"
+            }
+          },
+          "digest": "832403aa9df9b298263af7908c66b8444bbde0fc9217264b4e6ffc5fc0b52163"
+        },
+        "manifest": "da26c0454f3beea33528497cf9df476a391ceec534193f13bedd4ab9dff83934",
+        "checks": "e2c061ed067d3ffd915b40ce3f34d29b5d0f80ec797ff94773dcb6fd4736844e",
+        "root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees\\c0d2875802aa4e91a5628c5251981565\\TASK-add"
+      }
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 25
+    }
+  }
+}

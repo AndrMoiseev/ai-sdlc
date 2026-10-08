@@ -1,0 +1,102 @@
+diff --git a/calculator.py b/calculator.py
+index e1090e39598e6ab527371e7fed277e3dd66e6613..4674dff01523283de6717d896f178bfd4ab69d7b 100644
+--- a/calculator.py
++++ b/calculator.py
+@@ -1,2 +1,20 @@
++﻿"""Finite numeric addition with arbitrary-precision integer support."""
++
++import math
++
++
+ def add(a, b):
+-    return str(a) + str(b)
++    """Return the sum of numeric operands, rejecting invalid or non-finite values."""
++    for operand in (a, b):
++        if isinstance(operand, bool) or not isinstance(operand, (int, float)):
++            raise TypeError("operands must be int or float, excluding bool")
++    for operand in (a, b):
++        if isinstance(operand, float) and not math.isfinite(operand):
++            raise ValueError("operands must be finite")
++    try:
++        result = a + b
++    except OverflowError as exc:
++        raise ValueError("sum must be finite") from exc
++    if isinstance(result, float) and not math.isfinite(result):
++        raise ValueError("sum must be finite")
++    return result
+diff --git a/check.py b/check.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c49554fd656deea076a1e8e403ba21084256c906
+--- /dev/null
++++ b/check.py
+@@ -0,0 +1,61 @@
++# /// script
++# requires-python = ">=3.11"
++# dependencies = []
++# ///
++
++import sys
++
++sys.dont_write_bytecode = True
++
++import unittest
++from decimal import Decimal
++from fractions import Fraction
++
++from calculator import add
++
++
++class AdditionContract(unittest.TestCase):
++    def test_arithmetic_sum(self):
++        for a, b, expected in [
++            (2, 3, 5), (-4, 7, 3), (-4, -7, -11), (0, 0, 0),
++            (1.25, 2.5, 3.75), (1, 2.5, 3.5), (2.5, 1, 3.5),
++            (-1.5, 1.5, 0.0), (1e-300, 1e-300, 2e-300),
++            (1e308, -1e308, 0.0),
++        ]:
++            with self.subTest(a=a, b=b):
++                self.assertEqual(add(a, b), expected)
++
++    def test_arbitrary_precision_integers(self):
++        huge = 10 ** 1000
++        for a, b, expected in [(huge, huge, 2 * huge), (-huge, huge, 0),
++                               (huge, 1, huge + 1)]:
++            with self.subTest(a=a, b=b):
++                actual = add(a, b)
++                self.assertEqual(actual, expected)
++                self.assertIs(type(actual), int)
++
++    def test_invalid_types_in_each_position(self):
++        for invalid in [True, False, "2", None, [], {}, (), set(), b"2",
++                        2j, Decimal("2"), Fraction(2), object()]:
++            for args in [(invalid, 1), (1, invalid)]:
++                with self.subTest(args=args):
++                    with self.assertRaises(TypeError):
++                        add(*args)
++
++    def test_nonfinite_operands_in_each_position(self):
++        for invalid in [float("nan"), float("inf"), -float("inf")]:
++            for args in [(invalid, 1), (1, invalid)]:
++                with self.subTest(args=args):
++                    with self.assertRaises(ValueError):
++                        add(*args)
++
++    def test_nonfinite_results(self):
++        for args in [(1e308, 1e308), (-1e308, -1e308),
++                     (10 ** 1000, 1.0), (1.0, 10 ** 1000)]:
++            with self.subTest(args=args):
++                with self.assertRaises(ValueError):
++                    add(*args)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+diff --git a/check.py.lock b/check.py.lock
+new file mode 100644
+index 0000000000000000000000000000000000000000..9431a635b11c9d9012aadf511f90c19be8aed737
+--- /dev/null
++++ b/check.py.lock
+@@ -0,0 +1,3 @@
++version = 1
++revision = 3
++requires-python = ">=3.11"

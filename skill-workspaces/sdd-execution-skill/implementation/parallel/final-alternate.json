@@ -1,0 +1,47 @@
+﻿{
+    "task_id":  "TASK-alternate",
+    "role_id":  "final_alternate",
+    "context_id":  "/root/parallel_eval/final_alternate",
+    "stage":  "final",
+    "status":  "passed",
+    "head":  "4252002de7f6c04dab478c8b1bc89c2071f0e702",
+    "source_digest":  "2ebe0ee15091fcff1efbcdedfbad94817757120e8cabb5f4a8dd8800ce456105",
+    "snapshots_unchanged":  true,
+    "command":  "uv run --locked --script alternate_check.py",
+    "cwd":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project",
+    "configuration":  {
+
+                      },
+    "exit_code":  0,
+    "tests_run":  4,
+    "ac_evidence":  {
+                        "AC-alternate":  "Four executed unittest methods cover numeric int/float addition, arbitrary precision integer addition, bool and other invalid types in both positions, nonfinite operands in both positions, nonfinite results and mixed conversion overflow."
+                    },
+    "raw_log":  "C:/Users/Andrew/AppData/Local/Temp/sdd-apply-parallel-0bzu0k6o/project/sdd/changes/add/execution/runs/c0d2875802aa4e91a5628c5251981565/tasks/TASK-alternate/1/88e7f13cb459448f87ab8e91720bd23d.json",
+    "inspected_paths":  [
+                            "skills/sdd-apply/agents/verifier.md",
+                            "skills/sdd-apply/references/roles.md",
+                            "roles/final_alternate.json",
+                            "sdd/changes/add/tasks.md",
+                            "sdd/changes/add/design.md",
+                            "sdd/changes/add/specs/alternate/spec.md",
+                            "sdd/changes/add/state.md",
+                            "sdd/changes/add/execution/state.json",
+                            "alternate.py",
+                            "alternate_check.py"
+                        ],
+    "blockers":  [
+
+                 ],
+    "limitations":  [
+                        "This task-scoped final verifier covers AC-alternate; TASK-add final evidence is collected by a separate fresh verifier.",
+                        "Default sandbox denied temp reads; authorized escalated access was used. Read-only behavior is procedural, not an OS read-only sandbox."
+                    ],
+    "host_trace":  [
+                       "Fresh launch /root/parallel_eval/final_alternate, registered role packet final_alternate; no executor context inherited.",
+                       "functions.exec chunk ab6788: actual final check_run API returned passed, revision 62.",
+                       "functions.exec chunk 238800: raw logs and HEAD inspected."
+                   ],
+    "implementation_edits":  false,
+    "review_performed":  false
+}

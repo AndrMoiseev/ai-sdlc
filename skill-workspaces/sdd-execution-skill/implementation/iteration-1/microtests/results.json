@@ -1,0 +1,117 @@
+{
+    "control_passed":  5,
+    "samples":  [
+                    {
+                        "evidence":  "control-1.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "control-1",
+                        "context_id":  "/root/micro_control_1",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "control-2.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "control-2",
+                        "context_id":  "/root/micro_control_2",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "control-3.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "control-3",
+                        "context_id":  "/root/micro_control_3",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "control-4.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "control-4",
+                        "context_id":  "/root/micro_control_4",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "control-5.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "control-5",
+                        "context_id":  "/root/micro_control_5",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "guided-1.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "guided-1",
+                        "context_id":  "/root/micro_guided_1",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "guided-2.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "guided-2",
+                        "context_id":  "/root/micro_guided_2",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "guided-3.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "guided-3",
+                        "context_id":  "/root/micro_guided_3",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "guided-4.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "guided-4",
+                        "context_id":  "/root/micro_guided_4",
+                        "passed":  true
+                    },
+                    {
+                        "evidence":  "guided-5.json",
+                        "timing":  {
+                                       "total_tokens":  null,
+                                       "total_duration_seconds":  null,
+                                       "limitation":  "Per-sample duration not instrumented; token telemetry unavailable"
+                                   },
+                        "sample":  "guided-5",
+                        "context_id":  "/root/micro_guided_5",
+                        "passed":  true
+                    }
+                ],
+    "guided_passed":  5,
+    "comparative_improvement":  false
+}

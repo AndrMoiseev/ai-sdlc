@@ -1,0 +1,30 @@
+﻿[
+    {
+        "path":  "proposal.md",
+        "sha256":  "0007194da44d1739f1d0e8373ef16d07ad26d96679bb52308ab5b986469732fc"
+    },
+    {
+        "path":  "design.md",
+        "sha256":  "111ec1685637f123d87463c3fa23fa8e9615a5ef2ddc15d1573e0ccdfa76c959"
+    },
+    {
+        "path":  "specs/sdd-execution/spec.md",
+        "sha256":  "2dd4fa633fb4f32cfec6dffc9668bda78bc9a545c92c2d0ee24b2cf366986afc"
+    },
+    {
+        "path":  "research.md",
+        "sha256":  "289942e4081263393c42f0b0e0a3b9768daf6f924c78efaca5c16e73fd34ed9b"
+    },
+    {
+        "path":  "premortem.md",
+        "sha256":  "7e0b46e76933d0527d4ac5b664641cfb0ac1369c99b36ec2ed4ef56d1338c531"
+    },
+    {
+        "path":  "state.md",
+        "sha256":  "91729c1b39b549249d08528fa9a93953b3c8bfcb221ff15b392748ce689aa39d"
+    },
+    {
+        "path":  "review/summary.md",
+        "sha256":  "44183f93bbaf9a81a224b0e0c63b8c1d064482b27d597f360d197639956adc64"
+    }
+]

@@ -1,0 +1,81 @@
+{
+  "task": {
+    "covers": [
+      "AC-add",
+      "AC-invalid"
+    ],
+    "depends_on": [],
+    "id": "TASK-add",
+    "number": 1,
+    "sdd_record": "task",
+    "status": "pending",
+    "verification": [
+      {
+        "criteria": [
+          "AC-add",
+          "AC-invalid"
+        ],
+        "location": "check.py",
+        "run": {
+          "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+        },
+        "test_description": "Exercise numeric addition and reject invalid/non-finite inputs and results"
+      }
+    ]
+  },
+  "basis": [
+    {
+      "path": "design.md",
+      "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc"
+    },
+    {
+      "path": "proposal.md",
+      "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44"
+    },
+    {
+      "path": "specs/calculator/spec.md",
+      "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52"
+    },
+    {
+      "path": "tasks.md",
+      "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89"
+    }
+  ],
+  "project_root": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project",
+  "paths": [],
+  "worktree": null,
+  "candidate": null,
+  "checks": [
+    {
+      "id": "plan-1",
+      "criteria": [
+        "AC-add",
+        "AC-invalid"
+      ],
+      "source": "tasks.md",
+      "run": {
+        "setup_required": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+      },
+      "cwd": ".",
+      "configuration": {},
+      "setup": null
+    }
+  ],
+  "prior_commits": [],
+  "blockers": [],
+  "rejected_approaches": [],
+  "role": {
+    "role_id": "executor",
+    "kind": "executor",
+    "context_id": "/root/behavioral_eval/executor",
+    "fresh": true,
+    "host": "codex",
+    "launch_ref": "native collaboration.spawn_agent task_name=executor fork_turns=none returned /root/behavioral_eval/executor",
+    "capabilities": {
+      "fresh_context": true
+    },
+    "task_id": "TASK-add",
+    "status": "active",
+    "registered_at": "2026-10-08T09:43:40.364171+00:00"
+  }
+}

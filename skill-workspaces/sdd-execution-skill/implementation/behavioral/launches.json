@@ -1,0 +1,34 @@
+{
+    "schema_version":  1,
+    "launches":  [
+                     {
+                         "tool":  "collaboration.spawn_agent",
+                         "task_name":  "executor",
+                         "fork_turns":  "none",
+                         "returned_task_name":  "/root/behavioral_eval/executor",
+                         "registered_at":  "2026-10-08T09:43:40.364171+00:00"
+                     },
+                     {
+                         "tool":  "collaboration.spawn_agent",
+                         "task_name":  "baseline",
+                         "fork_turns":  "none",
+                         "returned_task_name":  "/root/behavioral_eval/baseline",
+                         "registered_at":  "2026-10-08T09:44:00.771658+00:00"
+                     },
+                     {
+                         "returned_task_name":  "/root/behavioral_eval/verify_review",
+                         "fork_turns":  "none",
+                         "tool":  "collaboration.spawn_agent",
+                         "task_name":  "verify_review",
+                         "registered_at":  "2026-10-08T09:58:10.815939+00:00"
+                     },
+                     {
+                         "returned_task_name":  "/root/behavioral_eval/final_verifier",
+                         "fork_turns":  "none",
+                         "tool":  "collaboration.spawn_agent",
+                         "task_name":  "final_verifier",
+                         "registered_at":  "2026-10-08T10:04:44.262248+00:00"
+                     }
+                 ],
+    "provenance":  "Recorded from actual native tool returns in this parent transcript; not a raw host transcript export"
+}

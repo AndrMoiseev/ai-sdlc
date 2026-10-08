@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "change_id": "add",
+  "run_id": "1ce7765c054f4c80a39ac2c5640cbee8",
+  "task_id": "TASK-add",
+  "role_id": "executor",
+  "stage": "self",
+  "candidate": null,
+  "before": {
+    "files": {
+      "calculator.py": {
+        "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+        "executable": false
+      },
+      "check.py": {
+        "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+        "executable": false
+      },
+      "check.py.lock": {
+        "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+        "executable": false
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+        "executable": false
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+        "executable": false
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+        "executable": false
+      }
+    },
+    "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+  },
+  "after": {
+    "files": {
+      "calculator.py": {
+        "sha256": "035d4a11d690d6fca36c46afe97a90b3c7f689e8b209f8fe8bad0fd92f2ca65f",
+        "executable": false
+      },
+      "check.py": {
+        "sha256": "08f0487bda99f0e11173ded345f4cfc4a352ff1eb30355eef13f45510d582ddf",
+        "executable": false
+      },
+      "check.py.lock": {
+        "sha256": "e50d5e0518d8b4f23b09d4c04f71f5b34c60435e774c40ec598c413c449fa80a",
+        "executable": false
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+        "executable": false
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+        "executable": false
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+        "executable": false
+      }
+    },
+    "digest": "825d807c30d8008b51d0515afdad263aff01dc517b4eae8831e58cf9599bc743"
+  },
+  "outputs": [
+    {
+      "command": "uv run --locked --script check.py",
+      "cwd": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project",
+      "started_at": "2026-10-08T09:55:03.460493+00:00",
+      "duration_seconds": 0.16252589999930933,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "warning: `--locked` has no effect when used outside of a project\n.....\r\n----------------------------------------------------------------------\r\nRan 5 tests in 0.001s\r\n\r\nOK\r\n",
+      "outcome": "passed",
+      "check_id": "plan-1",
+      "configuration": {},
+      "criteria": [
+        "AC-add",
+        "AC-invalid"
+      ]
+    }
+  ]
+}

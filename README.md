@@ -8,7 +8,7 @@
 
 | Пакет | Состав |
 |---|---|
-| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
+| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
@@ -175,6 +175,12 @@ apm install AndrMoiseev/ai-sdlc/packages/aisdlc-skills --target codex,claude
   Неоднозначные термины остаются открытыми вопросами.
   [Ручная проверка](skills/sdd-doc/evals/manual.md) ·
   [Состояние проверки](skill-workspaces/sdd-doc/validation.md).
+
+- [sdd-apply](skills/sdd-apply/SKILL.md) — исполнение согласованного плана
+  `sdd-spec` по явному вызову `$sdd-apply` или `/sdd-apply`: независимые
+  проверки, коммиты задач, восстановление и локальная панель прогресса.
+  Параллельное исполнение включается только по явному запросу.
+  [Установка и runtime](skills/sdd-apply/references/runtime-setup.md).
 
 - [sdd-implement](skills/sdd-implement/SKILL.md) — выполнение или продолжение
   готового изменения OpenSpec по явному вызову `$sdd-implement` или `/sdd-implement`.

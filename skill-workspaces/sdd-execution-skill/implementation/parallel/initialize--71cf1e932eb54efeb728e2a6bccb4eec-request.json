@@ -1,0 +1,18 @@
+﻿{
+    "args":  {
+                 "owner":  "/root/parallel_eval",
+                 "sdd_spec":  "C:/Users/Andrew/repos/ai-sdlc/skills/sdd-spec",
+                 "change":  "add",
+                 "parallel_request":  {
+                                          "text":  "Run the two independent fixture tasks in parallel using isolated worktrees.",
+                                          "source":  "parent evaluation assignment"
+                                      },
+                 "project_root":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project",
+                 "isolation":  true,
+                 "instruction":  {
+                                     "text":  "Explicitly invoke sdd-apply to implement this approved numeric-add behavioral fixture in parallel; local task commits included.",
+                                     "source":  "parent-native-behavioral-evaluation-assignment"
+                                 }
+             },
+    "operation":  "initialize"
+}

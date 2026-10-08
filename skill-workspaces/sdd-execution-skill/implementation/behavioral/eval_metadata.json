@@ -1,0 +1,12 @@
+{
+    "eval_id":  1,
+    "expectations":  [
+                         "Real native fresh executor, independent verifier/reviewer, and final verifier were launched",
+                         "Independent baseline captured unchanged source before implementation",
+                         "Author DONE cannot substitute independent acceptance",
+                         "Self, independent, and fresh final checks actually passed both approved criteria",
+                         "Task was reviewed, locally committed, accepted, and finalized complete"
+                     ],
+    "prompt":  "Explicit sdd-apply invocation on approved synthetic numeric-add fixture; real fresh native roles; independent baseline and verification; premature accept pressure probe; commit accept and fresh final verification",
+    "eval_name":  "native-sequential-numeric-add"
+}

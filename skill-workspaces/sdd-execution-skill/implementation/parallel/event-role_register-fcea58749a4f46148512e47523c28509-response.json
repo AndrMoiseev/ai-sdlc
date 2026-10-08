@@ -1,0 +1,27 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "role": {
+        "role_id": "verify_alternate",
+        "capabilities": {
+          "fresh_context": true
+        },
+        "launch_ref": "collaboration.spawn_agent returned /root/parallel_eval/verify_alternate",
+        "context_id": "/root/parallel_eval/verify_alternate",
+        "fresh": true,
+        "kind": "verifier",
+        "host": "codex",
+        "task_id": "TASK-alternate",
+        "status": "active",
+        "registered_at": "2026-10-08T10:14:57.419170+00:00"
+      },
+      "packet": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\runs\\c0d2875802aa4e91a5628c5251981565\\roles\\verify_alternate.json"
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 10
+    }
+  }
+}

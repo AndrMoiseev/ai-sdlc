@@ -1,0 +1,15 @@
+﻿{
+    "eval_id":  "parallel-native-two-tasks",
+    "assertions":  [
+                       "Both implementation contexts are actual fresh native launches with overlapping active intervals.",
+                       "Detached worktrees isolate disjoint task paths and mutable scratch resources.",
+                       "Independent worktree and integration evidence precede both task commits.",
+                       "Each task has worktree and integrated reviews using one lifetime budget.",
+                       "Fresh final verifier evidence names final HEAD and all AC.",
+                       "Post-success unavailable mandatory runner yields partial, never false green."
+                   ],
+    "control":  "No control in this scenario; not a hermetic comparison.",
+    "prompt":  "Explicitly invoke sdd-apply to execute two independent approved fixture tasks in parallel with local commits, independent checks, review and final acceptance.",
+    "eval_name":  "parallel-native-two-isolated-tasks",
+    "assertion_timing":  "Written during final verification; not preregistered. Scenario scope was assigned by parent before native launch."
+}

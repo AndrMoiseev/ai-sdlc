@@ -1,0 +1,14 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "verdict": "pass",
+      "status": "committing"
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 16
+    }
+  }
+}

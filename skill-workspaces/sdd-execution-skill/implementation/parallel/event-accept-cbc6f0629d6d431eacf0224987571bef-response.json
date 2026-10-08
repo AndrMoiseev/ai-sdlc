@@ -1,0 +1,14 @@
+﻿{
+  "ok": true,
+  "result": {
+    "event_result": {
+      "status": "accepted",
+      "sha": "4252002de7f6c04dab478c8b1bc89c2071f0e702"
+    },
+    "view": {
+      "dashboard": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\dashboard.html",
+      "summary": "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution\\summary.md",
+      "revision": 60
+    }
+  }
+}

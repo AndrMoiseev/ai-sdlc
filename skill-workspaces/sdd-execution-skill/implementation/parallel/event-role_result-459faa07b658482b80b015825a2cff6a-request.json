@@ -1,0 +1,28 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "role_id":  "verify_add",
+                                               "result":  {
+                                                              "status":  "DONE",
+                                                              "independent":  "5 tests passed",
+                                                              "integration":  "5 tests passed",
+                                                              "criteria":  [
+                                                                               "AC-add",
+                                                                               "AC-invalid"
+                                                                           ],
+                                                              "report":  "integration-add.json"
+                                                          },
+                                               "trace":  "Native /root/parallel_eval/verify_add final completion; actual evidence dab2c95513854a13a8245846bc282a35.json"
+                                           },
+                               "expected_revision":  46,
+                               "task_id":  "TASK-add",
+                               "type":  "role_result",
+                               "event_id":  "459faa07b658482b80b015825a2cff6a",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

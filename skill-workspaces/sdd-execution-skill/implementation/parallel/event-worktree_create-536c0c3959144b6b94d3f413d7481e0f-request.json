@@ -1,0 +1,20 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+                                               "resources":  [
+                                                                 "scratch-TASK-alternate"
+                                                             ],
+                                               "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-parallel-worktrees"
+                                           },
+                               "expected_revision":  2,
+                               "task_id":  "TASK-alternate",
+                               "type":  "worktree_create",
+                               "event_id":  "536c0c3959144b6b94d3f413d7481e0f",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

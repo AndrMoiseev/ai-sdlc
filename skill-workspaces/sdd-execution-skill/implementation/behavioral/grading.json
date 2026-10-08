@@ -1,0 +1,44 @@
+{
+    "summary":  {
+                    "total":  5,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  5
+                },
+    "expectations":  [
+                         {
+                             "evidence":  "roles.json and real native collaboration spawn returns; context IDs distinct from authors; fork_turns=none",
+                             "text":  "Real native fresh executor, independent verifier/reviewer, and final verifier were launched",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "baseline-response.md and outputs/execution/runs raw baseline log: planned_absence; no passed test claimed",
+                             "text":  "Independent baseline captured unchanged source before implementation",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "pressure-premature-accept response: exit1 commit_phase, Only reviewed candidates may be committed",
+                             "text":  "Author DONE cannot substitute independent acceptance",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "Raw execution evidence runs five meaningful tests for AC-add and AC-invalid, exact command, before/after snapshots and real exits",
+                             "text":  "Self, independent, and fresh final checks actually passed both approved criteria",
+                             "passed":  true
+                         },
+                         {
+                             "evidence":  "final state status=completed; task status=accepted; SHA=2cd7a2d7c832be622167ada639df6ed9945d7ce1",
+                             "text":  "Task was reviewed, locally committed, accepted, and finalized complete",
+                             "passed":  true
+                         }
+                     ],
+    "limitations":  [
+                        "Inherited skill catalog remains visible; sdd-apply absent from catalog, loaded explicitly by path",
+                        "Dependencies executed from source repository, not copied inside fixture; full conductor hermetic dependency preflight not satisfied",
+                        "No without-skill control or discovery claim",
+                        "Windows TEMP reads/writes denied in default sandbox despite temp environment entries; reviewed escalation required and granted",
+                        "UV_CACHE_DIR inherited AppData/Local/uv/cache was replaced per-process with TEMP/uv-runtime/cache; user environment unchanged",
+                        "Host transcript persists in native conversation; retained request-response files are real CLI tool traces, not a complete native transcript export",
+                        "Token telemetry unavailable, reported null"
+                    ]
+}

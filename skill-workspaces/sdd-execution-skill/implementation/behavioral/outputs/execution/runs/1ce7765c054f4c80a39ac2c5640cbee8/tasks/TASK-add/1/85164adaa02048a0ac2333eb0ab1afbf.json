@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "change_id": "add",
+  "run_id": "1ce7765c054f4c80a39ac2c5640cbee8",
+  "task_id": "TASK-add",
+  "role_id": "baseline",
+  "stage": "baseline",
+  "candidate": null,
+  "before": {
+    "files": {
+      "calculator.py": {
+        "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+        "executable": false
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+        "executable": false
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+        "executable": false
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+        "executable": false
+      }
+    },
+    "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+  },
+  "after": {
+    "files": {
+      "calculator.py": {
+        "sha256": "808fa4f4a62373f15aaf326d0be71bc19d7cfd014eb76ebfa8813182cfb1b4fd",
+        "executable": false
+      },
+      "sdd/changes/add/design.md": {
+        "sha256": "ed91d05dea8f59a6303dad4330487588fae60ec65701f8791a40587cc136c7dc",
+        "executable": false
+      },
+      "sdd/changes/add/proposal.md": {
+        "sha256": "8391ce303b9f9a6c38b22aee344378fe1526b71223d39992f6e70d520ad44b44",
+        "executable": false
+      },
+      "sdd/changes/add/review/decisions.md": {
+        "sha256": "36bcce7e7a38172c7f5b3013d95d5a3f6237bfcfb108d3dbc35c87b697951932",
+        "executable": false
+      },
+      "sdd/changes/add/specs/calculator/spec.md": {
+        "sha256": "e75b8bba6d94dd38f694e4b6fcd5bf68544040b5657db31dcaca1a91112e4c52",
+        "executable": false
+      },
+      "sdd/changes/add/state.md": {
+        "sha256": "b4cdb5480a6d3eeb41a7383133cd36ec055a6bed5463be1510320dfe0129e672",
+        "executable": false
+      },
+      "sdd/changes/add/tasks.md": {
+        "sha256": "d8df2c809188675ff6b8d03486ac2e17fdcbe203b8945e913c29a5988d3e1c89",
+        "executable": false
+      }
+    },
+    "digest": "e1450054d65dc88e44bc9f30bda76098adbedad30330f3dae5bcc4f90fc0f0cd"
+  },
+  "outputs": [
+    {
+      "check_id": "plan-1",
+      "outcome": "planned_absence",
+      "description": "Create check.py as a PEP 723 standard-library entry point plus uv lockfile. Run uv run --locked --script check.py; assert finite numeric addition and reject invalid inputs and overflow."
+    }
+  ]
+}

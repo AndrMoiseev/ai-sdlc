@@ -1,0 +1,25 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/behavioral_eval",
+                               "payload":  {
+                                               "role_id":  "reviewer",
+                                               "kind":  "reviewer",
+                                               "context_id":  "/root/behavioral_eval/verify_review",
+                                               "fresh":  true,
+                                               "host":  "codex",
+                                               "launch_ref":  "same actual native collaboration.spawn_agent task_name=verify_review fork_turns=none returned /root/behavioral_eval/verify_review; second permitted independent role",
+                                               "capabilities":  {
+                                                                    "fresh_context":  true
+                                                                }
+                                           },
+                               "expected_revision":  12,
+                               "task_id":  "TASK-add",
+                               "type":  "role_register",
+                               "event_id":  "dbfe9a0216554ebf9c5fc817d3b6c0e6",
+                               "run_id":  "1ce7765c054f4c80a39ac2c5640cbee8"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-native-754imw39\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}

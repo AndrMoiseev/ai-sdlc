@@ -1,0 +1,17 @@
+﻿{
+    "args":  {
+                 "event":  {
+                               "owner":  "/root/parallel_eval",
+                               "payload":  {
+
+                                           },
+                               "expected_revision":  50,
+                               "task_id":  "TASK-alternate",
+                               "type":  "integrate",
+                               "event_id":  "f0b505b9a7264e62984385f454ce18ae",
+                               "run_id":  "c0d2875802aa4e91a5628c5251981565"
+                           },
+                 "directory":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-apply-parallel-0bzu0k6o\\project\\sdd\\changes\\add\\execution"
+             },
+    "operation":  "event"
+}
