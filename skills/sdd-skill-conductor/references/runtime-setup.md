@@ -4,6 +4,8 @@ Read before running scripts or evaluations. Resolve `<skill-root>` from the load
 
 ## Choose the execution path
 
+If the current agent is neither Codex nor Claude Code, or the host is unknown, start with the [arbitrary agent path](generic.md). The CLI choices below describe the bundled runner, not an exhaustive list of agents that can follow this skill.
+
 1. Prefer the current harness's native subagents for behavior runs, grading, and analysis when they support fresh context and the required workspace isolation. Native Codex and Claude Code agents use their host session; a missing CLI or API key does not block this path.
 2. Use the CLI adapter when native subagents are unavailable or cannot provide a clean run. `run_task.py` runs behavior prompts; `run_eval.py` measures discovery; `improve_description.py` and `run_loop.py` optimize descriptions. All accept `--harness auto|codex|claude-code`.
 3. If neither path works, report the specific unavailable capability. Continue local structural checks and provide runnable manual scenarios; do not substitute the author's current conversation for an independent baseline.

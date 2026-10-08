@@ -10,7 +10,7 @@ Use only on explicit invocation. Keep normative SDD documents unchanged.
 
 ## Route
 
-1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md) or [Claude Code](agents/claude-code.md).
+1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md), [Claude Code](agents/claude-code.md), or [arbitrary agent](agents/generic.md) when neither host is established.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
 3. Select one mode from verified state and the current user's authorization. Default to `sequential`. Select `parallel` only with an explicit scoped request and available isolation. If isolation is unavailable, select `sequential` before loading a mode flow and explain why.
 4. Load only [execute-sequential](flows/execute-sequential.md) or [execute-parallel](flows/execute-parallel.md). Keep the other flow unloaded.

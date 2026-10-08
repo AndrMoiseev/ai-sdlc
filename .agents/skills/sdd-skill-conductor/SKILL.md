@@ -25,8 +25,10 @@ Before execution, follow [runtime-setup.md](references/runtime-setup.md) for the
 exact command and storage requirements. uv installs missing dependencies on run.
 If execution fails, report the actual missing tool, network or filesystem access.
 
-Prefer clean native subagents in the current harness (Codex or Claude Code);
-use the matching CLI when native execution cannot provide the required isolation.
+Prefer clean native subagents when the current harness provides the required isolation;
+use the matching supported CLI when native execution cannot provide it. If the current
+agent is neither Codex nor Claude Code, or its host is unknown, follow the
+[arbitrary agent path](references/generic.md).
 
 ## Package runtime requirements
 
