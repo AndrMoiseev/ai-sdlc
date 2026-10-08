@@ -85,6 +85,26 @@ def required_lenses(project_root: Path) -> list[str]:
     return result
 
 
+def _questions(document, root, questions, *, legacy=False):
+    for question in document.records:
+        fields(question, {"sdd_record", "id", "text", "blocking", "status"}, {"reason", "return_at", "resolution"})
+        require(question["sdd_record"] == "question" and valid_id(question["id"], "Q"), "Invalid question record")
+        if question["id"] in questions:
+            raise ValidationError("duplicate_question", f'Duplicate question ID across discussion files: {question["id"]}', document.path, question["id"])
+        require(text(question["text"]) and type(question["blocking"]) is bool and question["status"] in {"open", "resolved"}, "Invalid question fields")
+        if question["status"] == "open" and not question["blocking"]:
+            require(text(question.get("reason")) and text(question.get("return_at")), "Deferred question needs reason and return_at")
+        if not legacy and question["status"] == "resolved":
+            require(text(question.get("resolution")), "Resolved question needs a resolution reference")
+        if "resolution" in question:
+            require(text(question["resolution"]), "Resolution reference must be text")
+            require("\0" not in question["resolution"], "Resolution reference must not contain NUL")
+            target, separator, fragment = question["resolution"].partition("#")
+            require(not separator or text(fragment), "Resolution fragment must be nonempty")
+            contained(root, target, must_exist=True)
+        questions[question["id"]] = question
+
+
 def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     require(stage in STAGES, "Unknown review stage")
     root = Path(change_root)
@@ -250,10 +270,24 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
                 work[ident] = {**record["scope"], "findings": remaining}
             else:
                 del work[ident]
-    state = contained(root, "state.md")
-    if state.exists():
-        try:
+    questions, discussion_valid = {}, True
+    questions_path = root / "questions.md"
+    try:
+        questions_path = contained(root, "questions.md")
+        if questions_path.exists():
+            discussion = read_document(questions_path)
+            fields(discussion.meta, COMMON)
+            identity(discussion.meta, "questions", root.name)
+            _questions(discussion, root, questions)
+    except (ValidationError, TypeError, KeyError, OSError) as exc:
+        discussion_valid = False
+        errors.append({"code": "questions_structure", "path": str(questions_path), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
+    state = root / "state.md"
+    try:
+        state = contained(root, "state.md")
+        if state.exists():
             checkpoint = read_document(state)
+            _questions(checkpoint, root, questions, legacy=True)
             identity(checkpoint.meta, "state", root.name)
             fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language"})
             require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
@@ -266,17 +300,17 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
                     contained(root, link, must_exist=True)
             require(strings(checkpoint.meta.get("approval_refs", [])), "approval_refs must be a list")
             require(all(i in users for i in checkpoint.meta.get("approval_refs", [])), "State refers to missing USER decision")
-            for question in checkpoint.records:
-                fields(question, {"sdd_record", "id", "text", "blocking", "status"}, {"reason", "return_at"})
-                require(question["sdd_record"] == "question" and valid_id(question["id"], "Q"), "Invalid question record")
-                require(text(question["text"]) and type(question["blocking"]) is bool and question["status"] in {"open", "resolved"}, "Invalid question fields")
-                if question["status"] == "open" and not question["blocking"]:
-                    require(text(question.get("reason")) and text(question.get("return_at")), "Deferred question needs reason and return_at")
-        except (ValidationError, TypeError, KeyError) as exc:
-            warnings.append({"code": "state_recovery", "path": str(state), "element_id": None, "message": str(exc)})
-    else:
-        warnings.append({"code": "state_recovery", "path": str(state), "element_id": None, "message": "State is missing; recover a draft checkpoint without inferring approvals."})
-    return {"errors": errors, "warnings": warnings, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and complete and not unresolved and not unfinished and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
+        else:
+            # Legacy bundles may have valid approval evidence without a checkpoint.
+            warnings.append({"code": "state_recovery", "path": str(state), "element_id": None, "message": "State is missing; recover a draft checkpoint without inferring approvals."})
+    except (ValidationError, TypeError, KeyError, OSError) as exc:
+        discussion_valid = False
+        duplicate = getattr(exc, "code", None) == "duplicate_question"
+        (errors if duplicate else warnings).append({"code": "duplicate_question" if duplicate else "state_recovery", "path": str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
+    open_questions = sorted(i for i, question in questions.items() if question["status"] == "open")
+    blocking_questions = [i for i in open_questions if questions[i]["blocking"]]
+    discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not blocking_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}
+    return {"errors": errors, "warnings": warnings, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and complete and discussion_status["complete"] and not unresolved and not unfinished and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
 
 
 def _validate_user(record, root, findings):
@@ -324,5 +358,3 @@ def _validate_user(record, root, findings):
             completed.add(completion["finding"])
     else:
         require(not set(record) & {"action", "reason", "return_at", "completion"}, "Disposition fields on unrelated authorization")
-
-

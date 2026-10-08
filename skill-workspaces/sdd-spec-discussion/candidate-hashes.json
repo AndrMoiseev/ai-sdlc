@@ -1,0 +1,278 @@
+﻿[
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\.gitignore",
+        "Hash":  "B0B18F5BF7184F205A45032E7A3034FFFC852F9C6AD28AE26BB839E2893B5DDD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\pyproject.toml",
+        "Hash":  "8C67DB5BE703D85FEA7D7046E8E54094FFF6C12C40683795B71029C16C7656D8"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\README.md",
+        "Hash":  "83F155F024974F42DB1687C12819649CF1B7F0BF17D3F6128764C183162085CB"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\SKILL.md",
+        "Hash":  "8A5CF51831890E79A89BEDF18CC575B9A2EC6B5B159AB21D034490DA2396C246"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\agents\\openai.yaml",
+        "Hash":  "DB27A4783BF0805AB392CCADF8D58475F5E517B9C136EFEFF659C687D9D77E4A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\evals\\evals.json",
+        "Hash":  "1EEDDDD207DA17C6A50E1F8EA3D7F3228F6B4618F29BD4D2379CB71DE96684A8"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\evals\\manual.md",
+        "Hash":  "7602BE675400FF1C258D49D12B957BF4B8B693B5215021FE9789B7060BE30972"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\draft.md",
+        "Hash":  "791AE269D67FF9F35C1CE6AF3BD60AF6C171A224EE74B47BBF1610FFD1A09B87"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\explain.md",
+        "Hash":  "5FBDA38A80E806E7CE3097819A41EBE164A48A4BA43EE03329ACAA4AF5D76CFB"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\explore.md",
+        "Hash":  "22A9F74D12D874AF8CF41E6A92D1D33453081EFF606EF5686CAA4636217DA950"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\plan.md",
+        "Hash":  "F3FCA3913B0BA9573375215FF096E50DF26B1AF72E699BE0ECB8CC49515BA373"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\resume.md",
+        "Hash":  "F404F305E16553BA2C804DC4835BB51F1E7D4E50D84BA02D9417F321354AFB32"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\review.md",
+        "Hash":  "EB4A700DA1B6694E770D522AF9A1576028B1F60124F20935EAA338FE1E2C1A91"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\revise.md",
+        "Hash":  "0246BE9A41061C2E172CD21707E7C695B276B73436F6804D7358908A45A96C90"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\flows\\user-review.md",
+        "Hash":  "F85A66B2087DFC88FD7214478E0FFC96841913ED92FD617D8F94F297F5D2C07C"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\claude-code.md",
+        "Hash":  "D315EC196429C09CF26156566B35F3E67BC5E26DDA7FE3E5E8149E63DF920025"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\codex.md",
+        "Hash":  "4107C78D518EC3719E43640845952ADCA4EECB9FEAAB392CE87C056AC541A8A4"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\consistency.md",
+        "Hash":  "3AA2A5447A9B344F7965DB7F6509812FC6BA10196CA295230307BB4F2308DA71"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\discussion.md",
+        "Hash":  "EF60ADB4C95E45625E0FFE28226BFDA64BC3CAB6F7707E24687C6252B1DF32C3"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\document-format.md",
+        "Hash":  "0BBD6832652EF6A5DAB83CCC00AF962609D11CEB666B9D76B3D8C5C6E5B3DE24"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\editorial-pass.md",
+        "Hash":  "4ED54ABB20170639A80FA262B1409C52A06FE23772F06D9DFDA3990EE3E2EB37"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\explanation.md",
+        "Hash":  "17E422A2128FE1D65BBA2ED27CBCC51B30634EADCBD2A423263E6A479323597C"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\generic.md",
+        "Hash":  "8318ED816A119FC57E818CF80C2692911B75690C9D7616059568E33A00B5AED0"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\openspec-origin.md",
+        "Hash":  "E09CF14CEB4F631930E596D6AD8F76BB338A38E31506F208385B9B3F949375CD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\premortem.md",
+        "Hash":  "463237B1B96815C07BA9DD47440356AA9B5FDC470626C2964041928A9635AFFD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\reviewer-documents.md",
+        "Hash":  "C7561EE0E51C6D089BDB627C3EF7448CFD239E10E264F98870DD1AC51FED60CB"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\reviewer-plan.md",
+        "Hash":  "AF07257E416E4403B0146A849754C520635A28BDF4EDDE854220A2B95B906DBF"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\references\\runtime-setup.md",
+        "Hash":  "B61416CF2917D575199F2B203CFEB70DE107D30E2D57ACCF609B10B17F170EBA"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\check.py",
+        "Hash":  "157AF3813F6BAFEF9724D7B905348F42E300E145874193CEEF9CF4485474875E"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\check.py.lock",
+        "Hash":  "8422FA7A6ECCAB5207463B53515E33BB333EEA1B70E3FE9E9E383949977AD984"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\snapshot.py",
+        "Hash":  "689204A4CD8804A51E18F139A399E617140077D10733ACB4C7ED3D9AA850BF5A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\snapshot.py.lock",
+        "Hash":  "8422FA7A6ECCAB5207463B53515E33BB333EEA1B70E3FE9E9E383949977AD984"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\test.py",
+        "Hash":  "614EF1AF831D8DA6ADBDEB397856307A87B284103A781693D64310A3F15C38DD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\test.py.lock",
+        "Hash":  "F5BEFB4B44FE4CFD364E98CB14D2E0AA610694134B4D4EB0B0AA9893A57DCB06"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\documents.py",
+        "Hash":  "B3FA1F3CAC56DFF5F234E8EB09ED83BFEA556938F8219510383E830094816550"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\paths.py",
+        "Hash":  "1E5FCD4492FFD77F77232570876F12DC9DE661A35F6E6F9DBF6CB9475094CD8A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\reviews.py",
+        "Hash":  "D6533AD95C549CC2CF33940317B55EC993EDEE4FC1B3428F52061656AE51CDB9"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\snapshots.py",
+        "Hash":  "8CEA65570376DDADEC908E792D1E4234A9CA5FC32D2FD1C1ABDEC0B2BBEBA9AE"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\validation.py",
+        "Hash":  "98F6EB474759CD5F239F2E512F4A5BD340DEEB9816119F7BE51A598A28207AB5"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\scripts\\lib\\__init__.py",
+        "Hash":  "BF8E342533875AF6DFA4B90164D39AFF4A63E2B6EFFF8D716757EF0324312E3A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\decisions.md",
+        "Hash":  "767674954DB0AE0B6A721152F5EE47DD2D53D23820A37F28DADBBD04DE225C6C"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\design.md",
+        "Hash":  "2F34CDA87C62E20D18D00292C89A67239C168D14759E57CDD20DDFAC8845F4B0"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\discussion-decisions.md",
+        "Hash":  "69E2076C753F77B1CA5F857EA908F52FAE1714FA8DD263F52D573FFE0718A1A0"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\explanation.md",
+        "Hash":  "36ADF2B9EEC634285C5E73AA9933526A5B85B1DA18A4547983A6CEA9C5342808"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\lens-index.md",
+        "Hash":  "9960A72DEF2967A4607EFD50F4D2B9FCF4447309CEF53CE8CAB9311B7E350AE0"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\premortem.md",
+        "Hash":  "42455A1D4E030DF82536406A48B1D8CBDDDAA007BC6193601B9FF8892E61CA04"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\preview-handoff.md",
+        "Hash":  "AA585CBEF9961DB4AEAC38B4100DC86023652AA7CAF65FBBC68E7291A79431BE"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\proposal.md",
+        "Hash":  "742A700E5F58B79BED894D2F24427BCB394170F52A639F0920CF7CD5F8689399"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\questions.md",
+        "Hash":  "E111EC7ECE117C538FE9FB510AE036012F0763A81E17D2D1C4EC463BA6630A5D"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\review-report.md",
+        "Hash":  "DFDFBA807F3A77AEDCCA8CCBCE9FC982DFC5490A0390F48B3E76034A51ED0944"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\review-summary.md",
+        "Hash":  "DAD47EB9ACB8B398439B973C8CEC2F96E1521EB2EEA4C32607774B71E557B4CC"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\spec.md",
+        "Hash":  "756EE7A48946D37C8734761F5F45DFC2EF874FBF12B321A4E81E110C82974DF2"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\state.md",
+        "Hash":  "584FCBAB03CE8A45D158590ED91D9CA171BF24D41E06A3D90429A361C2D868D9"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\templates\\tasks.md",
+        "Hash":  "A9F53F1612052EB85C87E8E2B8A4FDB4764BB2F254BB9707036E8C962EA1AE80"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\conftest.py",
+        "Hash":  "3945BB7D71BC71F9828A72E648379981EC83522919F59B58D4E27084989B8D71"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_authorizations.py",
+        "Hash":  "469745CA63D36864EA6204F5FE9CCCB74CE21548622C52CBDF47AE5E56B2DB84"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_check_command.py",
+        "Hash":  "75D448068B39371457CC6BE163E9C3DCA4CAF9BC50BD392491539B821AD8B34B"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_document_records.py",
+        "Hash":  "C3C2EA52ED53DB08EC45C6BCBF7A75411E5FCB24A20CE69F6F93BBC1C94C6468"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_lens_index.py",
+        "Hash":  "CD4921A9C4EF1A70A1B26F87CCECDA398100D0B3C72011B52D15C36AA6678D00"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_package_contract.py",
+        "Hash":  "FBE5EC56029564EF105562DCFDF666D65BB9AAE0DF5CCF1DD395D87F61FDAEB4"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_questions.py",
+        "Hash":  "DBB4F14876B153C119014F3255E4B3787D335CE978C6810DCCC8823B4636A129"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_review_records.py",
+        "Hash":  "F99ECA1B3E1CBF7E3CE22EFEB698EAC8B7DDD7D85BC154252D415BC38C1CD858"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_runtime.py",
+        "Hash":  "0F5CB0DB86F836CFA6CC1FAE1E797D64AEAD6FB58F704920705C54603DFA0E2C"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_snapshots.py",
+        "Hash":  "FB11FCF88683FA60A81CE4496453E09C3AB125E1DDCE4DAC28234D4CEEF78E38"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_task_coverage.py",
+        "Hash":  "0DCD1A0E30A1CDD5B72D1EB76390BE1CABF267D52FDB1F48130B72A5561AA975"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_task_graph.py",
+        "Hash":  "A6FA5E2DC181C9AFA9310B0E9C588630093D4C8289C8B1B5AD7B1E66BF59571B"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_task_verification.py",
+        "Hash":  "3ED5D15BF9C49312D6109675031ECA8789A63FEB6B141112CF126F7F5C41092F"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_template_contract.py",
+        "Hash":  "832F93035EF3C444910C4157184E5EAE399C0C6C76A234686EE13A0251E6CBA6"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\new_skill\\sdd-spec\\tests\\test_traceability.py",
+        "Hash":  "B6036CB41B4E1BE6826020DA54A9552ECF5A610B042262A212078F0FBC4D02BC"
+    }
+]

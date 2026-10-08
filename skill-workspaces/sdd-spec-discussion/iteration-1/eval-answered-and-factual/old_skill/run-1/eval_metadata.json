@@ -1,0 +1,6 @@
+{
+    "eval_id":  "answered-and-factual",
+    "scope":  "Read-only conversational behavior; host supplies complete existing context; no artifact-writing claims",
+    "prompt":  "$sdd-spec, продолжаем automation-runner. Из sources.md достоверно: платформа Windows, Git установлен, проект использует pytest. Мои подтвержденные ответы: «По умолчанию последовательно», «Результат — коммиты», «При падении тестов остановиться, ничего автоматически не чинить». Это всё уже записано в design и state. Осталась одна отмеченная альтернатива агента: отдельная ветка для каждой задачи или одна на весь план; я ещё не выбирал. Скажи, что делаем дальше; пожалуйста, не заставляй меня ещё раз пересказывать окружение.",
+    "eval_name":  "answered-and-factual"
+}

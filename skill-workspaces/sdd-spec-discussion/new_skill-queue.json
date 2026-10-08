@@ -1,0 +1,58 @@
+﻿[
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-1",
+        "name":  "draft-pressure-new_skill-1",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-1-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-1-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-draft-pressure\\new_skill\\run-1"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-2",
+        "name":  "draft-pressure-new_skill-2",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-2-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-2-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-draft-pressure\\new_skill\\run-2"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-3",
+        "name":  "draft-pressure-new_skill-3",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-3-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-3-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-draft-pressure\\new_skill\\run-3"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-4",
+        "name":  "draft-pressure-new_skill-4",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-4-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-4-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-draft-pressure\\new_skill\\run-4"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\draft-pressure-new_skill-5",
+        "name":  "draft-pressure-new_skill-5",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-5-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\draft-pressure-new_skill-5-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-draft-pressure\\new_skill\\run-5"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\resume-pending-new_skill-1",
+        "name":  "resume-pending-new_skill-1",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\resume-pending-new_skill-1-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\resume-pending-new_skill-1-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-resume-pending\\new_skill\\run-1"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\answered-and-factual-new_skill-1",
+        "name":  "answered-and-factual-new_skill-1",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\answered-and-factual-new_skill-1-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\answered-and-factual-new_skill-1-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-answered-and-factual\\new_skill\\run-1"
+    },
+    {
+        "workspace":  "C:\\Users\\Andrew\\AppData\\Local\\Temp\\sdd-spec-discussion-cc67e0e2b52b43eca34a198ec548c8f8-runs-utf8\\routine-edit-new_skill-1",
+        "name":  "routine-edit-new_skill-1",
+        "prompt":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\routine-edit-new_skill-1-prompt.txt",
+        "manifest":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\routine-edit-new_skill-1-manifest.json",
+        "output":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skill-workspaces\\sdd-spec-discussion\\iteration-1\\eval-routine-edit\\new_skill\\run-1"
+    }
+]

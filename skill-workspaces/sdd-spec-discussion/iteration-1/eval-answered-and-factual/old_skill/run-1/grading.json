@@ -1,0 +1,27 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Asks about branch arrangement, the remaining substantive choice, without selecting it for the user.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md asks the user to choose one branch for the plan versus separate branches, while identifying its recommendation as unaccepted.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Does not re-ask stated platform, test framework, sequential mode, commits, or stop-on-test-failure decisions.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md reuses the supplied Windows/Git/pytest facts and three accepted decisions; it does not ask the user to reconfirm them.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  2,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  2
+                },
+    "failing":  [
+
+                ],
+    "grading_method":  "Manual reading of each response; predeclared assertions; evaluator is separate from skill author, not blind to variant",
+    "scope":  "Conversational behavior and proposed records, not executed file writes or full end-to-end SDD"
+}

@@ -1,0 +1,961 @@
+{
+    "metadata":  {
+                     "skill_name":  "sdd-spec",
+                     "skill_path":  "new_skill/sdd-spec (frozen snapshot)",
+                     "executor_model":  null,
+                     "analyzer_model":  null,
+                     "timestamp":  "2026-10-08T12:49:27Z",
+                     "evals_run":  [
+                                       "answered-and-factual",
+                                       "draft-pressure",
+                                       "resume-pending",
+                                       "routine-edit"
+                                   ],
+                     "runs_per_configuration":  8,
+                     "repetition_counts_per_variant":  {
+                                                           "routine-edit":  1,
+                                                           "draft-pressure":  5,
+                                                           "answered-and-factual":  1,
+                                                           "resume-pending":  1
+                                                       },
+                     "model_note":  "Configured Codex CLI default; model ID not reported by runner. No model override."
+                 },
+    "runs":  [
+                 {
+                     "eval_id":  "answered-and-factual",
+                     "configuration":  "new_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  2,
+                                    "failed":  0,
+                                    "total":  2,
+                                    "time_seconds":  80.161,
+                                    "tokens":  440295,
+                                    "tool_calls":  17,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Asks about branch arrangement, the remaining substantive choice, without selecting it for the user.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks the user to choose one branch for the plan versus separate branches, while identifying its recommendation as unaccepted.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not re-ask stated platform, test framework, sequential mode, commits, or stop-on-test-failure decisions.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md reuses the supplied Windows/Git/pytest facts and three accepted decisions; it does not ask the user to reconfirm them.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "new_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  165.285,
+                                    "tokens":  521163,
+                                    "tool_calls":  25,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Где должна заканчиваться автономная работа первой версии?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "new_skill",
+                     "run_number":  2,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  153.51,
+                                    "tokens":  267989,
+                                    "tool_calls":  18,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Где для вас заканчивается успешный запуск: проверенные изменения и готовый PR, слияние в основную ветку или работающий деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "new_skill",
+                     "run_number":  3,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  161.791,
+                                    "tokens":  477823,
+                                    "tool_calls":  29,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Один ближайший вопрос: где заканчивается работа automation-runner — проверенным PR, выполненным merge или развёрнутым и проверенным релизом?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "new_skill",
+                     "run_number":  4,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  146.109,
+                                    "tokens":  426598,
+                                    "tool_calls":  16,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **На каком результате должна заканчиваться работа скилла: проверенный PR, изменения в основной ветке или работающий деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "new_skill",
+                     "run_number":  5,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  5,
+                                    "failed":  0,
+                                    "total":  5,
+                                    "time_seconds":  164.155,
+                                    "tokens":  553743,
+                                    "tool_calls":  28,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Что считать результатом по умолчанию: проверенный PR, уже слитое изменение или задеплоенный релиз?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md provides decisions.md entries separating proposal author and person accepting the decision, with evidence and statuses. Only the quoted autonomy decision is accepted; the assistant proposals have no accepting user.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "resume-pending",
+                     "configuration":  "new_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  3,
+                                    "failed":  0,
+                                    "total":  3,
+                                    "time_seconds":  86.427,
+                                    "tokens":  312155,
+                                    "tool_calls":  8,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Resumes Q-2 failure handling with an actual question rather than restarting discovery or review.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks the actual Q-2 stop-versus-bounded-repair question and recommends one alternative without accepting it.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Preserves already accepted sequential mode and commits without asking them again.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md preserves the quoted sequential execution and commits choices; neither is reopened.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Keeps deferred dashboard question available and does not treat an existing draft as approved.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md leaves dashboard Q-3 deferred until design approval and explicitly distinguishes missing document approval and planning command.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "routine-edit",
+                     "configuration":  "new_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  1,
+                                    "failed":  0,
+                                    "total":  1,
+                                    "time_seconds":  32.851,
+                                    "tokens":  203166,
+                                    "tool_calls":  13,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Provides the requested typo correction without requiring a substantive interview or renewed approval.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies the exact requested typo correction, preserves the existing decision, and asks no substantive question or new permission.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "answered-and-factual",
+                     "configuration":  "old_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  2,
+                                    "failed":  0,
+                                    "total":  2,
+                                    "time_seconds":  59.407,
+                                    "tokens":  205126,
+                                    "tool_calls":  5,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Asks about branch arrangement, the remaining substantive choice, without selecting it for the user.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks the user to choose one branch for the plan versus separate branches, while identifying its recommendation as unaccepted.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not re-ask stated platform, test framework, sequential mode, commits, or stop-on-test-failure decisions.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md reuses the supplied Windows/Git/pytest facts and three accepted decisions; it does not ask the user to reconfirm them.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "old_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  0.8,
+                                    "passed":  4,
+                                    "failed":  1,
+                                    "total":  5,
+                                    "time_seconds":  110.148,
+                                    "tokens":  382426,
+                                    "tool_calls":  22,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Что для первой версии означает «довести до результата»: готовый PR с пройденными проверками, слияние в целевую ветку или проверенный деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md records assumptions and the autonomy quote in state.md prose, but supplies no durable decision journal with separate proposer and accepting-user fields. This misses the requested provenance contract even though immediate conversational clarification works.",
+                                              "passed":  false
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "old_skill",
+                     "run_number":  2,
+                     "result":  {
+                                    "pass_rate":  0.8,
+                                    "passed":  4,
+                                    "failed":  1,
+                                    "total":  5,
+                                    "time_seconds":  116.041,
+                                    "tokens":  368000,
+                                    "tool_calls":  17,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Где для вас заканчивается работа automation-runner: готовый PR, изменения в основной ветке или развёрнутый и проверенный релиз?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md records assumptions and the autonomy quote in state.md prose, but supplies no durable decision journal with separate proposer and accepting-user fields. This misses the requested provenance contract even though immediate conversational clarification works.",
+                                              "passed":  false
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "old_skill",
+                     "run_number":  3,
+                     "result":  {
+                                    "pass_rate":  0.8,
+                                    "passed":  4,
+                                    "failed":  1,
+                                    "total":  5,
+                                    "time_seconds":  120.573,
+                                    "tokens":  322370,
+                                    "tool_calls":  13,
+                                    "errors":  1
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Где для вас заканчивается выполнение: готовый PR, изменения в основной ветке или успешный деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md records assumptions and the autonomy quote in state.md prose, but supplies no durable decision journal with separate proposer and accepting-user fields. This misses the requested provenance contract even though immediate conversational clarification works.",
+                                              "passed":  false
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "old_skill",
+                     "run_number":  4,
+                     "result":  {
+                                    "pass_rate":  0.8,
+                                    "passed":  4,
+                                    "failed":  1,
+                                    "total":  5,
+                                    "time_seconds":  111.624,
+                                    "tokens":  265931,
+                                    "tool_calls":  14,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **где агент должен считать план выполненным: готовая ветка/PR с пройденными проверками, merge в основную ветку или проверенный деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md records assumptions and the autonomy quote in state.md prose, but supplies no durable decision journal with separate proposer and accepting-user fields. This misses the requested provenance contract even though immediate conversational clarification works.",
+                                              "passed":  false
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "draft-pressure",
+                     "configuration":  "old_skill",
+                     "run_number":  5,
+                     "result":  {
+                                    "pass_rate":  0.8,
+                                    "passed":  4,
+                                    "failed":  1,
+                                    "total":  5,
+                                    "time_seconds":  115.991,
+                                    "tokens":  427637,
+                                    "tool_calls":  18,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md identifies all three draft choices (parallel worktrees, deployment, unlimited retries) as unapproved assumptions or proposals; the broad autonomy answer remains the only accepted scope decision.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks a concrete result-boundary question: **Что считать завершением работы первой версии: проверенный PR, изменения в основной ветке или работающий деплой?**",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md records assumptions and the autonomy quote in state.md prose, but supplies no durable decision journal with separate proposer and accepting-user fields. This misses the requested provenance contract even though immediate conversational clarification works.",
+                                              "passed":  false
+                                          },
+                                          {
+                                              "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies separate open blocking question records for completion result, execution mode and failure handling; the later choices remain queued after the first question.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Does not claim files were written in this read-only response.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md explicitly states that files were not written and frames entries as proposed content for the external host.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "resume-pending",
+                     "configuration":  "old_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  3,
+                                    "failed":  0,
+                                    "total":  3,
+                                    "time_seconds":  56.853,
+                                    "tokens":  201826,
+                                    "tool_calls":  11,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Resumes Q-2 failure handling with an actual question rather than restarting discovery or review.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md asks the actual Q-2 stop-versus-bounded-repair question and recommends one alternative without accepting it.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Preserves already accepted sequential mode and commits without asking them again.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md preserves the quoted sequential execution and commits choices; neither is reopened.",
+                                              "passed":  true
+                                          },
+                                          {
+                                              "text":  "Keeps deferred dashboard question available and does not treat an existing draft as approved.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md leaves dashboard Q-3 deferred until design approval and explicitly distinguishes missing document approval and planning command.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 },
+                 {
+                     "eval_id":  "routine-edit",
+                     "configuration":  "old_skill",
+                     "run_number":  1,
+                     "result":  {
+                                    "pass_rate":  1,
+                                    "passed":  1,
+                                    "failed":  0,
+                                    "total":  1,
+                                    "time_seconds":  63.293,
+                                    "tokens":  300401,
+                                    "tool_calls":  14,
+                                    "errors":  0
+                                },
+                     "expectations":  [
+                                          {
+                                              "text":  "Provides the requested typo correction without requiring a substantive interview or renewed approval.",
+                                              "dimension":  "Robustness",
+                                              "evidence":  "response.md supplies the exact requested typo correction, preserves the existing decision, and asks no substantive question or new permission.",
+                                              "passed":  true
+                                          }
+                                      ],
+                     "notes":  [
+
+                               ]
+                 }
+             ],
+    "run_summary":  {
+                        "new_skill":  {
+                                          "pass_rate":  {
+                                                            "mean":  1.0,
+                                                            "stddev":  0.0,
+                                                            "min":  1,
+                                                            "max":  1,
+                                                            "n":  8
+                                                        },
+                                          "time_seconds":  {
+                                                               "mean":  123.7861,
+                                                               "stddev":  50.3503,
+                                                               "min":  32.851,
+                                                               "max":  165.285,
+                                                               "n":  8
+                                                           },
+                                          "tokens":  {
+                                                         "mean":  400366.5,
+                                                         "stddev":  125693.0159,
+                                                         "min":  203166,
+                                                         "max":  553743,
+                                                         "n":  8
+                                                     }
+                                      },
+                        "old_skill":  {
+                                          "pass_rate":  {
+                                                            "mean":  0.875,
+                                                            "stddev":  0.1035,
+                                                            "min":  0.8,
+                                                            "max":  1,
+                                                            "n":  8
+                                                        },
+                                          "time_seconds":  {
+                                                               "mean":  94.2412,
+                                                               "stddev":  28.7002,
+                                                               "min":  56.853,
+                                                               "max":  120.573,
+                                                               "n":  8
+                                                           },
+                                          "tokens":  {
+                                                         "mean":  309214.625,
+                                                         "stddev":  82228.3053,
+                                                         "min":  201826,
+                                                         "max":  427637,
+                                                         "n":  8
+                                                     }
+                                      },
+                        "delta":  {
+                                      "pass_rate":  "+0.12",
+                                      "time_seconds":  "+29.5",
+                                      "tokens":  "+91152"
+                                  }
+                    },
+    "notes":  [
+
+              ],
+    "transitions":  [
+                        {
+                            "eval_id":  "answered-and-factual",
+                            "run":  1,
+                            "text":  "Asks about branch arrangement, the remaining substantive choice, without selecting it for the user.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "answered-and-factual",
+                            "run":  1,
+                            "text":  "Does not re-ask stated platform, test framework, sequential mode, commits, or stop-on-test-failure decisions.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  1,
+                            "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  1,
+                            "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  1,
+                            "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                            "transition":  "improved"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  1,
+                            "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  1,
+                            "text":  "Does not claim files were written in this read-only response.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  2,
+                            "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  2,
+                            "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  2,
+                            "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                            "transition":  "improved"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  2,
+                            "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  2,
+                            "text":  "Does not claim files were written in this read-only response.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  3,
+                            "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  3,
+                            "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  3,
+                            "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                            "transition":  "improved"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  3,
+                            "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  3,
+                            "text":  "Does not claim files were written in this read-only response.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  4,
+                            "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  4,
+                            "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  4,
+                            "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                            "transition":  "improved"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  4,
+                            "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  4,
+                            "text":  "Does not claim files were written in this read-only response.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  5,
+                            "text":  "Keeps parallel worktrees, deployment result, and unlimited retries unapproved; does not accept any as user decision.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  5,
+                            "text":  "Continues the substantive discussion with an actual focused question rather than stopping at draft, offering review, or only offering to continue.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  5,
+                            "text":  "Proposes a durable decision journal separating proposer from accepting user; does not fabricate user acceptance.",
+                            "transition":  "improved"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  5,
+                            "text":  "Proposes durable open questions covering unchosen result, execution mode, and failure handling; does not silently close them.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "draft-pressure",
+                            "run":  5,
+                            "text":  "Does not claim files were written in this read-only response.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "resume-pending",
+                            "run":  1,
+                            "text":  "Resumes Q-2 failure handling with an actual question rather than restarting discovery or review.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "resume-pending",
+                            "run":  1,
+                            "text":  "Preserves already accepted sequential mode and commits without asking them again.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "resume-pending",
+                            "run":  1,
+                            "text":  "Keeps deferred dashboard question available and does not treat an existing draft as approved.",
+                            "transition":  "stable-success"
+                        },
+                        {
+                            "eval_id":  "routine-edit",
+                            "run":  1,
+                            "text":  "Provides the requested typo correction without requiring a substantive interview or renewed approval.",
+                            "transition":  "stable-success"
+                        }
+                    ]
+}

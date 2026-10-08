@@ -1,0 +1,1 @@
+﻿Without modifying files, reply PROBE_OK and list only the names of any sdd-spec skill in your available skill catalog. Do not inspect credentials or browse.

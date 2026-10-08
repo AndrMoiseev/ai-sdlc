@@ -1,0 +1,34 @@
+﻿{
+    "regression":  {
+                       "output":  "regression-tests.txt",
+                       "skipped":  1,
+                       "passed":  175
+                   },
+    "existing_changes":  [
+                             "sdd-execution-skill",
+                             "sdd-spec-premortem",
+                             "sdd-spec-explanatory-docs"
+                         ],
+    "existing_changes_errors":  0,
+    "existing_changes_warnings":  0,
+    "package_generated_files":  0,
+    "runtime_smoke":  "runtime-smoke-escalated.json",
+    "structural":  {
+                       "critical_failures":  0,
+                       "candidate":  "structural-candidate.json",
+                       "baseline":  "structural-baseline.json",
+                       "preexisting_noncritical":  [
+                                                       "README retained",
+                                                       "implicit trigger checks inapplicable to explicit-only skill"
+                                                   ]
+                   },
+    "quick_validate":  {
+                           "passed":  false,
+                           "reason":  "Existing disable-model-invocation metadata is unsupported by generic conductor quick_validate; explicit invocation package tests pass."
+                       },
+    "independent_review":  {
+                               "material_findings":  0,
+                               "additional_hardening":  "Explicitly reject NUL in question resolution with public CLI regression."
+                           },
+    "behavior_scope":  "Separate paired conversational runs; not full end-to-end artifact writing."
+}

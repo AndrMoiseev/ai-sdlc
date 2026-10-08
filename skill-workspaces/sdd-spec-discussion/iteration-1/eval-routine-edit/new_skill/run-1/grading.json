@@ -1,0 +1,21 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Provides the requested typo correction without requiring a substantive interview or renewed approval.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md supplies the exact requested typo correction, preserves the existing decision, and asks no substantive question or new permission.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  1,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  1
+                },
+    "failing":  [
+
+                ],
+    "grading_method":  "Manual reading of each response; predeclared assertions; evaluator is separate from skill author, not blind to variant",
+    "scope":  "Conversational behavior and proposed records, not executed file writes or full end-to-end SDD"
+}

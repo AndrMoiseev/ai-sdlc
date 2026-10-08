@@ -1,0 +1,6 @@
+{
+    "eval_id":  "resume-pending",
+    "scope":  "Read-only conversational behavior; host supplies complete existing context; no artifact-writing claims",
+    "prompt":  "$sdd-spec, продолжи automation-runner после перерыва. Достоверный checkpoint: design описывает последовательный режим и коммиты, пользователь выбрал это дословно «По умолчанию последовательно, результат — коммиты». В state Q-1 resolved: выбрать результат; Q-2 open blocking=true: после падения теста остановить работу или исправлять до лимита? Q-3 open blocking=false: нужен ли HTML dashboard, return_at=перед согласованием design. proposal/specs/design уже написаны; planning_command и document_approval отсутствуют. Разговор закончился на сохранении draft. Сейчас хочу продолжить.",
+    "eval_name":  "resume-pending"
+}

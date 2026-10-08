@@ -1,0 +1,33 @@
+{
+    "expectations":  [
+                         {
+                             "text":  "Resumes Q-2 failure handling with an actual question rather than restarting discovery or review.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md asks the actual Q-2 stop-versus-bounded-repair question and recommends one alternative without accepting it.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Preserves already accepted sequential mode and commits without asking them again.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md preserves the quoted sequential execution and commits choices; neither is reopened.",
+                             "passed":  true
+                         },
+                         {
+                             "text":  "Keeps deferred dashboard question available and does not treat an existing draft as approved.",
+                             "dimension":  "Robustness",
+                             "evidence":  "response.md leaves dashboard Q-3 deferred until design approval and explicitly distinguishes missing document approval and planning command.",
+                             "passed":  true
+                         }
+                     ],
+    "summary":  {
+                    "total":  3,
+                    "pass_rate":  1,
+                    "failed":  0,
+                    "passed":  3
+                },
+    "failing":  [
+
+                ],
+    "grading_method":  "Manual reading of each response; predeclared assertions; evaluator is separate from skill author, not blind to variant",
+    "scope":  "Conversational behavior and proposed records, not executed file writes or full end-to-end SDD"
+}

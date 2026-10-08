@@ -1,0 +1,6 @@
+{
+    "eval_id":  "routine-edit",
+    "scope":  "Read-only conversational behavior; host supplies complete existing context; no artifact-writing claims",
+    "prompt":  "$sdd-spec, в готовом черновике automation-runner исправь только опечатку «последоватльно» на «последовательно». Это заголовок абзаца, который дословно говорит «Пользователь выбрал последовательное исполнение всех задач». Решение пользователя уже записано и подтверждено; открытых вопросов нет. Не меняй смысл.",
+    "eval_name":  "routine-edit"
+}
