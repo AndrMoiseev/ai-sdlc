@@ -10,6 +10,8 @@ Execute the selected ready change through implementation, automatic checks, task
 
 Invoke explicitly with `$sdd-implement` in Codex or `/sdd-implement` in Claude Code. After invocation, execute the workflow autonomously within its existing boundaries.
 
+When the current agent is neither Codex nor Claude Code, or its host is unknown, use the [arbitrary agent adapter](references/generic.md). An explicit request to use `sdd-implement` is sufficient invocation in that branch.
+
 ## Roles and prerequisites
 
 | Role | Model | Reasoning |
