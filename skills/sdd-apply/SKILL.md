@@ -14,6 +14,6 @@ Use only on explicit invocation. Keep normative SDD documents unchanged.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
 3. Select one mode from verified state and the current user's authorization. Default to `sequential`. Select `parallel` only with an explicit scoped request and available isolation. If isolation is unavailable, select `sequential` before loading a mode flow and explain why.
 4. Load only [execute-sequential](flows/execute-sequential.md) or [execute-parallel](flows/execute-parallel.md). Keep the other flow unloaded.
-5. For a failed check or review, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
+5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed check or proven review violation, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 
 If a loaded mode must change, transfer ownership to a fresh context through the resume flow. Authorization to execute includes local task commits; delivery beyond those commits requires its own instruction.

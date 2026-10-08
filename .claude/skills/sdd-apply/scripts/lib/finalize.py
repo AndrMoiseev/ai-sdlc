@@ -2,6 +2,7 @@
 from .common import git, now, require
 from .commits import confirm, index_tree
 from .verification import valid_evidence
+from .review_policy import technical_debt
 
 
 def finalize(state, payload, directory):
@@ -22,10 +23,18 @@ def finalize(state, payload, directory):
             accepted.extend(task["plan"]["covers"])
         except ValueError as exc:
             missing.append({"task_id": key, "criteria": task["plan"]["covers"], "reason": str(exc)})
-    recommendations = [f for t in state["tasks"].values() for r in t["reviews"] for f in r["findings"] if f["severity"] == "recommendation"]
-    decisions = payload.get("recommendation_decisions", [])
-    if recommendations and (len(decisions) != len(recommendations) or not all(d.get("reason") and d.get("action") in {"fix", "defer", "reject"} for d in decisions)):
-        missing.append({"reason": "recommendation_decisions_required", "criteria": []})
+    recommendations = technical_debt(state)
+    decisions = payload.get("recommendation_decisions")
+    if decisions is None:
+        decisions = [{"finding_id": f["finding_id"], "action": "defer",
+                      "reason": "Await explicit user approval after plan completion"}
+                     for f in recommendations]
+    require(isinstance(decisions, list) and all(isinstance(d, dict) for d in decisions),
+            "recommendation_decisions", "Decisions must be objects")
+    require(len(decisions) == len(recommendations)
+            and {d.get("finding_id") for d in decisions} == {f["finding_id"] for f in recommendations}
+            and all(d.get("reason") and d.get("action") in {"defer", "reject"} for d in decisions),
+            "recommendation_decisions", "Identify each finding; defer debt or record rejection. Fixes require explicit user approval as follow-up after completion")
     state["final"] = {"head": head, "time": now(), "accepted_criteria": sorted(set(accepted)), "missing": missing, "evidence": evidence, "recommendations": recommendations, "decisions": decisions, "commits": {k: t["commits"] for k, t in state["tasks"].items()}, "result": "partial" if missing else "complete"}
     state["status"] = "blocked" if missing else "completed"
     if missing:
