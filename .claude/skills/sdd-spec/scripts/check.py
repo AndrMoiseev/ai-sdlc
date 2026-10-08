@@ -21,6 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--stage', required=True, choices=('documents', 'plan'))
     args = parser.parse_args(argv)
     result = {'schema_version': 1, 'stage': args.stage, 'errors': [], 'warnings': [],
+              'discussion_status': {'status': 'not_checked'},
               'review_status': {'status': 'not_checked'},
               'approval_status': {'status': 'not_checked'}}
     try:
@@ -45,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
         review = review_status(project, root, args.stage)
         for key in ('errors', 'warnings'):
             result[key].extend(review.get(key, []))
-        for key in ('review_status', 'approval_status'):
+        for key in ('discussion_status', 'review_status', 'approval_status'):
             result[key] = review[key]
         if result['errors']:
             result['approval_status']['ready'] = False

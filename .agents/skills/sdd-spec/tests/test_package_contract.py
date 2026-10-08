@@ -52,9 +52,9 @@ def test_required_resources_ship_together():
     files += [f"flows/{name}.md" for name in
               ("explore", "draft", "revise", "review", "user-review", "resume", "plan", "explain")]
     files += [f"templates/{name}.md" for name in
-              ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "lens-index", "explanation", "preview-handoff")]
+              ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "discussion-decisions", "questions", "lens-index", "explanation", "preview-handoff")]
     files += [f"references/{name}.md" for name in
-              ("document-format", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation")]
+              ("document-format", "discussion", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation")]
     for file in files:
         assert (ROOT / file).is_file(), file
 

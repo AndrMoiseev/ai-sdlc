@@ -1,6 +1,6 @@
 # Progress and derived views
 
-Use the `dashboard` operation to regenerate `summary.md`, `dashboard.html`, and `dashboard-state.js` from execution state. The initial dashboard exists before task admission. Provide its local link at start and when reporting completion or a blocker.
+Use the `dashboard` operation to regenerate `summary.md`, `technical-debt.md`, `dashboard.html`, and `dashboard-state.js` from execution state. The technical debt journal preserves recommendations from all recorded review rounds with stable finding IDs, task IDs, paths, problems, and proposed fixes. Regenerate it after each review; never hand-edit this derived journal. The initial dashboard exists before task admission. Provide its local link at start and when reporting completion or a blocker.
 
 Open the HTML from disk first. It includes a retained snapshot and polls adjacent generated data without page reload; the visible revision and timestamp distinguish live progress from a saved snapshot. Inspect task states, evidence stages, both budget counters, blockers, commits and log links against state. A stale or inaccessible view is not evidence that the state changed.
 

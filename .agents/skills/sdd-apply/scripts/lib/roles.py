@@ -1,6 +1,7 @@
 """Host-attested fresh contexts and separate implementation/review results."""
 from .common import contained, digest, now, require, write_json
 from .verification import current, independent, valid_evidence
+from .review_policy import proven
 import re
 
 
@@ -51,20 +52,27 @@ def transition(state, task, event, directory):
     require(p.get("candidate") == task["candidate"], "stale_review", "Review must name the frozen candidate")
     require(p.get("verdict") in {"pass", "changes", "more_checks"} and isinstance(p.get("findings"), list), "review_schema", "Verdict and findings required")
     require(p.get("test_integrity") and p.get("trace"), "review_evidence", "Review assertions, skips/xfail and command weakening; retain trace")
+    findings = []
     for finding in p["findings"]:
+        require(isinstance(finding, dict), "finding_schema", "Finding must be an object")
         require(set(finding) >= {"severity", "criteria", "path", "problem", "resolution"}, "finding_schema", "Findings need AC, file and resolution condition")
         require(finding["severity"] in {"blocker", "recommendation"}, "finding_severity", "Unknown severity")
-    require(p["verdict"] != "pass" or not any(f["severity"] == "blocker" for f in p["findings"]), "review_blocker", "Pass conflicts with blockers")
-    result = {**p, "round_id": task["active_review"], "round": task["review_rounds_started"]}
+        findings.append({**finding, "reported_severity": finding["severity"],
+                         "severity": "blocker" if proven(finding) else "recommendation"})
+    blockers = any(f["severity"] == "blocker" for f in findings)
+    require(p["verdict"] != "pass" or not blockers, "review_blocker", "Pass conflicts with proven violations")
+    verdict = "pass" if p["verdict"] == "changes" and not blockers else p["verdict"]
+    result = {**p, "verdict": verdict, "reported_verdict": p["verdict"], "findings": findings,
+              "round_id": task["active_review"], "round": task["review_rounds_started"]}
     task["reviews"].append(result)
     task["review_rounds_completed"] += 1
     task["active_review"] = None
     state["roles"][p["role_id"]]["status"] = "finished"
-    if p["verdict"] == "pass":
+    if verdict == "pass":
         task["status"] = "integrating" if task["worktree"] and not task["worktree"].get("integrated") else "committing"
-    elif p["verdict"] == "more_checks":
+    elif verdict == "more_checks":
         task["status"] = "verifying"
     else:
         from .budgets import failure
         failure(state, task, "review", "changes_requested")
-    return {"verdict": p["verdict"], "status": task["status"]}
+    return {"verdict": verdict, "status": task["status"]}

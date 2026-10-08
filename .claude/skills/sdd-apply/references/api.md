@@ -36,7 +36,7 @@ Use JSON null for run-level `task_id`. Read the current revision before a new ev
 | `role_result` | `role_id`, structured `result`, actual host `trace`; ends role work, never accepts a task. |
 | `candidate` | Freeze the candidate after executor result; evidence binds source, normative manifest, registry, and root. |
 | `review_start` | Independent reviewer `role_id`; reserves one task-lifetime review round after passing verification. |
-| `review_result` | `role_id`, exact `candidate`, `verdict: pass|changes|more_checks`, `findings`, `test_integrity`, `trace`. |
+| `review_result` | `role_id`, exact `candidate`, `verdict: pass|changes|more_checks`, `findings`, `test_integrity`, `trace`. Findings follow the [review policy](review-policy.md): only structured `proof` admits a blocker; unsupported findings become recommendations, and `changes` with no proven blockers becomes `pass`. |
 | `repair` | `reason`, defect evidence or recorded failure, optional successor `executor`; pass `test_failure: true` for a failed self-check so the test budget is reserved. |
 | `commit`, `accept` | Script gates current evidence, passing review and task ownership; commit precedes acceptance. |
 | `block` | `reason`, `resume_condition`; preserve partial work and evidence. |
@@ -45,6 +45,12 @@ Use JSON null for run-level `task_id`. Read the current revision before a new ev
 Task states are `pending`, `running`, `verifying`, `reviewing`, `integrating`, `repairing`, `committing`, `blocked`, `accepted`. Run states are `active`, `blocked`, `completed`. Executor DONE and exit 0 alone satisfy neither acceptance nor completion.
 
 The transition router also recognizes `resume`, `spec_conflict`, `revised_plan`, `handoff`, `mode`, and `finalize`. Read their installed handler schemas before constructing payloads. Mode-specific events belong only in the selected mode flow.
+
+`finalize` defers all technical debt when `recommendation_decisions` is omitted.
+Explicit decisions must cover every journal `finding_id` once, with `action:
+defer|reject` and a `reason`. A `fix` decision is not accepted during plan
+finalization: summarize debt after completion and obtain explicit user approval
+for scoped follow-up work under the [review policy](review-policy.md).
 
 ## Evidence
 
