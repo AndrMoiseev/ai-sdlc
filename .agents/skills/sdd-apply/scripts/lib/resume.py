@@ -43,6 +43,22 @@ def transition(state, task, event, directory):
         import uuid
         basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"), state["basis"]["sdd_spec"])
         require(basis["manifest"] != state["basis"]["manifest"], "plan_unchanged", "Use resume when the approved basis is unchanged")
+        plans = {plan["id"]: plan for plan in basis["tasks"]}
+        completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]
+        for key in completed:
+            require(plans.get(key) == state["tasks"][key]["plan"], "completed_task_changed",
+                    f"Preserve completed task {key} unchanged; append follow-up work as a new task")
+        # Validate before archiving or creating a run so rejected revisions have
+        # no side effects. New tasks follow the existing plan in file and number order.
+        last_number = max([old["plan"]["number"] for old in state["tasks"].values()]
+                          + [plan["number"] for plan in basis["tasks"] if plan["id"] in state["tasks"]])
+        appended = False
+        for plan in basis["tasks"]:
+            if plan["id"] in state["tasks"]:
+                require(not appended, "new_tasks_append_only", "Append new tasks after all existing tasks")
+            else:
+                appended = True
+                require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
         previous_run = state["run_id"]
         write_json(contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
         previous_tasks = deepcopy(state["tasks"])
@@ -52,8 +68,11 @@ def transition(state, task, event, directory):
         state["tasks"] = {}
         from .state import new_task
         for plan in basis["tasks"]:
-            fresh = new_task(plan)
             old = previous_tasks.get(plan["id"])
+            if old and old["status"] == "accepted":
+                state["tasks"][plan["id"]] = old
+                continue
+            fresh = new_task(plan)
             if old:
                 for field in ("review_limit", "review_rounds_started", "review_rounds_completed", "test_repair_limit", "test_repair_cycles_started", "active_repair", "repair_cycles", "budget_decisions", "commits"):
                     fresh[field] = old[field]
@@ -67,7 +86,8 @@ def transition(state, task, event, directory):
         state["baseline"] = snapshot(state)
         state["final"] = None
         write_json(contained(directory, f"runs/{state['run_id']}/input.json"), basis)
-        return {"run_id": state["run_id"], "previous_run": previous_run, "reassessment": "No task accepted automatically"}
+        return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
+                "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
     issues = []
     try:
