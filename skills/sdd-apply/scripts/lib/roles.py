@@ -25,6 +25,15 @@ def transition(state, task, event, directory):
         state["roles"][p["role_id"]] = role
         task["roles"].append(p["role_id"])
         packet = {"task": task["plan"], "basis": state["basis"]["manifest"], "project_root": state["basis"]["project_root"], "paths": task["paths"], "worktree": task["worktree"], "candidate": task["candidate"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        import json
+        for effect in (directory / "runs" / state["run_id"] / "effects").glob("*.json"):
+            record = json.loads(effect.read_text(encoding="utf-8"))
+            if (record["phase"] == "prepared" and record["request"]["operation"] == "worktree_refresh"
+                    and record["request"]["task_id"] == task["plan"]["id"]):
+                saved = record["request"]["precondition"]
+                packet["worktree_recovery"] = {"intent_id": record["request"]["event"]["event_id"],
+                    "source": saved["old"]["path"], "replacement": saved["new"],
+                    "patch": str(contained(saved["artifacts"], "task.patch"))}
         path = contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
         write_json(path, packet)
         return {"role": role, "packet": str(path)}
