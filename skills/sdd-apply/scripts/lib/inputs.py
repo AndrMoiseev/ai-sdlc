@@ -15,14 +15,14 @@ def companion(project, explicit=None):
     raise ValueError("sdd-spec unavailable or incompatible: install its complete package")
 
 
-def spec_modules(root):
+def spec_modules(root, module_name="documents"):
     name = "_sdd_spec_" + digest(str(root))[:12]
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, root / "scripts/lib/__init__.py", submodule_search_locations=[str(root / "scripts/lib")])
         module = importlib.util.module_from_spec(spec)
         sys.modules[name] = module
         spec.loader.exec_module(module)
-    return __import__(name + ".documents", fromlist=["read_document"])
+    return __import__(name + "." + module_name, fromlist=[module_name])
 
 
 def spec_call(dependency, project, change, stage, script):
@@ -42,6 +42,7 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None):
     directory = contained(project, "sdd/changes/" + change)
     require((directory / "tasks.md").is_file(), "missing_plan", "Return to sdd-spec for an approved plan")
     dependency = companion(project, sdd_spec)
+    require(callable(getattr(spec_modules(dependency, "paths"), "verification_location", None)), "sdd_spec_incompatible", "Update sdd-spec together with sdd-apply: shared verification location validator is missing")
     checks = {}
     for stage in ("documents", "plan"):
         checks[stage] = spec_call(dependency, project, change, stage, "check.py")

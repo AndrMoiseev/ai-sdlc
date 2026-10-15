@@ -23,3 +23,15 @@ def change_root(project_root, change_id):
     if not valid_slug(change_id):
         raise ValidationError("invalid_change", "change_id must be lowercase-kebab-case, at most 64 characters")
     return contained(project_root, f"sdd/changes/{change_id}")
+
+
+def verification_location(project_root, value):
+    """Resolve a portable test/procedure location without requiring its creation."""
+    if (not isinstance(value, str) or not value or value != value.strip()
+            or any(ord(c) < 32 or c in '*?[]#;|&<>`"' for c in value)):
+        raise ValidationError("verification_location", "location must be one relative file/directory path without selectors, anchors or shell syntax")
+    path = contained(project_root, value)
+    root = Path(project_root).resolve()
+    if path == root or ".git" in [part.lower() for part in path.relative_to(root).parts]:
+        raise ValidationError("verification_location", "location must identify a file/directory below the project root, outside .git")
+    return path
