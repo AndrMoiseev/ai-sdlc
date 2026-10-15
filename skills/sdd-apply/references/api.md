@@ -40,6 +40,8 @@ Use JSON null for run-level `task_id`. Read the current revision before a new ev
 | `repair` | `reason`, defect evidence or recorded failure, optional successor `executor`; pass `test_failure: true` for a failed self-check so the test budget is reserved. |
 | `commit`, `accept` | Script gates current evidence, passing review and task ownership; commit precedes acceptance. |
 | `block` | `reason`, `resume_condition`; preserve partial work and evidence. |
+| `worktree_refresh` | `reason`, `evidence` of the fixed execution base; replaces an unfinished, unintegrated task worktree at current HEAD and preserves its work and budgets. Stop task roles and resolve existing run blockers first. See [worktree recovery](worktree-recovery.md). |
+| `worktree_refresh_resolve` | `intent_id`, finished resolver `role_id`, `resolution`; adopts a resolved replacement from a conflicted refresh, verifies preservation and completes old-worktree cleanup. |
 | `budget_extend` | `budget: review|test`, new finite `limit`, explicit user decision `source` and `text`. |
 
 Task states are `pending`, `running`, `verifying`, `reviewing`, `integrating`, `repairing`, `committing`, `blocked`, `accepted`. Run states are `active`, `blocked`, `completed`. Executor DONE and exit 0 alone satisfy neither acceptance nor completion.
