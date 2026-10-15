@@ -1,0 +1,47 @@
+﻿{
+    "change":  "sdd-apply execution waves",
+    "date":  "2026-10-15",
+    "tests":  {
+                  "duration_seconds":  370.68,
+                  "command":  "uv run --locked --script skills/sdd-apply/scripts/test.py -q",
+                  "failed":  0,
+                  "passed":  129
+              },
+    "browser":  {
+                    "verified":  [
+                                     "vertical waves",
+                                     "wrapping cards",
+                                     "dependency links",
+                                     "highlight retained after update",
+                                     "expanded evidence retained",
+                                     "overlapping waves",
+                                     "no horizontal overflow",
+                                     "saved snapshots",
+                                     "live updates"
+                                 ],
+                    "engine":  "Chrome headless",
+                    "viewport_widths":  [
+                                            1280,
+                                            540
+                                        ]
+                },
+    "baseline":  {
+                     "failed":  8,
+                     "reason":  "Existing dashboard projection lacked waves",
+                     "type":  "deterministic regression tests"
+                 },
+    "structural":  {
+                       "warning":  "Existing description lacks automatic trigger phrase; skill is explicit-only and description is unchanged",
+                       "critical_checks":  "passed"
+                   },
+    "skipped":  [
+                    "Automatic discovery: explicit-only skill",
+                    "Model behavior evaluations: change verified through deterministic projection tests and real-browser tests"
+                ],
+    "runtime":  {
+                    "new_dependencies":  false,
+                    "locks_changed":  false,
+                    "generated_files_inside_skill":  false
+                },
+    "preview":  "demo/dashboard.html"
+}
