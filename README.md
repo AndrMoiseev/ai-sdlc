@@ -10,6 +10,7 @@
 |---|---|
 | [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
+| [aisdlc-experimental](packages/aisdlc-experimental/apm.yml) | [ubiquitous-language](https://github.com/CodeAlive-AI/ai-driven-development/tree/79d911b773d83986bee7ac4170d09a972e61fe31/skills/ubiquitous-language) |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
 `aisdlc-core` и `aisdlc-skills` можно подключать по отдельности или вместе.
@@ -17,6 +18,8 @@
 установке общая зависимость используется один раз. `humanizer-ru` и `archify`
 загружаются из внешних репозиториев; их версии закреплены полными Git SHA
 в манифесте `common-dependencies`. Archify закреплён на коммите тега `v3.0.1`.
+`aisdlc-experimental` подключается отдельно; `ubiquitous-language` закреплён
+полным Git SHA в манифесте пакета.
 Для обновления измените соответствующий SHA и выполните
 `apm install --update`, затем проверьте изменения скилла и lock-файла.
 Если APM использует старый граф вложенных зависимостей, выполните
@@ -147,6 +150,7 @@ APM не объединяет изменения в управляемых ко�
 ```text
 apm install AndrMoiseev/ai-sdlc/packages/aisdlc-core --target codex,claude
 apm install AndrMoiseev/ai-sdlc/packages/aisdlc-skills --target codex,claude
+apm install AndrMoiseev/ai-sdlc/packages/aisdlc-experimental --target codex,claude
 ```
 
 Можно выбрать только `--target codex` или `--target claude`. Для фиксации
