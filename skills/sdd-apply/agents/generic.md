@@ -1,5 +1,10 @@
 # Arbitrary agent adapter
 
+Read [project subagent selection](../references/subagents.md) when settings exist.
+The shared resolver supports Codex and Claude Code only. Preserve configured overrides
+and report an unsupported host before dependent launches; do not label another host as
+Codex to satisfy registration. Without overrides, use only confirmed host inheritance.
+
 Use this adapter when the current agent is neither Codex nor Claude Code, or its host is unknown. An explicit request to use `sdd-apply` starts the workflow; no slash command, installation directory, or metadata enforcement is assumed.
 
 Follow the API and role contracts using only capabilities exposed by the current environment. Establish access to project files, command execution, durable state, fresh contexts, role messaging, and launch evidence before the steps that need them. An installed CLI does not identify the current host.

@@ -43,6 +43,7 @@ uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>"
 uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage documents
 uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage plan
 uv run --locked --script "<skill-root>/scripts/test.py" -q
+uv run --locked --script "<skill-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.document_reviewer --host codex --parent-model "<observed-model>"
 ```
 
 Зависимости последней команды, включая pytest, объявлены в самом тестовом

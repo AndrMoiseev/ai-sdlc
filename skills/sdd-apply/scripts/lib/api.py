@@ -18,6 +18,11 @@ def dispatch(request):
         return result
     if operation == "read":
         return state.read(**args)
+    if operation == "resolve_agent":
+        from .subagents import resolve
+        args = dict(args)
+        current = state.read(args.pop("directory"))
+        return resolve(current, **args)
     if operation == "available":
         return scheduler.available(state.read(args["directory"]))
     if operation == "event":
