@@ -25,3 +25,30 @@ def test_existing_procedure(bundle):
     task["verification"][0]["run"] = dict(procedure="verification.md")
     write_doc(change / "tasks.md", "tasks", [task])
     assert not validate_documents(root, change, "plan")["errors"]
+
+
+@pytest.mark.parametrize("location", [
+    "../outside.py", "/tests/test.py", "C:/tests/test.py", "tests\\test.py",
+    "https://example.test/check", "tests/*.py", "tests/test.py::test_case",
+    "docs/check.md#steps", ".", ".git/config", " tests/test.py", "tests/test.py\n",
+    "tests/test.py; echo ok", "tests/[ab].py", "tests/test?.py",
+])
+def test_location_requires_project_path(bundle, location):
+    root, change, _, task = bundle
+    task["verification"][0]["location"] = location
+    write_doc(change / "tasks.md", "tasks", [task])
+    assert validate_documents(root, change, "plan")["errors"]
+
+
+@pytest.mark.parametrize("kind", ["future", "file", "directory"])
+def test_location_accepts_file_directory_and_future_path(bundle, kind):
+    root, change, _, task = bundle
+    location = root / "tests with spaces" / "verification"
+    if kind == "file":
+        location.parent.mkdir()
+        location.write_text("assert True\n")
+    elif kind == "directory":
+        location.mkdir(parents=True)
+    task["verification"][0].update(location="tests with spaces/verification", run={"setup_required": "Prepare and run checks"})
+    write_doc(change / "tasks.md", "tasks", [task])
+    assert not validate_documents(root, change, "plan")["errors"]

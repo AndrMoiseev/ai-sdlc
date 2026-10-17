@@ -8,6 +8,9 @@ disable-model-invocation: true
 
 Use only on explicit invocation. Keep normative SDD documents unchanged.
 
+Before each fresh worker launch, apply [project subagent selection](references/subagents.md).
+Resolve the role's agent from `.sdd/settings.json` at the execution's original project root.
+
 ## Route
 
 1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md), [Claude Code](agents/claude-code.md), or [arbitrary agent](agents/generic.md) when neither host is established.

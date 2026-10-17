@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from .documents import InputError, ValidationError, read_document, valid_id, parse_markdown, MAX_DOCUMENT_CHARS
-from .paths import contained, change_root as resolve_change
+from .paths import contained, change_root as resolve_change, verification_location
 
 
 def validate_documents(project_root: Path, change_root: Path, stage: str):
@@ -180,9 +180,12 @@ def validate_documents(project_root: Path, change_root: Path, stage: str):
                 problem(record, "verification_criteria", "Verification criteria must be a nonempty subset of covers")
             else:
                 verified.update(criteria)
-            for field in ("test_description", "location"):
-                if not isinstance(check[field], str) or not check[field].strip():
-                    problem(record, "verification", f"{field} must be nonempty text")
+            if not isinstance(check["test_description"], str) or not check["test_description"].strip():
+                problem(record, "verification", "test_description must be nonempty text")
+            try:
+                verification_location(project_root, check["location"])
+            except ValidationError as exc:
+                problem(record, exc.code, exc.message)
             run = check["run"]
             if not isinstance(run, dict) or len(run) != 1 or next(iter(run), None) not in {"command", "procedure", "setup_required"} or not all(isinstance(x, str) and x.strip() for x in run.values()):
                 problem(record, "verification_run", "run requires exactly one nonempty command, procedure or setup_required")

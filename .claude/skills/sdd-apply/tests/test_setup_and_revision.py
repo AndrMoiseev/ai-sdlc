@@ -1,9 +1,68 @@
 import sys
+import json
 from pathlib import Path
 import pytest
 from conftest import document, SPEC, Driver
 from lib.common import digest, git
 from lib.inputs import spec_modules, validate
+
+
+@pytest.mark.parametrize("stage", ["baseline", "self", "independent", "final"])
+def test_missing_command_location_blocks_even_when_command_passes(project, stage):
+    # A broad command can succeed after its intended test has disappeared.
+    reapprove(project, lambda t: t["verification"][0].update(run={"command": f'"{sys.executable}" -B -c "pass"'}))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    if stage == "baseline":
+        (project / "check.py").unlink()
+        d.start()
+        outputs = d.task["baseline_checks"]["outputs"]
+    else:
+        d.start()
+        if stage == "final":
+            (project / "result.txt").write_text("implemented\n")
+            d.freeze()
+            d.verify()
+            d.review()
+            d.send("commit")
+            d.send("accept")
+            d.role("final", "final_verifier")
+        (project / "check.py").unlink()
+        if stage == "self":
+            result = d.send("check_run", {"role_id": "author", "stage": stage})
+        elif stage == "final":
+            result = d.send("check_run", {"role_id": "final", "stage": stage})
+        else:
+            d.freeze()
+            result = d.verify()
+        assert result["outcome"] == "unavailable"
+        outputs = json.loads((d.directory / result["log"]).read_text())["outputs"]
+    assert outputs[0]["outcome"] == "unavailable"
+    assert "exit_code" not in outputs[0]  # Do not execute an incomplete check.
+
+
+def test_directory_location_is_relative_to_project_not_command_cwd(project):
+    (project / "tests").mkdir()
+    (project / "tests/check.py").write_text("assert True\n")
+    reapprove(project, lambda t: t["verification"][0].update(location="tests", run={"setup_required": "Create and run suite"}))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d.start()
+    assert d.task["baseline_checks"]["outputs"][0]["outcome"] == "planned_absence"
+    d.send("check_setup", {"check_id": "plan-1", "command": f'"{sys.executable}" -B check.py', "cwd": "tests", "description": "Prepared suite"})
+    d.freeze()
+    assert d.verify()["outcome"] == "passed"
+
+
+def test_procedure_result_cannot_hide_missing_location(project):
+    (project / "procedure.md").write_text("Inspect the check definition and verify the result.\n")
+    reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
+    d.role("author", "executor")
+    d.send("start", {"role_id": "author", "paths": ["check.py"]})
+    (project / "check.py").unlink()
+    d.send("procedure_begin", {"check_id": "plan-1", "role_id": "author", "stage": "self"})
+    d.send("procedure_result", {"check_id": "plan-1", "role_id": "author", "outcome": "passed", "steps": ["Synthetic observation"], "trace": "unit"})
+    assert d.send("check_run", {"role_id": "author", "stage": "self"})["outcome"] == "unavailable"
 
 
 def reapprove(project, modify):

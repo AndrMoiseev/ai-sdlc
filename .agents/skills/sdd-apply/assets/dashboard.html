@@ -1,13 +1,151 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SDD execution · __CHANGE__</title>
 <style>
-:root{color-scheme:light dark;--bg:#101620;--panel:#1a2330;--ink:#edf3fa;--muted:#a9bbce;--line:#344356;--accent:#65d8b2}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:44px 24px}header{border-bottom:1px solid var(--line);padding-bottom:24px}.eyebrow{color:var(--accent);letter-spacing:.14em;font-size:12px}h1{font-size:clamp(26px,4vw,42px);margin:8px 0}h2{font-size:18px;margin:0 0 10px;overflow-wrap:anywhere}p{margin:8px 0}.muted{color:var(--muted)}#progress{font-size:22px;margin:22px 0}progress{width:100%;height:10px;accent-color:var(--accent)}#tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin:24px 0}article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}a{color:var(--accent)}.badge{font-size:13px;text-transform:uppercase;color:var(--accent)}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monospace}details{margin-top:12px}#blocked{color:#ffcba5}@media(prefers-color-scheme:light){:root{--bg:#f5f7fa;--panel:#fff;--ink:#192838;--muted:#55677b;--line:#d8e0e8;--accent:#08795b}#blocked{color:#934718}}
-</style></head><body><main><header><div class="eyebrow">SPECIFICATION DRIVEN DEVELOPMENT</div><h1>__CHANGE__</h1><p id="meta" class="muted">Execution snapshot</p><p id="freshness" class="muted">Saved snapshot · __SAVED_AT__</p></header><p id="progress"></p><progress id="bar" max="1" value="0"></progress><p id="blocked"></p><section id="tasks">__STATIC_TASKS__</section><footer class="muted">State is authoritative. This view refreshes every two seconds. A copied HTML retains its saved snapshot.</footer></main>
+:root{color-scheme:light dark;--bg:#101620;--panel:#1a2330;--wave:#141d29;--ink:#edf3fa;--muted:#a9bbce;--line:#344356;--accent:#65d8b2;--warning:#ffcba5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1180px;margin:auto;padding:44px 24px}header{border-bottom:1px solid var(--line);padding-bottom:24px}
+.eyebrow{color:var(--accent);letter-spacing:.14em;font-size:12px}h1{font-size:clamp(26px,4vw,42px);margin:8px 0;overflow-wrap:anywhere}
+h2,h3{font-size:18px;margin:0;overflow-wrap:anywhere}p{margin:8px 0}.muted{color:var(--muted)}
+#progress{font-size:22px;margin:22px 0 8px}progress{width:100%;height:10px;accent-color:var(--accent)}
+.plan-note{margin:24px 0;color:var(--muted);max-width:85ch}.plan-note strong{color:var(--ink)}
+#tasks{display:flex;flex-direction:column;gap:20px;margin:24px 0}
+.wave{background:var(--wave);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.wave[data-status="in_progress"]{border-left:4px solid var(--accent)}
+.wave-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.wave-heading h2{margin-right:auto}
+.dependencies{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;color:var(--muted);font-size:14px}
+.dependency{border:1px solid var(--line);border-radius:6px;padding:3px 9px;text-decoration:none;overflow-wrap:anywhere;max-width:100%}
+.dependency[data-accepted="true"]{border-color:var(--accent)}
+.wave-tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+article{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0;scroll-margin-top:24px}
+article:target,article.selected{outline:3px solid var(--accent);outline-offset:3px}a{color:var(--accent)}a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.badge{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.waiting,.blocked{color:var(--warning);font-size:14px;overflow-wrap:anywhere}.launch{font-size:14px;color:var(--muted)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monospace}details,.evidence{margin-top:12px}.evidence h4{margin:0;font-weight:500}summary{cursor:pointer}
+#blocked{color:var(--warning)}footer{font-size:13px}
+@media(max-width:600px){main{padding:24px 14px}.wave{padding:14px}.wave-heading h2{flex-basis:100%}}
+@media(prefers-color-scheme:light){:root{--bg:#f5f7fa;--panel:#fff;--wave:#eef2f6;--ink:#192838;--muted:#55677b;--line:#cbd6e0;--accent:#08795b;--warning:#934718}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="eyebrow">SPECIFICATION DRIVEN DEVELOPMENT</div><h1>__CHANGE__</h1><p id="meta" class="muted">Execution snapshot</p><p id="freshness" class="muted">Saved snapshot · __SAVED_AT__</p></header>
+<p id="progress"></p><progress id="bar" max="1" value="0" aria-label="Accepted tasks"></progress>
+<p id="blocked" role="status"></p>
+<p class="plan-note"><strong>Execution waves</strong> group tasks planned to run in parallel. Each wave waits for acceptance of its listed tasks; it can overlap other waves. Actual starts depend on executor capacity, file ownership and resources. Integration into the execution branch is sequential.</p>
+<p id="mode-note" class="muted"></p>
+<section id="tasks" aria-label="Execution waves">__STATIC_TASKS__</section>
+<footer class="muted">State is authoritative. This view refreshes every two seconds. A copied HTML retains its saved snapshot. Wave membership stays fixed for the same plan and execution mode.</footer>
+</main>
 <script>
-(()=>{'use strict';let current=__SNAPSHOT__;const el=id=>document.getElementById(id);function node(tag,text,cls){const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n;}
-function draw(s,live){el('meta').textContent=s.mode+' · '+s.status+' · run '+s.run_id+' · revision '+s.revision;el('freshness').textContent=(live?'Live view':'Saved snapshot')+' · '+s.updated_at;el('progress').textContent=s.accepted+' / '+s.total+' tasks accepted';el('bar').max=Math.max(s.total,1);el('bar').value=s.accepted;el('blocked').textContent=s.blockers.map(b=>b.reason+(b.detail?': '+b.detail:'')).join(' · ');const fragment=document.createDocumentFragment();for(const t of s.tasks){const card=node('article','');card.append(node('h2',t.id),node('p',t.status,'badge'),node('p','Review '+t.review+' · Test repairs '+t.repair),node('p','Attempt '+t.attempt,'muted'));if(t.commits.length)card.append(node('pre',t.commits.join('\n')));if(t.blockers.length)card.append(node('pre',JSON.stringify(t.blockers,null,2)));const details=node('details','');details.append(node('summary','Criteria and evidence'));details.append(node('p',t.criteria.join(', ')));for(const e of t.evidence){const row=node('p',e.stage+' · '+e.outcome+' ');if(/^runs\/[a-zA-Z0-9_/-]+\.json$/.test(e.log)){const link=node('a','log');link.href=e.log;row.append(link);}details.append(row);}card.append(details);fragment.append(card);}el('tasks').replaceChildren(fragment);}
-window.sddApplyUpdate=s=>{if(!s||s.schema_version!==1||s.change_id!==current.change_id||s.run_id!==current.run_id||!Number.isInteger(s.revision)||s.revision<current.revision)return;current=s;draw(s,true);};draw(current,false);
-function poll(){const script=document.createElement('script');script.src='dashboard-state.js?t='+Date.now();script.onload=()=>script.remove();script.onerror=()=>{el('freshness').textContent='Saved snapshot · '+current.updated_at+' · live data unavailable';script.remove();};document.head.append(script);}setInterval(poll,2000);
+(()=>{
+  'use strict';
+  let current=__SNAPSHOT__;
+  const el=id=>document.getElementById(id);
+  const preferenceKey='sdd-apply:details:'+JSON.stringify([location.pathname,current.change_id,current.run_id]);
+  let persistent=true,opened=new Set();
+  try{
+    let saved;try{saved=JSON.parse(localStorage.getItem(preferenceKey)||'[]');}catch{saved=[];}
+    if(Array.isArray(saved))opened=new Set(saved.filter(id=>typeof id==='string'));
+    localStorage.setItem(preferenceKey,JSON.stringify([...opened]));
+  }catch{persistent=false;}
+  function saveDetails(){
+    if(!persistent)return;
+    opened=new Set([...document.querySelectorAll('article[data-task]')].filter(c=>c.querySelector('details[open]')).map(c=>c.dataset.task));
+    try{localStorage.setItem(preferenceKey,JSON.stringify([...opened]));}
+    catch{persistent=false;draw(current);}
+  }
+  window.addEventListener('pagehide',saveDetails);
+  function node(tag,text,cls){const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n;}
+  function reconcile(parent,children){
+    children.forEach((child,i)=>{if(parent.children[i]!==child)parent.insertBefore(child,parent.children[i]||null);});
+    while(parent.children.length>children.length)parent.lastElementChild.remove();
+  }
+  function highlightTarget(){
+    for(const card of document.querySelectorAll('article.selected'))card.classList.remove('selected');
+    let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}
+    const target=document.getElementById(id);if(target?.matches('article[data-task]'))target.classList.add('selected');
+  }
+  window.addEventListener('hashchange',highlightTarget);
+  function taskLink(id,t){
+    const link=node('a',id+' · '+t.status,'dependency');
+    link.href='#'+encodeURIComponent('task-'+id);
+    link.dataset.accepted=String(t.status==='accepted');
+    link.setAttribute('aria-label','Go to '+id+', '+t.status);
+    return link;
+  }
+  function taskCard(t,s){
+    const card=document.getElementById('task-'+t.id)||node('article','');card.id='task-'+t.id;card.tabIndex=-1;card.dataset.task=t.id;
+    let body=card.querySelector('.task-body');if(!body){body=node('div','','task-body');card.replaceChildren(body);}
+    body.replaceChildren(node('h3',t.id),node('p',t.status,'badge'));
+    for(const reason of t.waiting_text)body.append(node('p',reason,'waiting'));
+    if(t.status==='pending'&&!t.waiting.length&&s.next.includes(t.id))
+      body.append(node('p','Dependencies satisfied; awaiting launch checks and executor capacity.','launch'));
+    if(t.cannot_parallel_with.length)body.append(node('p','Cannot run alongside: '+t.cannot_parallel_with.join(', '),'muted'));
+    body.append(node('p','Review '+t.review+' · Test repairs '+t.repair),node('p','Attempt '+t.attempt,'muted'));
+    if(t.commits.length)body.append(node('pre',t.commits.join('\n')));
+    if(t.blockers.length)body.append(node('pre',JSON.stringify(t.blockers,null,2),'blocked'));
+    let details=card.querySelector('.evidence');
+    if(details&&details.tagName!==(persistent?'DETAILS':'SECTION')){details.remove();details=null;}
+    if(!details){
+      details=node(persistent?'details':'section','','evidence');
+      details.append(node(persistent?'summary':'h4','Criteria and evidence'),node('div','','evidence-body'));
+      if(persistent){details.open=opened.has(t.id);details.addEventListener('toggle',()=>{if(details.isConnected)saveDetails();});}
+      card.append(details);
+    }
+    const evidence=details.querySelector('.evidence-body');evidence.replaceChildren(node('p',t.criteria.join(', ')));
+    for(const e of t.evidence){
+      const row=node('p',e.stage+' · '+e.outcome+' ');
+      if(/^runs\/[a-zA-Z0-9_/-]+\.json$/.test(e.log)){const link=node('a','log');link.href=e.log;row.append(link);}
+      evidence.append(row);
+    }
+    return card;
+  }
+  function draw(s){
+    el('meta').textContent=s.mode+' · '+s.status+' · run '+s.run_id+' · revision '+s.revision;
+    el('progress').textContent=s.accepted+' / '+s.total+' tasks accepted';el('bar').max=Math.max(s.total,1);el('bar').value=s.accepted;
+    el('blocked').textContent=s.blockers.map(b=>b.reason+(b.detail?': '+b.detail:'')).join(' · ');
+    el('mode-note').textContent=s.mode==='sequential'
+      ?'Sequential mode: one task per wave; only one task executes at a time.'
+      :'Parallel mode: wave numbers show the plan layout, not a required launch sequence.';
+    const tasks=new Map(s.tasks.map(t=>[t.id,t]));const sections=[];
+    const existing=new Map([...el('tasks').querySelectorAll('.wave')].map(w=>[w.dataset.wave,w]));
+    for(const w of s.waves){
+      let wave=existing.get(w.id);
+      if(!wave){wave=node('section','','wave');wave.append(node('div','','wave-info'),node('div','','wave-tasks'));}
+      // The no-JavaScript snapshot has a simpler structure; replace it on first draw.
+      if(!wave.querySelector('.wave-info')){wave=node('section','','wave');wave.append(node('div','','wave-info'),node('div','','wave-tasks'));}
+      wave.dataset.wave=w.id;wave.dataset.status=w.status;
+      const heading=node('div','','wave-heading');
+      heading.append(node('h2','Wave '+w.number),node('span',w.label,'badge'),node('span',w.accepted+' / '+w.tasks.length+' accepted','muted'));
+      const deps=node('div','','dependencies');deps.append(node('span','After acceptance:'));
+      if(w.depends_on.length)for(const dep of w.depends_on)deps.append(taskLink(dep,tasks.get(dep)));
+      else deps.append(node('span','No dependencies'));
+      const info=wave.querySelector('.wave-info');info.replaceChildren(heading,deps);
+      if(w.blocked.length)info.append(node('p','Blocked tasks: '+w.blocked.join(', '),'blocked'));
+      reconcile(wave.querySelector('.wave-tasks'),w.tasks.map(key=>taskCard(tasks.get(key),s)));
+      sections.push(wave);
+    }
+    if(!s.waves.length)sections.push(node('p','No tasks in this plan.','muted'));
+    reconcile(el('tasks'),sections);
+    highlightTarget();
+  }
+  window.sddApplyUpdate=s=>{
+    if(!s||s.schema_version!==1||s.change_id!==current.change_id||s.run_id!==current.run_id||!Number.isInteger(s.revision)||s.revision<current.revision)return;
+    if(!Array.isArray(s.waves)){el('freshness').textContent='Saved snapshot · '+current.updated_at+' · regenerate dashboard to update this view';return;}
+    if(s.revision!==current.revision){draw(s);current=s;}
+    el('freshness').textContent='Live view · '+current.updated_at;
+  };
+  draw(current);
+  function poll(){
+    const script=document.createElement('script');script.src='dashboard-state.js?t='+Date.now();script.onload=()=>script.remove();
+    script.onerror=()=>{el('freshness').textContent='Saved snapshot · '+current.updated_at+' · live data unavailable';script.remove();};
+    document.head.append(script);
+  }
+  setInterval(poll,2000);
 })();
-</script></body></html>
+</script>
+</body>
+</html>

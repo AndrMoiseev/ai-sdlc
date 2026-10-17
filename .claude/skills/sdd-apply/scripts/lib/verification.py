@@ -7,6 +7,7 @@ import os
 import signal
 from .common import contained, digest, git, now, require, write_json
 from .state import snapshot
+from .inputs import spec_modules
 
 
 def root_for(state, task):
@@ -188,13 +189,15 @@ def transition(state, task, event, directory):
     outputs = []
     for check in task["checks"]:
         run = check["setup"] or check["run"]
-        if check["setup"] and check.get("location") and not contained(root, check["location"]).exists():
-            outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Previously prepared required check location is missing"})
+        if stage == "baseline" and "setup_required" in run:
+            outputs.append({"check_id": check["id"], "outcome": "planned_absence", "description": run["setup_required"]})
             continue
-        if "command" not in run:
-            if stage == "baseline" and "setup_required" in run:
-                outputs.append({"check_id": check["id"], "outcome": "planned_absence", "description": run["setup_required"]})
+        if "location" in check:
+            location = spec_modules(Path(state["basis"]["sdd_spec"]), "paths").verification_location(root, check["location"])
+            if not (location.is_file() or location.is_dir()):
+                outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Required verification location is missing", "location": check["location"]})
                 continue
+        if "command" not in run:
             if "procedure" in run:
                 tested = candidate(state, task) if stage == "final" else task["candidate"]
                 latest = next((e for e in reversed(task["evidence"]) if e["check_id"] == check["id"] and e["stage"] == stage and e["candidate"] == tested and e.get("procedure")), None)
