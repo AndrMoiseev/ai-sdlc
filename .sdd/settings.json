@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "subagents": {
+    "roles": {
+      "sdd-spec.document_reviewer": "sdd-document-reviewer",
+      "sdd-spec.plan_reviewer": "sdd-plan-reviewer",
+      "sdd-spec.editor": "sdd-editor",
+      "sdd-spec.editorial_reviewer": "sdd-editorial-reviewer",
+      "sdd-apply.executor": "sdd-executor",
+      "sdd-apply.verifier": "sdd-verifier",
+      "sdd-apply.reviewer": "sdd-reviewer",
+      "sdd-apply.final_verifier": "sdd-final-verifier"
+    }
+  }
+}
