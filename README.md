@@ -8,7 +8,7 @@
 
 | Пакет | Состав |
 |---|---|
-| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
+| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
@@ -38,6 +38,14 @@ Archify в `bin/`: контрольная переустановка пропу�
 
 OpenSpec CLI и установленные в этом проекте скиллы `openspec-*` в эти наборы
 не входят. Для работы `sdd-implement` требуется отдельно установленный OpenSpec CLI.
+
+### Настройка SDD проекта
+
+После установки набора вызовите `$sdd-setup` в Codex или `/sdd-setup` в Claude Code
+для настройки ролей и моделей проекта. Мастер показывает текущие значения,
+предлагает [пресеты по ролям и средам](skills/sdd-setup/assets/defaults.json),
+сохраняет выбор в `.sdd/settings.json` и создаёт недостающие проектные определения
+агентов. Имена агентов одинаковы в обеих средах; модели и effort различаются.
 
 ### Установка и настройка uv
 
