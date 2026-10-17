@@ -1,0 +1,42 @@
+# Project subagent selection
+
+Before a new executor, verifier, reviewer or final_verifier launch, read
+`references/subagents.md` in the resolved sdd-spec dependency at `basis.sdd_spec`.
+That shared contract defines `.sdd/settings.json`, all eight roles, host behavior,
+fallbacks and source evidence. Read that reference directly; do not invoke the
+authoring workflow. Update both skill packages together.
+
+Use the [API](api.md) operation `resolve_agent` before the waiting handshake:
+
+```json
+{
+  "operation": "resolve_agent",
+  "args": {
+    "directory": "<change-root>/execution",
+    "kind": "reviewer",
+    "host": "codex",
+    "parent_model": "<observed-parent-model>",
+    "parent_effort": "<observed-parent-effort>"
+  }
+}
+```
+
+For Claude Code use `host: claude-code` and `available_agents`, an array of names
+observed in its actual tool/catalog. The operation always uses `basis.project_root`,
+not the task worktree. It returns launch parameters and evidence without spawning.
+Pass the complete result as `agent_selection` when registering the observed launch.
+Configuration errors or an unavailable requested launch capability block that role.
+
+Verifier/reviewer context sharing requires equal resolved launch identities. Compare
+their selections before spawning; differing models, effort or native agent definitions
+require separate contexts. Registration checks this invariant as well.
+Claude Code native-agent selections always use separate verifier/reviewer contexts;
+their name-only catalog cannot prove equal definition versions. Existing
+registrations without selection evidence remain readable; with settings.json present,
+new registrations require selection evidence. Interrupted launches with changed source
+hashes require reconciliation, not invented attestations or duplicate writers.
+
+Repair and continuation retain the running executor's selection. Reconfigure only a
+fresh successor through the existing handoff. The orchestrator/mode handoff is not a
+configurable worker role. Record actual model observations separately from requested
+parameters. These changes leave task budgets, approvals and independent checks intact.
