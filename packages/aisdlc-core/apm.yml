@@ -4,6 +4,7 @@ description: Specification-driven development, implementation, and project termi
 dependencies:
   apm:
     - path: ../common-dependencies
+    - path: ../../skills/sdd-setup
     - path: ../../skills/sdd-spec
     - path: ../../skills/sdd-apply
     - path: ../../skills/sdd-doc
