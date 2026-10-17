@@ -23,7 +23,7 @@ Large tasks are not rejected because they are large. Agents can successfully imp
 
 `SKILL.md` contains the trigger description and top-level index. `guidelines.md` is the routing layer: it maps tasks, symptoms, and named practices to the smallest useful reference files.
 
-Code examples are C#-first; every rule and the tooling tables are language-neutral.
+Code examples include the original C# material and Kotlin/JVM and Go counterparts; every rule and the tooling tables are language-neutral. Use [Examples by Stack](guidelines.md#examples-by-stack) to select the matching language and dependencies.
 
 The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. When a rule proves repeatedly useful in a repository, operationalize it (`workflows/operationalize-finding.md`) so it persists as a gate and in project agent instructions.
 
@@ -66,6 +66,7 @@ Most reference folders summarize or operationalize ideas from Seemann's book. Th
 
 - Moved the five standalone example documents into per-topic `examples/` directories, with filenames identifying the language and relevant framework. The original C# files retain their exact contents.
 - Added idiomatic Kotlin/JVM counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Framework-independent, JUnit 5, and Ktor examples are separated for selective loading.
+- Added Go counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Go 1.22+ examples separate domain code, standard-library `testing` tests, and `net/http` / `httptest` boundaries. Adaptations explain zero-value limits, explicit errors, composition, and migration without method overloading.
 - Updated example paths and added [stack-specific routing](guidelines.md#examples-by-stack), so an agent loads the example matching the project.
-- Preserved the original rules, explanations, and code embedded in other documents. Kotlin examples are fork additions.
+- Preserved the original rules, explanations, and code embedded in other documents. Kotlin and Go examples are fork additions.
 - Documented conventions for adding and verifying examples for another language or stack.

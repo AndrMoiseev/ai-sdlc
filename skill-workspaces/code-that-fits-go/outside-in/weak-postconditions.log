@@ -1,0 +1,2 @@
+﻿error acquiring upload token: creating token file: open C:\Users\Andrew\AppData\Roaming\go\telemetry\local\upload.token: Access is denied.
+ok  	example.com/weak-postconditions	0.718s

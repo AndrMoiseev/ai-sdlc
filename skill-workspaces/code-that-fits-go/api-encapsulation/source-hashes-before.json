@@ -1,0 +1,27 @@
+﻿[
+    {
+        "Algorithm":  "SHA256",
+        "Hash":  "39EB377866D2AEE126909D9620759ECE95DC401625478A94364D2834231DB51A",
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\examples\\csharp.md"
+    },
+    {
+        "Algorithm":  "SHA256",
+        "Hash":  "DADBCF8639E397070A73B023C7C1D6839D6E3D72845EAAF59B05A384896DA96B",
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\examples\\kotlin.md"
+    },
+    {
+        "Algorithm":  "SHA256",
+        "Hash":  "3271F15A07D049C723FBD1F85A37CA9DE4FF3F6B3F9704A80C7484893B272209",
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\csharp-aspnetcore-xunit.md"
+    },
+    {
+        "Algorithm":  "SHA256",
+        "Hash":  "CF5652E8C27AF35999C31FE9AAA7D01EC738E26F4A90FC833FCE8DC6B3D930E0",
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\kotlin-junit5.md"
+    },
+    {
+        "Algorithm":  "SHA256",
+        "Hash":  "62AC693F20FD06EA73E4503BD53D5319A83D1B1F5E49188EB2EA024FF612F653",
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\kotlin.md"
+    }
+]

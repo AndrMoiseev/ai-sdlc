@@ -1,0 +1,6 @@
+﻿error acquiring upload token: creating token file: open C:\Users\Andrew\AppData\Roaming\go\telemetry\local\upload.token: Access is denied.
+--- FAIL: TestFullCapacity (0.00s)
+    capacity_test.go:25: body = "unrelated conflict\n"; want a tables explanation
+FAIL
+FAIL	example.com/strong-postconditions	0.619s
+FAIL

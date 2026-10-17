@@ -1,0 +1,24 @@
+﻿{
+    "go_documents":  7,
+    "runnable_green_modules":  12,
+    "go_test":  "passed",
+    "go_vet":  "passed",
+    "go_runtime":  "1.26.5 windows/amd64",
+    "go_language_directive":  "1.22",
+    "go_1_22_runtime_executed":  false,
+    "expected_red_probes":  [
+                                "missing HTTP route",
+                                "email-specific Devil branch",
+                                "unrelated capacity failure rejected by strengthened assertion"
+                            ],
+    "source_heading_coverage":  "all C# level 2/3 headings retained across documented splits",
+    "existing_examples_hashes":  "unchanged",
+    "local_links":  "passed",
+    "package_generated_state":  "none",
+    "structural_critical_checks":  "passed",
+    "structural_existing_exceptions":  [
+                                           "README requested by user",
+                                           "nested examples directories required by README"
+                                       ],
+    "behavioral_agent_benchmark":  "not run; executable examples and independent peer review used for this language extension"
+}
