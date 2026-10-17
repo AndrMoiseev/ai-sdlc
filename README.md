@@ -1,6 +1,44 @@
 # ai-sdlc
 Поддержка AI Assisted Software Engineering
 
+## Рекомендуемые инструменты для анализа кода
+
+Подбирайте инструменты под стек и задачу: сложность функций, зависимости между модулями, дублирование, неиспользуемый код и качество тестов. Команды и ориентиры для проверок приведены в [справочнике скилла](skills/code-that-fits-in-your-head/references/tooling/commands.md). Не обязательно устанавливать весь список: для одного вида проверки обычно достаточно одного подходящего инструмента.
+
+| Инструмент | Краткое описание | Инструкция по установке | Подходящие стеки |
+|---|---|---|---|
+| Lizard | Цикломатическая сложность функций | [Установка](https://github.com/terryyin/lizard#installation) | C#, JS/TS, Python, Go, Java, C/C++, Rust и другие |
+| Radon | Метрики сложности Python-кода | [Установка](https://pypi.org/project/radon/) | Python |
+| Ruff (`C901`) | Проверка сложности функций в линтере | [Установка](https://docs.astral.sh/ruff/installation/) | Python |
+| ESLint (`complexity`) | Проверка сложности по правилу линтера | [Установка](https://eslint.org/docs/latest/use/getting-started) | JavaScript, TypeScript |
+| Анализаторы Roslyn (`CA1502`, `IDE0051`, `IDE0052`) и `dotnet format` | Сложность и неиспользуемые члены; анализаторы и команда входят в современный .NET SDK | [Установка .NET SDK](https://learn.microsoft.com/dotnet/core/install/) | .NET, C# |
+| gocyclo | Цикломатическая сложность функций | [Установка](https://github.com/fzipp/gocyclo#installation) | Go |
+| Madge | Циклические зависимости модулей | [Установка](https://github.com/pahen/madge#installation) | JavaScript, TypeScript |
+| dependency-cruiser | Циклы и правила зависимостей между слоями | [Установка](https://github.com/sverweij/dependency-cruiser#how-do-i-use-it) | JavaScript, TypeScript |
+| pydeps | Граф зависимостей и циклы импортов | [Установка](https://pydeps.readthedocs.io/en/latest/#how-to-install) | Python |
+| Import Linter | Контракты между слоями и запреты импортов | [Установка](https://import-linter.readthedocs.io/en/latest/get_started/install/) | Python |
+| NetArchTest | Архитектурные ограничения как тесты | [Подключение пакета](https://github.com/BenMorris/NetArchTest#getting-started) | .NET, C# |
+| ArchUnit | Архитектурные ограничения и циклы как тесты | [Подключение зависимости](https://www.archunit.org/userguide/html/000_Index.html#_installation) | JVM, Java |
+| depguard (в golangci-lint) | Ограничения на импорты пакетов | [Установка golangci-lint](https://golangci-lint.run/docs/welcome/install/local/) | Go |
+| jscpd | Поиск дублирующихся фрагментов | [Установка](https://jscpd.dev/start/quickstart) | Разные языки |
+| ripgrep (`rg`) | Поиск существующих реализаций и употреблений символа | [Установка](https://github.com/BurntSushi/ripgrep#installation) | Любой стек |
+| Knip | Неиспользуемые файлы, экспорты и зависимости | [Установка](https://knip.dev/overview/getting-started) | JavaScript, TypeScript |
+| ts-prune | Потенциально неиспользуемые экспорты | [Установка](https://github.com/nadeesha/ts-prune#installing) | TypeScript |
+| Vulture | Потенциально неиспользуемый код | [Установка](https://github.com/jendrikseipp/vulture#installation) | Python |
+| deptry | Неиспользуемые и отсутствующие зависимости проекта | [Установка](https://deptry.com/#installation) | Python |
+| `dead_code` | Встроенное предупреждение компилятора о неиспользуемом коде | [Установка Rust](https://www.rust-lang.org/tools/install) | Rust |
+| cargo-udeps | Неиспользуемые зависимости Cargo; для запуска нужен nightly | [Установка](https://github.com/est31/cargo-udeps#installation) | Rust |
+| Git | История изменений для поиска часто меняющихся файлов и связанных правок | [Установка](https://git-scm.com/install/) | Любой стек |
+| Stryker | Мутационное тестирование | [Установка](https://stryker-mutator.io/stryker/quickstart/) | JavaScript, TypeScript |
+| Stryker.NET | Мутационное тестирование | [Установка](https://stryker-mutator.io/docs/stryker-net/getting-started/) | .NET, C# |
+| mutmut | Мутационное тестирование; на Windows требуется WSL | [Установка](https://github.com/boxed/mutmut#install-and-run) | Python |
+| Cosmic Ray | Мутационное тестирование | [Установка](https://cosmic-ray.readthedocs.io/en/latest/tutorials/intro/index.html#installation) | Python |
+| PIT | Мутационное тестирование | [Подключение к Maven](https://pitest.org/quickstart/maven/) | JVM, Java (Maven) |
+| cargo-mutants | Мутационное тестирование | [Установка](https://github.com/sourcefrog/cargo-mutants#install) | Rust |
+| eslint-plugin-boundaries | Правила границ между модулями | [Установка](https://github.com/javierbrea/eslint-plugin-boundaries#quick-example) | JavaScript, TypeScript |
+
+Для Go циклы импортов пакетов запрещены компилятором, поэтому отдельный инструмент для их поиска не нужен. Примеры анализа истории в справочнике используют Git вместе со стандартными утилитами POSIX (`sort`, `uniq`, `awk` и др.); в Windows их удобно запускать через WSL или Git Bash.
+
 ## Пакеты APM
 
 Исходники скиллов хранятся в `skills/`. Пакеты описывают подборки через
