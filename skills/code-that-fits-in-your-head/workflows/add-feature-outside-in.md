@@ -100,7 +100,7 @@ For large features or migrations, define the target architecture, dependency dir
 - [ ] No database, no domain logic yet — just plumb the call
 - [ ] Run: all tests green
 
-**Reference**: `references/outside-in-tdd/patterns.md` (Walking Skeleton), `references/outside-in-tdd/examples.md`
+**Reference**: `references/outside-in-tdd/patterns.md` (Walking Skeleton), `references/outside-in-tdd/examples/`
 
 ---
 
@@ -126,7 +126,7 @@ For large features or migrations, define the target architecture, dependency dir
 - [ ] Follow parse-don't-validate: return `null` / `Result` from the parse function
 - [ ] Move branching logic out of the controller; let types do the work
 
-**Reference**: `references/encapsulation/rules.md`, `references/encapsulation/examples.md`
+**Reference**: `references/encapsulation/rules.md`, `references/encapsulation/examples/`
 
 ---
 
@@ -139,7 +139,7 @@ For large features or migrations, define the target architecture, dependency dir
 - [ ] Use a Fake (not a mock) for I/O dependencies
 - [ ] Keep domain tests fast (milliseconds) — they're the feedback loop
 
-**Reference**: `references/outside-in-tdd/patterns.md` (Fake Object), `references/outside-in-tdd/examples.md`
+**Reference**: `references/outside-in-tdd/patterns.md` (Fake Object), `references/outside-in-tdd/examples/`
 
 ---
 
