@@ -95,7 +95,7 @@ Measure, don't estimate: complexity/cycle/duplication commands in `../references
 - [ ] Any `null!` or bypassed nullability? Ask why.
 - [ ] 400 vs 500 distinction clear at API boundaries?
 
-**Reference**: `references/encapsulation/rules.md`, `references/encapsulation/examples.md`
+**Reference**: `references/encapsulation/rules.md`, `references/encapsulation/examples/`
 
 ---
 
