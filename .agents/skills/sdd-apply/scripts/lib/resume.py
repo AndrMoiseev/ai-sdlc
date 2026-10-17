@@ -145,4 +145,12 @@ def transition(state, task, event, directory):
                     confirm(state, t, t["commits"][-1])
                 t["status"] = target
     state["status"] = "blocked" if state["blockers"] else "active"
-    return {"status": state["status"], "issues": issues, "preserved_roles": state["roles"]}
+    head = git(root, "rev-parse", "HEAD")
+    stale_worktrees = [{"task_id": key, "path": t["worktree"]["path"], "base": t["worktree"]["base"],
+                       "head": head, "next": "worktree_refresh"}
+                      for key, t in state["tasks"].items()
+                      if t["status"] != "accepted" and t["worktree"]
+                      and not t["worktree"].get("integrated") and not t["worktree"].get("removed")
+                      and t["worktree"]["base"] != head]
+    return {"status": state["status"], "issues": issues, "preserved_roles": state["roles"],
+            "stale_worktrees": stale_worktrees}

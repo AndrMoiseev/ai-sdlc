@@ -1,6 +1,6 @@
 # Fresh roles and attestations
 
-Launch each task's executor in a genuinely fresh context. Launch its verifier and reviewer separately from all authors. They may share one fresh context for that task, with distinct registered role IDs and separate verification and review results. A final verifier also starts fresh. Repair may return to the original executor while available; a lost executor is replaced with a fresh successor and a recorded handoff.
+Launch each task's executor in a genuinely fresh context. Apply [project subagent selection](subagents.md) before each new launch. Launch its verifier and reviewer separately from all authors. They may share one fresh context for that task only with matching resolved launch identities, distinct registered role IDs and separate verification and review results. Otherwise launch them separately. A final verifier also starts fresh. Repair may return to the original executor with its existing selection while available; a lost executor is replaced with a fresh successor and a recorded handoff.
 
 The host adapter performs the actual native launch. The script checks host attestations and creates packets; it does not launch or simulate native agents. `context_id` and `launch_ref` must come from observed host launches. Their strings cannot cryptographically prove freshness or identity. Preserve raw launch/tool traces and disclose inherited instructions, skills, workspace exposure, and permission limits. A unit-test stub or fabricated attestation must never be reported as a real role run.
 

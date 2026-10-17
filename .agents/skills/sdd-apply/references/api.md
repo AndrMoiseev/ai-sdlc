@@ -1,5 +1,14 @@
 # Script and event contract
 
+`resolve_agent` is a read-only operation: pass execution `directory`, role `kind`,
+`host`, observed `parent_model`, optional `parent_effort`, and for Claude Code the
+observed `available_agents` array. It uses the stored project root and sdd-spec
+dependency. Retain its result as `agent_selection` in `role_register`; see
+[subagent selection](subagents.md). It selects parameters, not a running agent.
+Optional `model_observation` records actual model/effort and source trace; unknown
+values are null. Old registrations remain valid. New registrations with a project
+settings file require selection evidence and reject conflicting shared contexts.
+
 Read the installed `scripts/lib/api.py` for the currently exported operations and exact argument names. Call them through `execute.py --request`, with JSON shaped as `{"operation":"<name>","args":{...}}`. A missing mandatory operation is a package implementation gap: stop that step and report it. Do not substitute hand-edited state, hand-built dashboards, or handwritten Git orchestration.
 
 `validate` accepts `project_root`, optional `change`, `instruction: {text, source}`, and optional `sdd_spec`. Preserve its returned basis. It invokes the companion's check/snapshot interfaces and checks both document and plan approval. An ambiguous change requires selection; missing approval or a missing plan returns to sdd-spec.
@@ -40,6 +49,8 @@ Use JSON null for run-level `task_id`. Read the current revision before a new ev
 | `repair` | `reason`, defect evidence or recorded failure, optional successor `executor`; pass `test_failure: true` for a failed self-check so the test budget is reserved. |
 | `commit`, `accept` | Script gates current evidence, passing review and task ownership; commit precedes acceptance. |
 | `block` | `reason`, `resume_condition`; preserve partial work and evidence. |
+| `worktree_refresh` | `reason`, `evidence` of the fixed execution base; replaces an unfinished, unintegrated task worktree at current HEAD and preserves its work and budgets. Stop task roles and resolve existing run blockers first. See [worktree recovery](worktree-recovery.md). |
+| `worktree_refresh_resolve` | `intent_id`, finished resolver `role_id`, `resolution`; adopts a resolved replacement from a conflicted refresh, verifies preservation and completes old-worktree cleanup. |
 | `budget_extend` | `budget: review|test`, new finite `limit`, explicit user decision `source` and `text`. |
 
 Task states are `pending`, `running`, `verifying`, `reviewing`, `integrating`, `repairing`, `committing`, `blocked`, `accepted`. Run states are `active`, `blocked`, `completed`. Executor DONE and exit 0 alone satisfy neither acceptance nor completion.
@@ -54,7 +65,9 @@ for scoped follow-up work under the [review policy](review-policy.md).
 
 ## Evidence
 
-Register exact commands, cwd, configuration, source, and AC before implementation, including project instructions and CI. Existing mandatory checks remain mandatory. An absent applicable linter is an explained inventory fact, not a successful run. `setup_required` permits preparing a concrete runner inside that task; it does not permit reducing assertions or editing the approved plan. Record before/after setup and run existing checks independently. Final checks use `final_verifier` and capture a final-HEAD snapshot separately from historical task candidates.
+Read the installed companion sdd-spec's `references/document-format.md`, section «Задача и ее проверка», for the shared verification contract. `location` identifies the file/directory defining the check, relative to the project or active worktree root, independently of command cwd. The scripts use the companion's path validator. At check_run, require its location to be a file or directory for every run variant; a missing location yields `unavailable`, even when the command would exit 0 or a procedure result reports success. Additional registry checks may omit location; when supplied, it follows the same contract. A directory's existence does not prove that the expected tests ran.
+
+Register exact commands, cwd, configuration, source, and AC before implementation, including project instructions and CI. Existing mandatory checks remain mandatory. An absent applicable linter is an explained inventory fact, not a successful run. `setup_required` permits creating a planned check or preparing its runner inside that task, including a future test with a known command. Only unresolved setup_required is `planned_absence` at baseline. A missing location under command/procedure blocks; return an incorrectly planned future check to sdd-spec rather than changing the approved run. Record before/after setup and run existing checks independently; setup does not permit reducing assertions. Final checks use `final_verifier` and capture a final-HEAD snapshot separately from historical task candidates.
 
 Retain command, stdout/stderr, exit code, duration, source snapshots, role launch trace, and log hash. Use each command's actual exit status: a later successful shell command cannot repair an earlier failure. Review whether the expected tests actually ran. Unknown dependency scope requires rechecking. Any change to checked bytes, configuration, registry, or normative basis invalidates affected evidence. A required unavailable check blocks; it never becomes green by omission.
 

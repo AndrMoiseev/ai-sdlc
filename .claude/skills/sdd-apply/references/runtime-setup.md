@@ -6,6 +6,9 @@ The repository's `aisdlc-core` APM package includes `sdd-spec` and `sdd-apply`.
 Use the repository's documented APM installation from the consuming project.
 For a manual install, copy both complete skill folders into the same supported
 skill collection; preserve scripts, adjacent locks, assets and agent metadata.
+Update both packages together so they share the verification-location validator.
+The same dependency also supplies `scripts/lib/subagents.py` and the shared
+`references/subagents.md` selection contract. Older copies need updating before new role launches.
 Keep existing execution directories when updating a skill. Dependency discovery
 checks the sibling package first; `sdd_spec` selects an explicit compatible copy.
 Installation adds no Python dependency to the consuming project.

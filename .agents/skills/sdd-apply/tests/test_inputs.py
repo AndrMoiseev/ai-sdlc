@@ -1,5 +1,5 @@
 import pytest
-from lib.inputs import validate
+from lib.inputs import validate, spec_modules
 from lib.common import git
 from conftest import SPEC
 
@@ -42,3 +42,9 @@ def test_invalid(project, mutation):
 def test_missing_dependency(project):
     with pytest.raises(ValueError, match="sdd-spec"):
         validate(project, "demo", {"text": "Do", "source": "message"}, project / "missing")
+
+
+def test_old_companion_reports_shared_contract_requirement(project, monkeypatch):
+    monkeypatch.delattr(spec_modules(SPEC, "paths"), "verification_location")
+    with pytest.raises(ValueError, match="Update sdd-spec together with sdd-apply"):
+        call(project)

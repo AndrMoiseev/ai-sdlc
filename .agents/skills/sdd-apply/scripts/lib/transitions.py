@@ -29,6 +29,14 @@ def reduce(state, event, directory):
         require(state["status"] == "active" and not state["blockers"], "run_blocked", str(state["blockers"]))
     if kind != "role_result":
         assert_basis(state)
+    if task and kind not in {"worktree_refresh", "worktree_refresh_resolve", "role_register", "role_result"}:
+        import json
+        for path in (directory / "runs" / state["run_id"] / "effects").glob("*.json"):
+            effect = json.loads(path.read_text(encoding="utf-8"))
+            require(not (effect["request"]["operation"] == "worktree_refresh"
+                         and effect["request"]["task_id"] == event["task_id"]
+                         and effect["phase"] == "prepared"),
+                    "refresh_pending", "Finish the pending worktree refresh before continuing this task")
     if kind == "role_register" and state["status"] != "active":
         predecessor = state["roles"].get(payload.get("successor_of"))
         require(predecessor and predecessor["status"] == "lost" and predecessor["task_id"] == event["task_id"] and all(b["reason"] == "lost_role" for b in state["blockers"]), "run_blocked", "Only a lost-role successor may be registered while blocked")
@@ -67,6 +75,9 @@ def reduce(state, event, directory):
         return transition(state, task, event, directory)
     if kind in {"worktree_create", "worktree_remove"}:
         from .worktrees import transition
+        return transition(state, task, event, directory)
+    if kind in {"worktree_refresh", "worktree_refresh_resolve"}:
+        from .worktree_refresh import transition
         return transition(state, task, event, directory)
     if kind in {"integrate", "transfer", "integration_resolve"}:
         from .integration import transition
