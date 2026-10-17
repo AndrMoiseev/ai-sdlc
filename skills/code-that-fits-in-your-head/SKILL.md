@@ -7,7 +7,7 @@ description: Software-engineering heuristics based on Mark Seemann's Code That F
 
 Engineering heuristics for sustainable software, based on Mark Seemann's 2021 book and clearly labelled agent-era amendments.
 
-Code examples are C#-first; every rule and the tooling tables are language-neutral.
+Code examples include C#, Kotlin/JVM, and Go; every rule and the tooling tables are language-neutral. Select examples by the affected module's stack using `guidelines.md`.
 
 ## Philosophy (Why This Skill Exists)
 

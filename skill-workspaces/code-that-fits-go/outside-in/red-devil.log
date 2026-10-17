@@ -1,0 +1,7 @@
+﻿error acquiring upload token: creating token file: open C:\Users\Andrew\AppData\Roaming\go\telemetry\local\upload.token: Access is denied.
+--- FAIL: TestValidReservationsWhenDatabaseIsEmpty (0.00s)
+    --- FAIL: TestValidReservationsWhenDatabaseIsEmpty/shli@example.org (0.00s)
+        countercase_test.go:32: no tables available
+FAIL
+FAIL	example.com/red-devil	0.479s
+FAIL

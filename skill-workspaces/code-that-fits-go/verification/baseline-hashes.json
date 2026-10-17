@@ -1,0 +1,242 @@
+﻿[
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\guidelines.md",
+        "Hash":  "3F3E25FD17EE1433B8EB25530904CA6CD669233A2A67BDF06B2356F8F2528A16"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\README.md",
+        "Hash":  "74B01B875CF62F55EA7C9591AE0ADD5E6C07C48C56C7E8E574ADB3A1FFEFA0D5"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\SKILL.md",
+        "Hash":  "997C0361F3B8CB1FEEC06AEA87239670B7CC48473C8F940571BCC61DB78A091D"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\agent-native\\hallucination-debugging.md",
+        "Hash":  "2043C3C3CD65F963A385DC814F7A5898A8BFEAAB2F2BA792E0634B7DB4E24E1E"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\agent-native\\knowledge.md",
+        "Hash":  "6BF72360AD1E7B8C15624E4A286C25D655F93C2D8DD18E8F319E2ECEA8C9883A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\agent-native\\reviewability.md",
+        "Hash":  "6506F79F126D42AE8612E979089C21A632F0EB35525399521D5993836E3D54AA"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\agent-native\\types-as-guardrails.md",
+        "Hash":  "50BDE83DBC1B9C06CF5C335AA7E3093E469E73EEB2A27A48666635D0FDEAA099"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\agent-native\\verification-loops.md",
+        "Hash":  "67BE1B2FB116F92E5FFF54442BB2FBFA6C2AC1E8CEFA923B3191073D8AD0B7A9"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\knowledge.md",
+        "Hash":  "0AB95AE1B3EFEF32146B4C643197248D9450A0D542943CBEF4EBFBE3D06CB2CD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\rules.md",
+        "Hash":  "593CF353CA23C3CD3C976877D981F44400C99930C523EB04CAE9CB537A0A8E02"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\examples\\csharp.md",
+        "Hash":  "39EB377866D2AEE126909D9620759ECE95DC401625478A94364D2834231DB51A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\api-design\\examples\\kotlin.md",
+        "Hash":  "DADBCF8639E397070A73B023C7C1D6839D6E3D72845EAAF59B05A384896DA96B"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\code-navigation\\knowledge.md",
+        "Hash":  "BDAEDEB78BB6D1763CE09C0694EBADA349A8E95C12A7E9583C23C4E265DC0FAB"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\code-navigation\\rules.md",
+        "Hash":  "A76B65B7CDDD0C41EE55DD89B5A416D5715ECB43B15619351D6D341A6EA9AB32"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\codebase-setup\\checklist.md",
+        "Hash":  "7ADA1595A27305D32A7BC047185C336E0175B48DF7D0CE2D18E087A18BF5ADF6"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\codebase-setup\\knowledge.md",
+        "Hash":  "B3E0F52FE61DCF1981876E36B4A575F964832675746554D3FA727225885D63D1"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\codebase-setup\\rules.md",
+        "Hash":  "AE63678F89144F96FE557E5574D0DC2B84951E78769899263EF195CDA195E73F"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\knowledge.md",
+        "Hash":  "914EA284825305FB3C1B157549141E0573C7CDBDD695B9C2109C3CF107DA2DBE"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\patterns.md",
+        "Hash":  "E4119E7F07DE88DC6D9523C9CB691ED32DF335740818078A59D05964CDB1E324"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\rules.md",
+        "Hash":  "0D9B47F3489FB1D3831D7352C4571757AB2AB38F168A91135182B5A38720F681"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\smells.md",
+        "Hash":  "80BCA5364769240D6AC5AE5432A1152CC69EA37999C016ED0525C0513B114746"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\examples\\csharp-aspnetcore.md",
+        "Hash":  "DFB6189BBD6C82AD9A625FC9A70507ECA45615B7F2E950818D2F7184A6F6E477"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\decomposition\\examples\\kotlin.md",
+        "Hash":  "0ED26315A7EAB49B7B1BA70BF122E115EA370232E7BAA4033D140D6D39C3FD12"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\knowledge.md",
+        "Hash":  "65F6E668C926F62C2713DAA833769E6D18382E663AB69A1FC36025C6541BAB4A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\rules.md",
+        "Hash":  "411819DDBC45A685DA58BFB6682B9888905C4B698CE0992F5B3AB575E7FDADBC"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\csharp-aspnetcore-xunit.md",
+        "Hash":  "3271F15A07D049C723FBD1F85A37CA9DE4FF3F6B3F9704A80C7484893B272209"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\kotlin-junit5.md",
+        "Hash":  "CF5652E8C27AF35999C31FE9AAA7D01EC738E26F4A90FC833FCE8DC6B3D930E0"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\encapsulation\\examples\\kotlin.md",
+        "Hash":  "62AC693F20FD06EA73E4503BD53D5319A83D1B1F5E49188EB2EA024FF612F653"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\evolution\\knowledge.md",
+        "Hash":  "BA5C418ED56E94B6C11E212991A1BB08C5DC75625AB43E551FD6A68C3BA79412"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\evolution\\patterns.md",
+        "Hash":  "2060BBEB4057D61E16E507F69383B5E8B5F63F9931BF63DC0B569C77F1103D0D"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\evolution\\rules.md",
+        "Hash":  "FEB3CEEFC0E20C09575A983A7D85069EC57D3FA930B4911DA981884AD146E234"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\evolution\\examples\\csharp-aspnetcore.md",
+        "Hash":  "CB5949BF1DB83B24993BC4DE42FE0A6103DEAD67A61021D6774485AB2E584E3E"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\evolution\\examples\\kotlin.md",
+        "Hash":  "BE193233269F3396A7FC600CB60C94CB9576BDC351835C8DD94BCDDD37DF0A52"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\foundations\\knowledge.md",
+        "Hash":  "E04F44D2115B1E4720DAAFBD1799E1D1D8ECB4AE3FD36E62D0B45A4E2DABA6E4"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\foundations\\rules.md",
+        "Hash":  "3672A67657B22552A1273CF061193D1A44393052ACBA097DED5FD63868D794B1"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\knowledge.md",
+        "Hash":  "46AECE2F4F66E93A52A0D199FAC0B4AB5925100AE8F7B8EB0F14A8954721F46A"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\patterns.md",
+        "Hash":  "A5668D420544502B652D92F0218C023283D5851DC86939620CB5F0A2E27DE558"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\rules.md",
+        "Hash":  "5CBC539B937E969202E51CBB6743948C2251D03D7C8E00C42E0A2C9EA127D127"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\examples\\csharp-aspnetcore-xunit.md",
+        "Hash":  "F6A1B5405D18A67E271291B0E0D9A9EA384A76C6F338ABADDF25B92A833A2840"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\examples\\kotlin-junit5.md",
+        "Hash":  "C9ADDA654A19981FEEDC47E98BB3CBAEDBDC5A4B52BE4C46F1290C22A74E7668"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\outside-in-tdd\\examples\\kotlin-ktor-junit5.md",
+        "Hash":  "BF4DBCAE588CB216E255BC0DD756FA7D9FB6744716FDEDC4B6FE15BBB6F7E41E"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\practices-glossary\\knowledge.md",
+        "Hash":  "2DBC534757E0C54F52D58ECD1E561952F6C9233C968E71160951796B28A9A902"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\security\\checklist.md",
+        "Hash":  "416315B476C383FF8DEF62526F0AAF05D9C93BA5EFEC5BC41A8A89F00478F7DD"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\security\\knowledge.md",
+        "Hash":  "44627A17E330186E787FF3F80AB736B5CA8B250CBD39F2242BA8C8CE14561902"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\security\\rules.md",
+        "Hash":  "F9F501F09374D33707BBE93A400530AEA652DB2F43CA6D73C9DB9A9D872B42E5"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\separation-of-concerns\\knowledge.md",
+        "Hash":  "DDF040B39836C81A1B7EB3EF0A157C0E27BFA405712368947C2438E48770E880"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\separation-of-concerns\\patterns.md",
+        "Hash":  "4EE1816B691CA5DA324A434A4A00FCB55C4046A479BF6D751DF8B6AFCEBEDA01"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\separation-of-concerns\\rules.md",
+        "Hash":  "176E9FB85C5CFAC5D6BEFB80F6D985AF4533B463CA14A9D16D1725A8EFB803C5"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\teamwork-git\\checklist.md",
+        "Hash":  "73F63BB375C0990DEC56ACFFAF4CC9461DD893962BB374E103DCEBB5C36717DB"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\teamwork-git\\knowledge.md",
+        "Hash":  "D1D8555A0BC7DFB38BD25B6AB58AEECD3D03FA2D4FCD9E167C46B0D98F867AA3"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\teamwork-git\\rules.md",
+        "Hash":  "25DB064F7E4EDD92705CC836206C76E4CA8F709FE4E0CF1C9C84995A667E4978"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\tooling\\commands.md",
+        "Hash":  "21A5A0DC229251154EC10C5176759315F1BCE8D03C61B9DB41884EB47206CA37"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\troubleshooting\\knowledge.md",
+        "Hash":  "C12A9507229C7C0FEC6C6F69B26847B01E2611B3418C3BC5491AF5547B797438"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\troubleshooting\\patterns.md",
+        "Hash":  "EC8CF7627EAE16047F3693812FDF6A4033A042745C128BDE8F6244D736AF28E4"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\references\\troubleshooting\\rules.md",
+        "Hash":  "E4E206309DCF82E061B691560717E8F3D25CB0E1F8B9C3A85BC050DE1EE2E186"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\workflows\\add-feature-outside-in.md",
+        "Hash":  "137C348C42C0AF5F498A53287914E08AFF5285BAE9F22B773AA19AC05A889C7C"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\workflows\\debug-defect.md",
+        "Hash":  "F528E9F940284B9FFD0A9346620BCAE40BFFF3D0858B74A9D025F2EF60CA3436"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\workflows\\operationalize-finding.md",
+        "Hash":  "4AC8F0E4CBFB04E08EC62F566092E0ABE4391297618D412659B81CE74C96F266"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\workflows\\review-code.md",
+        "Hash":  "37A6FB797D3086B2C9F82C4D1DCEF00831A21CBD591F6B8C0F4D6A693A56FC70"
+    },
+    {
+        "Path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\skills\\code-that-fits-in-your-head\\workflows\\threat-model.md",
+        "Hash":  "63A28DEE6810B03BCC1F6568635192161FEB4F3463A8BCFB11C025C4961F9DB9"
+    }
+]

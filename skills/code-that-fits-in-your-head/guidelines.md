@@ -22,7 +22,7 @@ This is the routing layer for the skill. Find the user's task or symptom below, 
 
 When a task or workflow points to an `examples/` directory, select files using the following steps:
 
-1. Identify the module being changed and its language/runtime from its source and build configuration. For Kotlin, inspect the relevant `build.gradle.kts`, `build.gradle`, or `pom.xml`; for C#, inspect the relevant `.csproj` and shared build configuration. Resolve framework and test-library choices from declared dependencies and existing imports. In a repository with several stacks, use the affected module's configuration.
+1. Identify the module being changed and its language/runtime from its source and build configuration. For Kotlin, inspect the relevant `build.gradle.kts`, `build.gradle`, or `pom.xml`; for C#, inspect the relevant `.csproj` and shared build configuration. For Go (Golang), inspect the module's `go.mod` (`go` and optional `toolchain` directives), any enclosing `go.work`, and imports in `.go` and `_test.go` files. Resolve framework and test-library choices from declared dependencies and existing imports. In a repository with several stacks, use the affected module's configuration.
 2. Find the current task in the table below. Load its shared rules and only the example file whose requirements match that module. Follow a link to another example only when that additional topic or layer is needed; each selected file counts toward the reference-file budget above.
 3. If no framework-specific file matches, use the framework-independent example for that task when available. Otherwise, use the shared rules and state the missing example coverage. Apply the project's existing stack; the examples do not prescribe new dependencies.
 
@@ -38,7 +38,19 @@ The table is the selection index; reading all example files is unnecessary. Kotl
 | Unit tests, fakes, counter-cases, test spies | [C#, ASP.NET Core, xUnit](references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md) | [Kotlin/JVM + JUnit 5](references/outside-in-tdd/examples/kotlin-junit5.md), examples 3, 4, 6 |
 | HTTP walking skeleton, boundary tests, response postconditions | [C# + ASP.NET Core + xUnit](references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md) | [Kotlin/JVM + Ktor + JUnit 5](references/outside-in-tdd/examples/kotlin-ktor-junit5.md), examples 1, 2, 5 |
 
-The C# files retain the upstream text. The Kotlin files are additions in this fork.
+Go entries target Go 1.22 or later and use only the standard library. Select HTTP examples when the affected boundary uses `net/http` handlers and `httptest`; use unit examples for `testing` tests. A module using Gin, Echo, or another HTTP framework can use the domain examples, but has no framework-specific HTTP example here. Keep its existing dependencies.
+
+| Current task | Go example and requirements |
+|---|---|
+| API design | [Go](references/api-design/examples/go.md), no framework |
+| Domain invariants, parsing, encapsulation | [Go](references/encapsulation/examples/go.md), no framework |
+| Parameterized invariant tests | [Go + testing](references/encapsulation/examples/go-testing.md), standard library |
+| Decomposition | [Go](references/decomposition/examples/go.md), no framework |
+| Evolution | [Go](references/evolution/examples/go.md), standard-library `testing` for flag tests, no framework |
+| Unit tests, fakes, counter-cases, test spies | [Go + testing](references/outside-in-tdd/examples/go-testing.md), examples 3, 4, 6 |
+| HTTP walking skeleton, boundary tests, response postconditions | [Go + net/http + httptest + testing](references/outside-in-tdd/examples/go-net-http-testing.md), examples 1, 2, 5 |
+
+The C# files retain the upstream text. The Kotlin and Go files are additions in this fork.
 
 ---
 
