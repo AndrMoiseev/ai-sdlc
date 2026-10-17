@@ -429,6 +429,92 @@ dependencies:
   local_path: ../../skills/sdd-implement
   declaring_parent: ./packages/aisdlc-core
   anchored_local_path: skills/sdd-implement
+- repo_url: _local/sdd-setup
+  name: sdd-setup
+  version: unknown
+  depth: 2
+  resolved_by: _local/aisdlc-core
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/sdd-setup
+  - .agents/skills/sdd-setup/SKILL.md
+  - .agents/skills/sdd-setup/agents/openai.yaml
+  - .agents/skills/sdd-setup/assets/defaults.json
+  - .agents/skills/sdd-setup/evals/evals.json
+  - .agents/skills/sdd-setup/evals/manual.md
+  - .agents/skills/sdd-setup/references/api.md
+  - .agents/skills/sdd-setup/references/dialogue.md
+  - .agents/skills/sdd-setup/references/hosts.md
+  - .agents/skills/sdd-setup/references/runtime-setup.md
+  - .agents/skills/sdd-setup/scripts/setup.py
+  - .agents/skills/sdd-setup/scripts/setup.py.lock
+  - .agents/skills/sdd-setup/scripts/setup_core.py
+  - .agents/skills/sdd-setup/scripts/test.py
+  - .agents/skills/sdd-setup/scripts/test.py.lock
+  - .agents/skills/sdd-setup/tests/conftest.py
+  - .agents/skills/sdd-setup/tests/pytest.ini
+  - .agents/skills/sdd-setup/tests/test_package.py
+  - .agents/skills/sdd-setup/tests/test_setup.py
+  - .claude/skills/sdd-setup
+  - .claude/skills/sdd-setup/SKILL.md
+  - .claude/skills/sdd-setup/agents/openai.yaml
+  - .claude/skills/sdd-setup/assets/defaults.json
+  - .claude/skills/sdd-setup/evals/evals.json
+  - .claude/skills/sdd-setup/evals/manual.md
+  - .claude/skills/sdd-setup/references/api.md
+  - .claude/skills/sdd-setup/references/dialogue.md
+  - .claude/skills/sdd-setup/references/hosts.md
+  - .claude/skills/sdd-setup/references/runtime-setup.md
+  - .claude/skills/sdd-setup/scripts/setup.py
+  - .claude/skills/sdd-setup/scripts/setup.py.lock
+  - .claude/skills/sdd-setup/scripts/setup_core.py
+  - .claude/skills/sdd-setup/scripts/test.py
+  - .claude/skills/sdd-setup/scripts/test.py.lock
+  - .claude/skills/sdd-setup/tests/conftest.py
+  - .claude/skills/sdd-setup/tests/pytest.ini
+  - .claude/skills/sdd-setup/tests/test_package.py
+  - .claude/skills/sdd-setup/tests/test_setup.py
+  deployed_file_hashes:
+    .agents/skills/sdd-setup/SKILL.md: sha256:41d5e9ad42601baf96f0cebc3be64432d34e32e3e9e03d37a47e0fd4dba9f884
+    .agents/skills/sdd-setup/agents/openai.yaml: sha256:4f09d03b02adb55d0412c350529c3155b1245348babce388b178b8a67ebcd8f8
+    .agents/skills/sdd-setup/assets/defaults.json: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
+    .agents/skills/sdd-setup/evals/evals.json: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
+    .agents/skills/sdd-setup/evals/manual.md: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
+    .agents/skills/sdd-setup/references/api.md: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+    .agents/skills/sdd-setup/references/dialogue.md: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
+    .agents/skills/sdd-setup/references/hosts.md: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
+    .agents/skills/sdd-setup/references/runtime-setup.md: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+    .agents/skills/sdd-setup/scripts/setup.py: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+    .agents/skills/sdd-setup/scripts/setup.py.lock: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
+    .agents/skills/sdd-setup/scripts/setup_core.py: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+    .agents/skills/sdd-setup/scripts/test.py: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
+    .agents/skills/sdd-setup/scripts/test.py.lock: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
+    .agents/skills/sdd-setup/tests/conftest.py: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
+    .agents/skills/sdd-setup/tests/pytest.ini: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
+    .agents/skills/sdd-setup/tests/test_package.py: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+    .agents/skills/sdd-setup/tests/test_setup.py: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
+    .claude/skills/sdd-setup/SKILL.md: sha256:41d5e9ad42601baf96f0cebc3be64432d34e32e3e9e03d37a47e0fd4dba9f884
+    .claude/skills/sdd-setup/agents/openai.yaml: sha256:4f09d03b02adb55d0412c350529c3155b1245348babce388b178b8a67ebcd8f8
+    .claude/skills/sdd-setup/assets/defaults.json: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
+    .claude/skills/sdd-setup/evals/evals.json: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
+    .claude/skills/sdd-setup/evals/manual.md: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
+    .claude/skills/sdd-setup/references/api.md: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+    .claude/skills/sdd-setup/references/dialogue.md: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
+    .claude/skills/sdd-setup/references/hosts.md: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
+    .claude/skills/sdd-setup/references/runtime-setup.md: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+    .claude/skills/sdd-setup/scripts/setup.py: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+    .claude/skills/sdd-setup/scripts/setup.py.lock: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
+    .claude/skills/sdd-setup/scripts/setup_core.py: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+    .claude/skills/sdd-setup/scripts/test.py: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
+    .claude/skills/sdd-setup/scripts/test.py.lock: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
+    .claude/skills/sdd-setup/tests/conftest.py: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
+    .claude/skills/sdd-setup/tests/pytest.ini: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
+    .claude/skills/sdd-setup/tests/test_package.py: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+    .claude/skills/sdd-setup/tests/test_setup.py: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
+  source: local
+  local_path: ../../skills/sdd-setup
+  declaring_parent: ./packages/aisdlc-core
+  anchored_local_path: skills/sdd-setup
 - repo_url: _local/sdd-skill-conductor
   name: sdd-skill-conductor
   version: unknown
@@ -6028,6 +6114,177 @@ deployments:
   content_hash: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990
 - kind: project-relative
   target: claude
+  value: .claude/skills/sdd-setup
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:41d5e9ad42601baf96f0cebc3be64432d34e32e3e9e03d37a47e0fd4dba9f884
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:4f09d03b02adb55d0412c350529c3155b1245348babce388b178b8a67ebcd8f8
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/assets/defaults.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/evals/evals.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/evals/manual.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/references/api.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/references/dialogue.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/references/hosts.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/references/runtime-setup.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/setup.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/setup.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/setup_core.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/test.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/test.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/tests/conftest.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/tests/pytest.ini
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/tests/test_package.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/tests/test_setup.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
+- kind: project-relative
+  target: claude
   value: .claude/skills/sdd-skill-conductor
   runtime: null
   scope: project
@@ -10922,6 +11179,177 @@ deployments:
   - local:skills/sdd-implement
   active_owner: local:skills/sdd-implement
   content_hash: sha256:87da4edbfdc91ab8b75c50f11431b5007bc4703ac7f858ed1aa386c12b2ce990
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:41d5e9ad42601baf96f0cebc3be64432d34e32e3e9e03d37a47e0fd4dba9f884
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:4f09d03b02adb55d0412c350529c3155b1245348babce388b178b8a67ebcd8f8
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/assets/defaults.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/evals/evals.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/evals/manual.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/references/api.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/references/dialogue.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/references/hosts.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/references/runtime-setup.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/setup.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/setup.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/setup_core.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/test.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/test.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/tests/conftest.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/tests/pytest.ini
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/tests/test_package.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/tests/test_setup.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-skill-conductor
