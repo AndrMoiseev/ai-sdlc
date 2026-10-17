@@ -3,6 +3,7 @@ from .common import contained, digest, now, require, write_json
 from .verification import current, independent, valid_evidence
 from .review_policy import proven
 import re
+from pathlib import Path
 
 
 def transition(state, task, event, directory):
@@ -15,11 +16,26 @@ def transition(state, task, event, directory):
         require(p["role_id"] not in state["roles"], "duplicate_role", "Role already registered")
         require(isinstance(p["role_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", p["role_id"]), "role_id", "Use a filesystem-safe role ID")
         require(p["context_id"] != state["owner"], "orchestrator_role", "Use a separate context")
+        from .subagents import resolver
+        selection = p.get("agent_selection")
+        configuration = resolver(state)
+        _, settings_source, _ = configuration.settings(Path(state["basis"]["project_root"]))
+        require(selection is not None or settings_source is None, "agent_selection_missing",
+                "Resolve the role from project settings before launching and registering it")
+        if selection is not None:
+            configuration.validate_selection(selection, state["basis"]["project_root"],
+                                             "sdd-apply." + p["kind"], p["host"])
         if p["kind"] == "executor":
             require(not any(state["roles"][r]["kind"] == "executor" and state["roles"][r]["status"] == "active" for r in task["roles"]), "writer_active", "Finish or reconcile the previous executor before assigning another")
         for role in state["roles"].values():
             if role["context_id"] == p["context_id"]:
                 require(role["task_id"] == task["plan"]["id"] and role["kind"] in {"reviewer", "verifier"} and p["kind"] in {"reviewer", "verifier"}, "context_reused", "Only verifier/reviewer of the same task may share a fresh context")
+                previous = role.get("agent_selection")
+                if selection is not None or previous is not None:
+                    require(selection is not None and previous is not None
+                            and selection["mode"] != "native-agent" and previous["mode"] != "native-agent"
+                            and configuration.launch_identity(selection) == configuration.launch_identity(previous),
+                            "agent_selection_conflict", "Different agent selections require separate fresh contexts")
         require(p["capabilities"].get("fresh_context") is True, "host_limits", "Fresh context mechanism unavailable; distinguish busy slots from unsupported host")
         role = {**p, "task_id": task["plan"]["id"], "status": "active", "registered_at": now()}
         state["roles"][p["role_id"]] = role

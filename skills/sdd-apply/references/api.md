@@ -1,5 +1,14 @@
 # Script and event contract
 
+`resolve_agent` is a read-only operation: pass execution `directory`, role `kind`,
+`host`, observed `parent_model`, optional `parent_effort`, and for Claude Code the
+observed `available_agents` array. It uses the stored project root and sdd-spec
+dependency. Retain its result as `agent_selection` in `role_register`; see
+[subagent selection](subagents.md). It selects parameters, not a running agent.
+Optional `model_observation` records actual model/effort and source trace; unknown
+values are null. Old registrations remain valid. New registrations with a project
+settings file require selection evidence and reject conflicting shared contexts.
+
 Read the installed `scripts/lib/api.py` for the currently exported operations and exact argument names. Call them through `execute.py --request`, with JSON shaped as `{"operation":"<name>","args":{...}}`. A missing mandatory operation is a package implementation gap: stop that step and report it. Do not substitute hand-edited state, hand-built dashboards, or handwritten Git orchestration.
 
 `validate` accepts `project_root`, optional `change`, `instruction: {text, source}`, and optional `sdd_spec`. Preserve its returned basis. It invokes the companion's check/snapshot interfaces and checks both document and plan approval. An ambiguous change requires selection; missing approval or a missing plan returns to sdd-spec.

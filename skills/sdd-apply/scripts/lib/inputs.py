@@ -43,6 +43,8 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None):
     require((directory / "tasks.md").is_file(), "missing_plan", "Return to sdd-spec for an approved plan")
     dependency = companion(project, sdd_spec)
     require(callable(getattr(spec_modules(dependency, "paths"), "verification_location", None)), "sdd_spec_incompatible", "Update sdd-spec together with sdd-apply: shared verification location validator is missing")
+    require((dependency / "scripts/lib/subagents.py").is_file(), "sdd_spec_incompatible",
+            "Update sdd-spec together with sdd-apply: shared subagent resolver is missing")
     checks = {}
     for stage in ("documents", "plan"):
         checks[stage] = spec_call(dependency, project, change, stage, "check.py")
