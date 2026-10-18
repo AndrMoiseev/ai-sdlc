@@ -5,8 +5,8 @@
 существенные предложения агента остаются открытыми до решения пользователя.
 
 Для записи и восстановления журнала, вопросов и checkpoint прочитай
-[общую основу формата](document-format.md) и
-[формат обсуждения и восстановления](document-format-discussion.md).
+[общую основу формата](../../sdd-shared/references/document-format.md) и
+[формат обсуждения и восстановления](../../sdd-shared/references/document-format-discussion.md).
 
 ## Граница самостоятельности
 

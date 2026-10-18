@@ -17,7 +17,7 @@ operation: add
 
 Запишите полное предлагаемое поведение затронутого требования, включая ошибки и ограничения.
 
-Для modify/remove добавьте source по [нормативному формату](../references/document-format-normative.md#изменение-baseline). Удаление тоже имеет критерии результата. Сценарии с SCN-ID не нужны.
+Для modify/remove добавьте source по [нормативному формату](../../sdd-shared/references/document-format-normative.md#изменение-baseline). Удаление тоже имеет критерии результата. Сценарии с SCN-ID не нужны.
 
 ### Критерий приемки
 

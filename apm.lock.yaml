@@ -74,12 +74,14 @@ dependencies:
   - .agents/skills/sdd-apply/scripts/lib/scheduler.py
   - .agents/skills/sdd-apply/scripts/lib/server.py
   - .agents/skills/sdd-apply/scripts/lib/state.py
+  - .agents/skills/sdd-apply/scripts/lib/state_view.py
   - .agents/skills/sdd-apply/scripts/lib/subagents.py
   - .agents/skills/sdd-apply/scripts/lib/transitions.py
   - .agents/skills/sdd-apply/scripts/lib/verification.py
   - .agents/skills/sdd-apply/scripts/lib/waves.py
   - .agents/skills/sdd-apply/scripts/lib/worktree_refresh.py
   - .agents/skills/sdd-apply/scripts/lib/worktrees.py
+  - .agents/skills/sdd-apply/scripts/shared.py
   - .agents/skills/sdd-apply/scripts/test.py
   - .agents/skills/sdd-apply/scripts/test.py.lock
   - .agents/skills/sdd-apply/tests/conftest.py
@@ -94,6 +96,7 @@ dependencies:
   - .agents/skills/sdd-apply/tests/test_modes.py
   - .agents/skills/sdd-apply/tests/test_package.py
   - .agents/skills/sdd-apply/tests/test_plan_revision.py
+  - .agents/skills/sdd-apply/tests/test_read_views.py
   - .agents/skills/sdd-apply/tests/test_resume.py
   - .agents/skills/sdd-apply/tests/test_review_policy.py
   - .agents/skills/sdd-apply/tests/test_review_regressions.py
@@ -101,6 +104,7 @@ dependencies:
   - .agents/skills/sdd-apply/tests/test_runtime.py
   - .agents/skills/sdd-apply/tests/test_sequential.py
   - .agents/skills/sdd-apply/tests/test_setup_and_revision.py
+  - .agents/skills/sdd-apply/tests/test_shared_dependency.py
   - .agents/skills/sdd-apply/tests/test_state.py
   - .agents/skills/sdd-apply/tests/test_subagents.py
   - .agents/skills/sdd-apply/tests/test_verification.py
@@ -151,12 +155,14 @@ dependencies:
   - .claude/skills/sdd-apply/scripts/lib/scheduler.py
   - .claude/skills/sdd-apply/scripts/lib/server.py
   - .claude/skills/sdd-apply/scripts/lib/state.py
+  - .claude/skills/sdd-apply/scripts/lib/state_view.py
   - .claude/skills/sdd-apply/scripts/lib/subagents.py
   - .claude/skills/sdd-apply/scripts/lib/transitions.py
   - .claude/skills/sdd-apply/scripts/lib/verification.py
   - .claude/skills/sdd-apply/scripts/lib/waves.py
   - .claude/skills/sdd-apply/scripts/lib/worktree_refresh.py
   - .claude/skills/sdd-apply/scripts/lib/worktrees.py
+  - .claude/skills/sdd-apply/scripts/shared.py
   - .claude/skills/sdd-apply/scripts/test.py
   - .claude/skills/sdd-apply/scripts/test.py.lock
   - .claude/skills/sdd-apply/tests/conftest.py
@@ -171,6 +177,7 @@ dependencies:
   - .claude/skills/sdd-apply/tests/test_modes.py
   - .claude/skills/sdd-apply/tests/test_package.py
   - .claude/skills/sdd-apply/tests/test_plan_revision.py
+  - .claude/skills/sdd-apply/tests/test_read_views.py
   - .claude/skills/sdd-apply/tests/test_resume.py
   - .claude/skills/sdd-apply/tests/test_review_policy.py
   - .claude/skills/sdd-apply/tests/test_review_regressions.py
@@ -178,6 +185,7 @@ dependencies:
   - .claude/skills/sdd-apply/tests/test_runtime.py
   - .claude/skills/sdd-apply/tests/test_sequential.py
   - .claude/skills/sdd-apply/tests/test_setup_and_revision.py
+  - .claude/skills/sdd-apply/tests/test_shared_dependency.py
   - .claude/skills/sdd-apply/tests/test_state.py
   - .claude/skills/sdd-apply/tests/test_subagents.py
   - .claude/skills/sdd-apply/tests/test_verification.py
@@ -185,7 +193,7 @@ dependencies:
   - .claude/skills/sdd-apply/tests/test_worktree_refresh.py
   - .claude/skills/sdd-apply/tests/test_worktrees.py
   deployed_file_hashes:
-    .agents/skills/sdd-apply/SKILL.md: sha256:268199ac6097de09ae38c0a60bbf21a7316f52a6de8e35890792aa28e0a78418
+    .agents/skills/sdd-apply/SKILL.md: sha256:2d89d5b880abe5d801dd59c2c7b83732fe317415fd4d98430a6dae3464de3c98
     .agents/skills/sdd-apply/agents/claude-code.md: sha256:631a1b39d149670f48740664dfb777976f0b851d6bc4ca3f3f41bd3ff404b8a8
     .agents/skills/sdd-apply/agents/codex.md: sha256:304108e25fc67c20cf0a9aeb28274eea81fb89557fb86009e76d7256c1302e6c
     .agents/skills/sdd-apply/agents/executor.md: sha256:a44bf5d698ee2b0ddc2803dbb0b2133d3944b1e71e8c2f3f4f713c8e7bae7133
@@ -199,14 +207,14 @@ dependencies:
     .agents/skills/sdd-apply/flows/execute-sequential.md: sha256:59ce395ad2f3014dc0580d904b1e8214fe1e0c1d5ad687930e63937f38db70b8
     .agents/skills/sdd-apply/flows/finalize.md: sha256:b0bb5d1fd4dd0f25e6635233071c0a5ecb6e9364ba35c3a8f4ded539a96df3dd
     .agents/skills/sdd-apply/flows/repair.md: sha256:9f86c0385d404b9198dc3722e41b5e0f3d84360099a4d20f4c53a0fb04aa4092
-    .agents/skills/sdd-apply/flows/resume.md: sha256:aedc94b68bdc71dca7b3f0b0d31abb279dee891f6b8d01ecf2e3279e87429ffd
-    .agents/skills/sdd-apply/flows/start.md: sha256:0916bb56090fe0b129ffa8e97ec9e7afb7d2bcf0c13ce964923c071b385d7806
-    .agents/skills/sdd-apply/references/api.md: sha256:9ee90697c2869c45e81182bbe042e3f1971bf38453900dc1b077a49a1bd4ee6e
+    .agents/skills/sdd-apply/flows/resume.md: sha256:9d9499225e3d6196789b4c330080ef52c63f4c059e86a6ff3e6722eec533c81f
+    .agents/skills/sdd-apply/flows/start.md: sha256:0026e603d3c86b5fb3ea643bd22d3c3de69f2bdb2831b0b0d380eeb196c9b2ff
+    .agents/skills/sdd-apply/references/api.md: sha256:4864201f104081eaef9b7720e3eaf9650974358e4784a6db61c832720cb97b03
     .agents/skills/sdd-apply/references/progress.md: sha256:01d7317b27fba3944550e9cecbfcbb805728d987ddbc4d1b35fcf6048dc41a74
     .agents/skills/sdd-apply/references/review-policy.md: sha256:7c58a476de7596bab989b8e2d4000e6ae8316501026690c3b4f4c49a5c6ea809
     .agents/skills/sdd-apply/references/roles.md: sha256:afdeba229e198a328f551e7eb5e2bcbdfface05916dd031450cccd7142187bf2
-    .agents/skills/sdd-apply/references/runtime-setup.md: sha256:f2af0c972c3034b37bd5ff16287b004834f6624dcfcb4ea0c328a5e7b95eed86
-    .agents/skills/sdd-apply/references/subagents.md: sha256:16e2061b9369f447e2f2bdb4c0320356f6b255467bb2bd3141f49121fe447738
+    .agents/skills/sdd-apply/references/runtime-setup.md: sha256:68d8a1f06368a1ef47fb7ab2a03cbfa3e50e6a28b35b4388f45a4b6d50ea1eca
+    .agents/skills/sdd-apply/references/subagents.md: sha256:708539713e7aea76b67d46b0dbd0f9309c0e11a772f920ceae8a4d638c93d0e1
     .agents/skills/sdd-apply/references/worktree-recovery.md: sha256:77c06e4662ee38fb611a0408855e7ac4df56fb1537e771cd9a450556c92f1ee4
     .agents/skills/sdd-apply/schemas/event.schema.json: sha256:e15742bb68a9e2a3cd2b6f9a1f0194d3306974190a620e8422fc309029ade0c3
     .agents/skills/sdd-apply/schemas/state.schema.json: sha256:0ea1ece004e3af4a2f99d2a1959ea819683f74c871b95da36ef43759427176e6
@@ -220,20 +228,22 @@ dependencies:
     .agents/skills/sdd-apply/scripts/lib/dashboard.py: sha256:b6b636edcb5b15fba526b04aeb5bc644b0b9e1274c1c0f514482dc20437bd5b7
     .agents/skills/sdd-apply/scripts/lib/effects.py: sha256:54d1a37313901a5f29c18f13a89ae79231cdaa132847a4a04cb08549fbfc9cc2
     .agents/skills/sdd-apply/scripts/lib/finalize.py: sha256:8049e2e189b2060d49d56c06f93c5060ccb212645c6287f1024901daeaa69cb3
-    .agents/skills/sdd-apply/scripts/lib/inputs.py: sha256:e89d34b136badbf230a6222f98903ca517584591a2d105ba19121188d0e1c10e
+    .agents/skills/sdd-apply/scripts/lib/inputs.py: sha256:70283ac3c9a2b9d5a5fe3775f2ab4249d2cdcc9c50bfc13f9649d720ab85785f
     .agents/skills/sdd-apply/scripts/lib/integration.py: sha256:3b77cf7d1628f8a9b3f4655417c4edd22e8369031924bb71230f9fed92f159f3
-    .agents/skills/sdd-apply/scripts/lib/resume.py: sha256:f6cfccd114dfdb52831afca534963eb3e0a4b00f7aaa094c802e91fe726684b2
+    .agents/skills/sdd-apply/scripts/lib/resume.py: sha256:1af49511feb82025bbf079ddb134cfe72be8685831d0b5830eb9c2fc6808f067
     .agents/skills/sdd-apply/scripts/lib/review_policy.py: sha256:069a449a05a17af7136756f674be1148eb1803ffae63912f64f414b890ebd822
     .agents/skills/sdd-apply/scripts/lib/roles.py: sha256:27cba8d76e261f7b5797f51b46c7feea6a123499a7bad193670ac0e871726662
     .agents/skills/sdd-apply/scripts/lib/scheduler.py: sha256:cd1a73766b9c57778246ea45bd6a42ea787f703f80aa2a838d4b8416ecd1610d
     .agents/skills/sdd-apply/scripts/lib/server.py: sha256:fbcf8e3e047b5d78333ec5ceaac4e975cde51ed4b31cdb4c189d21e9a6510861
-    .agents/skills/sdd-apply/scripts/lib/state.py: sha256:fe20a3fd9d46481446d70f0dc8b54cf9a030fbc46fc4b99bc5054f23d196d58d
-    .agents/skills/sdd-apply/scripts/lib/subagents.py: sha256:ddf41fa1d5521da53560f4592f0a975693ccca33163713fe74d9ad49fab96e42
+    .agents/skills/sdd-apply/scripts/lib/state.py: sha256:e090086cf61becd36989d533f87839fdb5693c2d27d8eccf69b33883e7079d08
+    .agents/skills/sdd-apply/scripts/lib/state_view.py: sha256:c6354ec32b32a0400798e3a60c703659cccb083840d6f6504d65bf881089adca
+    .agents/skills/sdd-apply/scripts/lib/subagents.py: sha256:a58f1e7e1cc5f77a69ea0ab9b43f5fc23b170f43823eeb01775be5c250886d87
     .agents/skills/sdd-apply/scripts/lib/transitions.py: sha256:585c1c1457e73b90aa7f58fe2ccca0cf1828e89b0d2f9fca42f31fc33f74db3c
-    .agents/skills/sdd-apply/scripts/lib/verification.py: sha256:607cec3e8690d13cd058d5cf7aa7e4c2f1d219f3c0c652888e33d4e542b0c369
+    .agents/skills/sdd-apply/scripts/lib/verification.py: sha256:3732ef69d987a516af3bf5c838e23722d1ab56c4ae620ba32c92117870a7b720
     .agents/skills/sdd-apply/scripts/lib/waves.py: sha256:140b96941166a64c9be2182dc25cf378a781cba000d62d03141e936adeae9dc9
     .agents/skills/sdd-apply/scripts/lib/worktree_refresh.py: sha256:a5e560913d39fcab24165856b1b76c7c1eb225cbf5d11cf58a6e9602445de8ae
     .agents/skills/sdd-apply/scripts/lib/worktrees.py: sha256:23fe8debe651f8b80f958b1ce9bb45cc9947363cdf48c1e8b5407add94e97d03
+    .agents/skills/sdd-apply/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
     .agents/skills/sdd-apply/scripts/test.py: sha256:d9fe35c3c5015bebc3f7b9007dafb1dc584c48db9369ed47a992252a7464790d
     .agents/skills/sdd-apply/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
     .agents/skills/sdd-apply/tests/conftest.py: sha256:151efd712df5a0481dcf83356b1070827d0aee068fc33a4578c0e284385b7c12
@@ -243,25 +253,27 @@ dependencies:
     .agents/skills/sdd-apply/tests/test_dashboard.py: sha256:0576f96d949378427f1a264a8bd87b24e517f5fba99df22e39ff31d35d01ec4f
     .agents/skills/sdd-apply/tests/test_dashboard_browser.py: sha256:a88131ed91d8407ae17969fea53228bebb2e61ec8819395f26e69ead5a9b6c97
     .agents/skills/sdd-apply/tests/test_end_to_end.py: sha256:41658502bf277ec1d06310ab379301b757fb76a9e08452d66ae971e8c5939704
-    .agents/skills/sdd-apply/tests/test_inputs.py: sha256:0f0d71a647e10a3146dd85a7c1a879d7f8fc6505fec1bbe5dafa2d2968af66c3
+    .agents/skills/sdd-apply/tests/test_inputs.py: sha256:9ffecb3a4f2d36981b707c52de43d2ac951ad6184501fa4eaa79bf5388372233
     .agents/skills/sdd-apply/tests/test_integration.py: sha256:d3a0bc39d78633fb0f49218c72a1624b3eead89153eb98fa405550f4af482720
     .agents/skills/sdd-apply/tests/test_modes.py: sha256:18b0e7f487d231ccf44ef2d45e78fe79f55ea492189fff4ec3ab00afa73e1997
     .agents/skills/sdd-apply/tests/test_package.py: sha256:f912946e3c2f8f16e2e86ba5c8d4667fc72093053260d50035f6dca435441e5f
     .agents/skills/sdd-apply/tests/test_plan_revision.py: sha256:4b2bd2cd6063853b897c4d1ec53b5e2ce2230d14356bd177a8b0d41115e1c0fa
+    .agents/skills/sdd-apply/tests/test_read_views.py: sha256:7f5e7d991ab9c3d4ce0966828bcd5034b851455ef6443c5a51aa807290e4b81e
     .agents/skills/sdd-apply/tests/test_resume.py: sha256:fe8105aaf1f56a0f04e40e1b39597aa2b6b9f83e2c989748317af83d9c4d11da
     .agents/skills/sdd-apply/tests/test_review_policy.py: sha256:be1838423af9ea51add9aa7ca4e5f3cdfca696adc333be7808d1df8256295f46
     .agents/skills/sdd-apply/tests/test_review_regressions.py: sha256:f1f5ade538726d07705934d77863efcf624f6b30384395f9644a51f7b54984ef
     .agents/skills/sdd-apply/tests/test_roles.py: sha256:f03433ab434e1d56ebf5ba1f0e0bd202c4b19818518dda31ac078f56b66ec8a0
-    .agents/skills/sdd-apply/tests/test_runtime.py: sha256:7c0dddedcc41258e959877518061ec50fd7d11abd18a8b547ad6ef6aa9acb7e1
+    .agents/skills/sdd-apply/tests/test_runtime.py: sha256:fb5f576a4329a564b9c1f8c05ee1d5abd8e3c269f3a869bfff3aa9f1d0fc3762
     .agents/skills/sdd-apply/tests/test_sequential.py: sha256:1d08fbb6b2f3ed7e2bf2675617a147ddbef32f4039d8757b8f7eb4d0b864bef3
     .agents/skills/sdd-apply/tests/test_setup_and_revision.py: sha256:8822435f5a93e2a63b601ab5b844b59f4ad891d6ac742bb7a5348c225bad1633
+    .agents/skills/sdd-apply/tests/test_shared_dependency.py: sha256:ceb5f8b1ce0c234f9f8ff9d84579d89add5f2319b5e4053487446553a2aa8707
     .agents/skills/sdd-apply/tests/test_state.py: sha256:2717c8ad92933d256e9a2671baeafe7b18b6e5e3c1e664fa1f098ab3ec4f1d4e
-    .agents/skills/sdd-apply/tests/test_subagents.py: sha256:afd64acbdad6754fcbcde4b705716b5ba4604ad1d51616d9753946a2bee0fc20
+    .agents/skills/sdd-apply/tests/test_subagents.py: sha256:72e0097bc93be2c8d2fc37e68cee6ff60c0c03e55b618db7e72992e66c787600
     .agents/skills/sdd-apply/tests/test_verification.py: sha256:3434de5dff81716c73aedaa02b80b10d6f3688b6b5db158e3ad598ddf835f080
     .agents/skills/sdd-apply/tests/test_waves.py: sha256:f1ac516ae74e77041efe651f79c0a0f6176f097987c8a4bb112d03d028b9adbe
     .agents/skills/sdd-apply/tests/test_worktree_refresh.py: sha256:734e0079fb074a3f46d7fca0e85cd3923bac3173e8f920f3ea5f0c3c378f847e
     .agents/skills/sdd-apply/tests/test_worktrees.py: sha256:c9cb03d6524fd80e2d2458dbc3d9ebeeb2abad2d71ca1fec347a59a1f1afbf87
-    .claude/skills/sdd-apply/SKILL.md: sha256:268199ac6097de09ae38c0a60bbf21a7316f52a6de8e35890792aa28e0a78418
+    .claude/skills/sdd-apply/SKILL.md: sha256:2d89d5b880abe5d801dd59c2c7b83732fe317415fd4d98430a6dae3464de3c98
     .claude/skills/sdd-apply/agents/claude-code.md: sha256:631a1b39d149670f48740664dfb777976f0b851d6bc4ca3f3f41bd3ff404b8a8
     .claude/skills/sdd-apply/agents/codex.md: sha256:304108e25fc67c20cf0a9aeb28274eea81fb89557fb86009e76d7256c1302e6c
     .claude/skills/sdd-apply/agents/executor.md: sha256:a44bf5d698ee2b0ddc2803dbb0b2133d3944b1e71e8c2f3f4f713c8e7bae7133
@@ -275,14 +287,14 @@ dependencies:
     .claude/skills/sdd-apply/flows/execute-sequential.md: sha256:59ce395ad2f3014dc0580d904b1e8214fe1e0c1d5ad687930e63937f38db70b8
     .claude/skills/sdd-apply/flows/finalize.md: sha256:b0bb5d1fd4dd0f25e6635233071c0a5ecb6e9364ba35c3a8f4ded539a96df3dd
     .claude/skills/sdd-apply/flows/repair.md: sha256:9f86c0385d404b9198dc3722e41b5e0f3d84360099a4d20f4c53a0fb04aa4092
-    .claude/skills/sdd-apply/flows/resume.md: sha256:aedc94b68bdc71dca7b3f0b0d31abb279dee891f6b8d01ecf2e3279e87429ffd
-    .claude/skills/sdd-apply/flows/start.md: sha256:0916bb56090fe0b129ffa8e97ec9e7afb7d2bcf0c13ce964923c071b385d7806
-    .claude/skills/sdd-apply/references/api.md: sha256:9ee90697c2869c45e81182bbe042e3f1971bf38453900dc1b077a49a1bd4ee6e
+    .claude/skills/sdd-apply/flows/resume.md: sha256:9d9499225e3d6196789b4c330080ef52c63f4c059e86a6ff3e6722eec533c81f
+    .claude/skills/sdd-apply/flows/start.md: sha256:0026e603d3c86b5fb3ea643bd22d3c3de69f2bdb2831b0b0d380eeb196c9b2ff
+    .claude/skills/sdd-apply/references/api.md: sha256:4864201f104081eaef9b7720e3eaf9650974358e4784a6db61c832720cb97b03
     .claude/skills/sdd-apply/references/progress.md: sha256:01d7317b27fba3944550e9cecbfcbb805728d987ddbc4d1b35fcf6048dc41a74
     .claude/skills/sdd-apply/references/review-policy.md: sha256:7c58a476de7596bab989b8e2d4000e6ae8316501026690c3b4f4c49a5c6ea809
     .claude/skills/sdd-apply/references/roles.md: sha256:afdeba229e198a328f551e7eb5e2bcbdfface05916dd031450cccd7142187bf2
-    .claude/skills/sdd-apply/references/runtime-setup.md: sha256:f2af0c972c3034b37bd5ff16287b004834f6624dcfcb4ea0c328a5e7b95eed86
-    .claude/skills/sdd-apply/references/subagents.md: sha256:16e2061b9369f447e2f2bdb4c0320356f6b255467bb2bd3141f49121fe447738
+    .claude/skills/sdd-apply/references/runtime-setup.md: sha256:68d8a1f06368a1ef47fb7ab2a03cbfa3e50e6a28b35b4388f45a4b6d50ea1eca
+    .claude/skills/sdd-apply/references/subagents.md: sha256:708539713e7aea76b67d46b0dbd0f9309c0e11a772f920ceae8a4d638c93d0e1
     .claude/skills/sdd-apply/references/worktree-recovery.md: sha256:77c06e4662ee38fb611a0408855e7ac4df56fb1537e771cd9a450556c92f1ee4
     .claude/skills/sdd-apply/schemas/event.schema.json: sha256:e15742bb68a9e2a3cd2b6f9a1f0194d3306974190a620e8422fc309029ade0c3
     .claude/skills/sdd-apply/schemas/state.schema.json: sha256:0ea1ece004e3af4a2f99d2a1959ea819683f74c871b95da36ef43759427176e6
@@ -296,20 +308,22 @@ dependencies:
     .claude/skills/sdd-apply/scripts/lib/dashboard.py: sha256:b6b636edcb5b15fba526b04aeb5bc644b0b9e1274c1c0f514482dc20437bd5b7
     .claude/skills/sdd-apply/scripts/lib/effects.py: sha256:54d1a37313901a5f29c18f13a89ae79231cdaa132847a4a04cb08549fbfc9cc2
     .claude/skills/sdd-apply/scripts/lib/finalize.py: sha256:8049e2e189b2060d49d56c06f93c5060ccb212645c6287f1024901daeaa69cb3
-    .claude/skills/sdd-apply/scripts/lib/inputs.py: sha256:e89d34b136badbf230a6222f98903ca517584591a2d105ba19121188d0e1c10e
+    .claude/skills/sdd-apply/scripts/lib/inputs.py: sha256:70283ac3c9a2b9d5a5fe3775f2ab4249d2cdcc9c50bfc13f9649d720ab85785f
     .claude/skills/sdd-apply/scripts/lib/integration.py: sha256:3b77cf7d1628f8a9b3f4655417c4edd22e8369031924bb71230f9fed92f159f3
-    .claude/skills/sdd-apply/scripts/lib/resume.py: sha256:f6cfccd114dfdb52831afca534963eb3e0a4b00f7aaa094c802e91fe726684b2
+    .claude/skills/sdd-apply/scripts/lib/resume.py: sha256:1af49511feb82025bbf079ddb134cfe72be8685831d0b5830eb9c2fc6808f067
     .claude/skills/sdd-apply/scripts/lib/review_policy.py: sha256:069a449a05a17af7136756f674be1148eb1803ffae63912f64f414b890ebd822
     .claude/skills/sdd-apply/scripts/lib/roles.py: sha256:27cba8d76e261f7b5797f51b46c7feea6a123499a7bad193670ac0e871726662
     .claude/skills/sdd-apply/scripts/lib/scheduler.py: sha256:cd1a73766b9c57778246ea45bd6a42ea787f703f80aa2a838d4b8416ecd1610d
     .claude/skills/sdd-apply/scripts/lib/server.py: sha256:fbcf8e3e047b5d78333ec5ceaac4e975cde51ed4b31cdb4c189d21e9a6510861
-    .claude/skills/sdd-apply/scripts/lib/state.py: sha256:fe20a3fd9d46481446d70f0dc8b54cf9a030fbc46fc4b99bc5054f23d196d58d
-    .claude/skills/sdd-apply/scripts/lib/subagents.py: sha256:ddf41fa1d5521da53560f4592f0a975693ccca33163713fe74d9ad49fab96e42
+    .claude/skills/sdd-apply/scripts/lib/state.py: sha256:e090086cf61becd36989d533f87839fdb5693c2d27d8eccf69b33883e7079d08
+    .claude/skills/sdd-apply/scripts/lib/state_view.py: sha256:c6354ec32b32a0400798e3a60c703659cccb083840d6f6504d65bf881089adca
+    .claude/skills/sdd-apply/scripts/lib/subagents.py: sha256:a58f1e7e1cc5f77a69ea0ab9b43f5fc23b170f43823eeb01775be5c250886d87
     .claude/skills/sdd-apply/scripts/lib/transitions.py: sha256:585c1c1457e73b90aa7f58fe2ccca0cf1828e89b0d2f9fca42f31fc33f74db3c
-    .claude/skills/sdd-apply/scripts/lib/verification.py: sha256:607cec3e8690d13cd058d5cf7aa7e4c2f1d219f3c0c652888e33d4e542b0c369
+    .claude/skills/sdd-apply/scripts/lib/verification.py: sha256:3732ef69d987a516af3bf5c838e23722d1ab56c4ae620ba32c92117870a7b720
     .claude/skills/sdd-apply/scripts/lib/waves.py: sha256:140b96941166a64c9be2182dc25cf378a781cba000d62d03141e936adeae9dc9
     .claude/skills/sdd-apply/scripts/lib/worktree_refresh.py: sha256:a5e560913d39fcab24165856b1b76c7c1eb225cbf5d11cf58a6e9602445de8ae
     .claude/skills/sdd-apply/scripts/lib/worktrees.py: sha256:23fe8debe651f8b80f958b1ce9bb45cc9947363cdf48c1e8b5407add94e97d03
+    .claude/skills/sdd-apply/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
     .claude/skills/sdd-apply/scripts/test.py: sha256:d9fe35c3c5015bebc3f7b9007dafb1dc584c48db9369ed47a992252a7464790d
     .claude/skills/sdd-apply/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
     .claude/skills/sdd-apply/tests/conftest.py: sha256:151efd712df5a0481dcf83356b1070827d0aee068fc33a4578c0e284385b7c12
@@ -319,20 +333,22 @@ dependencies:
     .claude/skills/sdd-apply/tests/test_dashboard.py: sha256:0576f96d949378427f1a264a8bd87b24e517f5fba99df22e39ff31d35d01ec4f
     .claude/skills/sdd-apply/tests/test_dashboard_browser.py: sha256:a88131ed91d8407ae17969fea53228bebb2e61ec8819395f26e69ead5a9b6c97
     .claude/skills/sdd-apply/tests/test_end_to_end.py: sha256:41658502bf277ec1d06310ab379301b757fb76a9e08452d66ae971e8c5939704
-    .claude/skills/sdd-apply/tests/test_inputs.py: sha256:0f0d71a647e10a3146dd85a7c1a879d7f8fc6505fec1bbe5dafa2d2968af66c3
+    .claude/skills/sdd-apply/tests/test_inputs.py: sha256:9ffecb3a4f2d36981b707c52de43d2ac951ad6184501fa4eaa79bf5388372233
     .claude/skills/sdd-apply/tests/test_integration.py: sha256:d3a0bc39d78633fb0f49218c72a1624b3eead89153eb98fa405550f4af482720
     .claude/skills/sdd-apply/tests/test_modes.py: sha256:18b0e7f487d231ccf44ef2d45e78fe79f55ea492189fff4ec3ab00afa73e1997
     .claude/skills/sdd-apply/tests/test_package.py: sha256:f912946e3c2f8f16e2e86ba5c8d4667fc72093053260d50035f6dca435441e5f
     .claude/skills/sdd-apply/tests/test_plan_revision.py: sha256:4b2bd2cd6063853b897c4d1ec53b5e2ce2230d14356bd177a8b0d41115e1c0fa
+    .claude/skills/sdd-apply/tests/test_read_views.py: sha256:7f5e7d991ab9c3d4ce0966828bcd5034b851455ef6443c5a51aa807290e4b81e
     .claude/skills/sdd-apply/tests/test_resume.py: sha256:fe8105aaf1f56a0f04e40e1b39597aa2b6b9f83e2c989748317af83d9c4d11da
     .claude/skills/sdd-apply/tests/test_review_policy.py: sha256:be1838423af9ea51add9aa7ca4e5f3cdfca696adc333be7808d1df8256295f46
     .claude/skills/sdd-apply/tests/test_review_regressions.py: sha256:f1f5ade538726d07705934d77863efcf624f6b30384395f9644a51f7b54984ef
     .claude/skills/sdd-apply/tests/test_roles.py: sha256:f03433ab434e1d56ebf5ba1f0e0bd202c4b19818518dda31ac078f56b66ec8a0
-    .claude/skills/sdd-apply/tests/test_runtime.py: sha256:7c0dddedcc41258e959877518061ec50fd7d11abd18a8b547ad6ef6aa9acb7e1
+    .claude/skills/sdd-apply/tests/test_runtime.py: sha256:fb5f576a4329a564b9c1f8c05ee1d5abd8e3c269f3a869bfff3aa9f1d0fc3762
     .claude/skills/sdd-apply/tests/test_sequential.py: sha256:1d08fbb6b2f3ed7e2bf2675617a147ddbef32f4039d8757b8f7eb4d0b864bef3
     .claude/skills/sdd-apply/tests/test_setup_and_revision.py: sha256:8822435f5a93e2a63b601ab5b844b59f4ad891d6ac742bb7a5348c225bad1633
+    .claude/skills/sdd-apply/tests/test_shared_dependency.py: sha256:ceb5f8b1ce0c234f9f8ff9d84579d89add5f2319b5e4053487446553a2aa8707
     .claude/skills/sdd-apply/tests/test_state.py: sha256:2717c8ad92933d256e9a2671baeafe7b18b6e5e3c1e664fa1f098ab3ec4f1d4e
-    .claude/skills/sdd-apply/tests/test_subagents.py: sha256:afd64acbdad6754fcbcde4b705716b5ba4604ad1d51616d9753946a2bee0fc20
+    .claude/skills/sdd-apply/tests/test_subagents.py: sha256:72e0097bc93be2c8d2fc37e68cee6ff60c0c03e55b618db7e72992e66c787600
     .claude/skills/sdd-apply/tests/test_verification.py: sha256:3434de5dff81716c73aedaa02b80b10d6f3688b6b5db158e3ad598ddf835f080
     .claude/skills/sdd-apply/tests/test_waves.py: sha256:f1ac516ae74e77041efe651f79c0a0f6176f097987c8a4bb112d03d028b9adbe
     .claude/skills/sdd-apply/tests/test_worktree_refresh.py: sha256:734e0079fb074a3f46d7fca0e85cd3923bac3173e8f920f3ea5f0c3c378f847e
@@ -449,6 +465,7 @@ dependencies:
   - .agents/skills/sdd-setup/scripts/setup.py
   - .agents/skills/sdd-setup/scripts/setup.py.lock
   - .agents/skills/sdd-setup/scripts/setup_core.py
+  - .agents/skills/sdd-setup/scripts/shared.py
   - .agents/skills/sdd-setup/scripts/test.py
   - .agents/skills/sdd-setup/scripts/test.py.lock
   - .agents/skills/sdd-setup/tests/conftest.py
@@ -468,6 +485,7 @@ dependencies:
   - .claude/skills/sdd-setup/scripts/setup.py
   - .claude/skills/sdd-setup/scripts/setup.py.lock
   - .claude/skills/sdd-setup/scripts/setup_core.py
+  - .claude/skills/sdd-setup/scripts/shared.py
   - .claude/skills/sdd-setup/scripts/test.py
   - .claude/skills/sdd-setup/scripts/test.py.lock
   - .claude/skills/sdd-setup/tests/conftest.py
@@ -480,41 +498,181 @@ dependencies:
     .agents/skills/sdd-setup/assets/defaults.json: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
     .agents/skills/sdd-setup/evals/evals.json: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
     .agents/skills/sdd-setup/evals/manual.md: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
-    .agents/skills/sdd-setup/references/api.md: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+    .agents/skills/sdd-setup/references/api.md: sha256:687d941feb0b779e62fbb08e7f270fa39db8b2d9006883047379ca60f2f20a08
     .agents/skills/sdd-setup/references/dialogue.md: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
     .agents/skills/sdd-setup/references/hosts.md: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
-    .agents/skills/sdd-setup/references/runtime-setup.md: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
-    .agents/skills/sdd-setup/scripts/setup.py: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+    .agents/skills/sdd-setup/references/runtime-setup.md: sha256:615a2d7476b3319f956cd247b7bf3b485d76a74815dfe9d23569c0e3dfc87d29
+    .agents/skills/sdd-setup/scripts/setup.py: sha256:041415049d3a8fb4b679cc5e2ee5ef7d858080a70be491a53258f52b987cfd79
     .agents/skills/sdd-setup/scripts/setup.py.lock: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
-    .agents/skills/sdd-setup/scripts/setup_core.py: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+    .agents/skills/sdd-setup/scripts/setup_core.py: sha256:58da06c1bb23c9e1f0d34345434de705b785a1d14faa43489ad2eff3baec7429
+    .agents/skills/sdd-setup/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
     .agents/skills/sdd-setup/scripts/test.py: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
     .agents/skills/sdd-setup/scripts/test.py.lock: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
     .agents/skills/sdd-setup/tests/conftest.py: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
     .agents/skills/sdd-setup/tests/pytest.ini: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
-    .agents/skills/sdd-setup/tests/test_package.py: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+    .agents/skills/sdd-setup/tests/test_package.py: sha256:7ea444c11981407575ab0232f3ff5bef48700084cc26eeeef7ad8b0cf10cf055
     .agents/skills/sdd-setup/tests/test_setup.py: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
     .claude/skills/sdd-setup/SKILL.md: sha256:41d5e9ad42601baf96f0cebc3be64432d34e32e3e9e03d37a47e0fd4dba9f884
     .claude/skills/sdd-setup/agents/openai.yaml: sha256:4f09d03b02adb55d0412c350529c3155b1245348babce388b178b8a67ebcd8f8
     .claude/skills/sdd-setup/assets/defaults.json: sha256:2a688099ea4236b164c53a03f75d60d740ec88d377e683a027f0aadcc0e9ffcf
     .claude/skills/sdd-setup/evals/evals.json: sha256:a16640f25d0920323ed4c5c1e14d31c3afa2c36260897d39d080a875b8b2cd60
     .claude/skills/sdd-setup/evals/manual.md: sha256:e127a0167fd3619699d82c6e0b78790d97baa69f85bb5cc5df13d9e86d217adb
-    .claude/skills/sdd-setup/references/api.md: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+    .claude/skills/sdd-setup/references/api.md: sha256:687d941feb0b779e62fbb08e7f270fa39db8b2d9006883047379ca60f2f20a08
     .claude/skills/sdd-setup/references/dialogue.md: sha256:01a5861f7bb3b38fea799ba5f52d2503c7f3baa018eee098719dcd4e54c3373a
     .claude/skills/sdd-setup/references/hosts.md: sha256:ac9f0f7968c99c0434972b0b8ecb92f7a5e7db66cdaa5dc56e69f0e8761f54ee
-    .claude/skills/sdd-setup/references/runtime-setup.md: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
-    .claude/skills/sdd-setup/scripts/setup.py: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+    .claude/skills/sdd-setup/references/runtime-setup.md: sha256:615a2d7476b3319f956cd247b7bf3b485d76a74815dfe9d23569c0e3dfc87d29
+    .claude/skills/sdd-setup/scripts/setup.py: sha256:041415049d3a8fb4b679cc5e2ee5ef7d858080a70be491a53258f52b987cfd79
     .claude/skills/sdd-setup/scripts/setup.py.lock: sha256:256ebc5fe9a99f32ff7da54ea3c0bede10cee036ef1b31c957984b4317ee8e83
-    .claude/skills/sdd-setup/scripts/setup_core.py: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+    .claude/skills/sdd-setup/scripts/setup_core.py: sha256:58da06c1bb23c9e1f0d34345434de705b785a1d14faa43489ad2eff3baec7429
+    .claude/skills/sdd-setup/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
     .claude/skills/sdd-setup/scripts/test.py: sha256:c6d6f64270bf42d5fed566897781f15beda8141df347a372cf8ff7a97a774af4
     .claude/skills/sdd-setup/scripts/test.py.lock: sha256:e52559a6b8b3bb18fb66f2b72392f608835038765a18e5980caae3515e2b2881
     .claude/skills/sdd-setup/tests/conftest.py: sha256:98bdbabd05350d00f66b8f71cac159e3ad51f94a41b28ccd77c80c20aafdbb0f
     .claude/skills/sdd-setup/tests/pytest.ini: sha256:8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4
-    .claude/skills/sdd-setup/tests/test_package.py: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+    .claude/skills/sdd-setup/tests/test_package.py: sha256:7ea444c11981407575ab0232f3ff5bef48700084cc26eeeef7ad8b0cf10cf055
     .claude/skills/sdd-setup/tests/test_setup.py: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
   source: local
   local_path: ../../skills/sdd-setup
   declaring_parent: ./packages/aisdlc-core
   anchored_local_path: skills/sdd-setup
+- repo_url: _local/sdd-shared
+  name: sdd-shared
+  version: unknown
+  depth: 2
+  resolved_by: _local/aisdlc-core
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/sdd-shared
+  - .agents/skills/sdd-shared/SKILL.md
+  - .agents/skills/sdd-shared/agents/openai.yaml
+  - .agents/skills/sdd-shared/api.json
+  - .agents/skills/sdd-shared/references/api.md
+  - .agents/skills/sdd-shared/references/coordination.md
+  - .agents/skills/sdd-shared/references/document-format-discussion.md
+  - .agents/skills/sdd-shared/references/document-format-normative.md
+  - .agents/skills/sdd-shared/references/document-format-review.md
+  - .agents/skills/sdd-shared/references/document-format-tasks.md
+  - .agents/skills/sdd-shared/references/document-format.md
+  - .agents/skills/sdd-shared/references/runtime-setup.md
+  - .agents/skills/sdd-shared/references/subagents.md
+  - .agents/skills/sdd-shared/schemas/settings.schema.json
+  - .agents/skills/sdd-shared/scripts/check.py
+  - .agents/skills/sdd-shared/scripts/check.py.lock
+  - .agents/skills/sdd-shared/scripts/resolve_agent.py
+  - .agents/skills/sdd-shared/scripts/resolve_agent.py.lock
+  - .agents/skills/sdd-shared/scripts/sdd_shared/__init__.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/documents.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/paths.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/reviews.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/snapshots.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/subagents.py
+  - .agents/skills/sdd-shared/scripts/sdd_shared/validation.py
+  - .agents/skills/sdd-shared/scripts/snapshot.py
+  - .agents/skills/sdd-shared/scripts/snapshot.py.lock
+  - .agents/skills/sdd-shared/scripts/test.py
+  - .agents/skills/sdd-shared/scripts/test.py.lock
+  - .agents/skills/sdd-shared/templates/settings.example.json
+  - .agents/skills/sdd-shared/tests/pytest.ini
+  - .agents/skills/sdd-shared/tests/test_contract.py
+  - .claude/skills/sdd-shared
+  - .claude/skills/sdd-shared/SKILL.md
+  - .claude/skills/sdd-shared/agents/openai.yaml
+  - .claude/skills/sdd-shared/api.json
+  - .claude/skills/sdd-shared/references/api.md
+  - .claude/skills/sdd-shared/references/coordination.md
+  - .claude/skills/sdd-shared/references/document-format-discussion.md
+  - .claude/skills/sdd-shared/references/document-format-normative.md
+  - .claude/skills/sdd-shared/references/document-format-review.md
+  - .claude/skills/sdd-shared/references/document-format-tasks.md
+  - .claude/skills/sdd-shared/references/document-format.md
+  - .claude/skills/sdd-shared/references/runtime-setup.md
+  - .claude/skills/sdd-shared/references/subagents.md
+  - .claude/skills/sdd-shared/schemas/settings.schema.json
+  - .claude/skills/sdd-shared/scripts/check.py
+  - .claude/skills/sdd-shared/scripts/check.py.lock
+  - .claude/skills/sdd-shared/scripts/resolve_agent.py
+  - .claude/skills/sdd-shared/scripts/resolve_agent.py.lock
+  - .claude/skills/sdd-shared/scripts/sdd_shared/__init__.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/documents.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/paths.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/reviews.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/snapshots.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/subagents.py
+  - .claude/skills/sdd-shared/scripts/sdd_shared/validation.py
+  - .claude/skills/sdd-shared/scripts/snapshot.py
+  - .claude/skills/sdd-shared/scripts/snapshot.py.lock
+  - .claude/skills/sdd-shared/scripts/test.py
+  - .claude/skills/sdd-shared/scripts/test.py.lock
+  - .claude/skills/sdd-shared/templates/settings.example.json
+  - .claude/skills/sdd-shared/tests/pytest.ini
+  - .claude/skills/sdd-shared/tests/test_contract.py
+  deployed_file_hashes:
+    .agents/skills/sdd-shared/SKILL.md: sha256:e6f7aefccbfcd4be1dea8e1efe91b5f94786b6b2dc7ae75f351c88222ed6153e
+    .agents/skills/sdd-shared/agents/openai.yaml: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
+    .agents/skills/sdd-shared/api.json: sha256:9b260659896258aeb66a23d67569eae3e98655cbbfe748d83a628557d60185ae
+    .agents/skills/sdd-shared/references/api.md: sha256:5138dfdefc7fb564b28a4e4f422f18da5fb98acaf049d9e804c2e3f0c03a9d7a
+    .agents/skills/sdd-shared/references/coordination.md: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+    .agents/skills/sdd-shared/references/document-format-discussion.md: sha256:7f5a35a47d7402adc01454e8c9953e918d36bc834ffe40cf9d496e00df38daae
+    .agents/skills/sdd-shared/references/document-format-normative.md: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
+    .agents/skills/sdd-shared/references/document-format-review.md: sha256:7e65e61105065c2c750f8983702e65485f56931a953616f564c5ca23c0cc5f5b
+    .agents/skills/sdd-shared/references/document-format-tasks.md: sha256:4b307cf17f7f86d7800e9c92530605606a97f5c2ae9f52e6f122fc36d9ec705f
+    .agents/skills/sdd-shared/references/document-format.md: sha256:54da72f0879b7f8314a92d417ec76b894b1865b20cc86cab9788722fb05428cd
+    .agents/skills/sdd-shared/references/runtime-setup.md: sha256:26dbf4cf3d68a1c39306331d689d543703345baf1d044a7d66eeb64d11adaca7
+    .agents/skills/sdd-shared/references/subagents.md: sha256:99dd45eaa932f2ae19d3e8e968b02b9e7cf4fae1a4d01a19bd905337fafb83de
+    .agents/skills/sdd-shared/schemas/settings.schema.json: sha256:532de09e6b402e08732517e09be76d3ac83d1b911bd2cbfc4bf7d5159dc80909
+    .agents/skills/sdd-shared/scripts/check.py: sha256:20380692e0f597f5d8e7a90afa272cb5749705b29508c5074d18d93acd7a9195
+    .agents/skills/sdd-shared/scripts/check.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+    .agents/skills/sdd-shared/scripts/resolve_agent.py: sha256:8d6b258558033b8a2f30114928a947add27b98e185e1eacbfb34b50854df4174
+    .agents/skills/sdd-shared/scripts/resolve_agent.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
+    .agents/skills/sdd-shared/scripts/sdd_shared/__init__.py: sha256:b3811cf21717b4f5d43e69360788dc8059995290d25befe0c22d4913932ab79c
+    .agents/skills/sdd-shared/scripts/sdd_shared/documents.py: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
+    .agents/skills/sdd-shared/scripts/sdd_shared/paths.py: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
+    .agents/skills/sdd-shared/scripts/sdd_shared/reviews.py: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
+    .agents/skills/sdd-shared/scripts/sdd_shared/snapshots.py: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
+    .agents/skills/sdd-shared/scripts/sdd_shared/subagents.py: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
+    .agents/skills/sdd-shared/scripts/sdd_shared/validation.py: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+    .agents/skills/sdd-shared/scripts/snapshot.py: sha256:198e2ee2cb61bc3e5bf3ac4db59454f63ad61047fa27e4cabf25c095a6116b4a
+    .agents/skills/sdd-shared/scripts/snapshot.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+    .agents/skills/sdd-shared/scripts/test.py: sha256:83e8510040ec1f0f531350d285bcd2cc5603b05f9fd24bcdc07fad175a027b08
+    .agents/skills/sdd-shared/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
+    .agents/skills/sdd-shared/templates/settings.example.json: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
+    .agents/skills/sdd-shared/tests/pytest.ini: sha256:1dac468dd93a169701c454eceadb34c9ebe60cdb8afa67a28ea85f0f0dfa5bba
+    .agents/skills/sdd-shared/tests/test_contract.py: sha256:4e88af304882c838d9bd1f2e684996ad5e705264fb651164aee0ba6fd0132006
+    .claude/skills/sdd-shared/SKILL.md: sha256:e6f7aefccbfcd4be1dea8e1efe91b5f94786b6b2dc7ae75f351c88222ed6153e
+    .claude/skills/sdd-shared/agents/openai.yaml: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
+    .claude/skills/sdd-shared/api.json: sha256:9b260659896258aeb66a23d67569eae3e98655cbbfe748d83a628557d60185ae
+    .claude/skills/sdd-shared/references/api.md: sha256:5138dfdefc7fb564b28a4e4f422f18da5fb98acaf049d9e804c2e3f0c03a9d7a
+    .claude/skills/sdd-shared/references/coordination.md: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+    .claude/skills/sdd-shared/references/document-format-discussion.md: sha256:7f5a35a47d7402adc01454e8c9953e918d36bc834ffe40cf9d496e00df38daae
+    .claude/skills/sdd-shared/references/document-format-normative.md: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
+    .claude/skills/sdd-shared/references/document-format-review.md: sha256:7e65e61105065c2c750f8983702e65485f56931a953616f564c5ca23c0cc5f5b
+    .claude/skills/sdd-shared/references/document-format-tasks.md: sha256:4b307cf17f7f86d7800e9c92530605606a97f5c2ae9f52e6f122fc36d9ec705f
+    .claude/skills/sdd-shared/references/document-format.md: sha256:54da72f0879b7f8314a92d417ec76b894b1865b20cc86cab9788722fb05428cd
+    .claude/skills/sdd-shared/references/runtime-setup.md: sha256:26dbf4cf3d68a1c39306331d689d543703345baf1d044a7d66eeb64d11adaca7
+    .claude/skills/sdd-shared/references/subagents.md: sha256:99dd45eaa932f2ae19d3e8e968b02b9e7cf4fae1a4d01a19bd905337fafb83de
+    .claude/skills/sdd-shared/schemas/settings.schema.json: sha256:532de09e6b402e08732517e09be76d3ac83d1b911bd2cbfc4bf7d5159dc80909
+    .claude/skills/sdd-shared/scripts/check.py: sha256:20380692e0f597f5d8e7a90afa272cb5749705b29508c5074d18d93acd7a9195
+    .claude/skills/sdd-shared/scripts/check.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+    .claude/skills/sdd-shared/scripts/resolve_agent.py: sha256:8d6b258558033b8a2f30114928a947add27b98e185e1eacbfb34b50854df4174
+    .claude/skills/sdd-shared/scripts/resolve_agent.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
+    .claude/skills/sdd-shared/scripts/sdd_shared/__init__.py: sha256:b3811cf21717b4f5d43e69360788dc8059995290d25befe0c22d4913932ab79c
+    .claude/skills/sdd-shared/scripts/sdd_shared/documents.py: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
+    .claude/skills/sdd-shared/scripts/sdd_shared/paths.py: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
+    .claude/skills/sdd-shared/scripts/sdd_shared/reviews.py: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
+    .claude/skills/sdd-shared/scripts/sdd_shared/snapshots.py: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
+    .claude/skills/sdd-shared/scripts/sdd_shared/subagents.py: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
+    .claude/skills/sdd-shared/scripts/sdd_shared/validation.py: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+    .claude/skills/sdd-shared/scripts/snapshot.py: sha256:198e2ee2cb61bc3e5bf3ac4db59454f63ad61047fa27e4cabf25c095a6116b4a
+    .claude/skills/sdd-shared/scripts/snapshot.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+    .claude/skills/sdd-shared/scripts/test.py: sha256:83e8510040ec1f0f531350d285bcd2cc5603b05f9fd24bcdc07fad175a027b08
+    .claude/skills/sdd-shared/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
+    .claude/skills/sdd-shared/templates/settings.example.json: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
+    .claude/skills/sdd-shared/tests/pytest.ini: sha256:1dac468dd93a169701c454eceadb34c9ebe60cdb8afa67a28ea85f0f0dfa5bba
+    .claude/skills/sdd-shared/tests/test_contract.py: sha256:4e88af304882c838d9bd1f2e684996ad5e705264fb651164aee0ba6fd0132006
+  source: local
+  local_path: ../../skills/sdd-shared
+  declaring_parent: ./packages/aisdlc-core
+  anchored_local_path: skills/sdd-shared
 - repo_url: _local/sdd-skill-conductor
   name: sdd-skill-conductor
   version: unknown
@@ -745,6 +903,10 @@ dependencies:
   - .agents/skills/sdd-spec/references/codex.md
   - .agents/skills/sdd-spec/references/consistency.md
   - .agents/skills/sdd-spec/references/discussion.md
+  - .agents/skills/sdd-spec/references/document-format-discussion.md
+  - .agents/skills/sdd-spec/references/document-format-normative.md
+  - .agents/skills/sdd-spec/references/document-format-review.md
+  - .agents/skills/sdd-spec/references/document-format-tasks.md
   - .agents/skills/sdd-spec/references/document-format.md
   - .agents/skills/sdd-spec/references/editorial-pass.md
   - .agents/skills/sdd-spec/references/explanation.md
@@ -758,16 +920,11 @@ dependencies:
   - .agents/skills/sdd-spec/scripts/check.py
   - .agents/skills/sdd-spec/scripts/check.py.lock
   - .agents/skills/sdd-spec/scripts/lib/__init__.py
-  - .agents/skills/sdd-spec/scripts/lib/documents.py
-  - .agents/skills/sdd-spec/scripts/lib/paths.py
-  - .agents/skills/sdd-spec/scripts/lib/reviews.py
-  - .agents/skills/sdd-spec/scripts/lib/snapshots.py
-  - .agents/skills/sdd-spec/scripts/lib/subagents.py
-  - .agents/skills/sdd-spec/scripts/lib/validation.py
   - .agents/skills/sdd-spec/scripts/prepare_subagent_eval.py
   - .agents/skills/sdd-spec/scripts/prepare_subagent_eval.py.lock
   - .agents/skills/sdd-spec/scripts/resolve_agent.py
   - .agents/skills/sdd-spec/scripts/resolve_agent.py.lock
+  - .agents/skills/sdd-spec/scripts/shared.py
   - .agents/skills/sdd-spec/scripts/snapshot.py
   - .agents/skills/sdd-spec/scripts/snapshot.py.lock
   - .agents/skills/sdd-spec/scripts/test.py
@@ -783,7 +940,6 @@ dependencies:
   - .agents/skills/sdd-spec/templates/questions.md
   - .agents/skills/sdd-spec/templates/review-report.md
   - .agents/skills/sdd-spec/templates/review-summary.md
-  - .agents/skills/sdd-spec/templates/settings.example.json
   - .agents/skills/sdd-spec/templates/spec.md
   - .agents/skills/sdd-spec/templates/state.md
   - .agents/skills/sdd-spec/templates/tasks.md
@@ -824,6 +980,10 @@ dependencies:
   - .claude/skills/sdd-spec/references/codex.md
   - .claude/skills/sdd-spec/references/consistency.md
   - .claude/skills/sdd-spec/references/discussion.md
+  - .claude/skills/sdd-spec/references/document-format-discussion.md
+  - .claude/skills/sdd-spec/references/document-format-normative.md
+  - .claude/skills/sdd-spec/references/document-format-review.md
+  - .claude/skills/sdd-spec/references/document-format-tasks.md
   - .claude/skills/sdd-spec/references/document-format.md
   - .claude/skills/sdd-spec/references/editorial-pass.md
   - .claude/skills/sdd-spec/references/explanation.md
@@ -837,16 +997,11 @@ dependencies:
   - .claude/skills/sdd-spec/scripts/check.py
   - .claude/skills/sdd-spec/scripts/check.py.lock
   - .claude/skills/sdd-spec/scripts/lib/__init__.py
-  - .claude/skills/sdd-spec/scripts/lib/documents.py
-  - .claude/skills/sdd-spec/scripts/lib/paths.py
-  - .claude/skills/sdd-spec/scripts/lib/reviews.py
-  - .claude/skills/sdd-spec/scripts/lib/snapshots.py
-  - .claude/skills/sdd-spec/scripts/lib/subagents.py
-  - .claude/skills/sdd-spec/scripts/lib/validation.py
   - .claude/skills/sdd-spec/scripts/prepare_subagent_eval.py
   - .claude/skills/sdd-spec/scripts/prepare_subagent_eval.py.lock
   - .claude/skills/sdd-spec/scripts/resolve_agent.py
   - .claude/skills/sdd-spec/scripts/resolve_agent.py.lock
+  - .claude/skills/sdd-spec/scripts/shared.py
   - .claude/skills/sdd-spec/scripts/snapshot.py
   - .claude/skills/sdd-spec/scripts/snapshot.py.lock
   - .claude/skills/sdd-spec/scripts/test.py
@@ -862,7 +1017,6 @@ dependencies:
   - .claude/skills/sdd-spec/templates/questions.md
   - .claude/skills/sdd-spec/templates/review-report.md
   - .claude/skills/sdd-spec/templates/review-summary.md
-  - .claude/skills/sdd-spec/templates/settings.example.json
   - .claude/skills/sdd-spec/templates/spec.md
   - .claude/skills/sdd-spec/templates/state.md
   - .claude/skills/sdd-spec/templates/tasks.md
@@ -884,53 +1038,52 @@ dependencies:
   - .claude/skills/sdd-spec/tests/test_traceability.py
   deployed_file_hashes:
     .agents/skills/sdd-spec/.gitignore: sha256:b0b18f5bf7184f205a45032e7a3034fffc852f9c6ad28ae26bb839e2893b5ddd
-    .agents/skills/sdd-spec/README.md: sha256:5d89f3f237ef3f44aa9fd77bb2f4a34c79df7dd858b09bc379bcc664e2ad786f
-    .agents/skills/sdd-spec/SKILL.md: sha256:6306c0f41c6d528aef67834bafd5e55e1475371e3672b3b6cfcf3b76be2a2dda
+    .agents/skills/sdd-spec/README.md: sha256:d5a67dfc623ecb6dee0daccf19da76212227a37445ab21d0174d5a56e8ce017a
+    .agents/skills/sdd-spec/SKILL.md: sha256:bca3c145d5fab46bdf8af9368d3354b3fd54cf68454891ef8a896f6d39f4d33c
     .agents/skills/sdd-spec/agents/openai.yaml: sha256:db27a4783bf0805ab392ccadf8d58475f5e517b9c136efeff659c687d9d77e4a
     .agents/skills/sdd-spec/evals/evals.json: sha256:b93b0db3d5887d264b2f1642ab09a7320d44d59678eb4c3f72351545a514f3e1
     .agents/skills/sdd-spec/evals/manual.md: sha256:b623ffc483da029482b6a327550fead82927902947da99a46e86358cdc9c7a17
     .agents/skills/sdd-spec/evals/subagents.md: sha256:1938af3108407ca184da334c6453481f22ff844b969a2b323fc744000552d096
-    .agents/skills/sdd-spec/flows/draft.md: sha256:861f23da7a63d72409091c2fa58ea58733da2f8747ee69b622febd18968d6fb1
+    .agents/skills/sdd-spec/flows/draft.md: sha256:203cd08b9f0359878ebdbd894369ffa462483f42627d6e5aa53095ceb23c9860
     .agents/skills/sdd-spec/flows/explain.md: sha256:d10a45d7dd57977acf9e16273f1b115ffb3d1ac517930f458a455899bda5fa1d
     .agents/skills/sdd-spec/flows/explore.md: sha256:ab6a150b607531fae13f00214d1bb32beb8e48747360f9c7601e1ad374ded75c
-    .agents/skills/sdd-spec/flows/plan.md: sha256:0934bcc39c550b48a87d4c062889783834d627cfaf92adb8b8d69dcc7a4ba117
-    .agents/skills/sdd-spec/flows/resume.md: sha256:4ca4e5d4621205997b101218684ec835566251bbb8c9dd6d2c16e6b76d61b8a3
-    .agents/skills/sdd-spec/flows/review.md: sha256:d88eef904d0b7dc2d05d11e85a91ef2f8fec44b208fde04234522bf657258329
-    .agents/skills/sdd-spec/flows/revise.md: sha256:aace09a8cb23b2aca20f0fa569349dea112d7f47336de5a8a54e81bd688b9bb8
-    .agents/skills/sdd-spec/flows/user-review.md: sha256:a4668baa4f5248c7051c71d9b9b99a27e81b4d9d7478b6f67dc3ef1426039b06
+    .agents/skills/sdd-spec/flows/plan.md: sha256:820144a5eeb2ead1dc51da63598f979b9a817b2573813bddf2508ea8bc32e1be
+    .agents/skills/sdd-spec/flows/resume.md: sha256:5ec7796c190779fe34cafea7bcd0612740c56414f74bb28d21c7a8ef90a1c1e0
+    .agents/skills/sdd-spec/flows/review.md: sha256:4fbc437ccd0ce68875ae18bfa8f213e95adffc0bddb4a5468ab11aadf834b2c0
+    .agents/skills/sdd-spec/flows/revise.md: sha256:07d3da75cb769a0813649019c0a89dd0565c763ced26f40dc67009fd00b49aca
+    .agents/skills/sdd-spec/flows/user-review.md: sha256:6acae24b34b2672df90e35d4088566ae9a4446494eb855c8ac4af70541ac461e
     .agents/skills/sdd-spec/pyproject.toml: sha256:8c67db5be703d85fea7d7046e8e54094fff6c12c40683795b71029c16c7656d8
-    .agents/skills/sdd-spec/references/claude-code.md: sha256:b3fd24710f9a587f0acef5f05fb9f535b77a53e1a1ee921d4cd1391b9479a6af
-    .agents/skills/sdd-spec/references/codex.md: sha256:796a3434b92e5a21ea3cc8764ba7c0b1334eb22ea4ea89127cbb165083d2caba
+    .agents/skills/sdd-spec/references/claude-code.md: sha256:dca2f1f4736ac00b327accceffc5a047b51882a0d228b44aaec004db0efc4981
+    .agents/skills/sdd-spec/references/codex.md: sha256:4b0c68b71d54866b081cbc6843cceb0b897de3788be45818b9b1cdc1c8ea4029
     .agents/skills/sdd-spec/references/consistency.md: sha256:3aa2a5447a9b344f7965db7f6509812fc6ba10196ca295230307bb4f2308da71
-    .agents/skills/sdd-spec/references/discussion.md: sha256:ef60adb4c95e45625e0ffe28226bfda64bc3cab6f7707e24687c6252b1df32c3
-    .agents/skills/sdd-spec/references/document-format.md: sha256:0adc459f2c6c29d608e56d1b3006469e21f646db72e5526a8d591639dc94560a
-    .agents/skills/sdd-spec/references/editorial-pass.md: sha256:e93ac5fe7a46d2eded6df5f751c32062dca4036d349257d6fd11433d6be5a29a
+    .agents/skills/sdd-spec/references/discussion.md: sha256:9de4d70b0b949f929f218b9dbdcd8cf455d4ed02df1eb849bbefcd0ce00412b4
+    .agents/skills/sdd-spec/references/document-format-discussion.md: sha256:b07f43a524eaf5a1bef5f0108b09742ca2dad24c3d594a0fd3db6281e5c00208
+    .agents/skills/sdd-spec/references/document-format-normative.md: sha256:654ae7839800f35bd2b4b617061f7752944398a79e3484fb0355ae35a8bd3972
+    .agents/skills/sdd-spec/references/document-format-review.md: sha256:a17998ab0b04d8d86543026504e0b14b18b290340e9ec30158615b572fc63731
+    .agents/skills/sdd-spec/references/document-format-tasks.md: sha256:4f9c6f30df6f62b35fa6a92823e03a6708b0490300d3f3ac4fe1d01db7673df3
+    .agents/skills/sdd-spec/references/document-format.md: sha256:7697e4674a7a59d6412c32ef25d576a914b8b34ede7ce51e4532d813d5317144
+    .agents/skills/sdd-spec/references/editorial-pass.md: sha256:1aef11ac2cafb9f834ec4c1fb39fc58c41193b928e1d4da9191cd638adea03da
     .agents/skills/sdd-spec/references/explanation.md: sha256:17e422a2128fe1d65bba2ed27cbcc51b30634eadcbd2a423263e6a479323597c
-    .agents/skills/sdd-spec/references/generic.md: sha256:07e0ef4809663167ab976826c7fb20b53b12a401feb1fedad15f616ae7fcc6a2
+    .agents/skills/sdd-spec/references/generic.md: sha256:da7781ddc47529c754fc60b4ad8014165d7e626a1f112be8e3d133b2ba503633
     .agents/skills/sdd-spec/references/openspec-origin.md: sha256:e09cf14ceb4f631930e596d6ad8f76bb338a38e31506f208385b9b3f949375cd
     .agents/skills/sdd-spec/references/premortem.md: sha256:138282894180797eac018049420d20a2dfc782aa199c07785fdc9c9c1b87f3ae
-    .agents/skills/sdd-spec/references/reviewer-documents.md: sha256:c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb
-    .agents/skills/sdd-spec/references/reviewer-plan.md: sha256:7123e41eb73f111477283de5b15ff93bab3b4e0c37d91a8f446aedb75061337a
-    .agents/skills/sdd-spec/references/runtime-setup.md: sha256:94759dec7e7e673a391a598c73304f1e0c13f921d65e89e1f1dbad1be8423b18
-    .agents/skills/sdd-spec/references/subagents.md: sha256:c1a01ce97310f692408013d4ea3c3917714a4a51c87b484fb834c391ac779434
-    .agents/skills/sdd-spec/scripts/check.py: sha256:157af3813f6bafef9724d7b905348f42e300e145874193ceef9cf4485474875e
+    .agents/skills/sdd-spec/references/reviewer-documents.md: sha256:b9e568b1ea8b7d570aea68207fc28b365855072ba6f2d8fadc64f5252b0f81bc
+    .agents/skills/sdd-spec/references/reviewer-plan.md: sha256:19366fb85d6293b36d0b7e54b4c0527dc52f8da92bc707ab522b6b1e7239c68d
+    .agents/skills/sdd-spec/references/runtime-setup.md: sha256:020c216419b02bb06508d61626e743891223aafb006db934612b50f8b0a88bf0
+    .agents/skills/sdd-spec/references/subagents.md: sha256:54182717da83158b4b026f38b6d5913617bf0dce711a4f6b70c14eabfb582aeb
+    .agents/skills/sdd-spec/scripts/check.py: sha256:c8f2470bf2d4d5206767f5f3c7a2a77c66bdb8264c1eb4a1bbe7122d0f6a49a2
     .agents/skills/sdd-spec/scripts/check.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
-    .agents/skills/sdd-spec/scripts/lib/__init__.py: sha256:bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a
-    .agents/skills/sdd-spec/scripts/lib/documents.py: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
-    .agents/skills/sdd-spec/scripts/lib/paths.py: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
-    .agents/skills/sdd-spec/scripts/lib/reviews.py: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
-    .agents/skills/sdd-spec/scripts/lib/snapshots.py: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
-    .agents/skills/sdd-spec/scripts/lib/subagents.py: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
-    .agents/skills/sdd-spec/scripts/lib/validation.py: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+    .agents/skills/sdd-spec/scripts/lib/__init__.py: sha256:3d2cee0aff857d9af3f5c87a5f9f4d210cb4e8ad2b252d7d4b0ed7f4c56611af
     .agents/skills/sdd-spec/scripts/prepare_subagent_eval.py: sha256:1a475e3c4acb762bfa0ac8c83d6a16cc8c4ed5d852753e4e8e7c771262435304
     .agents/skills/sdd-spec/scripts/prepare_subagent_eval.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
-    .agents/skills/sdd-spec/scripts/resolve_agent.py: sha256:4135473c19fc83b407aa4bd9eb24362f38ac159afc83ce3af647bf02463c43fa
+    .agents/skills/sdd-spec/scripts/resolve_agent.py: sha256:c5296c4a3a04077151be076772da093f4dae29289efcc07dcc3f2f60a56e20d4
     .agents/skills/sdd-spec/scripts/resolve_agent.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
-    .agents/skills/sdd-spec/scripts/snapshot.py: sha256:689204a4cd8804a51e18f139a399e617140077d10733acb4c7ed3d9aa850bf5a
+    .agents/skills/sdd-spec/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
+    .agents/skills/sdd-spec/scripts/snapshot.py: sha256:ef9a31f89d45c6935d65f722464199c43806f27b8ea7333bafefb7262493fef1
     .agents/skills/sdd-spec/scripts/snapshot.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
     .agents/skills/sdd-spec/scripts/test.py: sha256:614ef1af831d8da6adbdeb397856307a87b284103a781693d64310a3f15c38dd
     .agents/skills/sdd-spec/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
-    .agents/skills/sdd-spec/templates/decisions.md: sha256:767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c
+    .agents/skills/sdd-spec/templates/decisions.md: sha256:0bc98502265342e38bee5bec9a980470a3e4d0087cebaa667bbe1f368e37c696
     .agents/skills/sdd-spec/templates/design.md: sha256:2f34cda87c62e20d18d00292c89a67239c168d14759e57cdd20ddfac8845f4b0
     .agents/skills/sdd-spec/templates/discussion-decisions.md: sha256:69e2076c753f77b1ca5f857ea908f52fae1714fa8dd263f52d573ffe0718a1a0
     .agents/skills/sdd-spec/templates/explanation.md: sha256:36adf2b9eec634285c5e73aa9933526a5b85b1da18a4547983a6cea9c5342808
@@ -941,8 +1094,7 @@ dependencies:
     .agents/skills/sdd-spec/templates/questions.md: sha256:e111ec7ece117c538fe9fb510ae036012f0763a81e17d2d1c4ec463ba6630a5d
     .agents/skills/sdd-spec/templates/review-report.md: sha256:dfdfba807f3a77aedcca8ccbce9fc982dfc5490a0390f48b3e76034a51ed0944
     .agents/skills/sdd-spec/templates/review-summary.md: sha256:dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc
-    .agents/skills/sdd-spec/templates/settings.example.json: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
-    .agents/skills/sdd-spec/templates/spec.md: sha256:756ee7a48946d37c8734761f5f45dfc2ef874fbf12b321a4e81e110c82974df2
+    .agents/skills/sdd-spec/templates/spec.md: sha256:5acde1eb59e4739384048ee89270c97f1aa99fbedae83c023693c629570164c0
     .agents/skills/sdd-spec/templates/state.md: sha256:8421a9328553ad40c28d37205ff6e1da4973e3e21d9f1c4a194153d51c42cdbc
     .agents/skills/sdd-spec/templates/tasks.md: sha256:5fed259232209845f675fd81ae70d5298a2a4263406c478fbdcf8e16b0c82818
     .agents/skills/sdd-spec/tests/conftest.py: sha256:3945bb7d71bc71f9828a72e648379981ec83522919f59b58d4e27084989b8d71
@@ -950,65 +1102,64 @@ dependencies:
     .agents/skills/sdd-spec/tests/test_check_command.py: sha256:75d448068b39371457cc6be163e9c3dca4caf9bc50bd392491539b821ad8b34b
     .agents/skills/sdd-spec/tests/test_document_records.py: sha256:c3c2ea52ed53db08ec45c6bcbf7a75411e5fcb24a20ce69f6f93bbc1c94c6468
     .agents/skills/sdd-spec/tests/test_lens_index.py: sha256:cd4921a9c4ef1a70a1b26f87ccecda398100d0b3c72011b52d15c36aa6678d00
-    .agents/skills/sdd-spec/tests/test_package_contract.py: sha256:9807595c1eb7f42764b33ad7a75845fa7fc53124fefcd278a6d6792921c9364b
+    .agents/skills/sdd-spec/tests/test_package_contract.py: sha256:ec8487a88fd694c061c383c27657f000e5b8d821e6a787b786668ea1996e5932
     .agents/skills/sdd-spec/tests/test_questions.py: sha256:82169101ca618957d25bbb0b634c6fc937c523c3884a3b4f399bc53f50739668
     .agents/skills/sdd-spec/tests/test_review_records.py: sha256:f99eca1b3e1cbf7e3ce22efeb698eac8b7ddd7d85bc154252d415bc38c1cd858
-    .agents/skills/sdd-spec/tests/test_runtime.py: sha256:0f5cb0db86f836cfa6cc1fae1e797d64aead6fb58f704920705c54603dfa0e2c
+    .agents/skills/sdd-spec/tests/test_runtime.py: sha256:598342775247c3469a276b2244fcf0f4ffc17795652f85c79d6c2edac38e52ce
     .agents/skills/sdd-spec/tests/test_snapshots.py: sha256:fb11fcf88683fa60a81ce4496453e09c3ab125e1ddce4dac28234d4ceef78e38
-    .agents/skills/sdd-spec/tests/test_subagents.py: sha256:0e65d5754732a39d6e930dfc84ae8c99c63ef4216c211f87d28f5452a0e86db6
+    .agents/skills/sdd-spec/tests/test_subagents.py: sha256:e684f37f8c6b70d959c482f8ed20e0ce3f99664f17974bc597e5b3627235497a
     .agents/skills/sdd-spec/tests/test_task_coverage.py: sha256:0dcd1a0e30a1cdd5b72d1eb76390be1cabf267d52fdb1f48130b72a5561aa975
     .agents/skills/sdd-spec/tests/test_task_graph.py: sha256:a6fa5e2dc181c9afa9310b0e9c588630093d4c8289c8b1b5ad7b1e66bf59571b
     .agents/skills/sdd-spec/tests/test_task_verification.py: sha256:134b10553b674f921c5e902a2f8e1900af5ce8b76757c2573a5b7202f4a8d849
     .agents/skills/sdd-spec/tests/test_template_contract.py: sha256:832f93035ef3c444910c4157184e5eae399c0c6c76a234686ee13a0251e6cba6
     .agents/skills/sdd-spec/tests/test_traceability.py: sha256:b6036cb41b4e1be6826020da54a9552ecf5a610b042262a212078f0fbc4d02bc
     .claude/skills/sdd-spec/.gitignore: sha256:b0b18f5bf7184f205a45032e7a3034fffc852f9c6ad28ae26bb839e2893b5ddd
-    .claude/skills/sdd-spec/README.md: sha256:5d89f3f237ef3f44aa9fd77bb2f4a34c79df7dd858b09bc379bcc664e2ad786f
-    .claude/skills/sdd-spec/SKILL.md: sha256:6306c0f41c6d528aef67834bafd5e55e1475371e3672b3b6cfcf3b76be2a2dda
+    .claude/skills/sdd-spec/README.md: sha256:d5a67dfc623ecb6dee0daccf19da76212227a37445ab21d0174d5a56e8ce017a
+    .claude/skills/sdd-spec/SKILL.md: sha256:bca3c145d5fab46bdf8af9368d3354b3fd54cf68454891ef8a896f6d39f4d33c
     .claude/skills/sdd-spec/agents/openai.yaml: sha256:db27a4783bf0805ab392ccadf8d58475f5e517b9c136efeff659c687d9d77e4a
     .claude/skills/sdd-spec/evals/evals.json: sha256:b93b0db3d5887d264b2f1642ab09a7320d44d59678eb4c3f72351545a514f3e1
     .claude/skills/sdd-spec/evals/manual.md: sha256:b623ffc483da029482b6a327550fead82927902947da99a46e86358cdc9c7a17
     .claude/skills/sdd-spec/evals/subagents.md: sha256:1938af3108407ca184da334c6453481f22ff844b969a2b323fc744000552d096
-    .claude/skills/sdd-spec/flows/draft.md: sha256:861f23da7a63d72409091c2fa58ea58733da2f8747ee69b622febd18968d6fb1
+    .claude/skills/sdd-spec/flows/draft.md: sha256:203cd08b9f0359878ebdbd894369ffa462483f42627d6e5aa53095ceb23c9860
     .claude/skills/sdd-spec/flows/explain.md: sha256:d10a45d7dd57977acf9e16273f1b115ffb3d1ac517930f458a455899bda5fa1d
     .claude/skills/sdd-spec/flows/explore.md: sha256:ab6a150b607531fae13f00214d1bb32beb8e48747360f9c7601e1ad374ded75c
-    .claude/skills/sdd-spec/flows/plan.md: sha256:0934bcc39c550b48a87d4c062889783834d627cfaf92adb8b8d69dcc7a4ba117
-    .claude/skills/sdd-spec/flows/resume.md: sha256:4ca4e5d4621205997b101218684ec835566251bbb8c9dd6d2c16e6b76d61b8a3
-    .claude/skills/sdd-spec/flows/review.md: sha256:d88eef904d0b7dc2d05d11e85a91ef2f8fec44b208fde04234522bf657258329
-    .claude/skills/sdd-spec/flows/revise.md: sha256:aace09a8cb23b2aca20f0fa569349dea112d7f47336de5a8a54e81bd688b9bb8
-    .claude/skills/sdd-spec/flows/user-review.md: sha256:a4668baa4f5248c7051c71d9b9b99a27e81b4d9d7478b6f67dc3ef1426039b06
+    .claude/skills/sdd-spec/flows/plan.md: sha256:820144a5eeb2ead1dc51da63598f979b9a817b2573813bddf2508ea8bc32e1be
+    .claude/skills/sdd-spec/flows/resume.md: sha256:5ec7796c190779fe34cafea7bcd0612740c56414f74bb28d21c7a8ef90a1c1e0
+    .claude/skills/sdd-spec/flows/review.md: sha256:4fbc437ccd0ce68875ae18bfa8f213e95adffc0bddb4a5468ab11aadf834b2c0
+    .claude/skills/sdd-spec/flows/revise.md: sha256:07d3da75cb769a0813649019c0a89dd0565c763ced26f40dc67009fd00b49aca
+    .claude/skills/sdd-spec/flows/user-review.md: sha256:6acae24b34b2672df90e35d4088566ae9a4446494eb855c8ac4af70541ac461e
     .claude/skills/sdd-spec/pyproject.toml: sha256:8c67db5be703d85fea7d7046e8e54094fff6c12c40683795b71029c16c7656d8
-    .claude/skills/sdd-spec/references/claude-code.md: sha256:b3fd24710f9a587f0acef5f05fb9f535b77a53e1a1ee921d4cd1391b9479a6af
-    .claude/skills/sdd-spec/references/codex.md: sha256:796a3434b92e5a21ea3cc8764ba7c0b1334eb22ea4ea89127cbb165083d2caba
+    .claude/skills/sdd-spec/references/claude-code.md: sha256:dca2f1f4736ac00b327accceffc5a047b51882a0d228b44aaec004db0efc4981
+    .claude/skills/sdd-spec/references/codex.md: sha256:4b0c68b71d54866b081cbc6843cceb0b897de3788be45818b9b1cdc1c8ea4029
     .claude/skills/sdd-spec/references/consistency.md: sha256:3aa2a5447a9b344f7965db7f6509812fc6ba10196ca295230307bb4f2308da71
-    .claude/skills/sdd-spec/references/discussion.md: sha256:ef60adb4c95e45625e0ffe28226bfda64bc3cab6f7707e24687c6252b1df32c3
-    .claude/skills/sdd-spec/references/document-format.md: sha256:0adc459f2c6c29d608e56d1b3006469e21f646db72e5526a8d591639dc94560a
-    .claude/skills/sdd-spec/references/editorial-pass.md: sha256:e93ac5fe7a46d2eded6df5f751c32062dca4036d349257d6fd11433d6be5a29a
+    .claude/skills/sdd-spec/references/discussion.md: sha256:9de4d70b0b949f929f218b9dbdcd8cf455d4ed02df1eb849bbefcd0ce00412b4
+    .claude/skills/sdd-spec/references/document-format-discussion.md: sha256:b07f43a524eaf5a1bef5f0108b09742ca2dad24c3d594a0fd3db6281e5c00208
+    .claude/skills/sdd-spec/references/document-format-normative.md: sha256:654ae7839800f35bd2b4b617061f7752944398a79e3484fb0355ae35a8bd3972
+    .claude/skills/sdd-spec/references/document-format-review.md: sha256:a17998ab0b04d8d86543026504e0b14b18b290340e9ec30158615b572fc63731
+    .claude/skills/sdd-spec/references/document-format-tasks.md: sha256:4f9c6f30df6f62b35fa6a92823e03a6708b0490300d3f3ac4fe1d01db7673df3
+    .claude/skills/sdd-spec/references/document-format.md: sha256:7697e4674a7a59d6412c32ef25d576a914b8b34ede7ce51e4532d813d5317144
+    .claude/skills/sdd-spec/references/editorial-pass.md: sha256:1aef11ac2cafb9f834ec4c1fb39fc58c41193b928e1d4da9191cd638adea03da
     .claude/skills/sdd-spec/references/explanation.md: sha256:17e422a2128fe1d65bba2ed27cbcc51b30634eadcbd2a423263e6a479323597c
-    .claude/skills/sdd-spec/references/generic.md: sha256:07e0ef4809663167ab976826c7fb20b53b12a401feb1fedad15f616ae7fcc6a2
+    .claude/skills/sdd-spec/references/generic.md: sha256:da7781ddc47529c754fc60b4ad8014165d7e626a1f112be8e3d133b2ba503633
     .claude/skills/sdd-spec/references/openspec-origin.md: sha256:e09cf14ceb4f631930e596d6ad8f76bb338a38e31506f208385b9b3f949375cd
     .claude/skills/sdd-spec/references/premortem.md: sha256:138282894180797eac018049420d20a2dfc782aa199c07785fdc9c9c1b87f3ae
-    .claude/skills/sdd-spec/references/reviewer-documents.md: sha256:c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb
-    .claude/skills/sdd-spec/references/reviewer-plan.md: sha256:7123e41eb73f111477283de5b15ff93bab3b4e0c37d91a8f446aedb75061337a
-    .claude/skills/sdd-spec/references/runtime-setup.md: sha256:94759dec7e7e673a391a598c73304f1e0c13f921d65e89e1f1dbad1be8423b18
-    .claude/skills/sdd-spec/references/subagents.md: sha256:c1a01ce97310f692408013d4ea3c3917714a4a51c87b484fb834c391ac779434
-    .claude/skills/sdd-spec/scripts/check.py: sha256:157af3813f6bafef9724d7b905348f42e300e145874193ceef9cf4485474875e
+    .claude/skills/sdd-spec/references/reviewer-documents.md: sha256:b9e568b1ea8b7d570aea68207fc28b365855072ba6f2d8fadc64f5252b0f81bc
+    .claude/skills/sdd-spec/references/reviewer-plan.md: sha256:19366fb85d6293b36d0b7e54b4c0527dc52f8da92bc707ab522b6b1e7239c68d
+    .claude/skills/sdd-spec/references/runtime-setup.md: sha256:020c216419b02bb06508d61626e743891223aafb006db934612b50f8b0a88bf0
+    .claude/skills/sdd-spec/references/subagents.md: sha256:54182717da83158b4b026f38b6d5913617bf0dce711a4f6b70c14eabfb582aeb
+    .claude/skills/sdd-spec/scripts/check.py: sha256:c8f2470bf2d4d5206767f5f3c7a2a77c66bdb8264c1eb4a1bbe7122d0f6a49a2
     .claude/skills/sdd-spec/scripts/check.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
-    .claude/skills/sdd-spec/scripts/lib/__init__.py: sha256:bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a
-    .claude/skills/sdd-spec/scripts/lib/documents.py: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
-    .claude/skills/sdd-spec/scripts/lib/paths.py: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
-    .claude/skills/sdd-spec/scripts/lib/reviews.py: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
-    .claude/skills/sdd-spec/scripts/lib/snapshots.py: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
-    .claude/skills/sdd-spec/scripts/lib/subagents.py: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
-    .claude/skills/sdd-spec/scripts/lib/validation.py: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+    .claude/skills/sdd-spec/scripts/lib/__init__.py: sha256:3d2cee0aff857d9af3f5c87a5f9f4d210cb4e8ad2b252d7d4b0ed7f4c56611af
     .claude/skills/sdd-spec/scripts/prepare_subagent_eval.py: sha256:1a475e3c4acb762bfa0ac8c83d6a16cc8c4ed5d852753e4e8e7c771262435304
     .claude/skills/sdd-spec/scripts/prepare_subagent_eval.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
-    .claude/skills/sdd-spec/scripts/resolve_agent.py: sha256:4135473c19fc83b407aa4bd9eb24362f38ac159afc83ce3af647bf02463c43fa
+    .claude/skills/sdd-spec/scripts/resolve_agent.py: sha256:c5296c4a3a04077151be076772da093f4dae29289efcc07dcc3f2f60a56e20d4
     .claude/skills/sdd-spec/scripts/resolve_agent.py.lock: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
-    .claude/skills/sdd-spec/scripts/snapshot.py: sha256:689204a4cd8804a51e18f139a399e617140077d10733acb4c7ed3d9aa850bf5a
+    .claude/skills/sdd-spec/scripts/shared.py: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
+    .claude/skills/sdd-spec/scripts/snapshot.py: sha256:ef9a31f89d45c6935d65f722464199c43806f27b8ea7333bafefb7262493fef1
     .claude/skills/sdd-spec/scripts/snapshot.py.lock: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
     .claude/skills/sdd-spec/scripts/test.py: sha256:614ef1af831d8da6adbdeb397856307a87b284103a781693d64310a3f15c38dd
     .claude/skills/sdd-spec/scripts/test.py.lock: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
-    .claude/skills/sdd-spec/templates/decisions.md: sha256:767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c
+    .claude/skills/sdd-spec/templates/decisions.md: sha256:0bc98502265342e38bee5bec9a980470a3e4d0087cebaa667bbe1f368e37c696
     .claude/skills/sdd-spec/templates/design.md: sha256:2f34cda87c62e20d18d00292c89a67239c168d14759e57cdd20ddfac8845f4b0
     .claude/skills/sdd-spec/templates/discussion-decisions.md: sha256:69e2076c753f77b1ca5f857ea908f52fae1714fa8dd263f52d573ffe0718a1a0
     .claude/skills/sdd-spec/templates/explanation.md: sha256:36adf2b9eec634285c5e73aa9933526a5b85b1da18a4547983a6cea9c5342808
@@ -1019,8 +1170,7 @@ dependencies:
     .claude/skills/sdd-spec/templates/questions.md: sha256:e111ec7ece117c538fe9fb510ae036012f0763a81e17d2d1c4ec463ba6630a5d
     .claude/skills/sdd-spec/templates/review-report.md: sha256:dfdfba807f3a77aedcca8ccbce9fc982dfc5490a0390f48b3e76034a51ed0944
     .claude/skills/sdd-spec/templates/review-summary.md: sha256:dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc
-    .claude/skills/sdd-spec/templates/settings.example.json: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
-    .claude/skills/sdd-spec/templates/spec.md: sha256:756ee7a48946d37c8734761f5f45dfc2ef874fbf12b321a4e81e110c82974df2
+    .claude/skills/sdd-spec/templates/spec.md: sha256:5acde1eb59e4739384048ee89270c97f1aa99fbedae83c023693c629570164c0
     .claude/skills/sdd-spec/templates/state.md: sha256:8421a9328553ad40c28d37205ff6e1da4973e3e21d9f1c4a194153d51c42cdbc
     .claude/skills/sdd-spec/templates/tasks.md: sha256:5fed259232209845f675fd81ae70d5298a2a4263406c478fbdcf8e16b0c82818
     .claude/skills/sdd-spec/tests/conftest.py: sha256:3945bb7d71bc71f9828a72e648379981ec83522919f59b58d4e27084989b8d71
@@ -1028,12 +1178,12 @@ dependencies:
     .claude/skills/sdd-spec/tests/test_check_command.py: sha256:75d448068b39371457cc6be163e9c3dca4caf9bc50bd392491539b821ad8b34b
     .claude/skills/sdd-spec/tests/test_document_records.py: sha256:c3c2ea52ed53db08ec45c6bcbf7a75411e5fcb24a20ce69f6f93bbc1c94c6468
     .claude/skills/sdd-spec/tests/test_lens_index.py: sha256:cd4921a9c4ef1a70a1b26f87ccecda398100d0b3c72011b52d15c36aa6678d00
-    .claude/skills/sdd-spec/tests/test_package_contract.py: sha256:9807595c1eb7f42764b33ad7a75845fa7fc53124fefcd278a6d6792921c9364b
+    .claude/skills/sdd-spec/tests/test_package_contract.py: sha256:ec8487a88fd694c061c383c27657f000e5b8d821e6a787b786668ea1996e5932
     .claude/skills/sdd-spec/tests/test_questions.py: sha256:82169101ca618957d25bbb0b634c6fc937c523c3884a3b4f399bc53f50739668
     .claude/skills/sdd-spec/tests/test_review_records.py: sha256:f99eca1b3e1cbf7e3ce22efeb698eac8b7ddd7d85bc154252d415bc38c1cd858
-    .claude/skills/sdd-spec/tests/test_runtime.py: sha256:0f5cb0db86f836cfa6cc1fae1e797d64aead6fb58f704920705c54603dfa0e2c
+    .claude/skills/sdd-spec/tests/test_runtime.py: sha256:598342775247c3469a276b2244fcf0f4ffc17795652f85c79d6c2edac38e52ce
     .claude/skills/sdd-spec/tests/test_snapshots.py: sha256:fb11fcf88683fa60a81ce4496453e09c3ab125e1ddce4dac28234d4ceef78e38
-    .claude/skills/sdd-spec/tests/test_subagents.py: sha256:0e65d5754732a39d6e930dfc84ae8c99c63ef4216c211f87d28f5452a0e86db6
+    .claude/skills/sdd-spec/tests/test_subagents.py: sha256:e684f37f8c6b70d959c482f8ed20e0ce3f99664f17974bc597e5b3627235497a
     .claude/skills/sdd-spec/tests/test_task_coverage.py: sha256:0dcd1a0e30a1cdd5b72d1eb76390be1cabf267d52fdb1f48130b72a5561aa975
     .claude/skills/sdd-spec/tests/test_task_graph.py: sha256:a6fa5e2dc181c9afa9310b0e9c588630093d4c8289c8b1b5ad7b1e66bf59571b
     .claude/skills/sdd-spec/tests/test_task_verification.py: sha256:134b10553b674f921c5e902a2f8e1900af5ce8b76757c2573a5b7202f4a8d849
@@ -5283,7 +5433,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:268199ac6097de09ae38c0a60bbf21a7316f52a6de8e35890792aa28e0a78418
+  content_hash: sha256:2d89d5b880abe5d801dd59c2c7b83732fe317415fd4d98430a6dae3464de3c98
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/agents/claude-code.md
@@ -5409,7 +5559,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:aedc94b68bdc71dca7b3f0b0d31abb279dee891f6b8d01ecf2e3279e87429ffd
+  content_hash: sha256:9d9499225e3d6196789b4c330080ef52c63f4c059e86a6ff3e6722eec533c81f
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/flows/start.md
@@ -5418,7 +5568,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:0916bb56090fe0b129ffa8e97ec9e7afb7d2bcf0c13ce964923c071b385d7806
+  content_hash: sha256:0026e603d3c86b5fb3ea643bd22d3c3de69f2bdb2831b0b0d380eeb196c9b2ff
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/references/api.md
@@ -5427,7 +5577,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:9ee90697c2869c45e81182bbe042e3f1971bf38453900dc1b077a49a1bd4ee6e
+  content_hash: sha256:4864201f104081eaef9b7720e3eaf9650974358e4784a6db61c832720cb97b03
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/references/progress.md
@@ -5463,7 +5613,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:f2af0c972c3034b37bd5ff16287b004834f6624dcfcb4ea0c328a5e7b95eed86
+  content_hash: sha256:68d8a1f06368a1ef47fb7ab2a03cbfa3e50e6a28b35b4388f45a4b6d50ea1eca
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/references/subagents.md
@@ -5472,7 +5622,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:16e2061b9369f447e2f2bdb4c0320356f6b255467bb2bd3141f49121fe447738
+  content_hash: sha256:708539713e7aea76b67d46b0dbd0f9309c0e11a772f920ceae8a4d638c93d0e1
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/references/worktree-recovery.md
@@ -5598,7 +5748,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:e89d34b136badbf230a6222f98903ca517584591a2d105ba19121188d0e1c10e
+  content_hash: sha256:70283ac3c9a2b9d5a5fe3775f2ab4249d2cdcc9c50bfc13f9649d720ab85785f
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/lib/integration.py
@@ -5616,7 +5766,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:f6cfccd114dfdb52831afca534963eb3e0a4b00f7aaa094c802e91fe726684b2
+  content_hash: sha256:1af49511feb82025bbf079ddb134cfe72be8685831d0b5830eb9c2fc6808f067
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/lib/review_policy.py
@@ -5661,7 +5811,16 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:fe20a3fd9d46481446d70f0dc8b54cf9a030fbc46fc4b99bc5054f23d196d58d
+  content_hash: sha256:e090086cf61becd36989d533f87839fdb5693c2d27d8eccf69b33883e7079d08
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-apply/scripts/lib/state_view.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:c6354ec32b32a0400798e3a60c703659cccb083840d6f6504d65bf881089adca
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/lib/subagents.py
@@ -5670,7 +5829,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:ddf41fa1d5521da53560f4592f0a975693ccca33163713fe74d9ad49fab96e42
+  content_hash: sha256:a58f1e7e1cc5f77a69ea0ab9b43f5fc23b170f43823eeb01775be5c250886d87
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/lib/transitions.py
@@ -5688,7 +5847,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:607cec3e8690d13cd058d5cf7aa7e4c2f1d219f3c0c652888e33d4e542b0c369
+  content_hash: sha256:3732ef69d987a516af3bf5c838e23722d1ab56c4ae620ba32c92117870a7b720
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/lib/waves.py
@@ -5716,6 +5875,15 @@ deployments:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
   content_hash: sha256:23fe8debe651f8b80f958b1ce9bb45cc9947363cdf48c1e8b5407add94e97d03
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-apply/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/scripts/test.py
@@ -5805,7 +5973,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:0f0d71a647e10a3146dd85a7c1a879d7f8fc6505fec1bbe5dafa2d2968af66c3
+  content_hash: sha256:9ffecb3a4f2d36981b707c52de43d2ac951ad6184501fa4eaa79bf5388372233
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/tests/test_integration.py
@@ -5842,6 +6010,15 @@ deployments:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
   content_hash: sha256:4b2bd2cd6063853b897c4d1ec53b5e2ce2230d14356bd177a8b0d41115e1c0fa
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-apply/tests/test_read_views.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:7f5e7d991ab9c3d4ce0966828bcd5034b851455ef6443c5a51aa807290e4b81e
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/tests/test_resume.py
@@ -5886,7 +6063,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:7c0dddedcc41258e959877518061ec50fd7d11abd18a8b547ad6ef6aa9acb7e1
+  content_hash: sha256:fb5f576a4329a564b9c1f8c05ee1d5abd8e3c269f3a869bfff3aa9f1d0fc3762
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/tests/test_sequential.py
@@ -5907,6 +6084,15 @@ deployments:
   content_hash: sha256:8822435f5a93e2a63b601ab5b844b59f4ad891d6ac742bb7a5348c225bad1633
 - kind: project-relative
   target: claude
+  value: .claude/skills/sdd-apply/tests/test_shared_dependency.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:ceb5f8b1ce0c234f9f8ff9d84579d89add5f2319b5e4053487446553a2aa8707
+- kind: project-relative
+  target: claude
   value: .claude/skills/sdd-apply/tests/test_state.py
   runtime: null
   scope: project
@@ -5922,7 +6108,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:afd64acbdad6754fcbcde4b705716b5ba4604ad1d51616d9753946a2bee0fc20
+  content_hash: sha256:72e0097bc93be2c8d2fc37e68cee6ff60c0c03e55b618db7e72992e66c787600
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-apply/tests/test_verification.py
@@ -6174,7 +6360,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+  content_hash: sha256:687d941feb0b779e62fbb08e7f270fa39db8b2d9006883047379ca60f2f20a08
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-setup/references/dialogue.md
@@ -6201,7 +6387,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+  content_hash: sha256:615a2d7476b3319f956cd247b7bf3b485d76a74815dfe9d23569c0e3dfc87d29
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-setup/scripts/setup.py
@@ -6210,7 +6396,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+  content_hash: sha256:041415049d3a8fb4b679cc5e2ee5ef7d858080a70be491a53258f52b987cfd79
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-setup/scripts/setup.py.lock
@@ -6228,7 +6414,16 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+  content_hash: sha256:58da06c1bb23c9e1f0d34345434de705b785a1d14faa43489ad2eff3baec7429
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-setup/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-setup/scripts/test.py
@@ -6273,7 +6468,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+  content_hash: sha256:7ea444c11981407575ab0232f3ff5bef48700084cc26eeeef7ad8b0cf10cf055
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-setup/tests/test_setup.py
@@ -6283,6 +6478,294 @@ deployments:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
   content_hash: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:e6f7aefccbfcd4be1dea8e1efe91b5f94786b6b2dc7ae75f351c88222ed6153e
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/api.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:9b260659896258aeb66a23d67569eae3e98655cbbfe748d83a628557d60185ae
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/api.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:5138dfdefc7fb564b28a4e4f422f18da5fb98acaf049d9e804c2e3f0c03a9d7a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/coordination.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/document-format-discussion.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:7f5a35a47d7402adc01454e8c9953e918d36bc834ffe40cf9d496e00df38daae
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/document-format-normative.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/document-format-review.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:7e65e61105065c2c750f8983702e65485f56931a953616f564c5ca23c0cc5f5b
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/document-format-tasks.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:4b307cf17f7f86d7800e9c92530605606a97f5c2ae9f52e6f122fc36d9ec705f
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/document-format.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:54da72f0879b7f8314a92d417ec76b894b1865b20cc86cab9788722fb05428cd
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/runtime-setup.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:26dbf4cf3d68a1c39306331d689d543703345baf1d044a7d66eeb64d11adaca7
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/references/subagents.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:99dd45eaa932f2ae19d3e8e968b02b9e7cf4fae1a4d01a19bd905337fafb83de
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/schemas/settings.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:532de09e6b402e08732517e09be76d3ac83d1b911bd2cbfc4bf7d5159dc80909
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/check.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:20380692e0f597f5d8e7a90afa272cb5749705b29508c5074d18d93acd7a9195
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/check.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/resolve_agent.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8d6b258558033b8a2f30114928a947add27b98e185e1eacbfb34b50854df4174
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/resolve_agent.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/__init__.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:b3811cf21717b4f5d43e69360788dc8059995290d25befe0c22d4913932ab79c
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/documents.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/paths.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/reviews.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/snapshots.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/subagents.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/sdd_shared/validation.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/snapshot.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:198e2ee2cb61bc3e5bf3ac4db59454f63ad61047fa27e4cabf25c095a6116b4a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/snapshot.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/test.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:83e8510040ec1f0f531350d285bcd2cc5603b05f9fd24bcdc07fad175a027b08
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/scripts/test.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/templates/settings.example.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/tests/pytest.ini
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:1dac468dd93a169701c454eceadb34c9ebe60cdb8afa67a28ea85f0f0dfa5bba
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-shared/tests/test_contract.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:4e88af304882c838d9bd1f2e684996ad5e705264fb651164aee0ba6fd0132006
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-skill-conductor
@@ -6741,7 +7224,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:5d89f3f237ef3f44aa9fd77bb2f4a34c79df7dd858b09bc379bcc664e2ad786f
+  content_hash: sha256:d5a67dfc623ecb6dee0daccf19da76212227a37445ab21d0174d5a56e8ce017a
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/SKILL.md
@@ -6750,7 +7233,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:6306c0f41c6d528aef67834bafd5e55e1475371e3672b3b6cfcf3b76be2a2dda
+  content_hash: sha256:bca3c145d5fab46bdf8af9368d3354b3fd54cf68454891ef8a896f6d39f4d33c
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/agents/openai.yaml
@@ -6795,7 +7278,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:861f23da7a63d72409091c2fa58ea58733da2f8747ee69b622febd18968d6fb1
+  content_hash: sha256:203cd08b9f0359878ebdbd894369ffa462483f42627d6e5aa53095ceb23c9860
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/flows/explain.md
@@ -6822,7 +7305,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0934bcc39c550b48a87d4c062889783834d627cfaf92adb8b8d69dcc7a4ba117
+  content_hash: sha256:820144a5eeb2ead1dc51da63598f979b9a817b2573813bddf2508ea8bc32e1be
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/flows/resume.md
@@ -6831,7 +7314,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:4ca4e5d4621205997b101218684ec835566251bbb8c9dd6d2c16e6b76d61b8a3
+  content_hash: sha256:5ec7796c190779fe34cafea7bcd0612740c56414f74bb28d21c7a8ef90a1c1e0
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/flows/review.md
@@ -6840,7 +7323,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:d88eef904d0b7dc2d05d11e85a91ef2f8fec44b208fde04234522bf657258329
+  content_hash: sha256:4fbc437ccd0ce68875ae18bfa8f213e95adffc0bddb4a5468ab11aadf834b2c0
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/flows/revise.md
@@ -6849,7 +7332,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:aace09a8cb23b2aca20f0fa569349dea112d7f47336de5a8a54e81bd688b9bb8
+  content_hash: sha256:07d3da75cb769a0813649019c0a89dd0565c763ced26f40dc67009fd00b49aca
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/flows/user-review.md
@@ -6858,7 +7341,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:a4668baa4f5248c7051c71d9b9b99a27e81b4d9d7478b6f67dc3ef1426039b06
+  content_hash: sha256:6acae24b34b2672df90e35d4088566ae9a4446494eb855c8ac4af70541ac461e
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/pyproject.toml
@@ -6876,7 +7359,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:b3fd24710f9a587f0acef5f05fb9f535b77a53e1a1ee921d4cd1391b9479a6af
+  content_hash: sha256:dca2f1f4736ac00b327accceffc5a047b51882a0d228b44aaec004db0efc4981
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/codex.md
@@ -6885,7 +7368,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:796a3434b92e5a21ea3cc8764ba7c0b1334eb22ea4ea89127cbb165083d2caba
+  content_hash: sha256:4b0c68b71d54866b081cbc6843cceb0b897de3788be45818b9b1cdc1c8ea4029
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/consistency.md
@@ -6903,7 +7386,43 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:ef60adb4c95e45625e0ffe28226bfda64bc3cab6f7707e24687c6252b1df32c3
+  content_hash: sha256:9de4d70b0b949f929f218b9dbdcd8cf455d4ed02df1eb849bbefcd0ce00412b4
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-spec/references/document-format-discussion.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:b07f43a524eaf5a1bef5f0108b09742ca2dad24c3d594a0fd3db6281e5c00208
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-spec/references/document-format-normative.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:654ae7839800f35bd2b4b617061f7752944398a79e3484fb0355ae35a8bd3972
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-spec/references/document-format-review.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:a17998ab0b04d8d86543026504e0b14b18b290340e9ec30158615b572fc63731
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-spec/references/document-format-tasks.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:4f9c6f30df6f62b35fa6a92823e03a6708b0490300d3f3ac4fe1d01db7673df3
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/document-format.md
@@ -6912,7 +7431,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0adc459f2c6c29d608e56d1b3006469e21f646db72e5526a8d591639dc94560a
+  content_hash: sha256:7697e4674a7a59d6412c32ef25d576a914b8b34ede7ce51e4532d813d5317144
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/editorial-pass.md
@@ -6921,7 +7440,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:e93ac5fe7a46d2eded6df5f751c32062dca4036d349257d6fd11433d6be5a29a
+  content_hash: sha256:1aef11ac2cafb9f834ec4c1fb39fc58c41193b928e1d4da9191cd638adea03da
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/explanation.md
@@ -6939,7 +7458,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:07e0ef4809663167ab976826c7fb20b53b12a401feb1fedad15f616ae7fcc6a2
+  content_hash: sha256:da7781ddc47529c754fc60b4ad8014165d7e626a1f112be8e3d133b2ba503633
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/openspec-origin.md
@@ -6966,7 +7485,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb
+  content_hash: sha256:b9e568b1ea8b7d570aea68207fc28b365855072ba6f2d8fadc64f5252b0f81bc
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/reviewer-plan.md
@@ -6975,7 +7494,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:7123e41eb73f111477283de5b15ff93bab3b4e0c37d91a8f446aedb75061337a
+  content_hash: sha256:19366fb85d6293b36d0b7e54b4c0527dc52f8da92bc707ab522b6b1e7239c68d
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/runtime-setup.md
@@ -6984,7 +7503,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:94759dec7e7e673a391a598c73304f1e0c13f921d65e89e1f1dbad1be8423b18
+  content_hash: sha256:020c216419b02bb06508d61626e743891223aafb006db934612b50f8b0a88bf0
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/references/subagents.md
@@ -6993,7 +7512,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:c1a01ce97310f692408013d4ea3c3917714a4a51c87b484fb834c391ac779434
+  content_hash: sha256:54182717da83158b4b026f38b6d5913617bf0dce711a4f6b70c14eabfb582aeb
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/scripts/check.py
@@ -7002,7 +7521,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:157af3813f6bafef9724d7b905348f42e300e145874193ceef9cf4485474875e
+  content_hash: sha256:c8f2470bf2d4d5206767f5f3c7a2a77c66bdb8264c1eb4a1bbe7122d0f6a49a2
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/scripts/check.py.lock
@@ -7020,61 +7539,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/documents.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/paths.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/reviews.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/snapshots.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/subagents.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
-- kind: project-relative
-  target: claude
-  value: .claude/skills/sdd-spec/scripts/lib/validation.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+  content_hash: sha256:3d2cee0aff857d9af3f5c87a5f9f4d210cb4e8ad2b252d7d4b0ed7f4c56611af
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/scripts/prepare_subagent_eval.py
@@ -7101,7 +7566,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:4135473c19fc83b407aa4bd9eb24362f38ac159afc83ce3af647bf02463c43fa
+  content_hash: sha256:c5296c4a3a04077151be076772da093f4dae29289efcc07dcc3f2f60a56e20d4
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/scripts/resolve_agent.py.lock
@@ -7113,13 +7578,22 @@ deployments:
   content_hash: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
 - kind: project-relative
   target: claude
+  value: .claude/skills/sdd-spec/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
+- kind: project-relative
+  target: claude
   value: .claude/skills/sdd-spec/scripts/snapshot.py
   runtime: null
   scope: project
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:689204a4cd8804a51e18f139a399e617140077d10733acb4c7ed3d9aa850bf5a
+  content_hash: sha256:ef9a31f89d45c6935d65f722464199c43806f27b8ea7333bafefb7262493fef1
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/scripts/snapshot.py.lock
@@ -7155,7 +7629,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c
+  content_hash: sha256:0bc98502265342e38bee5bec9a980470a3e4d0087cebaa667bbe1f368e37c696
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/templates/design.md
@@ -7248,22 +7722,13 @@ deployments:
   content_hash: sha256:dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc
 - kind: project-relative
   target: claude
-  value: .claude/skills/sdd-spec/templates/settings.example.json
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
-- kind: project-relative
-  target: claude
   value: .claude/skills/sdd-spec/templates/spec.md
   runtime: null
   scope: project
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:756ee7a48946d37c8734761f5f45dfc2ef874fbf12b321a4e81e110c82974df2
+  content_hash: sha256:5acde1eb59e4739384048ee89270c97f1aa99fbedae83c023693c629570164c0
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/templates/state.md
@@ -7335,7 +7800,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:9807595c1eb7f42764b33ad7a75845fa7fc53124fefcd278a6d6792921c9364b
+  content_hash: sha256:ec8487a88fd694c061c383c27657f000e5b8d821e6a787b786668ea1996e5932
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/tests/test_questions.py
@@ -7362,7 +7827,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0f5cb0db86f836cfa6cc1fae1e797d64aead6fb58f704920705c54603dfa0e2c
+  content_hash: sha256:598342775247c3469a276b2244fcf0f4ffc17795652f85c79d6c2edac38e52ce
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/tests/test_snapshots.py
@@ -7380,7 +7845,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0e65d5754732a39d6e930dfc84ae8c99c63ef4216c211f87d28f5452a0e86db6
+  content_hash: sha256:e684f37f8c6b70d959c482f8ed20e0ce3f99664f17974bc597e5b3627235497a
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-spec/tests/test_task_coverage.py
@@ -10350,7 +10815,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:268199ac6097de09ae38c0a60bbf21a7316f52a6de8e35890792aa28e0a78418
+  content_hash: sha256:2d89d5b880abe5d801dd59c2c7b83732fe317415fd4d98430a6dae3464de3c98
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/agents/claude-code.md
@@ -10476,7 +10941,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:aedc94b68bdc71dca7b3f0b0d31abb279dee891f6b8d01ecf2e3279e87429ffd
+  content_hash: sha256:9d9499225e3d6196789b4c330080ef52c63f4c059e86a6ff3e6722eec533c81f
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/flows/start.md
@@ -10485,7 +10950,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:0916bb56090fe0b129ffa8e97ec9e7afb7d2bcf0c13ce964923c071b385d7806
+  content_hash: sha256:0026e603d3c86b5fb3ea643bd22d3c3de69f2bdb2831b0b0d380eeb196c9b2ff
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/references/api.md
@@ -10494,7 +10959,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:9ee90697c2869c45e81182bbe042e3f1971bf38453900dc1b077a49a1bd4ee6e
+  content_hash: sha256:4864201f104081eaef9b7720e3eaf9650974358e4784a6db61c832720cb97b03
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/references/progress.md
@@ -10530,7 +10995,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:f2af0c972c3034b37bd5ff16287b004834f6624dcfcb4ea0c328a5e7b95eed86
+  content_hash: sha256:68d8a1f06368a1ef47fb7ab2a03cbfa3e50e6a28b35b4388f45a4b6d50ea1eca
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/references/subagents.md
@@ -10539,7 +11004,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:16e2061b9369f447e2f2bdb4c0320356f6b255467bb2bd3141f49121fe447738
+  content_hash: sha256:708539713e7aea76b67d46b0dbd0f9309c0e11a772f920ceae8a4d638c93d0e1
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/references/worktree-recovery.md
@@ -10665,7 +11130,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:e89d34b136badbf230a6222f98903ca517584591a2d105ba19121188d0e1c10e
+  content_hash: sha256:70283ac3c9a2b9d5a5fe3775f2ab4249d2cdcc9c50bfc13f9649d720ab85785f
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/lib/integration.py
@@ -10683,7 +11148,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:f6cfccd114dfdb52831afca534963eb3e0a4b00f7aaa094c802e91fe726684b2
+  content_hash: sha256:1af49511feb82025bbf079ddb134cfe72be8685831d0b5830eb9c2fc6808f067
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/lib/review_policy.py
@@ -10728,7 +11193,16 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:fe20a3fd9d46481446d70f0dc8b54cf9a030fbc46fc4b99bc5054f23d196d58d
+  content_hash: sha256:e090086cf61becd36989d533f87839fdb5693c2d27d8eccf69b33883e7079d08
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-apply/scripts/lib/state_view.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:c6354ec32b32a0400798e3a60c703659cccb083840d6f6504d65bf881089adca
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/lib/subagents.py
@@ -10737,7 +11211,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:ddf41fa1d5521da53560f4592f0a975693ccca33163713fe74d9ad49fab96e42
+  content_hash: sha256:a58f1e7e1cc5f77a69ea0ab9b43f5fc23b170f43823eeb01775be5c250886d87
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/lib/transitions.py
@@ -10755,7 +11229,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:607cec3e8690d13cd058d5cf7aa7e4c2f1d219f3c0c652888e33d4e542b0c369
+  content_hash: sha256:3732ef69d987a516af3bf5c838e23722d1ab56c4ae620ba32c92117870a7b720
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/lib/waves.py
@@ -10783,6 +11257,15 @@ deployments:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
   content_hash: sha256:23fe8debe651f8b80f958b1ce9bb45cc9947363cdf48c1e8b5407add94e97d03
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-apply/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/scripts/test.py
@@ -10872,7 +11355,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:0f0d71a647e10a3146dd85a7c1a879d7f8fc6505fec1bbe5dafa2d2968af66c3
+  content_hash: sha256:9ffecb3a4f2d36981b707c52de43d2ac951ad6184501fa4eaa79bf5388372233
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/tests/test_integration.py
@@ -10909,6 +11392,15 @@ deployments:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
   content_hash: sha256:4b2bd2cd6063853b897c4d1ec53b5e2ce2230d14356bd177a8b0d41115e1c0fa
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-apply/tests/test_read_views.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:7f5e7d991ab9c3d4ce0966828bcd5034b851455ef6443c5a51aa807290e4b81e
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/tests/test_resume.py
@@ -10953,7 +11445,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:7c0dddedcc41258e959877518061ec50fd7d11abd18a8b547ad6ef6aa9acb7e1
+  content_hash: sha256:fb5f576a4329a564b9c1f8c05ee1d5abd8e3c269f3a869bfff3aa9f1d0fc3762
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/tests/test_sequential.py
@@ -10974,6 +11466,15 @@ deployments:
   content_hash: sha256:8822435f5a93e2a63b601ab5b844b59f4ad891d6ac742bb7a5348c225bad1633
 - kind: project-relative
   target: codex
+  value: .agents/skills/sdd-apply/tests/test_shared_dependency.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-apply
+  active_owner: local:skills/sdd-apply
+  content_hash: sha256:ceb5f8b1ce0c234f9f8ff9d84579d89add5f2319b5e4053487446553a2aa8707
+- kind: project-relative
+  target: codex
   value: .agents/skills/sdd-apply/tests/test_state.py
   runtime: null
   scope: project
@@ -10989,7 +11490,7 @@ deployments:
   owners:
   - local:skills/sdd-apply
   active_owner: local:skills/sdd-apply
-  content_hash: sha256:afd64acbdad6754fcbcde4b705716b5ba4604ad1d51616d9753946a2bee0fc20
+  content_hash: sha256:72e0097bc93be2c8d2fc37e68cee6ff60c0c03e55b618db7e72992e66c787600
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-apply/tests/test_verification.py
@@ -11241,7 +11742,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:682293295ec894439907a823fda490b6e46c7069c58704df4a0d5fbd5102a7f0
+  content_hash: sha256:687d941feb0b779e62fbb08e7f270fa39db8b2d9006883047379ca60f2f20a08
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-setup/references/dialogue.md
@@ -11268,7 +11769,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:e212ce70a6789b339c9c4b1e2bb3b8858e98e540abd705083de65abe3b6f3e16
+  content_hash: sha256:615a2d7476b3319f956cd247b7bf3b485d76a74815dfe9d23569c0e3dfc87d29
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-setup/scripts/setup.py
@@ -11277,7 +11778,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:fb568791194220b8a656948f28a9b45d233540e31584fb767a516bfb8b9bc35b
+  content_hash: sha256:041415049d3a8fb4b679cc5e2ee5ef7d858080a70be491a53258f52b987cfd79
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-setup/scripts/setup.py.lock
@@ -11295,7 +11796,16 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:f4b21e795b6d61a2f4fe039538da4dbdce1db4106241221e7451f37ea9620647
+  content_hash: sha256:58da06c1bb23c9e1f0d34345434de705b785a1d14faa43489ad2eff3baec7429
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-setup/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-setup
+  active_owner: local:skills/sdd-setup
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-setup/scripts/test.py
@@ -11340,7 +11850,7 @@ deployments:
   owners:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
-  content_hash: sha256:38a6878b9b28a80c26bae794a465740e2005460bf75a56a0d0ecc7a61f2fed78
+  content_hash: sha256:7ea444c11981407575ab0232f3ff5bef48700084cc26eeeef7ad8b0cf10cf055
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-setup/tests/test_setup.py
@@ -11350,6 +11860,294 @@ deployments:
   - local:skills/sdd-setup
   active_owner: local:skills/sdd-setup
   content_hash: sha256:1c2da39b87d259c1aa3a3df41b238a1101bd50e43fde346256e35b570cf5d6d0
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:e6f7aefccbfcd4be1dea8e1efe91b5f94786b6b2dc7ae75f351c88222ed6153e
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/api.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:9b260659896258aeb66a23d67569eae3e98655cbbfe748d83a628557d60185ae
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/api.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:5138dfdefc7fb564b28a4e4f422f18da5fb98acaf049d9e804c2e3f0c03a9d7a
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/coordination.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/document-format-discussion.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:7f5a35a47d7402adc01454e8c9953e918d36bc834ffe40cf9d496e00df38daae
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/document-format-normative.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/document-format-review.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:7e65e61105065c2c750f8983702e65485f56931a953616f564c5ca23c0cc5f5b
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/document-format-tasks.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:4b307cf17f7f86d7800e9c92530605606a97f5c2ae9f52e6f122fc36d9ec705f
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/document-format.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:54da72f0879b7f8314a92d417ec76b894b1865b20cc86cab9788722fb05428cd
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/runtime-setup.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:26dbf4cf3d68a1c39306331d689d543703345baf1d044a7d66eeb64d11adaca7
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/references/subagents.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:99dd45eaa932f2ae19d3e8e968b02b9e7cf4fae1a4d01a19bd905337fafb83de
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/schemas/settings.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:532de09e6b402e08732517e09be76d3ac83d1b911bd2cbfc4bf7d5159dc80909
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/check.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:20380692e0f597f5d8e7a90afa272cb5749705b29508c5074d18d93acd7a9195
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/check.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/resolve_agent.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8d6b258558033b8a2f30114928a947add27b98e185e1eacbfb34b50854df4174
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/resolve_agent.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/__init__.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:b3811cf21717b4f5d43e69360788dc8059995290d25befe0c22d4913932ab79c
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/documents.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/paths.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/reviews.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/snapshots.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/subagents.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/sdd_shared/validation.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/snapshot.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:198e2ee2cb61bc3e5bf3ac4db59454f63ad61047fa27e4cabf25c095a6116b4a
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/snapshot.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:8422fa7a6eccab5207463b53515e33bb333eea1b70e3fe9e9e383949977ad984
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/test.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:83e8510040ec1f0f531350d285bcd2cc5603b05f9fd24bcdc07fad175a027b08
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/scripts/test.py.lock
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:f5befb4b44fe4cfd364e98cb14d2e0aa610694134b4d4eb0b0aa9893a57dcb06
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/templates/settings.example.json
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/tests/pytest.ini
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:1dac468dd93a169701c454eceadb34c9ebe60cdb8afa67a28ea85f0f0dfa5bba
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-shared/tests/test_contract.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-shared
+  active_owner: local:skills/sdd-shared
+  content_hash: sha256:4e88af304882c838d9bd1f2e684996ad5e705264fb651164aee0ba6fd0132006
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-skill-conductor
@@ -11808,7 +12606,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:5d89f3f237ef3f44aa9fd77bb2f4a34c79df7dd858b09bc379bcc664e2ad786f
+  content_hash: sha256:d5a67dfc623ecb6dee0daccf19da76212227a37445ab21d0174d5a56e8ce017a
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/SKILL.md
@@ -11817,7 +12615,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:6306c0f41c6d528aef67834bafd5e55e1475371e3672b3b6cfcf3b76be2a2dda
+  content_hash: sha256:bca3c145d5fab46bdf8af9368d3354b3fd54cf68454891ef8a896f6d39f4d33c
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/agents/openai.yaml
@@ -11862,7 +12660,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:861f23da7a63d72409091c2fa58ea58733da2f8747ee69b622febd18968d6fb1
+  content_hash: sha256:203cd08b9f0359878ebdbd894369ffa462483f42627d6e5aa53095ceb23c9860
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/flows/explain.md
@@ -11889,7 +12687,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0934bcc39c550b48a87d4c062889783834d627cfaf92adb8b8d69dcc7a4ba117
+  content_hash: sha256:820144a5eeb2ead1dc51da63598f979b9a817b2573813bddf2508ea8bc32e1be
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/flows/resume.md
@@ -11898,7 +12696,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:4ca4e5d4621205997b101218684ec835566251bbb8c9dd6d2c16e6b76d61b8a3
+  content_hash: sha256:5ec7796c190779fe34cafea7bcd0612740c56414f74bb28d21c7a8ef90a1c1e0
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/flows/review.md
@@ -11907,7 +12705,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:d88eef904d0b7dc2d05d11e85a91ef2f8fec44b208fde04234522bf657258329
+  content_hash: sha256:4fbc437ccd0ce68875ae18bfa8f213e95adffc0bddb4a5468ab11aadf834b2c0
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/flows/revise.md
@@ -11916,7 +12714,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:aace09a8cb23b2aca20f0fa569349dea112d7f47336de5a8a54e81bd688b9bb8
+  content_hash: sha256:07d3da75cb769a0813649019c0a89dd0565c763ced26f40dc67009fd00b49aca
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/flows/user-review.md
@@ -11925,7 +12723,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:a4668baa4f5248c7051c71d9b9b99a27e81b4d9d7478b6f67dc3ef1426039b06
+  content_hash: sha256:6acae24b34b2672df90e35d4088566ae9a4446494eb855c8ac4af70541ac461e
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/pyproject.toml
@@ -11943,7 +12741,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:b3fd24710f9a587f0acef5f05fb9f535b77a53e1a1ee921d4cd1391b9479a6af
+  content_hash: sha256:dca2f1f4736ac00b327accceffc5a047b51882a0d228b44aaec004db0efc4981
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/codex.md
@@ -11952,7 +12750,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:796a3434b92e5a21ea3cc8764ba7c0b1334eb22ea4ea89127cbb165083d2caba
+  content_hash: sha256:4b0c68b71d54866b081cbc6843cceb0b897de3788be45818b9b1cdc1c8ea4029
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/consistency.md
@@ -11970,7 +12768,43 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:ef60adb4c95e45625e0ffe28226bfda64bc3cab6f7707e24687c6252b1df32c3
+  content_hash: sha256:9de4d70b0b949f929f218b9dbdcd8cf455d4ed02df1eb849bbefcd0ce00412b4
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-spec/references/document-format-discussion.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:b07f43a524eaf5a1bef5f0108b09742ca2dad24c3d594a0fd3db6281e5c00208
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-spec/references/document-format-normative.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:654ae7839800f35bd2b4b617061f7752944398a79e3484fb0355ae35a8bd3972
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-spec/references/document-format-review.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:a17998ab0b04d8d86543026504e0b14b18b290340e9ec30158615b572fc63731
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-spec/references/document-format-tasks.md
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:4f9c6f30df6f62b35fa6a92823e03a6708b0490300d3f3ac4fe1d01db7673df3
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/document-format.md
@@ -11979,7 +12813,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0adc459f2c6c29d608e56d1b3006469e21f646db72e5526a8d591639dc94560a
+  content_hash: sha256:7697e4674a7a59d6412c32ef25d576a914b8b34ede7ce51e4532d813d5317144
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/editorial-pass.md
@@ -11988,7 +12822,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:e93ac5fe7a46d2eded6df5f751c32062dca4036d349257d6fd11433d6be5a29a
+  content_hash: sha256:1aef11ac2cafb9f834ec4c1fb39fc58c41193b928e1d4da9191cd638adea03da
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/explanation.md
@@ -12006,7 +12840,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:07e0ef4809663167ab976826c7fb20b53b12a401feb1fedad15f616ae7fcc6a2
+  content_hash: sha256:da7781ddc47529c754fc60b4ad8014165d7e626a1f112be8e3d133b2ba503633
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/openspec-origin.md
@@ -12033,7 +12867,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:c7561ee0e51c6d089bdb627c3ef7448cfd239e10e264f98870dd1ac51fed60cb
+  content_hash: sha256:b9e568b1ea8b7d570aea68207fc28b365855072ba6f2d8fadc64f5252b0f81bc
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/reviewer-plan.md
@@ -12042,7 +12876,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:7123e41eb73f111477283de5b15ff93bab3b4e0c37d91a8f446aedb75061337a
+  content_hash: sha256:19366fb85d6293b36d0b7e54b4c0527dc52f8da92bc707ab522b6b1e7239c68d
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/runtime-setup.md
@@ -12051,7 +12885,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:94759dec7e7e673a391a598c73304f1e0c13f921d65e89e1f1dbad1be8423b18
+  content_hash: sha256:020c216419b02bb06508d61626e743891223aafb006db934612b50f8b0a88bf0
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/references/subagents.md
@@ -12060,7 +12894,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:c1a01ce97310f692408013d4ea3c3917714a4a51c87b484fb834c391ac779434
+  content_hash: sha256:54182717da83158b4b026f38b6d5913617bf0dce711a4f6b70c14eabfb582aeb
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/scripts/check.py
@@ -12069,7 +12903,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:157af3813f6bafef9724d7b905348f42e300e145874193ceef9cf4485474875e
+  content_hash: sha256:c8f2470bf2d4d5206767f5f3c7a2a77c66bdb8264c1eb4a1bbe7122d0f6a49a2
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/scripts/check.py.lock
@@ -12087,61 +12921,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:bf8e342533875af6dfa4b90164d39aff4a63e2b6efff8d716757ef0324312e3a
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/documents.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:b3fa1f3cac56dff5f234e8eb09ed83bfea556938f8219510383e830094816550
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/paths.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:82e59925527edfe92ddeba4fd1d200180f13e49e8b628997c1d6774fc0bd4597
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/reviews.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:028437eb0c5a29f7ec3980bb4a5092492eade7e44164be1c71e841e4772d203d
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/snapshots.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:8cea65570376ddadec908e792d1e4234a9ca5fc32d2fd1c1abdec0b2bbeba9ae
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/subagents.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:174e920cb892817ac60489654a56a292086ad79d644057791c033f20476efea9
-- kind: project-relative
-  target: codex
-  value: .agents/skills/sdd-spec/scripts/lib/validation.py
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:814c272dcdbdaf15b6c7427aeb864554a06174131437ea0fff1fd81d918817ff
+  content_hash: sha256:3d2cee0aff857d9af3f5c87a5f9f4d210cb4e8ad2b252d7d4b0ed7f4c56611af
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/scripts/prepare_subagent_eval.py
@@ -12168,7 +12948,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:4135473c19fc83b407aa4bd9eb24362f38ac159afc83ce3af647bf02463c43fa
+  content_hash: sha256:c5296c4a3a04077151be076772da093f4dae29289efcc07dcc3f2f60a56e20d4
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/scripts/resolve_agent.py.lock
@@ -12180,13 +12960,22 @@ deployments:
   content_hash: sha256:50e8bd1f687fc71872a80b9921fb9e4cab9906a892b5251b7945dd1305735656
 - kind: project-relative
   target: codex
+  value: .agents/skills/sdd-spec/scripts/shared.py
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-spec
+  active_owner: local:skills/sdd-spec
+  content_hash: sha256:d3805579bd45f43a6095bd659a0f10b1d41da6332eb692c4e9ac7ab9023a8388
+- kind: project-relative
+  target: codex
   value: .agents/skills/sdd-spec/scripts/snapshot.py
   runtime: null
   scope: project
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:689204a4cd8804a51e18f139a399e617140077d10733acb4c7ed3d9aa850bf5a
+  content_hash: sha256:ef9a31f89d45c6935d65f722464199c43806f27b8ea7333bafefb7262493fef1
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/scripts/snapshot.py.lock
@@ -12222,7 +13011,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:767674954db0ae0b6a721152f5ee47dd2d53d23820a37f28dadbbd04de225c6c
+  content_hash: sha256:0bc98502265342e38bee5bec9a980470a3e4d0087cebaa667bbe1f368e37c696
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/templates/design.md
@@ -12315,22 +13104,13 @@ deployments:
   content_hash: sha256:dad47eb9acb8b398439b973c8cec2f96e1521eb2eea4c32607774b71e557b4cc
 - kind: project-relative
   target: codex
-  value: .agents/skills/sdd-spec/templates/settings.example.json
-  runtime: null
-  scope: project
-  owners:
-  - local:skills/sdd-spec
-  active_owner: local:skills/sdd-spec
-  content_hash: sha256:a0ec0259f56395e54ca77a5dd4b63ffdb495627bca547a8f3134c22a2fcee7a3
-- kind: project-relative
-  target: codex
   value: .agents/skills/sdd-spec/templates/spec.md
   runtime: null
   scope: project
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:756ee7a48946d37c8734761f5f45dfc2ef874fbf12b321a4e81e110c82974df2
+  content_hash: sha256:5acde1eb59e4739384048ee89270c97f1aa99fbedae83c023693c629570164c0
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/templates/state.md
@@ -12402,7 +13182,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:9807595c1eb7f42764b33ad7a75845fa7fc53124fefcd278a6d6792921c9364b
+  content_hash: sha256:ec8487a88fd694c061c383c27657f000e5b8d821e6a787b786668ea1996e5932
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/tests/test_questions.py
@@ -12429,7 +13209,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0f5cb0db86f836cfa6cc1fae1e797d64aead6fb58f704920705c54603dfa0e2c
+  content_hash: sha256:598342775247c3469a276b2244fcf0f4ffc17795652f85c79d6c2edac38e52ce
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/tests/test_snapshots.py
@@ -12447,7 +13227,7 @@ deployments:
   owners:
   - local:skills/sdd-spec
   active_owner: local:skills/sdd-spec
-  content_hash: sha256:0e65d5754732a39d6e930dfc84ae8c99c63ef4216c211f87d28f5452a0e86db6
+  content_hash: sha256:e684f37f8c6b70d959c482f8ed20e0ce3f99664f17974bc597e5b3627235497a
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-spec/tests/test_task_coverage.py
