@@ -1,1 +1,0 @@
-Run smoke tests.
