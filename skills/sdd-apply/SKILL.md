@@ -11,6 +11,26 @@ Use only on explicit invocation. Keep normative SDD documents unchanged.
 Before each fresh worker launch, apply [project subagent selection](references/subagents.md).
 Resolve the role's agent from `.sdd/settings.json` at the execution's original project root.
 
+## Coordination and progress
+
+Include this messaging rule in worker assignments: send the result, a blocker,
+or a request for a needed decision; return required reports and evidence in full.
+Receive results through host notifications. Query status for a concrete delivery
+problem, recovery, or signs of a lost agent; repeat a status request only with
+new grounds. Keep required launch handshakes and role operations.
+
+When independent work is exhausted, wait for events with a 120-second timeout
+(`collaboration.wait_agent`: `timeout_ms: 120000`, when available). Handle a
+notification or user input as soon as the tool returns. Shorten the wait for a
+stricter host limit or a required user update deadline; use a confirmed equivalent
+tool on other hosts. If notifications are unavailable, query status after waiting.
+A timeout alone means no event arrived: continue waiting with the same agent.
+
+Keep intermediate user updates to one or two sentences: the material change and
+next step. If an update is due without new events, briefly name what is pending.
+Expand for blockers or user decisions; retain the flow's full reports, evidence,
+approvals and final response requirements.
+
 ## Route
 
 1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md), [Claude Code](agents/claude-code.md), or [arbitrary agent](agents/generic.md) when neither host is established.
