@@ -48,7 +48,7 @@
 |---|---|
 | [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-shared`, `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
-| [aisdlc-experimental](packages/aisdlc-experimental/apm.yml) | [ubiquitous-language](https://github.com/CodeAlive-AI/ai-driven-development/tree/79d911b773d83986bee7ac4170d09a972e61fe31/skills/ubiquitous-language) |
+| [aisdlc-experimental](packages/aisdlc-experimental/apm.yml) | `code-that-fits-in-your-head`, [ubiquitous-language](https://github.com/CodeAlive-AI/ai-driven-development/tree/79d911b773d83986bee7ac4170d09a972e61fe31/skills/ubiquitous-language) |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
 
 `aisdlc-core` и `aisdlc-skills` можно подключать по отдельности или вместе.

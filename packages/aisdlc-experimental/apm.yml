@@ -1,6 +1,7 @@
 name: aisdlc-experimental
 version: "0.1.0"
-description: Experimental third-party skills for ai-sdlc.
+description: Experimental skills for ai-sdlc.
 dependencies:
   apm:
+    - path: ../../skills/code-that-fits-in-your-head
     - CodeAlive-AI/ai-driven-development/skills/ubiquitous-language#79d911b773d83986bee7ac4170d09a972e61fe31
