@@ -1,6 +1,0 @@
-﻿error acquiring upload token: creating token file: open C:\Users\Andrew\AppData\Roaming\go\telemetry\local\upload.token: Access is denied.
---- FAIL: TestPostValidReservation (0.00s)
-    reservation_test.go:74: actual status code: 404
-FAIL
-FAIL	example.com/red-route	1.067s
-FAIL
