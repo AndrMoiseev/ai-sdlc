@@ -17,8 +17,8 @@ def run_uv(script, cwd, cache, *flags):
 def installed_copy(tmp_path):
     installed = tmp_path / "installed packages" / "sdd-setup"
     shutil.copytree(core.PACKAGE, installed)
-    companion = tmp_path / "installed packages" / "sdd-spec"
-    shutil.copytree(core.PACKAGE.parent / "sdd-spec", companion)
+    companion = tmp_path / "installed packages" / "sdd-shared"
+    shutil.copytree(core.PACKAGE.parent / "sdd-shared", companion)
     consumer = tmp_path / "consumer with spaces"
     consumer.mkdir()
     return installed, consumer
@@ -37,7 +37,7 @@ def test_runtime_metadata_locks_and_clean_package():
 
 
 def test_missing_companion_is_actionable(tmp_path):
-    with pytest.raises(ValueError, match="matching sdd-spec"):
+    with pytest.raises(ValueError, match="matching sdd-shared"):
         core.shared_contract(tmp_path)
 
 
@@ -55,9 +55,9 @@ def test_stale_lock_fails_without_rewrite(tmp_path):
     lock = script.with_suffix(".py.lock")
     before = lock.read_bytes()
     script.write_text(script.read_text().replace('>=3.11', '>=3.11.1'))
-    # Use metadata already resolved by this test runner; an empty offline cache
-    # would fail dependency resolution before it could diagnose the stale lock.
-    result = subprocess.run(["uv", "run", "--locked", "--offline", "--python", sys.executable,
+    # A locked run can install from wheel URLs without caching registry metadata.
+    # Permit resolution here so an offline cache miss cannot mask the lock error.
+    result = subprocess.run(["uv", "run", "--locked", "--python", sys.executable,
                              "--script", str(script), "--help"], cwd=consumer,
                             capture_output=True, text=True, timeout=60)
     assert result.returncode != 0 and "lock" in result.stderr.lower()

@@ -40,11 +40,14 @@ def test_invalid(project, mutation):
 
 
 def test_missing_dependency(project):
-    with pytest.raises(ValueError, match="sdd-spec"):
+    with pytest.raises(ValueError, match="sdd-shared"):
         validate(project, "demo", {"text": "Do", "source": "message"}, project / "missing")
 
 
-def test_old_companion_reports_shared_contract_requirement(project, monkeypatch):
-    monkeypatch.delattr(spec_modules(SPEC, "paths"), "verification_location")
-    with pytest.raises(ValueError, match="Update sdd-spec together with sdd-apply"):
-        call(project)
+def test_incompatible_shared_api_is_actionable(project, tmp_path):
+    import json
+    root = tmp_path / "incompatible"
+    root.mkdir()
+    (root / "api.json").write_text(json.dumps({"api_version": 2}))
+    with pytest.raises(ValueError, match="Incompatible sdd-shared API"):
+        validate(project, "demo", {"text": "Do", "source": "message"}, sdd_shared=root)

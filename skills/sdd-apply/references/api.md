@@ -2,7 +2,7 @@
 
 `resolve_agent` is a read-only operation: pass execution `directory`, role `kind`,
 `host`, observed `parent_model`, optional `parent_effort`, and for Claude Code the
-observed `available_agents` array. It uses the stored project root and sdd-spec
+observed `available_agents` array. It uses the stored project root and sdd-shared
 dependency. Retain its result as `agent_selection` in `role_register`; see
 [subagent selection](subagents.md). It selects parameters, not a running agent.
 Optional `model_observation` records actual model/effort and source trace; unknown
@@ -11,7 +11,7 @@ settings file require selection evidence and reject conflicting shared contexts.
 
 Read the installed `scripts/lib/api.py` for the currently exported operations and exact argument names. Call them through `execute.py --request`, with JSON shaped as `{"operation":"<name>","args":{...}}`. A missing mandatory operation is a package implementation gap: stop that step and report it. Do not substitute hand-edited state, hand-built dashboards, or handwritten Git orchestration.
 
-`validate` accepts `project_root`, optional `change`, `instruction: {text, source}`, and optional `sdd_spec`. Preserve its returned basis. It invokes the companion's check/snapshot interfaces and checks both document and plan approval. An ambiguous change requires selection; missing approval or a missing plan returns to sdd-spec.
+`validate` accepts `project_root`, optional `change`, `instruction: {text, source}`, and optional `sdd_shared`. Legacy `sdd_spec` locates sdd-shared alongside that path; supply only one explicit selector. Preserve its returned basis. It invokes the companion's check/snapshot interfaces and checks both document and plan approval. An ambiguous change requires selection; missing approval or a missing plan returns to sdd-spec.
 
 Public operations are `initialize` (validation arguments plus `owner`, optional `parallel_request` and `isolation`), `read`, `available`, `dashboard`, `recover_lock`, `serve`, and `stop_server` (each takes `directory`; `serve` also accepts `port`, default 0). `event` takes `directory` and `event`. `initialize` validates, records a new run and generates the initial dashboard; `read` verifies integrity. Existing state requires resume. The script owns all state writes and generated views. Verify these operations exist in the installed API before use.
 
@@ -95,7 +95,7 @@ for scoped follow-up work under the [review policy](review-policy.md).
 
 ## Evidence
 
-Read the installed companion sdd-spec's `references/document-format-tasks.md`, section «Задача и ее проверка», for the shared verification contract. `location` identifies the file/directory defining the check, relative to the project or active worktree root, independently of command cwd. The scripts use the companion's path validator. At check_run, require its location to be a file or directory for every run variant; a missing location yields `unavailable`, even when the command would exit 0 or a procedure result reports success. Additional registry checks may omit location; when supplied, it follows the same contract. A directory's existence does not prove that the expected tests ran.
+Read the installed sdd-shared's `references/document-format-tasks.md`, section «Задача и ее проверка», for the shared verification contract. `location` identifies the file/directory defining the check, relative to the project or active worktree root, independently of command cwd. The scripts use the companion's path validator. At check_run, require its location to be a file or directory for every run variant; a missing location yields `unavailable`, even when the command would exit 0 or a procedure result reports success. Additional registry checks may omit location; when supplied, it follows the same contract. A directory's existence does not prove that the expected tests ran.
 
 Register exact commands, cwd, configuration, source, and AC before implementation, including project instructions and CI. Existing mandatory checks remain mandatory. An absent applicable linter is an explained inventory fact, not a successful run. `setup_required` permits creating a planned check or preparing its runner inside that task, including a future test with a known command. Only unresolved setup_required is `planned_absence` at baseline. A missing location under command/procedure blocks; return an incorrectly planned future check to sdd-spec rather than changing the approved run. Record before/after setup and run existing checks independently; setup does not permit reducing assertions. Final checks use `final_verifier` and capture a final-HEAD snapshot separately from historical task candidates.
 

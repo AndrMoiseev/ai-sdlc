@@ -7,7 +7,7 @@ import os
 import signal
 from .common import contained, digest, git, now, require, write_json
 from .state import snapshot
-from .inputs import spec_modules
+from .inputs import spec_modules, basis_dependency
 
 
 def root_for(state, task):
@@ -193,7 +193,7 @@ def transition(state, task, event, directory):
             outputs.append({"check_id": check["id"], "outcome": "planned_absence", "description": run["setup_required"]})
             continue
         if "location" in check:
-            location = spec_modules(Path(state["basis"]["sdd_spec"]), "paths").verification_location(root, check["location"])
+            location = spec_modules(basis_dependency(state["basis"]), "paths").verification_location(root, check["location"])
             if not (location.is_file() or location.is_dir()):
                 outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Required verification location is missing", "location": check["location"]})
                 continue

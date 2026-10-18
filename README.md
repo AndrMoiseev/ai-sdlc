@@ -46,7 +46,7 @@
 
 | Пакет | Состав |
 |---|---|
-| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
+| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-shared`, `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
 | [aisdlc-experimental](packages/aisdlc-experimental/apm.yml) | [ubiquitous-language](https://github.com/CodeAlive-AI/ai-driven-development/tree/79d911b773d83986bee7ac4170d09a972e61fe31/skills/ubiquitous-language) |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
@@ -79,6 +79,18 @@ Archify в `bin/`: контрольная переустановка пропу�
 
 OpenSpec CLI и установленные в этом проекте скиллы `openspec-*` в эти наборы
 не входят. Для работы `sdd-implement` требуется отдельно установленный OpenSpec CLI.
+
+### Общая основа SDD
+
+`sdd-shared` содержит форматы документов, парсер, проверки, снимки и выбор
+субагентов. `sdd-setup`, `sdd-spec` и `sdd-apply` используют API v1 этого пакета.
+Единица установки и обновления — пакет `aisdlc-core`, в который входят все четыре
+скилла. Отдельных манифестов зависимостей у скиллов нет: они используют общий
+соседний каталог. При ручной установке копируйте комплект целиком.
+Старые команды `sdd-spec` сохранены. Для продолжения старого исполнения установите
+`sdd-shared` рядом с сохранённым в `basis.sdd_spec` расположением; файлы исполнения
+переписывать не требуется. После обновления повторите inspect для ещё не применённых
+планов setup. Подробности: [контракт совместимости](skills/sdd-shared/references/api.md).
 
 ### Настройка SDD проекта
 
