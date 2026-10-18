@@ -9,4 +9,3 @@ dependencies:
     - path: ../../skills/sdd-spec
     - path: ../../skills/sdd-apply
     - path: ../../skills/sdd-doc
-    - path: ../../skills/sdd-implement
