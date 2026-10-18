@@ -1,0 +1,3 @@
+interface:
+  display_name: "SDD Shared"
+  short_description: "Общие форматы, проверки и выбор агентов SDD"

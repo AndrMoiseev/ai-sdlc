@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDD project settings v1",
+  "type": "object",
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": {"const": 1, "type": "integer"},
+    "subagents": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "roles": {
+          "type": "object",
+          "propertyNames": {"enum": ["sdd-spec.document_reviewer", "sdd-spec.plan_reviewer", "sdd-spec.editor", "sdd-spec.editorial_reviewer", "sdd-apply.executor", "sdd-apply.verifier", "sdd-apply.reviewer", "sdd-apply.final_verifier"]},
+          "additionalProperties": {"type": "string", "minLength": 1, "pattern": "^\\S(?:[\\s\\S]*\\S)?$"}
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
