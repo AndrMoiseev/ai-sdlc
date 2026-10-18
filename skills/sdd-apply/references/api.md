@@ -29,7 +29,37 @@ Every applied event has exactly these fields:
 }
 ```
 
-Use JSON null for run-level `task_id`. Read the current revision before a new event. Retry a lost response with the identical event; a new payload needs a new ID and current revision. A rejected event does not authorize side effects. Re-read after revision conflict. Recover a lock only through the script's owner-liveness check; elapsed age is not evidence of death.
+Use JSON null for run-level `task_id`. Read the current revision before a new event, using the read view below. Retry a lost response with the identical event; a new payload needs a new ID and current revision. A rejected event does not authorize side effects. Re-read after revision conflict. Recover a lock only through the script's owner-liveness check; elapsed age is not evidence of death.
+
+## Read views
+
+For routine revision refreshes in an active session, including after a revision
+conflict, request `{"operation":"read","args":{"directory":"<execution>","view":"compact"}}`.
+Both views validate the entire state, registered root, integrity and event chain
+before returning. The default `view: "full"` preserves the original response.
+
+| Need | View |
+|---|---|
+| Current revision, task status, blockers, budgets or active role IDs | `compact` |
+| Resume, handoff, lost response/effect investigation or debugging | `full` |
+| Candidate, checks, evidence, review findings, plan, authorization or any omitted detail needed for the next event | `full`; read the referenced original artifacts as required by the flow |
+
+Compact view version 1 returns run identity, owner, revision, status, mode and
+timestamp; each task's status, attempt, complete blockers, review/test budget
+counters and active reservations; active role IDs with task/kind/context; and
+`available_tasks` from the existing scheduler. Artifact paths are relative to
+the execution directory: `state` is the full saved state and `run` contains its
+role packets, logs and effect journals. Use API `read` for verified full state.
+Historical roles, events, plans, candidates, checks, evidence and reviews remain
+in full state and artifacts, and are not repeated in compact output.
+
+`available_tasks` indicates dependency/mode eligibility only. It does not check
+all start prerequisites or authorize any event. Active roles are recorded
+identities, not a liveness check. Neither view proves that candidate bytes,
+approvals or evidence remain current; the existing event handlers enforce their
+gates. Use the selected flow and current user authorization for the next action.
+Keep the original event envelope for an idempotent retry, including its original
+revision; never replace it with the revision from a newer compact read.
 
 ## Task events
 
@@ -65,7 +95,7 @@ for scoped follow-up work under the [review policy](review-policy.md).
 
 ## Evidence
 
-Read the installed companion sdd-spec's `references/document-format.md`, section «Задача и ее проверка», for the shared verification contract. `location` identifies the file/directory defining the check, relative to the project or active worktree root, independently of command cwd. The scripts use the companion's path validator. At check_run, require its location to be a file or directory for every run variant; a missing location yields `unavailable`, even when the command would exit 0 or a procedure result reports success. Additional registry checks may omit location; when supplied, it follows the same contract. A directory's existence does not prove that the expected tests ran.
+Read the installed companion sdd-spec's `references/document-format-tasks.md`, section «Задача и ее проверка», for the shared verification contract. `location` identifies the file/directory defining the check, relative to the project or active worktree root, independently of command cwd. The scripts use the companion's path validator. At check_run, require its location to be a file or directory for every run variant; a missing location yields `unavailable`, even when the command would exit 0 or a procedure result reports success. Additional registry checks may omit location; when supplied, it follows the same contract. A directory's existence does not prove that the expected tests ran.
 
 Register exact commands, cwd, configuration, source, and AC before implementation, including project instructions and CI. Existing mandatory checks remain mandatory. An absent applicable linter is an explained inventory fact, not a successful run. `setup_required` permits creating a planned check or preparing its runner inside that task, including a future test with a known command. Only unresolved setup_required is `planned_absence` at baseline. A missing location under command/procedure blocks; return an incorrectly planned future check to sdd-spec rather than changing the approved run. Record before/after setup and run existing checks independently; setup does not permit reducing assertions. Final checks use `final_verifier` and capture a final-HEAD snapshot separately from historical task candidates.
 
