@@ -20,7 +20,7 @@ def bundle(tmp_path):
     root = tmp_path / "project with spaces"
     change = root / "sdd/changes/demo"
     records = [dict(sdd_record="requirement", id="REQ-feature", operation="add"), dict(sdd_record="acceptance", id="AC-feature", requirement="REQ-feature", conditions="Input", expected="Output")]
-    task = dict(sdd_record="task", id="TASK-feature", number=1, covers=["AC-feature"], depends_on=[], status="pending", verification=[dict(criteria=["AC-feature"], test_description="Check output", location="tests/future.py", run=dict(command="pytest tests/future.py"))])
+    task = dict(sdd_record="task", id="TASK-feature", number=1, covers=["AC-feature"], depends_on=[], status="pending", verification=[dict(criteria=["AC-feature"], test_description="Check output", location="tests/future.py", run=dict(command=["pytest", "tests/future.py"]))])
     write_doc(change / "proposal.md", "proposal")
     write_doc(change / "design.md", "design")
     write_doc(change / "specs/feature/spec.md", "spec", records, capability="feature")
