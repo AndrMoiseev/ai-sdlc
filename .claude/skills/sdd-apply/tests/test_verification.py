@@ -58,7 +58,7 @@ def test_additional_review_checks_invalidate_previous_pass(driver):
 def test_timeout_is_unavailable_and_stops_own_process(tmp_path):
     import sys
     from lib.verification import run_command
-    result = run_command(f'"{sys.executable}" -B -c "import time; time.sleep(30)"', tmp_path, .05)
+    result = run_command([sys.executable, "-B", "-c", "import time; time.sleep(30)"], tmp_path, .05)
     assert result["outcome"] == "unavailable"
     assert result["exit_code"] is None
     assert result["duration_seconds"] < 10
@@ -72,3 +72,78 @@ def test_initial_failing_check_blocks_plan(driver, project):
     assert driver.send("check_run", {"role_id": "author", "stage": "baseline"})["outcome"] == "failed"
     assert driver.state["status"] == "blocked"
     assert driver.state["blockers"][0]["reason"] == "baseline_failed"
+
+
+def test_arguments_are_literal_and_paths_with_spaces_work(tmp_path):
+    import json
+    import sys
+    from lib.verification import run_command
+    cwd = tmp_path / "working directory"
+    cwd.mkdir()
+    script = cwd / "echo arguments.py"
+    script.write_text("import json, sys; print(json.dumps(sys.argv[1:]))\n")
+    arguments = ["", "two words", 'a"quote', "trailing\\", "&&", ";", "|", ">", "*.py", "$HOME", "%TEMP%", "$(echo unexpected)"]
+    command = [sys.executable, "-B", str(script), *arguments]
+    result = run_command(command, cwd, 10)
+    assert result["outcome"] == "passed", result
+    assert json.loads(result["stdout"]) == arguments
+    assert result["command"] == command
+    assert list(cwd.iterdir()) == [script]
+
+
+@pytest.mark.parametrize("command", ["echo unsafe > marker", [], [""], [None], ["runner", "bad\0arg"]])
+def test_invalid_or_legacy_command_never_starts_process(tmp_path, monkeypatch, command):
+    from lib import verification
+    def unexpected(*args, **kwargs):
+        pytest.fail("Invalid command reached subprocess")
+    monkeypatch.setattr(verification.subprocess, "Popen", unexpected)
+    result = verification.run_command(command, tmp_path, 10)
+    assert result["outcome"] == "unavailable"
+    assert result["limitation"] == "command_format"
+    assert result["exit_code"] is None
+
+
+def test_nonzero_exit_and_missing_executable(tmp_path):
+    import sys
+    from lib.verification import run_command
+    result = run_command([sys.executable, "-B", "-c", "import sys; sys.stderr.write('failure'); sys.exit(7)"], tmp_path, 10)
+    assert result["outcome"] == "failed"
+    assert result["exit_code"] == 7
+    assert result["stderr"].endswith("failure")
+    result = run_command([str(tmp_path / "missing-executable")], tmp_path, 10)
+    assert result["outcome"] == "unavailable"
+    assert result["exit_code"] is None
+
+
+def test_explicit_shell_script(tmp_path):
+    import os
+    import shutil
+    from lib.verification import run_command
+    if os.name == "nt":
+        script = tmp_path / "verify.cmd"
+        script.write_text("@echo off\necho explicit-shell\nexit /b 7\n")
+        command = [os.environ["COMSPEC"], "/d", "/c", script.name]
+    else:
+        script = tmp_path / "verify.sh"
+        script.write_text("echo explicit-shell\nexit 7\n")
+        command = [shutil.which("sh"), str(script)]
+    result = run_command(command, tmp_path, 10)
+    assert result["stdout"].strip() == "explicit-shell"
+    assert result["exit_code"] == 7
+    assert result["outcome"] == "failed"
+
+
+def test_additional_check_rejects_string_command(driver):
+    with pytest.raises(ValueError, match="argument array"):
+        driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": [{"id": "extra", "source": "ci", "run": {"command": "pytest"}}]})
+    assert not driver.task["checks"]
+
+
+def test_extension_rejects_string_command(driver):
+    driver.start()
+    driver.freeze()
+    driver.verify()
+    driver.review(verdict="more_checks")
+    with pytest.raises(ValueError, match="argument array"):
+        driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [{"id": "extra", "source": "review", "criteria": ["AC-one"], "run": {"command": "pytest"}}]})
+    assert len(driver.task["checks"]) == 1

@@ -188,6 +188,7 @@ def test_new_entrypoints_relocate_without_consumer_changes(tmp_path, script):
     root = Path(__file__).resolve().parents[1]
     installed = tmp_path / "installed" / "sdd-spec"
     shutil.copytree(root, installed)
+    shutil.copytree(root.parent / "sdd-shared", installed.parent / "sdd-shared")
     consumer = tmp_path / "conflicting consumer"
     consumer.mkdir()
     (consumer / "pyproject.toml").write_text('[project]\nname="conflict"\nversion="1.0"\n'

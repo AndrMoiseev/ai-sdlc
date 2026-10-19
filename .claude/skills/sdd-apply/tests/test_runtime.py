@@ -19,6 +19,7 @@ def test_source_and_installed_entrypoints(tmp_path, installed, conflict):
     package = tmp_path / "installed/sdd-apply" if installed else ROOT
     if installed:
         shutil.copytree(ROOT, package)
+        shutil.copytree(ROOT.parent / "sdd-shared", package.parent / "sdd-shared")
     cwd = tmp_path / "consumer"
     cwd.mkdir()
     if conflict:
@@ -55,6 +56,7 @@ def test_first_run_and_cache_restoration(tmp_path):
     cache = (tmp_path / "owned-uv-cache").resolve()
     package = tmp_path / "installed/sdd-apply"
     shutil.copytree(ROOT, package)
+    shutil.copytree(ROOT.parent / "sdd-shared", package.parent / "sdd-shared")
     cwd = tmp_path / "unrelated"
     cwd.mkdir()
     env = {**os.environ, "UV_CACHE_DIR": str(cache)}

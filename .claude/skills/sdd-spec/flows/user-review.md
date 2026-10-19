@@ -1,5 +1,11 @@
 # Рассмотрение результатов
 
+Перед чтением отчётов и записью USER-решений прочитай
+[общую основу](../../sdd-shared/references/document-format.md) и
+[формат ревью и согласований](../../sdd-shared/references/document-format-review.md).
+При проверке содержания комплекта добавь [нормативный формат](../../sdd-shared/references/document-format-normative.md),
+а для tasks — [задачи и проверки](../../sdd-shared/references/document-format-tasks.md).
+
 После завершённой правки документов предложи [гуманизацию](../references/editorial-pass.md)
 и учти сохранённый выбор пользователя; выполняй её только в согласованной области.
 Исходные отчёты ревью и ответы пользователя сохраняй дословно.

@@ -2,7 +2,7 @@
 import copy
 import difflib
 import hashlib
-import importlib.util
+from shared import locate, load
 import io
 import json
 import os
@@ -61,15 +61,9 @@ def text_value(value):
     return isinstance(value, str) and bool(value.strip()) and value == value.strip() and not any(ord(c) < 32 for c in value)
 
 
-def shared_contract(sdd_spec=None):
-    root = Path(sdd_spec).resolve() if sdd_spec else PACKAGE.parent / "sdd-spec"
-    path = root / "scripts/lib/subagents.py"
-    require(path.is_file(), "Install the matching sdd-spec alongside sdd-setup or supply --sdd-spec")
-    spec = importlib.util.spec_from_file_location("sdd_setup_contract", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    require(all(hasattr(module, key) for key in ("ROLES", "settings")), "Update the companion sdd-spec")
-    return module, path
+def shared_contract(sdd_spec=None, sdd_shared=None):
+    root = locate(explicit=sdd_shared, legacy=sdd_spec)
+    return load(root, "subagents"), root / "scripts/sdd_shared/subagents.py"
 
 
 def safe_target(project, relative):
@@ -142,14 +136,14 @@ def scan_agents(root, host, scope):
     return records, evidence
 
 
-def inspect_project(project_root, host, sdd_spec=None, user_agent_dir=None, available_agents=None, names=None):
+def inspect_project(project_root, host, sdd_spec=None, user_agent_dir=None, available_agents=None, names=None, sdd_shared=None):
     require(host in ("codex", "claude-code"), "Supported hosts: codex, claude-code")
     project = Path(project_root).resolve(strict=True)
     require(project.is_dir(), "project_root must be a directory")
-    shared, contract_path = shared_contract(sdd_spec)
+    shared, contract_path = shared_contract(sdd_spec, sdd_shared)
     defaults_path = PACKAGE / "assets/defaults.json"
     presets = read_json(defaults_path)["roles"]
-    require(set(presets) == set(shared.ROLES), "sdd-setup defaults and sdd-spec roles differ; update both skills")
+    require(set(presets) == set(shared.ROLES), "sdd-setup defaults and sdd-shared roles differ; update both skills")
     roles, settings_evidence, _ = shared.settings(project)
     names = sorted(set(names or []))
     require(all(text_value(name) for name in names), "names must contain agent names")
@@ -178,7 +172,7 @@ def inspect_project(project_root, host, sdd_spec=None, user_agent_dir=None, avai
         agents[name] = entry
     result = {
         "schema_version": 1, "project_root": str(project), "host": host,
-        "inputs": {"project_root": str(project), "host": host, "sdd_spec": str(contract_path.parents[2]),
+        "inputs": {"project_root": str(project), "host": host, "sdd_shared": str(contract_path.parents[2]),
                    "user_agent_dir": str(user_root.resolve()), "available_agents": available_agents, "names": names},
         "roles": [{"role": role, "present": role in roles, "current": roles.get(role),
                    "default": presets[role]["agent"], "profile_default": presets[role][host]}

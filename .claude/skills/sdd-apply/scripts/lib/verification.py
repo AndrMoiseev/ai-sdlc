@@ -7,7 +7,7 @@ import os
 import signal
 from .common import contained, digest, git, now, require, write_json
 from .state import snapshot
-from .inputs import spec_modules
+from .inputs import spec_modules, basis_dependency
 
 
 def root_for(state, task):
@@ -60,17 +60,32 @@ def valid_evidence(state, task, directory, stage=None):
     return matches
 
 
+def valid_command(command):
+    return (isinstance(command, list) and bool(command)
+            and all(isinstance(arg, str) and "\0" not in arg for arg in command)
+            and bool(command[0].strip()))
+
+
+COMMAND_FORMAT = "command must be an argument array, e.g. ['pytest', '-q']; migrate legacy strings explicitly without changing approved checks"
+
+
+def require_command(command):
+    require(valid_command(command), "command_format", COMMAND_FORMAT)
+
+
 def run_command(command, cwd, timeout):
     started, stamp = time.monotonic(), now()
+    if not valid_command(command):
+        return {"command": command, "cwd": str(cwd), "started_at": stamp, "duration_seconds": time.monotonic() - started, "exit_code": None, "stdout": "", "stderr": COMMAND_FORMAT, "outcome": "unavailable", "limitation": "command_format"}
     try:
         options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" else {"start_new_session": True}
-        process = subprocess.Popen(command, shell=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **options)
+        process = subprocess.Popen(command, shell=False, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **options)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             if process.poll() is None:
                 if os.name == "nt":
-                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True)
+                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], shell=False, capture_output=True)
                 else:
                     os.killpg(process.pid, signal.SIGKILL)
             stdout, stderr = process.communicate(timeout=10)
@@ -97,6 +112,9 @@ def transition(state, task, event, directory):
             require(check.get("id") and check.get("source") and check.get("run"), "check_schema", "Additional required checks need ID, source and exact run")
             checks.append({**check, "setup": None, "cwd": check.get("cwd", "."), "configuration": check.get("configuration", {})})
         require(len({c["id"] for c in checks}) == len(checks), "duplicate_check", "Duplicate check ID")
+        for check in checks:
+            if "command" in check["run"]:
+                require_command(check["run"]["command"])
         task["checks"], task["inventory"] = checks, p["inventory"]
         return {"checks": checks}
     if kind == "checks_extend":
@@ -107,6 +125,7 @@ def transition(state, task, event, directory):
         for check in additions:
             require(check.get("id") and check.get("source") and check.get("run", {}).get("command") and check.get("criteria") and set(check["criteria"]) <= set(task["plan"]["covers"]), "check_schema", "Add exact runnable checks with scoped AC")
             require(check["id"] not in {c["id"] for c in task["checks"]}, "duplicate_check", "Existing checks cannot be replaced")
+            require_command(check["run"]["command"])
             task["checks"].append({**check, "setup": None, "cwd": check.get("cwd", "."), "configuration": check.get("configuration", {})})
         task["candidate"] = candidate(state, task)
         return {"checks": task["checks"], "candidate": task["candidate"]}
@@ -115,6 +134,7 @@ def transition(state, task, event, directory):
         require(check and ("setup_required" in check["run"] or "procedure" in check["run"]) and check["setup"] is None, "setup_not_planned", "Only planned, unresolved setup or procedure may be registered")
         require(task["status"] in {"running", "repairing"}, "setup_phase", "Prepare checks within their task")
         require(p.get("command") and p.get("description") and task.get("baseline_checks"), "setup_evidence", "Need baseline check inventory and preparation description")
+        require_command(p["command"])
         check["setup"] = {"command": p["command"], "cwd": p.get("cwd", "."), "configuration": p.get("configuration", {}), "description": p["description"], "before": task["start_snapshot"], "after": snapshot(state, root_for(state, task))}
         return {"setup": check}
     if kind == "candidate":
@@ -193,7 +213,7 @@ def transition(state, task, event, directory):
             outputs.append({"check_id": check["id"], "outcome": "planned_absence", "description": run["setup_required"]})
             continue
         if "location" in check:
-            location = spec_modules(Path(state["basis"]["sdd_spec"]), "paths").verification_location(root, check["location"])
+            location = spec_modules(basis_dependency(state["basis"]), "paths").verification_location(root, check["location"])
             if not (location.is_file() or location.is_dir()):
                 outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Required verification location is missing", "location": check["location"]})
                 continue

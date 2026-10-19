@@ -17,6 +17,7 @@ def installed(tmp_path):
     package = tmp_path / "installed skills" / "sdd-spec"
     shutil.copytree(SKILL, package, ignore=shutil.ignore_patterns(
         "__pycache__", "*.pyc", ".venv", ".pytest_cache", ".cache"))
+    shutil.copytree(SKILL.parent / "sdd-shared", package.parent / "sdd-shared")
     project = tmp_path / "consumer with spaces"
     project.mkdir()
     return package, project

@@ -39,9 +39,9 @@ def transition(state, task, event, directory):
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
         require(not any(r["status"] == "active" for r in state["roles"].values()), "active_roles", "Finish or reconcile active roles before replacing the basis")
-        from .inputs import validate
+        from .inputs import validate, basis_dependency
         import uuid
-        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"), state["basis"]["sdd_spec"])
+        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"), sdd_shared=basis_dependency(state["basis"]))
         require(basis["manifest"] != state["basis"]["manifest"], "plan_unchanged", "Use resume when the approved basis is unchanged")
         plans = {plan["id"]: plan for plan in basis["tasks"]}
         completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]

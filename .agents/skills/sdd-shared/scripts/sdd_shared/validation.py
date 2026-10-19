@@ -187,8 +187,16 @@ def validate_documents(project_root: Path, change_root: Path, stage: str):
             except ValidationError as exc:
                 problem(record, exc.code, exc.message)
             run = check["run"]
-            if not isinstance(run, dict) or len(run) != 1 or next(iter(run), None) not in {"command", "procedure", "setup_required"} or not all(isinstance(x, str) and x.strip() for x in run.values()):
-                problem(record, "verification_run", "run requires exactly one nonempty command, procedure or setup_required")
+            if not isinstance(run, dict) or len(run) != 1 or next(iter(run), None) not in {"command", "procedure", "setup_required"}:
+                problem(record, "verification_run", "run requires exactly one command, procedure or setup_required")
+            elif "command" in run:
+                command = run["command"]
+                if not (isinstance(command, list) and command
+                        and all(isinstance(arg, str) and "\0" not in arg for arg in command)
+                        and command[0].strip()):
+                    problem(record, "verification_run", "command must be an argument array, e.g. ['pytest', '-q']; migrate legacy strings explicitly")
+            elif not all(isinstance(x, str) and x.strip() for x in run.values()):
+                problem(record, "verification_run", "procedure and setup_required require nonempty text")
             elif "procedure" in run:
                 try:
                     guarded_path(run["procedure"])
