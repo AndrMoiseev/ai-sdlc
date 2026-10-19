@@ -1,10 +1,11 @@
 # Project subagent selection
 
 Before a new executor, verifier, reviewer or final_verifier launch, read
-`references/subagents.md` in the resolved sdd-spec dependency at `basis.sdd_spec`.
+`references/subagents.md` in sdd-shared at `basis.sdd_shared`. For a legacy basis
+with only `sdd_spec`, resolve sdd-shared alongside that saved package location.
 That shared contract defines `.sdd/settings.json`, all eight roles, host behavior,
 fallbacks and source evidence. Read that reference directly; do not invoke the
-authoring workflow. Update both skill packages together.
+authoring workflow. Update the SDD bundle together.
 
 Use the [API](api.md) operation `resolve_agent` before the waiting handshake:
 

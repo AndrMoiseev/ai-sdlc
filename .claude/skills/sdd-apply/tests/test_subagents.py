@@ -73,8 +73,9 @@ def test_api_uses_saved_project_root_not_worktree(driver, tmp_path, monkeypatch)
 
 def test_existing_run_old_dependency_has_actionable_error(driver, tmp_path):
     state = driver.state
-    state["basis"]["sdd_spec"] = str(tmp_path)
-    with pytest.raises(ValueError, match="Update sdd-spec together"):
+    state["basis"].pop("sdd_shared", None)
+    state["basis"]["sdd_spec"] = str(tmp_path / "missing-spec")
+    with pytest.raises(ValueError, match="matching sdd-shared"):
         resolve(state, "executor", host="codex", parent_model="parent")
 
 

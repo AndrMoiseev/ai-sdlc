@@ -1,14 +1,9 @@
 """Use the companion skill's resolver at the execution's original project root."""
-from .inputs import spec_modules
+from .inputs import spec_modules, basis_dependency
 
 
 def resolver(state):
-    from pathlib import Path
-    root = Path(state["basis"]["sdd_spec"])
-    if not (root / "scripts/lib/subagents.py").is_file():
-        raise ValueError("Update sdd-spec together with sdd-apply: shared subagent resolver is missing")
-    module = spec_modules(root, "subagents")
-    return module
+    return spec_modules(basis_dependency(state["basis"]), "subagents")
 
 
 def resolve(state, kind, **kwargs):

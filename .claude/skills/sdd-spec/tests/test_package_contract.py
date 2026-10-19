@@ -39,7 +39,7 @@ def test_every_local_markdown_link_resolves_inside_package():
                 continue
             target = target.split("#", 1)[0].strip("<>")
             resolved = (path.parent / target).resolve()
-            assert resolved.is_relative_to(ROOT.resolve()), (path, target)
+            assert any(resolved.is_relative_to(p.resolve()) for p in (ROOT, ROOT.parent / "sdd-shared")), (path, target)
             assert resolved.is_file(), (path, target)
             checked += 1
     assert checked >= 30, "The map must actually link its self-contained resources"
@@ -54,9 +54,29 @@ def test_required_resources_ship_together():
     files += [f"templates/{name}.md" for name in
               ("proposal", "spec", "design", "tasks", "state", "review-report", "review-summary", "decisions", "discussion-decisions", "questions", "lens-index", "explanation", "preview-handoff")]
     files += [f"references/{name}.md" for name in
-              ("document-format", "discussion", "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation")]
+              ("document-format", "document-format-normative", "document-format-tasks",
+               "document-format-discussion", "document-format-review", "discussion",
+               "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency",
+               "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation")]
     for file in files:
         assert (ROOT / file).is_file(), file
+
+
+def test_document_format_section_links_reach_existing_headings():
+    """Moving the shared contract must not leave callers at a removed section."""
+    checked = 0
+    for path in ROOT.rglob("*.md"):
+        content = path.read_text(encoding="utf-8")
+        for target, anchor in re.findall(
+            r"\]\(([^)\n]*document-format[^)#\n]*\.md)#([^)\n]+)\)", content
+        ):
+            document = (path.parent / target).resolve()
+            headings = re.findall(r"(?m)^#{1,6} (.+)$", document.read_text(encoding="utf-8"))
+            anchors = {re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-")
+                       for heading in headings}
+            assert anchor in anchors, (path, target, anchor)
+            checked += 1
+    assert checked >= 4, "Shared verification, baseline and USER links must resolve"
 
 
 def test_runtime_flows_do_not_invoke_openspec():

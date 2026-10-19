@@ -10,7 +10,7 @@ from lib.inputs import spec_modules, validate
 @pytest.mark.parametrize("stage", ["baseline", "self", "independent", "final"])
 def test_missing_command_location_blocks_even_when_command_passes(project, stage):
     # A broad command can succeed after its intended test has disappeared.
-    reapprove(project, lambda t: t["verification"][0].update(run={"command": f'"{sys.executable}" -B -c "pass"'}))
+    reapprove(project, lambda t: t["verification"][0].update(run={"command": [sys.executable, "-B", "-c", "pass"]}))
     d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
     if stage == "baseline":
         (project / "check.py").unlink()
@@ -47,7 +47,10 @@ def test_directory_location_is_relative_to_project_not_command_cwd(project):
     d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
     d.start()
     assert d.task["baseline_checks"]["outputs"][0]["outcome"] == "planned_absence"
-    d.send("check_setup", {"check_id": "plan-1", "command": f'"{sys.executable}" -B check.py', "cwd": "tests", "description": "Prepared suite"})
+    with pytest.raises(ValueError, match="argument array"):
+        d.send("check_setup", {"check_id": "plan-1", "command": "python check.py", "cwd": "tests", "description": "Legacy setup"})
+    assert d.task["checks"][0]["setup"] is None
+    d.send("check_setup", {"check_id": "plan-1", "command": [sys.executable, "-B", "check.py"], "cwd": "tests", "description": "Prepared suite"})
     d.freeze()
     assert d.verify()["outcome"] == "passed"
 
@@ -90,7 +93,7 @@ def test_planned_setup_then_missing_runner_remains_blocker(project):
     d.start(["result.txt", "new_check.py"])
     original = (project / "sdd/changes/demo/tasks.md").read_bytes()
     (project / "new_check.py").write_text("assert 2 + 3 == 5\n")
-    d.send("check_setup", {"check_id": "plan-1", "command": f'"{sys.executable}" -B new_check.py', "description": "Prepared planned assertions"})
+    d.send("check_setup", {"check_id": "plan-1", "command": [sys.executable, "-B", "new_check.py"], "description": "Prepared planned assertions"})
     d.freeze()
     assert d.verify()["outcome"] == "passed"
     assert (project / "sdd/changes/demo/tasks.md").read_bytes() == original

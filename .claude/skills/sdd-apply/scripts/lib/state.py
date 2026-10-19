@@ -63,7 +63,8 @@ def seal(state):
     state["integrity"] = digest({k: v for k, v in state.items() if k != "integrity"})
 
 
-def read(directory):
+def read(directory, view="full"):
+    require(view in ("full", "compact"), "read_view", "Expected full or compact")
     state = json.loads((Path(directory) / "state.json").read_text(encoding="utf-8"))
     require(state.get("schema_version") == 1, "state_version", "Unsupported state schema")
     expected_directory = contained(state["basis"]["project_root"], "sdd/changes/" + state["change_id"] + "/execution")
@@ -79,6 +80,9 @@ def read(directory):
         require(entry["hash"] == digest({k: v for k, v in entry.items() if k != "hash"}), "history_corrupt", "Event hash mismatch")
         ids.add(entry["event_id"])
         previous = entry["hash"]
+    if view == "compact":
+        from .state_view import compact
+        return compact(state)
     return state
 
 

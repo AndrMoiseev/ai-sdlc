@@ -17,7 +17,7 @@ def project(tmp_path):
     root = tmp_path / "project"
     change = root / "sdd/changes/demo"
     meta = dict(schema_version=1, change_id="demo", language="en")
-    task = dict(sdd_record="task", id="TASK-one", number=1, covers=["AC-one"], depends_on=[], status="pending", verification=[dict(criteria=["AC-one"], test_description="Check result", location="check.py", run={"command": f'"{sys.executable}" -B check.py'})])
+    task = dict(sdd_record="task", id="TASK-one", number=1, covers=["AC-one"], depends_on=[], status="pending", verification=[dict(criteria=["AC-one"], test_description="Check result", location="check.py", run={"command": [sys.executable, "-B", "check.py"]})])
     for name in ("proposal", "design", "tasks"):
         document(change / (name + ".md"), {**meta, "document_type": name}, [task] if name == "tasks" else [])
     document(change / "specs/demo/spec.md", {**meta, "document_type": "spec", "capability": "demo"}, [dict(sdd_record="requirement", id="REQ-one", operation="add"), dict(sdd_record="acceptance", id="AC-one", requirement="REQ-one", conditions="Numbers", expected="Sum")])

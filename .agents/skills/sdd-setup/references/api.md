@@ -12,7 +12,7 @@ uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root 
 uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root "<project>" --host claude-code --available-agents "<workspace>/catalog.json"
 ```
 
-Необязательные параметры: `--sdd-spec <skill-root>`, `--user-agent-dir <path>`
+Необязательные параметры: `--sdd-shared <shared-root>` (прежний `--sdd-spec` выбирает соседний с ним sdd-shared), `--user-agent-dir <path>`
 (для отдельного пользовательского каталога/тестов), `--names <name> <name>`
 (выбранные пользователем имена вне текущих настроек и пресетов).
 
@@ -98,4 +98,4 @@ uv run --locked --script "<skill-root>/scripts/setup.py" apply --plan "<workspac
 
 Поддерживаемые параметры среды: model/effort определений. Неизвестные верхние
 поля settings сохраняются; неизвестные поля внутри subagents отклоняет общий
-контракт `sdd-spec`. Версия схемы фиксирована, миграции других версий не выполняются.
+контракт `sdd-shared`. Версия схемы фиксирована, миграции других версий не выполняются.
