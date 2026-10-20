@@ -1,0 +1,33 @@
+{
+  "skill_name": "sdd-kb",
+  "evals": [
+    {
+      "id": 1,
+      "name": "search-map",
+      "prompt": "Найди в базе знаний, как проверяется подпись billing webhook, и построй интерактивную HTML-карту связей документов.",
+      "expected_output": "Answer cites the HMAC and expiry evidence; a reusable GitMark map contains all fixture documents and their links.",
+      "expectations": ["Answer cites the correct document and signature/expiry facts", "Map contains rendered documentation and an interactive graph", "No generated state is written inside the installed skill"]
+    },
+    {
+      "id": 2,
+      "name": "structural-query",
+      "prompt": "Какие документы созданы агентом и ещё никем не проверены? Сколько действующих решений по каждому сервису?",
+      "expected_output": "Structured query results from frontmatter, with counts qualified as typed-document counts.",
+      "expectations": ["Uses query rather than text search for metadata", "Correctly identifies unverified agent-authored document", "Counts active decisions by service without counting deprecated records"]
+    },
+    {
+      "id": 3,
+      "name": "curate-existing",
+      "prompt": "Обнови документацию billing webhook по src/billing.py. В коде срок действия подписи изменён на 600 секунд. Исправь связанные метаданные и индекс документации.",
+      "expected_output": "Existing doc updated without duplication; stale human verification removed; README and search index refreshed.",
+      "expectations": ["Updates existing document to 600 seconds without duplicate", "Removes invalidated verification and records truthful authorship", "Maintains typed code link and README entry", "Runs strict lint and rebuilds index"]
+    },
+    {
+      "id": 4,
+      "name": "build-scope",
+      "prompt": "Построй базу знаний только для src/billing.py. Сохрани существующие инструкции проекта. Создай обзор сервиса, справочник проверки подписи и карту документации.",
+      "expected_output": "Scoped service/reference docs, linked folder indexes, preserved AGENTS instructions and generated map.",
+      "expectations": ["Documents observed code without inventing historical decisions", "Creates reachable service and reference docs with typed links", "Preserves existing project instruction text", "Reports strict lint, index and map results"]
+    }
+  ]
+}
