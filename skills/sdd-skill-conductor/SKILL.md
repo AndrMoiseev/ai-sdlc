@@ -174,10 +174,14 @@ Error: [message] → Cause: [why] → Fix: [how]
 - **No secrets/env in SKILL.md.** No keys, passwords, tokens, env values, or user-absolute paths (`/home/<user>`, `/Users/<user>`) — reference them, never inline (Principle 9a)
 - **Progressive disclosure.** SKILL.md = brain (<500 lines). References = details. One level deep
 - **Token budget.** Frequently loaded: <200 words. Standard: <500 lines. Heavy: move to references/
-- **No junk files.** No README, CHANGELOG inside the skill
+- **User documentation.** When creating or updating a skill README, follow [readme-guidelines.md](references/readme-guidelines.md). Keep CHANGELOG and generated runtime state out of the skill package.
 - **Scripts:** bundle when same code rewritten repeatedly, or operation is fragile. Must return descriptive stdout/stderr on failure
 - **Python subprocesses:** pass an argument list with explicit `shell=False` so arguments stay data. Use Python APIs for cwd, environment and redirection. When a workflow requires a shell, register its interpreter and trusted script explicitly in the argument list; never automatically wrap command strings with `sh -c` or `cmd /c`. Review interpreter code as executable input, including Windows `.bat`/`.cmd` files.
 - **Imperative voice.** Use "Extract the data", not "you should extract" or capitalized "MUST/NEVER" — explanation > rule (see `references/sop-practices.md` Principle 5, TWI)
+
+### Step 5b: Write the README
+
+For a new skill, write a user-facing `README.md` using [readme-guidelines.md](references/readme-guidelines.md). When improving a skill, update its README if the purpose, ecosystem role, or prompt-selected flows change. Apply the same guide to direct README requests.
 
 ### Step 6: Test Cases & Eval Loop
 
@@ -350,7 +354,7 @@ Quick quality gate for third-party skills.
 [ ] description: ≤1024 chars, no angle brackets
 [ ] description describes intended use (automatic skills also have triggers)
 [ ] description has NO workflow/process steps
-[ ] No README.md inside skill folder
+[ ] README, when present, meets references/readme-guidelines.md (manual review)
 [ ] SKILL.md < 500 lines
 [ ] References max 1 level deep
 [ ] Scripts tested and executable
