@@ -19,7 +19,7 @@ Before coordinating workers, read the [shared coordination contract](../sdd-shar
 
 1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md), [Claude Code](agents/claude-code.md), or [arbitrary agent](agents/generic.md) when neither host is established.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
-3. Select one mode from verified state and the current user's authorization. Default to `sequential`. Select `parallel` only with an explicit scoped request and available isolation. If isolation is unavailable, select `sequential` before loading a mode flow and explain why.
+3. Select one mode from verified state and the current user's authorization. For a new execution, default to `parallel` when isolation is available; invoking sdd-apply authorizes this mode without a separate parallel request. Use `sequential` when the user explicitly requests it or isolation is unavailable, explaining the fallback. For an existing execution, preserve its saved mode unless the user changes it; apply the resume handoff contract for any mode change.
 4. Load only [execute-sequential](flows/execute-sequential.md) or [execute-parallel](flows/execute-parallel.md). Keep the other flow unloaded.
 5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed check or proven review violation, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 

@@ -222,7 +222,7 @@ Signals that questions belong together:
 - They describe the same missing element repeated in different places (missing WHY, missing trigger, missing edge-case handling)
 - They are different symptoms of one structural problem (e.g. SKILL.md is a prose dump → causes both "not a map" and "body too long")
 
-Keep deterministic `DET-*` failures as their own clusters when they have a single concrete fix (e.g. `DET-STRUCT-NO-README` → delete the README). Do not merge a critical failure into a non-critical cluster — critical fixes must stay visible.
+Keep deterministic `DET-*` failures as their own clusters when they have a single concrete fix (e.g. `DET-STRUCT-BODY-LENGTH` → move detailed instructions to references). Do not merge a critical failure into a non-critical cluster — critical fixes must stay visible.
 
 ### Step 3: Generalize Each Cluster into a Lesson
 

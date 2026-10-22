@@ -90,15 +90,20 @@ def new_task(task):
     return {"plan": task, "status": "pending", "attempt": 0, "candidate": None, "evidence": [], "reviews": [], "commits": [], "blockers": [], "review_limit": 3, "review_rounds_started": 0, "review_rounds_completed": 0, "active_review": None, "test_repair_limit": 5, "test_repair_cycles_started": 0, "active_repair": None, "repair_cycles": [], "budget_decisions": [], "checks": [], "worktree": None, "roles": [], "paths": []}
 
 
-def initialize(basis, owner, parallel_request=None, isolation=False):
+def initialize(basis, owner, parallel_request=None, isolation=False, mode="parallel"):
     require(isinstance(owner, str) and owner, "owner", "Orchestrator identity required")
+    require(mode in {"parallel", "sequential"}, "mode", "Expected parallel or sequential")
+    require(not parallel_request or (parallel_request.get("source") and parallel_request.get("text")), "parallel_authorization", "Record the actual execution instruction or mode request")
+    mode_reason = "isolation unavailable" if mode == "parallel" and not isolation else None
+    if mode_reason:
+        mode = "sequential"
+    parallel_request = (parallel_request or basis["instruction"]) if mode == "parallel" else None
     directory = contained(basis["project_root"], "sdd/changes/" + basis["change_id"] + "/execution")
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
     with lock(directory):
         require(not (directory / "state.json").exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
-        state = {"schema_version": 1, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": "parallel" if parallel_request and isolation else "sequential", "parallel_request": parallel_request if isolation else None, "mode_reason": "isolation unavailable" if parallel_request and not isolation else None, "tasks": {}, "roles": {}, "events": [], "blockers": [], "updated_at": now(), "final": None}
-        require(not parallel_request or (parallel_request.get("source") and parallel_request.get("text")), "parallel_authorization", "Explicit scoped user request required")
+        state = {"schema_version": 1, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "events": [], "blockers": [], "updated_at": now(), "final": None}
         for task in basis["tasks"]:
             state["tasks"][task["id"]] = new_task(task)
         state["baseline"] = snapshot(state, basis["project_root"])

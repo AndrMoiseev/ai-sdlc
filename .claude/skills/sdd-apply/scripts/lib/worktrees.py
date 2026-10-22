@@ -25,7 +25,7 @@ def transition(state, task, event, directory):
     require(task is not None, "task_required", "Task required")
     root = state["basis"]["project_root"]
     if event["type"] == "worktree_create":
-        require(state["mode"] == "parallel" and state["parallel_request"], "parallel_required", "Explicit parallel request required")
+        require(state["mode"] == "parallel" and state["parallel_request"], "parallel_required", "Saved execution instruction and parallel mode required")
         require(task["plan"]["id"] in available(state) and not task["worktree"], "worktree_admission", "Task is not available")
         workspace = Path(event["payload"]["workspace"]).resolve()
         resources = event["payload"].get("resources", [])

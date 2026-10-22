@@ -39,11 +39,6 @@ DET_QUESTIONS = {
         "Does SKILL.md exist?",
         "The skill folder has no SKILL.md file.",
     ),
-    "DET-STRUCT-NO-README": (
-        "Structure", False,
-        "Is there no README.md inside the skill?",
-        "A README.md file exists inside the skill folder.",
-    ),
     "DET-STRUCT-NO-CHANGELOG": (
         "Structure", False,
         "Is there no CHANGELOG.md inside the skill?",
@@ -204,13 +199,7 @@ def eval_skill(skill_path, json_mode=False):
         return finish(False)
     ok("SKILL.md exists", "DET-STRUCT-SKILLMD-EXISTS")
 
-    # Check for forbidden files
-    readme = skill_path / "README.md"
-    if readme.exists():
-        fail("README.md found inside skill (should not exist)", "DET-STRUCT-NO-README")
-    else:
-        ok("No README.md inside skill", "DET-STRUCT-NO-README")
-
+    # README content is reviewed manually using references/readme-guidelines.md.
     changelog = skill_path / "CHANGELOG.md"
     if changelog.exists():
         fail("CHANGELOG.md found inside skill", "DET-STRUCT-NO-CHANGELOG")

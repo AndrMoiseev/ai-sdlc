@@ -66,7 +66,6 @@ SKILL.md is a map (MOC), token budget respected, references at most 1 level deep
 
 - `DET-STRUCT-SKILLMD-EXISTS` — critical — "Does SKILL.md exist?"
 - `DET-STRUCT-FRONTMATTER-VALID` — critical — "Is the YAML frontmatter present and valid?"
-- `DET-STRUCT-NO-README` — non-critical — "Is there no README.md inside the skill?"
 - `DET-STRUCT-NO-CHANGELOG` — non-critical — "Is there no CHANGELOG.md inside the skill?"
 - `DET-STRUCT-REFS-DEPTH` — non-critical — "Are references nested at most 1 level deep?"
 - `DET-STRUCT-BODY-LENGTH` — non-critical — "Is the SKILL.md body at most 500 lines?"

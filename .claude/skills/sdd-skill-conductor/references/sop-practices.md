@@ -227,7 +227,7 @@ SKILL.md **must not contain** keys, passwords, tokens, env values, or hardcoded 
 | "usually 3 iterations are enough" | "at most 3 iterations, escalate after the third" |
 | "load as needed" | "if prices.md isn't loaded — load it" |
 
-Token budget: often <200 words, the standard is <500 lines of body, heavy material goes into `references/`. No README/CHANGELOG inside the skill.
+Token budget: often <200 words, the standard is <500 lines of body, heavy material goes into `references/`. Keep CHANGELOG out of the skill. For user-facing README content, follow [readme-guidelines.md](readme-guidelines.md).
 
 ### Sub-practice: one step — one action, no negations
 
