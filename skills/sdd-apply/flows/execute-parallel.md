@@ -1,6 +1,6 @@
 # Parallel execution
 
-Read [API](../references/api.md) and [roles](../references/roles.md). Keep the sequential flow unloaded. Require saved explicit user authorization and working isolation before admission.
+Read [API](../references/api.md) and [roles](../references/roles.md). Keep the sequential flow unloaded. Require the saved execution instruction, parallel mode and working isolation before admission; the default mode needs no separate parallel request.
 
 1. Request `available`; respect accepted dependencies, `cannot_parallel_with`, shared files and mutable resources. Isolate ports, databases, scratch directories and mutable caches per task. A conflict serializes the affected work; free slots alone do not authorize unsafe overlap.
 2. Submit `worktree_create` with `workspace` outside skill collections and the task's `resources`. The script creates a registered detached worktree at the execution branch's current HEAD. Register exact checks and project/CI inventory. Launch/register a fresh [executor](../agents/executor.md), pass the worktree and owned paths, then submit `start`. The executor leaves changes uncommitted and does not manage shared refs or other trees.
