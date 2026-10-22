@@ -116,6 +116,20 @@ def test_eval_skill_good_passes():
             f"expected pass marker, got: {result.stdout[:300]}"
 
 
+def test_eval_skill_readme_allowed():
+    with tempfile.TemporaryDirectory() as tmp:
+        skill = make_good_skill(Path(tmp))
+        (skill / "README.md").write_text(
+            "# Test Good Skill\n\nExercises skill validation.\n", encoding="utf-8"
+        )
+        result = subprocess.run(
+            [*PYTHON, str(SCRIPTS_DIR / "eval_skill.py"), str(skill)],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
+            shell=False,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_eval_skill_bad_fails():
     with tempfile.TemporaryDirectory() as tmp:
         skill = make_bad_skill(Path(tmp))
@@ -302,6 +316,7 @@ def main():
 
     print("\neval_skill.py:")
     run("good skill passes", test_eval_skill_good_passes)
+    run("README allowed", test_eval_skill_readme_allowed)
     run("bad skill fails", test_eval_skill_bad_fails)
     run("detects secret leak", test_eval_skill_detects_secret_leak)
     run("list description no crash", test_eval_skill_list_description_no_crash)
