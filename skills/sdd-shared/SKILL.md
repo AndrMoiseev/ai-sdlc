@@ -1,6 +1,6 @@
 ---
 name: sdd-shared
-description: Shared SDD document formats, validation scripts and subagent configuration contracts. Use when sdd-setup, sdd-spec or sdd-apply needs these resources, or when explicitly inspecting the shared SDD API. Do not use for starting planning, project setup or implementation workflows.
+description: Shared SDD document formats, validation scripts and subagent configuration contracts. Use when sdd-setup, sdd-spec, sdd-apply or sdd-sync needs these resources, or when explicitly inspecting the shared SDD API. Do not use for starting planning, project setup or implementation workflows.
 ---
 
 # SDD Shared
@@ -23,5 +23,6 @@ decisions, review authorization and execution.
 
 The package owns parsers, validators, snapshots, settings and role resolution.
 Authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
-and execution state and Git operations to sdd-apply. A successful structural check
+execution state and Git operations to sdd-apply, and baseline synchronization and
+change archiving to sdd-sync. A successful structural check
 reports evidence; the calling workflow determines whether it may proceed.

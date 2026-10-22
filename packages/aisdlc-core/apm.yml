@@ -8,4 +8,5 @@ dependencies:
     - path: ../../skills/sdd-setup
     - path: ../../skills/sdd-spec
     - path: ../../skills/sdd-apply
+    - path: ../../skills/sdd-sync
     - path: ../../skills/sdd-doc
