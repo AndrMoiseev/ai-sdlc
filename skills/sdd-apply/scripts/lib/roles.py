@@ -2,6 +2,7 @@
 from .common import contained, digest, now, require, write_json
 from .verification import current, independent, valid_evidence
 from .review_policy import proven
+from .candidates import reference, same
 import re
 from pathlib import Path
 
@@ -40,7 +41,11 @@ def transition(state, task, event, directory):
         role = {**p, "task_id": task["plan"]["id"], "status": "active", "registered_at": now()}
         state["roles"][p["role_id"]] = role
         task["roles"].append(p["role_id"])
-        packet = {"task": task["plan"], "basis": state["basis"]["manifest"], "project_root": state["basis"]["project_root"], "paths": task["paths"], "worktree": task["worktree"], "candidate": task["candidate"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        packet = {"task": task["plan"], "basis": state["basis"]["manifest"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        if task["worktree"]:
+            packet["worktree"] = {key: value for key, value in task["worktree"].items()
+                                  if key not in {"snapshot", "inventory"}}
+            packet["worktree_state"] = {"path": "state.json", "task_id": task["plan"]["id"]}
         import json
         for effect in (directory / "runs" / state["run_id"] / "effects").glob("*.json"):
             record = json.loads(effect.read_text(encoding="utf-8"))
@@ -69,12 +74,12 @@ def transition(state, task, event, directory):
             return {"blocked": "review_limit_reached"}
         task["active_reviewer"] = p["role_id"]
         task["status"] = "reviewing"
-        return {"round": task["review_rounds_started"], "candidate": task["candidate"]}
+        return {"round": task["review_rounds_started"], "candidate": reference(state, task["candidate"])}
     require(kind == "review_result", "role_operation", kind)
     require(task["active_review"] and task.get("active_reviewer") == p.get("role_id"), "review_not_started", "Reserve review round first")
     independent(state, task, p["role_id"], {"reviewer"})
     current(state, task)
-    require(p.get("candidate") == task["candidate"], "stale_review", "Review must name the frozen candidate")
+    require(same(state, p.get("candidate"), task["candidate"]), "stale_review", "Review must name the frozen candidate")
     require(p.get("verdict") in {"pass", "changes", "more_checks"} and isinstance(p.get("findings"), list), "review_schema", "Verdict and findings required")
     require(p.get("test_integrity") and p.get("trace"), "review_evidence", "Review assertions, skips/xfail and command weakening; retain trace")
     findings = []

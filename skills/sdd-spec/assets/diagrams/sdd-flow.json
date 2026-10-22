@@ -5,7 +5,7 @@
     "title": "Место sdd-spec в SDD",
     "locale": "ru",
     "quality_profile": "showcase",
-    "output": ".archify/workflow-sdd-spec-20261022-092239/sdd-flow.html",
+    "output": "skills/sdd-spec/assets/diagrams/sdd-flow.html",
     "repository": {
       "url": "git@github.com:AndrMoiseev/ai-sdlc.git",
       "revision": "fa23f63872c12d353057242dfb773e877ca35bae",

@@ -12,7 +12,7 @@ def transition(state, task, event, directory):
     require(task and task["worktree"] and state["mode"] == "parallel", "parallel_required", "Integration requires an authorized worktree task")
     require(task["status"] == "integrating", "integration_phase", "Review the task before transfer")
     current(state, task)
-    reviewed(task)
+    reviewed(state, task)
     valid_evidence(state, task, directory)
     root = state["basis"]["project_root"]
     worktree = task["worktree"]

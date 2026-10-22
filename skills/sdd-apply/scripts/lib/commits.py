@@ -5,10 +5,11 @@ import tempfile
 from .common import contained, digest, git, require, source_snapshot
 from .effects import intent, observed
 from .verification import current, valid_evidence, candidate
+from .candidates import same
 
 
-def reviewed(task):
-    require(task["reviews"] and task["reviews"][-1]["candidate"] == task["candidate"] and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Current independent passing review required")
+def reviewed(state, task):
+    require(task["reviews"] and same(state, task["reviews"][-1]["candidate"], task["candidate"]) and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Current independent passing review required")
 
 
 def index_tree(root, paths, base):
@@ -52,14 +53,14 @@ def confirm(state, task, commit):
 def transition(state, task, event, directory):
     require(task and task["status"] == "committing", "commit_phase", "Only reviewed candidates may be committed")
     current(state, task)
-    reviewed(task)
+    reviewed(state, task)
     valid_evidence(state, task, directory, "integration" if task["worktree"] and task["worktree"].get("integrated") else None)
     root = state["basis"]["project_root"]
     require(git(root, "symbolic-ref", "--quiet", "--short", "HEAD") == state["basis"]["branch"], "branch_changed", "Execution branch changed")
     if event["type"] == "accept":
         require(task["commits"], "commit_required", "A commit is mandatory")
         confirm(state, task, task["commits"][-1])
-        require(task["commits"][-1]["candidate"] == task["candidate"], "commit_candidate", "Commit did not record this candidate")
+        require(same(state, task["commits"][-1]["candidate"], task["candidate"]), "commit_candidate", "Commit did not record this candidate")
         task["status"] = "accepted"
         task["integration_active"] = False
         return {"status": "accepted", "sha": task["commits"][-1]["sha"]}

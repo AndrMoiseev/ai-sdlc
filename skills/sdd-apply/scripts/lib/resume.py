@@ -106,7 +106,8 @@ def transition(state, task, event, directory):
             role["status"] = "lost"
             t = state["tasks"].get(role["task_id"])
             if t and t["status"] not in {"pending", "accepted"}:
-                t["before_block"] = t["status"]
+                if t["status"] != "blocked":
+                    t["before_block"] = t["status"]
                 t["status"] = "blocked"
                 item = {"reason": "lost_role", "task_id": role["task_id"], "role_id": role["role_id"], "resume_condition": "Register a fresh successor with preserved files and task packet"}
                 t["blockers"].append(item)
@@ -114,7 +115,8 @@ def transition(state, task, event, directory):
     for key, t in state["tasks"].items():
         if t["candidate"] and t["status"] not in {"accepted", "pending", "blocked"}:
             from .verification import candidate
-            if t["candidate"] != candidate(state, t):
+            from .candidates import same
+            if not same(state, t["candidate"], candidate(state, t)):
                 issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Re-freeze and independently verify changed candidate"})
     for issue in issues:
         if issue not in state["blockers"]:
@@ -125,24 +127,42 @@ def transition(state, task, event, directory):
     for resolution in resolutions:
         require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict", "mode_handoff", "mode_switch_worktree"}, "resume_resolution", "Use the dedicated operation for this blocker")
         reason = resolution["reason"]
+        lost_role = None
         if reason == "lost_role":
             successor = state["roles"].get(resolution.get("successor"))
             require(successor and successor["status"] == "active" and successor.get("successor_of") and successor["task_id"] == resolution.get("task_id"), "successor_required", "Register a fresh successor first")
-        state["blockers"] = [b for b in state["blockers"] if not (b["reason"] == reason and b.get("task_id") == resolution.get("task_id"))]
+            # Older requests omit role_id; the registered lineage identifies the
+            # one loss they resolve. Never clear another lost role on this task.
+            lost_role = resolution.get("role_id", successor["successor_of"])
+            predecessor = state["roles"].get(lost_role)
+            require(predecessor and successor["successor_of"] == lost_role
+                    and predecessor["status"] == "lost"
+                    and predecessor["task_id"] == successor["task_id"]
+                    and predecessor["kind"] == successor["kind"],
+                    "successor_required", "Successor must replace the named lost role with the same task and kind")
+            require(any(b["reason"] == reason and b.get("task_id") == resolution.get("task_id")
+                        and b.get("role_id") == lost_role for b in state["blockers"]),
+                    "successor_required", "No unresolved loss for this role")
+        def resolved(blocker):
+            return (blocker["reason"] == reason
+                    and blocker.get("task_id", resolution.get("task_id")) == resolution.get("task_id")
+                    and (lost_role is None or blocker.get("role_id") == lost_role))
+        state["blockers"] = [b for b in state["blockers"] if not
+                             (b.get("task_id") == resolution.get("task_id") and resolved(b))]
         t = state["tasks"].get(resolution.get("task_id"))
         if t:
             if reason == "lost_role" and successor["kind"] == "executor":
                 t["executor"] = successor["role_id"]
-            if reason == "lost_role" and successor["kind"] == "reviewer" and t["active_review"]:
+            if reason == "lost_role" and successor["kind"] == "reviewer" and t.get("active_reviewer") == lost_role and t["active_review"]:
                 t["active_reviewer"] = successor["role_id"]
-            t["blockers"] = [b for b in t["blockers"] if b["reason"] != reason]
+            t["blockers"] = [b for b in t["blockers"] if not resolved(b)]
             if not t["blockers"] and t["status"] == "blocked":
                 target = t.get("before_block", "running")
                 if target == "accepted":
                     from .commits import confirm, reviewed
                     from .verification import valid_evidence
                     valid_evidence(state, t, directory)
-                    reviewed(t)
+                    reviewed(state, t)
                     require(t["commits"], "commit_required", "Accepted task needs confirmed commits")
                     confirm(state, t, t["commits"][-1])
                 t["status"] = target

@@ -445,7 +445,7 @@
       "viewer.rail.right": "Переместить панель рядом с диаграммой"
     },
     "quality_profile": "showcase",
-    "output": "docs/diagrams/sdd-apply/plan-revision.html",
+    "output": "skills/sdd-apply/assets/diagrams/plan-revision.html",
     "repository": {
       "url": "git@github.com:AndrMoiseev/ai-sdlc.git",
       "revision": "2940cf10a639d77cf86970b4907d024da9fc5908",
