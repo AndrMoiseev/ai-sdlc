@@ -8,7 +8,8 @@ dependencies:
   apm:
   - path: ./packages/aisdlc-core
   - path: ./packages/aisdlc-skills
+  - path: ./packages/aisdlc-experimental
 executables:
   allow:
-    github.com/tt-a1i/archify/archify#2ab3cae7ac2c2a55d7386ca789d03c4fcd31816c:
+    github.com/tt-a1i/archify/archify:
       bin: true
