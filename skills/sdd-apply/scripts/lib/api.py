@@ -6,6 +6,9 @@ from . import state, dashboard, scheduler
 def dispatch(request):
     operation = request["operation"]
     args = request.get("args", {})
+    if operation == "help":
+        from .api_help import describe
+        return describe(**args)
     if operation == "validate":
         return validate(**args)
     if operation == "initialize":

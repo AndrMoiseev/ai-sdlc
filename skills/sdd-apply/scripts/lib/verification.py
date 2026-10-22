@@ -8,6 +8,7 @@ import signal
 from .common import contained, digest, git, now, require, write_json
 from .state import snapshot
 from .inputs import spec_modules, basis_dependency
+from .candidates import resolve, same, store
 
 
 def root_for(state, task):
@@ -15,11 +16,15 @@ def root_for(state, task):
 
 
 def candidate(state, task):
-    return {"source": snapshot(state, root_for(state, task)), "manifest": digest(state["basis"]["manifest"]), "checks": digest(task["checks"]), "root": root_for(state, task)}
+    if task.get("candidate") is not None:
+        resolve(state, task["candidate"])
+    return store(state, {"source": snapshot(state, root_for(state, task)), "manifest": digest(state["basis"]["manifest"]), "checks": digest(task["checks"]), "root": root_for(state, task)})
 
 
 def current(state, task):
-    require(task["candidate"] and task["candidate"] == candidate(state, task), "stale_candidate", "Files, verification registry or normative inputs changed")
+    require(task["candidate"], "stale_candidate", "No frozen candidate")
+    resolve(state, task["candidate"])
+    require(same(state, task["candidate"], candidate(state, task)), "stale_candidate", "Files, verification registry or normative inputs changed")
 
 
 def independent(state, task, role_id, kinds):
@@ -36,7 +41,7 @@ def valid_evidence(state, task, directory, stage=None):
     expected = candidate(state, task) if stage == "final" else task["candidate"]
     matches, seen = [], set()
     for item in reversed(task["evidence"]):
-        if item["candidate"] != expected or item["stage"] not in ({stage} if stage else {"independent", "integration"}):
+        if item["stage"] not in ({stage} if stage else {"independent", "integration"}) or not same(state, item["candidate"], expected):
             continue
         if item["check_id"] in seen:
             continue
@@ -144,7 +149,7 @@ def transition(state, task, event, directory):
         require(all("setup_required" not in c["run"] or c["setup"] for c in task["checks"]), "setup_pending", "Resolve all planned setup")
         frozen = candidate(state, task)
         baseline = task.get("freeze_base", task["start_snapshot"])["files"]
-        current_files = frozen["source"]["files"]
+        current_files = resolve(state, frozen)["source"]["files"]
         changed = {p for p in set(baseline) | set(current_files) if baseline.get(p) != current_files.get(p)}
         require(changed <= set(task["paths"]), "candidate_scope", "Changes outside task ownership: " + ", ".join(sorted(changed - set(task["paths"]))))
         task["candidate"] = frozen
@@ -220,7 +225,7 @@ def transition(state, task, event, directory):
         if "command" not in run:
             if "procedure" in run:
                 tested = candidate(state, task) if stage == "final" else task["candidate"]
-                latest = next((e for e in reversed(task["evidence"]) if e["check_id"] == check["id"] and e["stage"] == stage and e["candidate"] == tested and e.get("procedure")), None)
+                latest = next((e for e in reversed(task["evidence"]) if e["check_id"] == check["id"] and e["stage"] == stage and same(state, e["candidate"], tested) and e.get("procedure")), None)
                 if latest:
                     path = contained(directory, latest["log"])
                     require(path.is_file() and digest(path.read_bytes()) == latest["log_hash"], "evidence_corrupt", "Procedure evidence changed")
