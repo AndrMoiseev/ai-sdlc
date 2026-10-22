@@ -49,7 +49,7 @@ class Driver:
     def __init__(self, basis, parallel=False):
         from lib.state import initialize
         self.directory = Path(basis["change_root"]) / "execution"
-        initialize(basis, "owner", {"source": "test-message", "text": "parallel"} if parallel else None, parallel)
+        initialize(basis, "owner", isolation=True, **({} if parallel else {"mode": "sequential"}))
         # State-only tests do not exercise HTML; dashboard tests use the renderer.
         (self.directory / "dashboard.html").write_text("test-only dashboard sentinel")
         self.number = 0
