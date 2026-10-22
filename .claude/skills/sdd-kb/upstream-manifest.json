@@ -1,0 +1,50 @@
+{
+    "excluded":  [
+                     "skills/dev-flow/",
+                     "commands/ship.md"
+                 ],
+    "revision":  "07eda61b4b15847371597937f6f620a2ae505720",
+    "files":  [
+                  {
+                      "sha256":  "942d0b22fb84d16f756a9118578cb9545bd91e73ceb4882a09deb01f8d254d49",
+                      "path":  "LICENSE"
+                  },
+                  {
+                      "sha256":  "a612a0b84a561166a4301e70f69ddfa32c4a59ee8c2c6cb3eec9703540b0fbe3",
+                      "path":  "skills/kb-search/SKILL.md"
+                  },
+                  {
+                      "sha256":  "fc48819b6a200039531dfb72859e05e0f697dda7a3bfc54041a13f00e1fc1f42",
+                      "path":  "skills/kb-curate/SKILL.md"
+                  },
+                  {
+                      "sha256":  "cc6d38541ba0d6d7c96147a6b2fcd9d7a23feb2f593c01b73cf4496458913553",
+                      "path":  "skills/kb-search/gitmark.py"
+                  },
+                  {
+                      "sha256":  "a55a5fcdd7d0ad2518b39731153fb21746a4c726dd6b4c4ec7aaeed921d14981",
+                      "path":  "commands/kb.md"
+                  },
+                  {
+                      "sha256":  "7e2ea90a7015f14d15ca99013989b5f9837945daa5678046271fe2ca57fbf75e",
+                      "path":  "commands/kb-map.md"
+                  },
+                  {
+                      "sha256":  "356538352f2714e021f7362ee6909087ae1477119d8f663376a90250101176d3",
+                      "path":  "commands/doc.md"
+                  },
+                  {
+                      "sha256":  "adffb43a0b48b7259cdbaa1f04425796df3a9577a9112851575842ecb38ed384",
+                      "path":  "commands/onto-doc.md"
+                  },
+                  {
+                      "sha256":  "52d6a6224bd8188cc4cdb3e787e8a60fe723439613bccf940c503e50022311cd",
+                      "path":  "docs/ontology.md"
+                  },
+                  {
+                      "sha256":  "a31179b6451dcbd4802bc3beca0931bb939c4c8f144c70ffbd16aff40b572a70",
+                      "path":  "tests/test_gitmark.py"
+                  }
+              ],
+    "repository":  "https://github.com/vakovalskii/ontoship"
+}

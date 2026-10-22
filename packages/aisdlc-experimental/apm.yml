@@ -5,4 +5,5 @@ dependencies:
   apm:
     - path: ../../skills/code-that-fits-in-your-head
     - path: ../../skills/sdd-kb
-    - CodeAlive-AI/ai-driven-development/skills/ubiquitous-language#79d911b773d83986bee7ac4170d09a972e61fe31
+    - CodeAlive-AI/ai-driven-development/skills/ubiquitous-language
+    - CodeAlive-AI/ai-driven-development/skills/fpf-problem-solving

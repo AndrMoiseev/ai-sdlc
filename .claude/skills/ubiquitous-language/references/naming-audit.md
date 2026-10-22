@@ -1,0 +1,278 @@
+# Naming & Ubiquitous Language Audit
+
+Read this when the user asks to audit, review, or check naming consistency in the codebase.
+This is a systematic protocol — run it top to bottom, report findings at the end.
+
+## When to Run
+
+- User asks: "audit naming", "check naming consistency", "review ubiquitous language"
+- Before a major refactoring or architecture change
+- When onboarding to a new codebase
+- Periodically (quarterly) to catch drift
+
+## Prerequisites
+
+- `THESAURUS.md` must exist. If it doesn't, run thesaurus generation first
+  (see [generating-thesaurus.md](generating-thesaurus.md))
+- Read the `## Index` of `THESAURUS.md` before starting — it is the audit's work-list
+
+## Audit Protocol
+
+Run all 9 checks. Collect findings without stopping. Present the full report at the end.
+
+The thesaurus's `## Index` is the work-list for most checks: each line gives the
+Identifier to look for and the `avoid:` names to look against. Extract it once:
+
+```bash
+# Index lines only
+awk '/^## Index/{f=1;next} /^## /{f=0} f && /^- \*\*/' docs/THESAURUS.md
+# one avoid-name per line, paired with its canonical Identifier
+awk '/^## Index/{f=1;next} /^## /{f=0} f && /avoid:/' docs/THESAURUS.md \
+  | sed -E 's/^- \*\*[^*]+\*\* `([^`]+)`.*avoid: (.*)$/\1\t\2/'
+```
+
+### Check 0: Thesaurus Integrity
+
+Before auditing code against the thesaurus, check the thesaurus against itself —
+a broken registry makes every later check lie.
+
+- **Index ↔ Terms**: every Index line has exactly one `### Term` header and vice versa.
+  Header count inside `## Terms` (not `## Unresolved`) must equal the Index line count:
+  `awk '/^## Terms/{f=1;next} /^## [^T]/{f=0} f && /^### /' THESAURUS.md | wc -l`
+- **Line grammar**: every Index line matches
+  ``^- \*\*[^*]+\*\* `[A-Z][A-Za-z0-9]*` kind:[a-z]+( ctx:[A-Za-z]+)?( avoid: .+)?$``;
+  Forbidden lines contain `` use: ``; Legacy lines contain `` → ``.
+- **Registry invariant**: no name appears in two registry lines. Collect all backticked
+  names from Index `avoid:` lists, `## Forbidden`, `## Legacy`; sort; report duplicates.
+  Also: no `avoid:` name equals another line's Identifier (SKOS: an altLabel is never
+  anyone's prefLabel).
+- **Anchor grammar**: every header under `## Terms` matches `^### [^(]+( \([^)]+\))?$`.
+- **Hierarchy sanity** (SKOS): the same pair is never both `Broader` and `Related`;
+  `Broader` chains have no cycles (A broader B broader A).
+- **Bridges vocabulary**: every bridge's mapping is one of
+  `exactMatch` `closeMatch` `broadMatch` `narrowMatch` `relatedMatch` `distinct`.
+- **Format stamp**: `rg -n '^thesaurus-format:'` must return exactly one line, inside the
+  YAML frontmatter at the top of the file, with a quoted `2.x` version. Missing/`1.x` → stop and offer migration (see
+  generating-thesaurus.md "Migrating an Existing Thesaurus"); missing but the Index is
+  already in 2.0 line grammar → just add the stamp and continue. Stamp says `2.x` but the
+  file still has `Synonyms to AVOID` lines or a table Index → stamp lies; report it.
+  A stamp newer than this skill's `thesaurus-format` → read-only audit; tell the user to
+  update the skill.
+
+**Severity: HIGH** — thesaurus cannot be trusted until fixed.
+
+### Check 1: Synonym Violations
+
+For each Index line, grep the codebase for every name in its `avoid:` list:
+
+```
+Line: - **Order** `Order` kind:aggregate avoid: `Purchase`, `Transaction`, `Buy`
+→ rg -n -i -w 'purchase|transaction|buy' src/ -t ts -t cs -t py -t java -t go -t ruby
+→ filter: only class names, method names, variable names, DB columns (not comments/strings)
+```
+
+Report as: `<avoid name>` in `<file:line>` — Index says `<Identifier>`.
+
+**Severity: HIGH** — direct contradiction of the thesaurus.
+
+### Check 2: Forbidden Words in Domain Layer
+
+For each `## Forbidden` line, scan domain-layer code for the word:
+
+```
+Work-list: the backticked words of ## Forbidden (project-specific), plus the baseline
+  Manager, Handler, Service (bare), Info, Data, Base, Util, Helper, Object, Obj, Record, Model
+In: domain layer classes, interfaces, method names (NOT infrastructure layer)
+```
+
+If a baseline word is hit but missing from `## Forbidden`, propose adding the line.
+
+**Severity: MEDIUM** — vague naming that hides domain concepts.
+
+### Check 3: Technical Jargon Leak
+
+Scan domain-layer code for implementation-specific prefixes/suffixes:
+
+```
+Scan for: Mongo*, Sql*, Http*, Redis*, Kafka*, Elastic*, *Dto, *Entity, *Model, *Record
+In: domain layer only (NOT infrastructure/persistence/API layers)
+```
+
+**Severity: HIGH** — infrastructure leaking into domain.
+
+### Check 4: Synonym Drift (same concept, multiple names)
+
+Look for groups of identifiers that likely refer to the same domain concept:
+
+- Same-shaped classes in different modules (similar fields, different names)
+- API endpoints that use different terms for the same resource
+- Database tables/columns with overlapping semantics
+- Tests that use different names than the code they test
+
+**Detection heuristics (grep-friendly, no pairwise comparison):**
+- Same role suffix with different noun stems: `UserController` vs `CustomerController`,
+  `UserRepository` vs `CustomerRepository` — grep for common suffixes, compare stems
+- API route vs domain code drift: `/users/...` in routes but `Customer` in domain
+- DB column vs code drift: `user_id` in schema but `customerId` in code
+- Test vs implementation drift: test descriptions say "user" but code says `Customer`
+- Competing stems in the same module: file that imports both `User` and `Customer`
+
+Treat synonym drift as a **local-cluster problem**: same module, same role, different noun.
+Do NOT attempt global pairwise class comparison.
+
+**Severity: HIGH** — the ubiquitous language is fractured.
+
+### Check 5: Polysemy (same name, different meanings)
+
+Look for the same identifier used with structurally different meanings:
+
+- Same class name in different packages with different fields/methods
+- Same enum name with different values in different modules
+- Same method name doing fundamentally different things in different classes
+- Same API parameter meaning different things in different endpoints
+
+**The incompatible-verbs test:** If the same word appears as subject of incompatible
+verbs in different parts of the code ("Account is charged" vs "Account is logged in"),
+it's polysemy.
+
+**Severity: HIGH** — silent bugs waiting to happen.
+
+### Check 6: Translation Chain
+
+Compare terminology across artifact layers:
+
+```
+Layer mapping (local artifacts only — do NOT assume access to Jira/Linear/Notion):
+  Local docs/ADRs/OpenAPI specs → API controllers → Domain code → DB schema → Test descriptions → Git commit messages
+
+For each major domain concept, trace the name through available local layers.
+If external specs are needed, ask the user to paste the relevant text.
+```
+
+**Detection method:**
+- Pick 3-10 major domain terms from the thesaurus or API surface
+- Grep their stems across available local layers
+- Check test descriptions (`describe()`/`it()`/`test()` strings) — tests often use
+  the domain expert's term while code uses an abbreviation
+- Check `git log --oneline -50` — commit messages reveal human intent vs code naming
+- Flag any layer where the term changes
+
+**Example finding:**
+```
+"Campaign" in docs/architecture.md
+→ "Promotion" in openapi.yaml
+→ `marketing_push` in domain code
+→ `promotions` table in DB
+→ "advertising effort" in test descriptions
+= Translation chain with 4 breaks
+```
+
+If some layers are missing locally, report them as `not auditable from local files`.
+
+**Severity: HIGH** — information loss at every translation.
+
+### Check 7: Abbreviation & Naming Inconsistency
+
+Scan for inconsistent forms of the same term:
+
+- Abbreviated vs full: `usr` / `user` / `customer` / `acct` / `account`
+- Casing inconsistency: `orderId` in one file, `order_id` in another (within same language)
+- Plural inconsistency: `Order` class but `order_items` table vs `orderItem` field
+
+**Severity: LOW** — cosmetic but creates cognitive load.
+
+### Check 8: Orphan Terms
+
+Check for Index terms that no longer appear in code, and code concepts missing from the Index:
+
+```
+For each Index line → grep the codebase for the Identifier (also its snake_case form)
+If zero matches → term may be obsolete, or not yet implemented — ask
+
+For each `## Legacy` line → grep for the legacy name
+If zero matches → the legacy line is done; propose removing it
+```
+
+Reverse direction: grep type/class/interface declarations in the domain layer, strip
+technical suffixes, and list names that hit neither an Index Identifier, an Avoid
+name, nor a Legacy name — candidates for new Index lines.
+
+**Severity: LOW** — thesaurus drift from codebase.
+
+## Report Format
+
+After running all 9 checks, present findings grouped by severity:
+
+```
+## Ubiquitous Language Audit Report
+
+**Codebase**: [project name]
+**Date**: [date]
+**Thesaurus**: [N terms, M legacy, K unresolved]
+
+### Critical (fix now)
+
+1. **Synonym violation**: `fetchPurchases()` in src/api/orders.ts:12
+   — Thesaurus says "Order", not "Purchase" — 8 files affected
+
+2. **Polysemy**: `Account` used as financial entity (billing/)
+   AND user identity (auth/) — 18 files affected
+
+3. **Translation chain**: "Campaign" → "Promotion" → `marketing_push`
+   — 4 translation breaks across 31 files
+
+### Warning (plan to fix)
+
+4. **Weasel word**: `OrderManager` in src/domain/OrderManager.ts
+   — "Manager" hides responsibility. What does it actually do?
+
+5. **Technical leak**: `MongoOrder` in src/domain/MongoOrder.ts
+   — Infrastructure prefix in domain layer
+
+### Info (track as debt)
+
+6. **Abbreviation**: `usr` in 3 files, `user` in 12, `customer` in 8
+   — All refer to the same concept
+
+7. **Orphan term**: "ShippingLabel" in thesaurus, 0 matches in code
+   — May be obsolete or not yet implemented
+
+### Stats
+
+| Check | Findings |
+|-------|----------|
+| Thesaurus integrity | 0 |
+| Synonym violations | 3 |
+| Forbidden words | 5 |
+| Technical leaks | 2 |
+| Synonym drift | 4 clusters |
+| Polysemy | 1 |
+| Translation chains | 2 |
+| Abbreviation issues | 6 |
+| Orphan terms | 3 |
+| **Total** | **26** |
+
+### Recommended Priority
+
+1. Fix polysemy first (silent bug risk)
+2. Fix translation chains (information loss)
+3. Fix synonym violations (thesaurus credibility)
+4. Clean up weasel words (naming quality)
+5. Track the rest as naming debt
+```
+
+## After the Audit
+
+- **Critical findings**: suggest immediate fixes or add to `## Unresolved` in thesaurus
+- **Warnings**: create tech debt tickets or note in thesaurus
+- **Info**: note for next audit cycle
+- **Update the thesaurus**: add missing Index lines + entries, remove finished Legacy
+  lines, extend `avoid:` lists with the synonyms you found in the wild — keeping the
+  registry invariant (a name lives under `avoid:` *or* Legacy *or* Forbidden, never two)
+- **If no thesaurus existed**: the audit findings ARE the input for thesaurus generation —
+  feed them into the generating-thesaurus.md workflow
+- **Offer history mining** for the findings the code alone can't settle — synonym drift
+  clusters (Check 5), polysemy candidates (Check 6), and anything you had to file under
+  `## Unresolved`. Git history says which spelling came first, which commit replaced which,
+  and which one is dying: see [git-history-mining.md](git-history-mining.md). Offer it once,
+  as an option; skip it when the repo has no usable history
