@@ -38,6 +38,7 @@ def transition(state, task, event, directory):
         state["status"] = "blocked" if state["blockers"] else "active"
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
+        require(not state.get("pending_mode"), "mode_handoff", "Complete the pending mode handoff before replacing the basis")
         require(not any(r["status"] == "active" for r in state["roles"].values()), "active_roles", "Finish or reconcile active roles before replacing the basis")
         from .inputs import validate, basis_dependency
         import uuid
@@ -78,7 +79,8 @@ def transition(state, task, event, directory):
                     fresh[field] = old[field]
                 fresh["prior_result"] = old
             state["tasks"][plan["id"]] = fresh
-        state["mode"], state["parallel_request"] = "sequential", None
+        if state["mode"] == "parallel":
+            state["parallel_request"] = basis["instruction"]
         # Budget blockers survive a revised plan. Other old blockers are retained
         # in the archived run and checked again against the new basis.
         state["blockers"] = [b for b in state["blockers"] if b["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]

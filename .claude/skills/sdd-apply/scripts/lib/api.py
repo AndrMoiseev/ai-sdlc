@@ -13,7 +13,8 @@ def dispatch(request):
         owner = args.pop("owner")
         parallel_request = args.pop("parallel_request", None)
         isolation = args.pop("isolation", False)
-        result = state.initialize(validate(**args), owner, parallel_request, isolation)
+        mode = args.pop("mode", "parallel")
+        result = state.initialize(validate(**args), owner, parallel_request, isolation, mode)
         dashboard.render(result["basis"]["change_root"] + "/execution")
         return result
     if operation == "read":

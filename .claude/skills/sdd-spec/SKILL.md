@@ -49,4 +49,4 @@ disable-model-invocation: true
 «`/sdd-spec` обнови пояснение order-export»; после начала процесса:
 «Продолжи незавершённые превью по сохранённому промпту».
 
-Происхождение и лицензия адаптированных инструкций: [OpenSpec](references/openspec-origin.md). Подключение полного пакета: [README](README.md). Проверочные процедуры: [manual](evals/manual.md).
+Происхождение и лицензия адаптированных инструкций: [OpenSpec](references/openspec-origin.md). Назначение и сценарии использования: [README](README.md). Проверочные процедуры: [manual](evals/manual.md).
