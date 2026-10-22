@@ -1,0 +1,8 @@
+{
+  "demo": true,
+  "notice": "Synthetic documentation example. No checks or commits were performed.",
+  "task": "TASK-006",
+  "criterion": "AC-csv-generation",
+  "stage": "independent",
+  "outcome": "pass"
+}
