@@ -100,9 +100,27 @@ FIELDS = {
     "task": ({"number", "covers", "depends_on", "status", "verification"}, {"cannot_parallel_with"}, "TASK"),
 }
 KINDS = {"proposal": set(), "spec": {"requirement", "acceptance"}, "design": {"decision"}, "tasks": {"task"}}
+WORK_KINDS = frozenset({"change", "refactoring"})
 
 
-def read_document(path):
+def document_schema(meta, work_kind):
+    """Select a schema by explicit work context, type and version, never by version alone."""
+    if not isinstance(work_kind, str) or work_kind not in WORK_KINDS:
+        raise InputError("unsupported_work_kind", f"Unsupported work kind: {work_kind}; install a matching SDD bundle or correct the selection")
+    declared = meta.get("work_kind", "change")
+    if not isinstance(declared, str) or declared not in WORK_KINDS:
+        raise InputError("unsupported_work_kind", f"Unsupported declared work kind: {declared}; install a matching SDD bundle")
+    if declared != work_kind:
+        raise ValidationError("work_kind_mismatch", f"Document declares {declared}, selected work is {work_kind}; correct the work selection or document placement")
+    if type(meta.get("schema_version")) is not int or meta["schema_version"] != 1:
+        raise InputError("unsupported_version", f"Unsupported {work_kind} schema version: {meta.get('schema_version')}; install a matching SDD bundle")
+    if work_kind == "refactoring":
+        from .refactoring import FIELDS as REFACTORING_FIELDS, KINDS as REFACTORING_KINDS
+        return REFACTORING_FIELDS, REFACTORING_KINDS
+    return FIELDS, KINDS
+
+
+def read_document(path, work_kind="change"):
     path = Path(path)
     try:
         with path.open(encoding="utf-8-sig") as stream:
@@ -119,14 +137,24 @@ def read_document(path):
         raise ValidationError("frontmatter", "Unterminated frontmatter", path)
     try:
         meta = safe_yaml("".join(lines[1:end]))
-        if type(meta.get("schema_version")) is not int or meta["schema_version"] != 1:
-            raise InputError("unsupported_version", "Only schema_version: 1 is supported", path)
+        fields, kinds = document_schema(meta, work_kind)
+        # Standalone reads also reject a known SDD root of the other work kind.
+        for parent in path.resolve().parents:
+            if parent.parent.name == "sdd" and parent.name in {"changes", "refactoring"}:
+                located = "change" if parent.name == "changes" else "refactoring"
+                if located != work_kind:
+                    raise ValidationError("work_kind_mismatch", f"Selected {work_kind} document is under sdd/{parent.name}; correct the work selection or placement")
+                break
         # Lens indexes have only schema_version/lenses; callers validate generic schemas.
         kind = meta.get("document_type", "")
         if not isinstance(kind, str):
             raise ValidationError("document_type", "document_type must be a string")
-        if kind in KINDS:
+        if work_kind == "refactoring" and kind not in kinds:
+            raise ValidationError("document_type", f"Unsupported refactoring document_type: {kind}")
+        if kind in kinds:
             required = {"schema_version", "document_type", "change_id", "language"}
+            if work_kind == "refactoring" or "work_kind" in meta:
+                required.add("work_kind")
             if kind == "spec":
                 required.add("capability")
             if set(meta) != required:
@@ -163,10 +191,10 @@ def read_document(path):
             if not isinstance(rid, str) or rid in seen:
                 raise ValidationError("duplicate_id", f"Missing or duplicate ID: {rid}")
             seen.add(rid)
-            if kind in KINDS:
-                if not isinstance(record_kind, str) or record_kind not in KINDS[kind]:
+            if kind in kinds:
+                if not isinstance(record_kind, str) or record_kind not in kinds[kind]:
                     raise ValidationError("record_type", f"Record {record_kind} is not allowed in {kind}", element_id=rid)
-                required, optional, prefix = FIELDS[record_kind]
+                required, optional, prefix = fields[record_kind]
                 required = required | {"sdd_record", "id"}
                 if not required <= record.keys() or record.keys() - required - optional:
                     raise ValidationError("record_fields", f"Invalid fields for {record_kind}", element_id=rid)

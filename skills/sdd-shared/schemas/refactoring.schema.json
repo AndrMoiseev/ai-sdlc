@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdd:refactoring:documents:1",
+  "title": "Parsed refactoring document v1",
+  "description": "JSON projection of Document: meta and records. Cross-document references, graph rules and filesystem containment are checked by the Python validator.",
+  "type": "object",
+  "required": ["meta", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {"$ref": "#/$defs/metadata"},
+    "records": {"type": "array"}
+  },
+  "allOf": [
+    {"if": {"properties": {"meta": {"properties": {"document_type": {"const": "proposal"}}}}}, "then": {"properties": {"records": {"maxItems": 0}}}},
+    {"if": {"properties": {"meta": {"properties": {"document_type": {"const": "design"}}}}}, "then": {"properties": {"records": {"items": {"oneOf": [{"$ref": "#/$defs/criterion"}, {"$ref": "#/$defs/decision"}]}}}}},
+    {"if": {"properties": {"meta": {"properties": {"document_type": {"const": "tasks"}}}}}, "then": {"properties": {"records": {"items": {"oneOf": [{"$ref": "#/$defs/task"}, {"$ref": "#/$defs/acceptance"}, {"$ref": "#/$defs/verification"}]}}}}}
+  ],
+  "$defs": {
+    "text": {"type": "string", "pattern": "\\S"},
+    "slug": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+    "ac": {"type": "string", "minLength": 4, "maxLength": 67, "pattern": "^AC-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+    "taskId": {"type": "string", "minLength": 6, "maxLength": 69, "pattern": "^TASK-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+    "decisionId": {"type": "string", "minLength": 5, "maxLength": 68, "pattern": "^DEC-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+    "criteria": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ac"}},
+    "taskReferences": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/taskId"}},
+    "path": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[^:\\\\]+$"},
+    "metadata": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "work_kind", "document_type", "change_id", "language"],
+      "properties": {
+        "schema_version": {"const": 1}, "work_kind": {"const": "refactoring"},
+        "document_type": {"enum": ["proposal", "design", "tasks"]},
+        "change_id": {"$ref": "#/$defs/slug"}, "language": {"$ref": "#/$defs/text"}
+      }
+    },
+    "source": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "path", "requirement"], "properties": {
+          "kind": {"const": "specification"}, "path": {"$ref": "#/$defs/path"}, "requirement": {"$ref": "#/$defs/text"}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "baseline_missing", "references", "observed", "assumptions"], "properties": {
+          "kind": {"const": "evidence"}, "baseline_missing": {"const": true},
+          "references": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+          "observed": {"$ref": "#/$defs/text"}, "assumptions": {"$ref": "#/$defs/text"}
+        }}
+      ]
+    },
+    "criterion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sdd_record", "id", "purpose", "scope", "conditions", "expected"],
+      "properties": {
+        "sdd_record": {"const": "criterion"}, "id": {"$ref": "#/$defs/ac"},
+        "purpose": {"enum": ["result", "preservation"]},
+        "scope": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+        "conditions": {"$ref": "#/$defs/text"}, "expected": {"$ref": "#/$defs/text"},
+        "parent": {"$ref": "#/$defs/ac"}, "source": {"$ref": "#/$defs/source"}
+      },
+      "allOf": [{"if": {"properties": {"purpose": {"const": "preservation"}}}, "then": {"required": ["source"], "not": {"required": ["parent"]}}}]
+    },
+    "supersedesLink": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["path", "id"], "properties": {"path": {"$ref": "#/$defs/path"}, "id": {"$ref": "#/$defs/decisionId"}}},
+        {"type": "object", "additionalProperties": false, "required": ["path", "anchor"], "properties": {"path": {"$ref": "#/$defs/path"}, "anchor": {"$ref": "#/$defs/text"}}}
+      ]
+    },
+    "decision": {
+      "type": "object", "additionalProperties": false, "required": ["sdd_record", "id", "criteria"],
+      "properties": {
+        "sdd_record": {"const": "decision"}, "id": {"$ref": "#/$defs/decisionId"}, "criteria": {"$ref": "#/$defs/criteria"},
+        "supersedes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/supersedesLink"}}
+      }
+    },
+    "run": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["command"], "properties": {"command": {
+          "type": "array", "minItems": 1,
+          "prefixItems": [{"type": "string", "pattern": "\\S", "not": {"pattern": "\\u0000"}}],
+          "items": {"type": "string", "not": {"pattern": "\\u0000"}}
+        }}},
+        {"type": "object", "additionalProperties": false, "required": ["procedure"], "properties": {"procedure": {"$ref": "#/$defs/path"}}},
+        {"type": "object", "additionalProperties": false, "required": ["setup_required"], "properties": {"setup_required": {"$ref": "#/$defs/text"}}}
+      ]
+    },
+    "location": {"allOf": [{"$ref": "#/$defs/path"}, {"type": "string", "pattern": "^(?!\\s)(?!.*\\s$)(?!.*(?:^|/)\\.git(?:/|$))[^\\u0000-\\u001f*?\\[\\]#;|&<>`\"]+$", "not": {"enum": [".", "./"]}}]},
+    "taskCheck": {
+      "type": "object", "additionalProperties": false, "required": ["id", "criteria", "test_description", "location", "run"],
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"}, "criteria": {"$ref": "#/$defs/criteria"}, "test_description": {"$ref": "#/$defs/text"},
+        "location": {"$ref": "#/$defs/location"}, "run": {"$ref": "#/$defs/run"}
+      }
+    },
+    "testChange": {
+      "type": "object", "additionalProperties": false, "required": ["id", "action", "group", "criteria", "reason"],
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"}, "action": {"enum": ["add", "adapt", "move", "remove"]},
+        "group": {"$ref": "#/$defs/text"}, "criteria": {"$ref": "#/$defs/criteria"}, "reason": {"$ref": "#/$defs/text"},
+        "decision": {"$ref": "#/$defs/decisionId"}, "replacement_criteria": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ac"}}
+      },
+      "allOf": [{"if": {"properties": {"action": {"const": "remove"}}}, "then": {"anyOf": [{"required": ["decision"]}, {"required": ["replacement_criteria"], "properties": {"replacement_criteria": {"minItems": 1}}}]}}]
+    },
+    "taskScope": {
+      "type": "object", "additionalProperties": false, "required": ["module"],
+      "properties": {"module": {"$ref": "#/$defs/text"}, "paths": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/path"}}}
+    },
+    "task": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sdd_record", "id", "number", "scope", "contributes_to", "preserves", "depends_on", "status", "verification"],
+      "properties": {
+        "sdd_record": {"const": "task"}, "id": {"$ref": "#/$defs/taskId"}, "number": {"type": "integer", "minimum": 1},
+        "scope": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/taskScope"}},
+        "contributes_to": {"$ref": "#/$defs/criteria"},
+        "preserves": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ac"}},
+        "preservation_reason": {"$ref": "#/$defs/text"}, "depends_on": {"$ref": "#/$defs/taskReferences"},
+        "cannot_parallel_with": {"$ref": "#/$defs/taskReferences"}, "status": {"enum": ["pending", "in_progress", "done", "blocked"]},
+        "verification": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/taskCheck"}},
+        "test_changes": {"type": "array", "items": {"$ref": "#/$defs/testChange"}}
+      },
+      "allOf": [{"if": {"properties": {"preserves": {"maxItems": 0}}}, "then": {"required": ["preservation_reason"]}}]
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false, "required": ["sdd_record", "id", "task", "conditions", "expected", "lifetime"],
+      "properties": {
+        "sdd_record": {"const": "acceptance"}, "id": {"$ref": "#/$defs/ac"}, "task": {"$ref": "#/$defs/taskId"},
+        "conditions": {"$ref": "#/$defs/text"}, "expected": {"$ref": "#/$defs/text"}, "lifetime": {"enum": ["persistent", "transitional"]},
+        "until_task": {"$ref": "#/$defs/taskId"}, "replaced_by": {"$ref": "#/$defs/criteria"}
+      },
+      "allOf": [{"if": {"properties": {"lifetime": {"const": "transitional"}}}, "then": {"required": ["until_task", "replaced_by"]}, "else": {"not": {"anyOf": [{"required": ["until_task"]}, {"required": ["replaced_by"]}]}}}]
+    },
+    "verification": {
+      "type": "object", "additionalProperties": false, "required": ["sdd_record", "id", "criteria", "test_description", "location", "run"],
+      "properties": {
+        "sdd_record": {"const": "verification"}, "id": {"type": "string", "minLength": 7, "maxLength": 70, "pattern": "^CHECK-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+        "criteria": {"$ref": "#/$defs/criteria"}, "test_description": {"$ref": "#/$defs/text"}, "location": {"$ref": "#/$defs/location"},
+        "run": {"$ref": "#/$defs/run"}, "setup_task": {"$ref": "#/$defs/taskId"}
+      },
+      "allOf": [{"if": {"properties": {"run": {"required": ["setup_required"]}}}, "then": {"required": ["setup_task"]}}]
+    }
+  }
+}

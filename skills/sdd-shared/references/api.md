@@ -48,3 +48,30 @@ the existing stale-plan check prevents writes and preserves the old plan.
 The small `scripts/shared.py` bootstrap is shipped in each consumer because a
 missing dependency cannot locate itself. Its copies must stay identical. It performs
 discovery and API checks only; domain rules stay here.
+
+## Refactoring document model
+
+`api.json.work_kinds` advertises `change` and `refactoring`;
+`document_schemas` lists supported versions for each kind/type pair. Both kinds
+start with version 1. This adds capabilities to API v1; it does not migrate stored
+documents or change the meaning of ordinary `covers`.
+
+`documents.read_document(path, work_kind="change")` selects the schema using the
+explicit context, declared kind, document type and version. Refactoring requires
+an explicit context and `work_kind: refactoring` in frontmatter. Known SDD directory
+roots must match the selection. Missing kind retains the ordinary change contract.
+
+`validation.validate_documents(project_root, work_root, stage, work_kind="change")`
+validates either model. Refactoring reads proposal/design and, for plan, tasks;
+it requires `sdd/refactoring/<change_id>` and no specs. The return shape preserves
+errors/warnings and plan tasks/progress. These are structural facts, not evidence
+of whole-work completion or runtime retirement of transitional checks.
+
+Consumers call `shared.locate(..., work_kind="refactoring")` or
+`shared.load(root, module, work_kind="refactoring")` before dependent operations.
+A legacy package without advertised support remains usable for ordinary changes;
+an explicit refactoring request fails with an installation diagnostic instead of
+loading the change schema. Install the matching whole bundle to repair missing
+support. The full model is in the
+[refactoring format](document-format-refactoring.md) and its linked JSON schema.
+Public CLI/root resolution remains a separate consumer operation.
