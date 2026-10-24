@@ -55,6 +55,7 @@ def test_offline_empty_cache_and_stale_lock(tmp_path):
     assert lock.read_bytes() == original
 
 
+@pytest.mark.network
 def test_first_run_and_cache_restoration(tmp_path):
     cache = (tmp_path / "owned-uv-cache").resolve()
     package = tmp_path / "installed/sdd-apply"

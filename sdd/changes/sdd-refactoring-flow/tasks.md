@@ -124,12 +124,19 @@ verification:
         skills/sdd-apply/scripts/test.py -q tests/test_refactoring_inputs.py.
 ```
 
-**Область:** sdd-shared paths/snapshots/reviews, check/snapshot CLI и общий API;
+**Область:** sdd-shared paths/snapshots/reviews и
+skills/sdd-shared/scripts/sdd_shared/documents.py, check/snapshot CLI и общий API;
 sdd-spec совместимые CLI-обёртки; sdd-apply inputs/api, начальная нормализация
 плана, initialize/read/snapshot в state и необходимое начальное отображение
 в dashboard/state_view со связанными схемами состояния.
 Общие state/questions/review получают маршрутную идентичность без изменения
 назначения и без переписывания старых работ.
+
+В documents.py разрешить чтение общих сопроводительных документов
+state/questions/decisions/review/summary в контексте work_kind: refactoring.
+Их прежние схемы и назначение сохраняются; проверка маршрутной идентичности,
+безопасности разбора и путей остаётся обязательной. Чтение обычных работ
+сохраняет прежнее поведение. Эти изменения входят в ту же задачу 2.
 
 Разрешать `sdd/refactoring/<id>` по явному work_kind. Сохранить значения по
 умолчанию прежних прямых CLI/API-вызовов. Для выбора через агента предоставить

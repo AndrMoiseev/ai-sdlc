@@ -8,6 +8,9 @@ disable-model-invocation: true
 
 Use only on explicit invocation. Keep normative SDD documents unchanged.
 
+When maintaining sdd-apply itself, select its bundled tests by the
+[task and final-acceptance stages](references/runtime-setup.md#test-runs).
+
 Before each fresh worker launch, apply [project subagent selection](references/subagents.md).
 Resolve the role's agent from `.sdd/settings.json` at the execution's original project root.
 

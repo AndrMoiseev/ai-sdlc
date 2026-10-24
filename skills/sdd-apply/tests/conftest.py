@@ -1,4 +1,6 @@
 from pathlib import Path
+from copy import deepcopy
+import shutil
 import pytest
 import yaml
 import sys
@@ -12,9 +14,10 @@ def document(path, meta, records=()):
     path.write_text("---\n" + yaml.safe_dump(meta) + "---\n" + "\n".join("### Record\n\n```yaml\n" + yaml.safe_dump(r) + "```\n\nDescription.\n" for r in records), encoding="utf-8")
 
 
-@pytest.fixture
-def project(tmp_path):
-    root = tmp_path / "project"
+@pytest.fixture(scope="session")
+def project_template(tmp_path_factory):
+    """Build one immutable repository per worker; tests use independent copies."""
+    root = tmp_path_factory.mktemp("project-template") / "project"
     change = root / "sdd/changes/demo"
     meta = dict(schema_version=1, change_id="demo", language="en")
     task = dict(sdd_record="task", id="TASK-one", number=1, covers=["AC-one"], depends_on=[], status="pending", verification=[dict(criteria=["AC-one"], test_description="Check result", location="check.py", run={"command": [sys.executable, "-B", "check.py"]})])
@@ -39,9 +42,23 @@ def project(tmp_path):
 
 
 @pytest.fixture
-def basis(project):
+def project(tmp_path, project_template):
+    return shutil.copytree(project_template, tmp_path / "project")
+
+
+@pytest.fixture(scope="session")
+def basis_template(project_template):
     from lib.inputs import validate
-    return validate(project, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
+    return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
+
+
+@pytest.fixture
+def basis(project, basis_template):
+    # Only the two roots change when the byte-identical repository is copied.
+    # Input-validation tests still call validate on their actual modified project.
+    result = deepcopy(basis_template)
+    result.update(project_root=str(project), change_root=str(project / "sdd/changes/demo"))
+    return result
 
 
 class Driver:
