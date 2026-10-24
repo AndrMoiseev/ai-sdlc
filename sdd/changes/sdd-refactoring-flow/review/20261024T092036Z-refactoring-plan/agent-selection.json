@@ -1,0 +1,66 @@
+{
+  "resolver": {
+    "ok": true,
+    "result": {
+      "schema_version": 1,
+      "project_root": "C:\\Users\\Andrew\\repos\\ai-sdlc",
+      "role": "sdd-spec.plan_reviewer",
+      "host": "codex",
+      "requested_agent": "sdd-plan-reviewer",
+      "mode": "model-profile",
+      "reason": "agent_profile",
+      "settings": {
+        "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.sdd\\settings.json",
+        "sha256": "2762a272569b9b72566172bfff5e8d90d622ac81cecf645b101c6e56f8db2062"
+      },
+      "definition": {
+        "path": "C:\\Users\\Andrew\\repos\\ai-sdlc\\.codex\\agents\\sdd-plan-reviewer.toml",
+        "sha256": "802fadd29aad2e7a1a52c24c062311fa3f77342a47593240995c054d6e2fe2df",
+        "name": "sdd-plan-reviewer",
+        "ignored_fields": [
+          "developer_instructions"
+        ]
+      },
+      "launch": {
+        "fork_turns": "none",
+        "model": "gpt-6-astra",
+        "reasoning_effort": "high"
+      },
+      "warnings": [
+        "Only model and model_reasoning_effort are applied; agent instructions, tools, skills and other settings are not imported. Use the SDD role contract."
+      ],
+      "resolution": {
+        "parent_model": "gpt-6-astra",
+        "parent_effort": "high",
+        "user_agent_dir": "C:\\Users\\Andrew\\.codex\\agents",
+        "available_agents": null
+      }
+    }
+  },
+  "parent_model_source": "Observed host turn_context in this session during preceding document review; gpt-6-astra/high.",
+  "launch_arguments": {
+    "task_name": "refactoring_plan_review",
+    "fork_turns": "none",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high"
+  },
+  "launch_identity": {
+    "task_name": "/root/refactoring_plan_review"
+  },
+  "started_at": "2026-10-24T09:20:36Z",
+  "effective_model": null,
+  "effective_effort": null,
+  "limitations": [
+    "Native API supplies clean context but not read-only filesystem isolation; read-only instructed by assignment.",
+    "Only model and effort imported; TOML developer_instructions not applied.",
+    "Effective child model and effort not separately reported by host."
+  ],
+  "finished_at": "2026-10-24T09:25:04Z",
+  "completion": {
+    "result": "completed_with_findings",
+    "findings": 2,
+    "inputs_unchanged": true,
+    "report": "plan.md",
+    "source": "Native FINAL_ANSWER /root/refactoring_plan_review"
+  }
+}
