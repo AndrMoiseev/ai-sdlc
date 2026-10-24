@@ -74,4 +74,25 @@ an explicit refactoring request fails with an installation diagnostic instead of
 loading the change schema. Install the matching whole bundle to repair missing
 support. The full model is in the
 [refactoring format](document-format-refactoring.md) and its linked JSON schema.
-Public CLI/root resolution remains a separate consumer operation.
+`paths.change_root(project_root, change_id, work_kind="change")` resolves either
+allowed root with containment checks, including existing linked parents.
+`paths.list_work(project_root, change_id=None)` returns explicit kind, ID, root
+and `has_plan` for both roots without selecting a first match.
+
+Check/snapshot accept `--work-kind change|refactoring`, defaulting to `change`.
+The compatible sdd-spec wrappers forward the same option. Snapshots retain the
+path/hash list shape: refactoring documents include proposal/design, and plan adds
+tasks. Review and approval checks additionally bind the work kind and ID; equal
+manifests do not transfer authority between identities.
+
+`reviews.review_status(project_root, work_root, stage, work_kind="change")`
+checks that the selected root and document identities agree. Ancillary state,
+questions, decisions, review and summary documents keep their generic schemas;
+refactoring adds explicit `work_kind` and `change_id` to their metadata.
+
+Apply validate/initialize accept `work_kind`, defaulting to `change` for existing
+calls. Explicit null requests discovery across both roots; ambiguity returns the
+available identities. Refactoring bases separate executable `tasks`, local
+`acceptance` and whole-work `verification`. Initialize stores the latter records
+as ID-keyed mappings without declaring them confirmed. Initial dashboards show
+pending tasks and local criteria; read verifies the selected execution root.

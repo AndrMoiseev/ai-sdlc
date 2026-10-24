@@ -63,11 +63,24 @@ def seal(state):
     state["integrity"] = digest({k: v for k, v in state.items() if k != "integrity"})
 
 
+def execution_directory(basis):
+    kind = basis.get("work_kind", "change")
+    require(kind in ("change", "refactoring"), "state_root", "Unsupported work kind")
+    change = basis["change_id"]
+    require(isinstance(change, str) and re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", change) and len(change) <= 64,
+            "state_root", "Invalid work identity")
+    root = "changes" if kind == "change" else "refactoring"
+    directory = contained(basis["project_root"], f"sdd/{root}/{change}/execution")
+    require(directory.parent == Path(basis["change_root"]).resolve(), "state_root", "State is outside its registered execution root")
+    return directory
+
+
 def read(directory, view="full"):
     require(view in ("full", "compact"), "read_view", "Expected full or compact")
     state = json.loads((Path(directory) / "state.json").read_text(encoding="utf-8"))
     require(state.get("schema_version") == 1, "state_version", "Unsupported state schema")
-    expected_directory = contained(state["basis"]["project_root"], "sdd/changes/" + state["change_id"] + "/execution")
+    require(state["change_id"] == state["basis"]["change_id"] and state.get("work_kind", "change") == state["basis"].get("work_kind", "change"), "state_root", "State work identity differs from its basis")
+    expected_directory = execution_directory(state["basis"])
     require(Path(directory).resolve() == expected_directory and expected_directory.parent == Path(state["basis"]["change_root"]).resolve(), "state_root", "State is outside its registered execution root")
     require(state.get("integrity") == digest({k: v for k, v in state.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
     require(state["revision"] == len(state["events"]), "history_corrupt", "History length mismatch")
@@ -98,12 +111,15 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
     if mode_reason:
         mode = "sequential"
     parallel_request = (parallel_request or basis["instruction"]) if mode == "parallel" else None
-    directory = contained(basis["project_root"], "sdd/changes/" + basis["change_id"] + "/execution")
+    directory = execution_directory(basis)
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
     with lock(directory):
         require(not (directory / "state.json").exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
         state = {"schema_version": 1, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "events": [], "blockers": [], "updated_at": now(), "final": None}
+        if basis.get("work_kind", "change") == "refactoring":
+            state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
+                         for kind in ("acceptance", "verification")})
         for task in basis["tasks"]:
             state["tasks"][task["id"]] = new_task(task)
         state["baseline"] = snapshot(state, basis["project_root"])
@@ -115,7 +131,8 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
 
 def snapshot(state, root=None):
     included = [p for t in state["tasks"].values() for p in t["paths"]]
-    return source_snapshot(root or state["basis"]["project_root"], [f"sdd/changes/{state['change_id']}/execution"], included)
+    excluded = execution_directory(state["basis"]).relative_to(Path(state["basis"]["project_root"]).resolve()).as_posix()
+    return source_snapshot(root or state["basis"]["project_root"], [excluded], included)
 
 
 def assert_basis(state):

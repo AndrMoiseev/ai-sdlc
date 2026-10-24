@@ -3,9 +3,13 @@
   "title": "SDD execution state; semantic invariants are enforced by state.py",
   "type": "object",
   "required": ["schema_version", "change_id", "run_id", "revision", "status", "owner", "basis", "mode", "tasks", "roles", "events", "blockers", "integrity"],
+  "allOf": [{"if": {"required": ["work_kind"], "properties": {"work_kind": {"const": "refactoring"}}}, "then": {"required": ["acceptance", "verification"]}}],
   "properties": {
     "schema_version": {"const": 1},
     "change_id": {"type": "string"},
+    "work_kind": {"enum": ["change", "refactoring"]},
+    "acceptance": {"type": "object", "additionalProperties": {"type": "object", "required": ["id", "task", "lifetime"], "properties": {"sdd_record": {"const": "acceptance"}}}},
+    "verification": {"type": "object", "additionalProperties": {"type": "object", "required": ["id", "criteria", "run"], "properties": {"sdd_record": {"const": "verification"}}}},
     "run_id": {"type": "string"},
     "revision": {"type": "integer", "minimum": 0},
     "status": {"enum": ["active", "blocked", "completed"]},

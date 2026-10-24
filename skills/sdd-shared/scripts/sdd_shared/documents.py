@@ -101,6 +101,7 @@ FIELDS = {
 }
 KINDS = {"proposal": set(), "spec": {"requirement", "acceptance"}, "design": {"decision"}, "tasks": {"task"}}
 WORK_KINDS = frozenset({"change", "refactoring"})
+ANCILLARY = frozenset({"state", "questions", "decisions", "review", "summary"})
 
 
 def document_schema(meta, work_kind):
@@ -149,8 +150,16 @@ def read_document(path, work_kind="change"):
         kind = meta.get("document_type", "")
         if not isinstance(kind, str):
             raise ValidationError("document_type", "document_type must be a string")
-        if work_kind == "refactoring" and kind not in kinds:
+        if work_kind == "refactoring" and kind not in kinds and kind not in ANCILLARY:
             raise ValidationError("document_type", f"Unsupported refactoring document_type: {kind}")
+        if work_kind == "refactoring" and kind in ANCILLARY:
+            if not valid_slug(meta.get("change_id")):
+                raise ValidationError("document_metadata", "Ancillary refactoring documents require change_id")
+            for parent in path.resolve().parents:
+                if parent.parent.name == "refactoring" and parent.parent.parent.name == "sdd":
+                    if meta["change_id"] != parent.name:
+                        raise ValidationError("document_identity", "Document change_id does not match its work root")
+                    break
         if kind in kinds:
             required = {"schema_version", "document_type", "change_id", "language"}
             if work_kind == "refactoring" or "work_kind" in meta:

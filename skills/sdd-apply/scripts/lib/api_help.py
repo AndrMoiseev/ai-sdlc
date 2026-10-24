@@ -8,16 +8,18 @@ def contract(summary, required=(), optional=(), **details):
 
 
 VALIDATION = ("project_root", "instruction")
-SELECTORS = ("change", "sdd_shared", "sdd_spec")
+SELECTORS = ("change", "work_kind", "sdd_shared", "sdd_spec")
 OPERATIONS = {
     "help": contract("List names, or return one operation/event contract; no state or filesystem access.",
                      optional=("operation", "event")),
     "validate": contract("Validate approved documents and execution instruction; return the basis.",
                          VALIDATION, SELECTORS, instruction={"text": "actual instruction", "source": "message/trace"},
-                         rules=["Use only one dependency selector: sdd_shared, or legacy sdd_spec."]),
+                         defaults={"work_kind": "change"}, choices={"work_kind": ["change", "refactoring", None]},
+                         rules=["Use only one dependency selector: sdd_shared, or legacy sdd_spec.",
+                                "work_kind=null discovers both roots; ambiguous identity returns explicit candidates."]),
     "initialize": contract("Validate, create execution state and render its initial dashboard.",
                            (*VALIDATION, "owner"), (*SELECTORS, "mode", "parallel_request", "isolation"),
-                           defaults={"mode": "parallel", "isolation": False},
+                           defaults={"mode": "parallel", "isolation": False, "work_kind": "change"},
                            rules=["Without verified isolation, parallel falls back to sequential.",
                                   "Existing executions use resume; initialization never overwrites state.",
                                   "instruction and optional parallel_request contain actual user text and source."]),
