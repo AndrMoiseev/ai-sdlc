@@ -38,6 +38,20 @@ USER-approve-refactoring-documents и USER-plan-refactoring-flow в
   .agents/skills и .claude/skills. Сохранять исходные логи и ограничения проверки.
 - Не ослаблять обязательные проверки проекта. При смене проверок исполняемого
   рефакторинга действовать только в согласованных границах и с доказательствами.
+- Для незавершённых задач, изменяющих sdd-apply, зарегистрировать локальную
+  регрессию по skills/sdd-apply/references/runtime-setup.md:
+  `uv run --locked --script skills/sdd-apply/scripts/test.py tests/ -q -n 8 --dist worksteal -m "not network" --durations=10`.
+  Выполнять её на baseline, self, independent, integration и в repair-циклах.
+  Прежний общий запуск sdd-apply без фильтра заменить этим локальным набором
+  при новом согласованном запуске, сохранив прежние реестры и свидетельства
+  в истории исполнения. Сфокусированные проверки и регрессии shared/spec
+  остаются обязательными. Принятая задача 1 и её запись не изменяются.
+- При итоговой приёмке sdd-apply на окончательном HEAD выполнить свежую локальную
+  регрессию выше и отдельно
+  `uv run --locked --script skills/sdd-apply/scripts/test.py tests/ -q -m network --durations=10`.
+  Network-проверка установки и восстановления кеша обязательна только в финале;
+  сохранить исходный лог, фактический результат и HEAD. При изменении финального
+  HEAD повторить обе проверки; недоступная проверка не считается успешной.
 
 ### Реализовать схемы документов и проверку модели задач
 
@@ -451,7 +465,7 @@ verification:
     test_description: Подтвердить прежние регрессии sdd-apply, включая возобновление, ревизии плана, приёмку и финал обычных работ
     location: skills/sdd-apply/tests
     run:
-      command: [uv, run, --locked, --script, skills/sdd-apply/scripts/test.py, -q]
+      command: [uv, run, --locked, --script, skills/sdd-apply/scripts/test.py, tests/, -q, -n, '8', --dist, worksteal, -m, not network, --durations=10]
   - criteria: [AC-refactoring-legacy-format]
     test_description: Подтвердить контракты общего пакета и всех его consumers без регрессии установки
     location: skills/sdd-shared/tests
