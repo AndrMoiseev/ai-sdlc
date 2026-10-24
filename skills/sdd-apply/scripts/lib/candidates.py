@@ -5,7 +5,8 @@ from .common import contained, digest, require, write_json
 
 
 def directory_for(state):
-    return contained(state["basis"]["project_root"], f"sdd/changes/{state['change_id']}/execution")
+    from .state import execution_directory
+    return execution_directory(state["basis"])
 
 
 def resolve(state, value):

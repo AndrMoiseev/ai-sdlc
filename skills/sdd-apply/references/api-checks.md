@@ -27,6 +27,16 @@ setup, run existing checks independently, and preserve assertion strength.
 Missing location under command/procedure blocks; return a wrongly planned future
 check to sdd-spec instead of changing the approved run.
 
+Refactoring checks use the stable key `TASK-ID/verification.id`. Their criteria
+are local acceptance records owned by that task or its `preserves` criteria;
+`contributes_to` is separate. Registration, prepared setup and review-requested
+extensions append immutable registry snapshots. Baseline logs retain exact
+initial checks and their revision, including existing preservation commands.
+Candidate and command evidence bind the current registry revision. Removing or
+rewriting a check directly blocks freezing and acceptance; an authorized registry
+transition requires a supported operation and independent confirmation. Keep
+historical logs.
+
 Every command is an argument array passed unchanged with `shell=False`. Register
 a required interpreter explicitly. Legacy strings are rejected at registration;
 persisted strings produce `unavailable` with `limitation: command_format`.

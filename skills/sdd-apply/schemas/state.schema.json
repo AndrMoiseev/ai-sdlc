@@ -14,7 +14,15 @@
     "revision": {"type": "integer", "minimum": 0},
     "status": {"enum": ["active", "blocked", "completed"]},
     "mode": {"enum": ["sequential", "parallel"]},
-    "tasks": {"type": "object", "additionalProperties": {"type": "object", "required": ["plan", "status", "attempt", "candidate", "checks", "evidence", "reviews", "commits", "review_limit", "test_repair_limit"], "properties": {"status": {"enum": ["pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"]}}}},
+    "tasks": {"type": "object", "additionalProperties": {"type": "object", "required": ["plan", "status", "attempt", "candidate", "checks", "evidence", "reviews", "commits", "review_limit", "test_repair_limit"], "properties": {
+      "status": {"enum": ["pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"]},
+      "check_registry": {"type": "object", "required": ["revision", "history"], "properties": {
+        "revision": {"type": "integer", "minimum": 1},
+        "history": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["revision", "event_id", "operation", "checks"], "properties": {
+          "revision": {"type": "integer", "minimum": 1}, "event_id": {"type": "string"}, "operation": {"type": "string"}, "checks": {"type": "array", "minItems": 1}
+        }}}
+      }}
+    }}},
     "roles": {"type": "object"},
     "events": {"type": "array"},
     "blockers": {"type": "array"},

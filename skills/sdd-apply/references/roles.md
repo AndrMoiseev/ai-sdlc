@@ -5,6 +5,13 @@ design, project instructions and exact checks; the packet gives their paths,
 owned files, candidate reference, prior commits, blockers and rejected approaches.
 The author's conversation, grading answers and unrelated task history are not inputs.
 
+For refactoring, the packet's `refactoring` context contains scope, original local
+acceptance records, preserves, contributes_to, test_changes, relevant design
+criteria/decisions, original document paths, registry history and baseline.
+Verify local acceptance and preservation independently. Contributions describe
+intended scope; they do not establish whole-result success. Use the current
+candidate and registry for task review and subsequent integrated-state review.
+
 Work only within the assignment. Verifiers and reviewers are independent of all
 authors and do not edit the candidate. Wait for the generated packet; a reviewer
 also waits for a successful `review_start` reservation. Report unavailable inputs,

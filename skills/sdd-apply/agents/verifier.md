@@ -6,4 +6,6 @@ Initiate a real `check_run` for the assigned stage through the orchestrator. Ins
 
 Return passed, failed, or unavailable with candidate, command/cwd/configuration, AC mappings, individual exit codes, raw log paths and limitations. Do not edit implementation during verification. A failed run requires the orchestrator's repair reservation before retry, including retries without code changes. A changed candidate needs fresh evidence. Your result is separate from code review even when you also serve as reviewer.
 
+For refactoring, map evidence to each local acceptance and preserved criterion in the packet. Inspect the baseline and registered revision, including existing mandatory commands and newly prepared checks. Confirm the command proves its declared criterion; a contribution to a design result does not establish that result across all modules. Parallel integration needs fresh evidence from the integrated candidate, followed by its own reserved review.
+
 For final verification, inspect and run the full required set and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Attribute a defect to its task or report uncertain ownership for resolution.

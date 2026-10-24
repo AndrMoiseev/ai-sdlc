@@ -5,10 +5,44 @@ import subprocess
 import time
 import os
 import signal
+from copy import deepcopy
 from .common import contained, digest, git, now, require, write_json
 from .state import snapshot
 from .inputs import spec_modules, basis_dependency
 from .candidates import resolve, same, store
+
+
+def local_criteria(state, task):
+    """A contribution never substitutes for a task's acceptance contract."""
+    if state["basis"].get("work_kind", "change") != "refactoring":
+        return set(task["plan"]["covers"])
+    local = {record["id"] for record in state["acceptance"].values()
+             if record["task"] == task["plan"]["id"]}
+    return local | set(task["plan"]["preserves"])
+
+
+def record_registry(state, task, event):
+    """Append snapshots; callers must authorize each mutation before recording it."""
+    if state["basis"].get("work_kind", "change") != "refactoring":
+        return
+    registry = task.setdefault("check_registry", {"revision": 0, "history": []})
+    registry["revision"] += 1
+    registry["history"].append({"revision": registry["revision"], "event_id": event["event_id"],
+                                "operation": event["type"], "checks": deepcopy(task["checks"])})
+
+
+def registry_current(state, task):
+    if state["basis"].get("work_kind", "change") != "refactoring":
+        return
+    registry = task.get("check_registry", {})
+    history = registry.get("history", [])
+    require(history and registry.get("revision") == len(history)
+            and [item["revision"] for item in history] == list(range(1, len(history) + 1))
+            and history[-1]["checks"] == task["checks"], "registry_changed",
+            "Verification registry changed without an authorized revision")
+    allowed = local_criteria(state, task)
+    covered = {criterion for check in task["checks"] for criterion in check["criteria"]}
+    require(allowed <= covered, "criteria_uncovered", "Local acceptance and preservation checks remain mandatory")
 
 
 def root_for(state, task):
@@ -16,9 +50,15 @@ def root_for(state, task):
 
 
 def candidate(state, task):
+    registry_current(state, task)
+    if state["basis"].get("work_kind", "change") == "refactoring":
+        require(task.get("baseline_checks"), "baseline_missing", "Capture existing checks before freezing a refactoring result")
     if task.get("candidate") is not None:
         resolve(state, task["candidate"])
-    return store(state, {"source": snapshot(state, root_for(state, task)), "manifest": digest(state["basis"]["manifest"]), "checks": digest(task["checks"]), "root": root_for(state, task)})
+    checks = task["checks"]
+    if state["basis"].get("work_kind", "change") == "refactoring":
+        checks = {"revision": task["check_registry"]["revision"], "checks": checks}
+    return store(state, {"source": snapshot(state, root_for(state, task)), "manifest": digest(state["basis"]["manifest"]), "checks": digest(checks), "root": root_for(state, task)})
 
 
 def current(state, task):
@@ -50,6 +90,24 @@ def valid_evidence(state, task, directory, stage=None):
         path = contained(directory, item["log"])
         require(path.is_file() and digest(path.read_bytes()) == item["log_hash"], "evidence_corrupt", item["log"])
         log_data = json.loads(path.read_text(encoding="utf-8"))
+        if state["basis"].get("work_kind", "change") == "refactoring" and not item.get("procedure"):
+            require(log_data.get("work_kind") == "refactoring"
+                    and log_data.get("run_id") == state["run_id"]
+                    and log_data.get("task_id") == task["plan"]["id"]
+                    and log_data.get("stage") == item["stage"]
+                    and log_data.get("role_id") == item["role_id"]
+                    and same(state, log_data.get("candidate"), expected)
+                    and log_data.get("registry_revision") == task["check_registry"]["revision"]
+                    and log_data.get("registered_checks") == task["checks"],
+                    "evidence_basis", "Evidence must name this task, candidate and registry revision")
+            check = next((check for check in task["checks"] if check["id"] == item["check_id"]), None)
+            output = next((output for output in log_data.get("outputs", []) if output.get("check_id") == item["check_id"]), None)
+            require(check and output and output["outcome"] == item["outcome"], "evidence_basis", "Evidence must contain its registered check")
+            run = check["setup"] or check["run"]
+            if "command" in run:
+                require(output.get("command") == run["command"] and output.get("exit_code") == 0
+                        and output.get("criteria") == check["criteria"], "evidence_command",
+                        "An unrelated successful command cannot establish a registered criterion")
         for output in log_data.get("outputs", []):
             if output.get("procedure_log"):
                 linked = contained(directory, output["procedure_log"])
@@ -111,16 +169,23 @@ def transition(state, task, event, directory):
         require(task["status"] == "pending" and not task["checks"], "registry_frozen", "Register once before execution")
         checks = []
         for i, planned in enumerate(task["plan"]["verification"]):
-            checks.append({"id": f"plan-{i + 1}", "criteria": planned["criteria"], "source": "tasks.md", "location": planned["location"], "run": planned["run"], "cwd": ".", "configuration": {}, "setup": None})
+            ident = (task["plan"]["id"] + "/" + planned["id"]
+                     if state["basis"].get("work_kind", "change") == "refactoring" else f"plan-{i + 1}")
+            checks.append({"id": ident, "criteria": planned["criteria"], "source": "tasks.md", "location": planned["location"], "run": planned["run"], "cwd": ".", "configuration": {}, "setup": None})
         require(p.get("inventory") and set(p["inventory"]) == {"instructions", "ci"}, "inventory_required", "Record inspected project instruction and CI files, including an explicit empty inventory")
         for check in p.get("additional", []):
             require(check.get("id") and check.get("source") and check.get("run"), "check_schema", "Additional required checks need ID, source and exact run")
             checks.append({**check, "setup": None, "cwd": check.get("cwd", "."), "configuration": check.get("configuration", {})})
         require(len({c["id"] for c in checks}) == len(checks), "duplicate_check", "Duplicate check ID")
         for check in checks:
+            if state["basis"].get("work_kind", "change") == "refactoring":
+                require(check.get("criteria") and set(check["criteria"]) <= local_criteria(state, task),
+                        "check_schema", "Bind checks to local acceptance or preserved criteria")
             if "command" in check["run"]:
                 require_command(check["run"]["command"])
         task["checks"], task["inventory"] = checks, p["inventory"]
+        record_registry(state, task, event)
+        registry_current(state, task)
         return {"checks": checks}
     if kind == "checks_extend":
         require(task["status"] == "verifying" and task["reviews"] and task["reviews"][-1]["verdict"] == "more_checks", "extension_phase", "A reviewer must request additional checks")
@@ -128,19 +193,22 @@ def transition(state, task, event, directory):
         additions = p.get("additional", [])
         require(additions and p.get("review_round") == task["reviews"][-1]["round_id"], "extension_evidence", "Reference the review requesting additional checks")
         for check in additions:
-            require(check.get("id") and check.get("source") and check.get("run", {}).get("command") and check.get("criteria") and set(check["criteria"]) <= set(task["plan"]["covers"]), "check_schema", "Add exact runnable checks with scoped AC")
+            require(check.get("id") and check.get("source") and check.get("run", {}).get("command") and check.get("criteria") and set(check["criteria"]) <= local_criteria(state, task), "check_schema", "Add exact runnable checks with scoped AC")
             require(check["id"] not in {c["id"] for c in task["checks"]}, "duplicate_check", "Existing checks cannot be replaced")
             require_command(check["run"]["command"])
             task["checks"].append({**check, "setup": None, "cwd": check.get("cwd", "."), "configuration": check.get("configuration", {})})
+        record_registry(state, task, event)
         task["candidate"] = candidate(state, task)
         return {"checks": task["checks"], "candidate": task["candidate"]}
     if kind == "check_setup":
+        registry_current(state, task)
         check = next((c for c in task["checks"] if c["id"] == p.get("check_id")), None)
         require(check and ("setup_required" in check["run"] or "procedure" in check["run"]) and check["setup"] is None, "setup_not_planned", "Only planned, unresolved setup or procedure may be registered")
         require(task["status"] in {"running", "repairing"}, "setup_phase", "Prepare checks within their task")
         require(p.get("command") and p.get("description") and task.get("baseline_checks"), "setup_evidence", "Need baseline check inventory and preparation description")
         require_command(p["command"])
         check["setup"] = {"command": p["command"], "cwd": p.get("cwd", "."), "configuration": p.get("configuration", {}), "description": p["description"], "before": task["start_snapshot"], "after": snapshot(state, root_for(state, task))}
+        record_registry(state, task, event)
         return {"setup": check}
     if kind == "candidate":
         require(task["status"] in {"running", "repairing", "integrating"}, "candidate_phase", "Candidate requires completed implementation or integration")
@@ -156,6 +224,7 @@ def transition(state, task, event, directory):
         task["status"] = "verifying"
         return {"candidate": task["candidate"]}
     if kind == "procedure_begin":
+        registry_current(state, task)
         stage = p.get("stage")
         require(stage in {"baseline", "self", "independent", "integration", "final"}, "procedure_stage", "Unknown stage")
         check = next((c for c in task["checks"] if c["id"] == p.get("check_id")), None)
@@ -191,6 +260,7 @@ def transition(state, task, event, directory):
         return item
     require(kind == "check_run", "check_operation", kind)
     stage = p.get("stage")
+    registry_current(state, task)
     require(stage in {"baseline", "self", "independent", "integration", "final"}, "check_stage", "Unknown verification stage")
     role_id = p.get("role_id")
     if stage in {"independent", "integration", "final"}:
@@ -241,6 +311,9 @@ def transition(state, task, event, directory):
     after = snapshot(state, root)
     tested_candidate = candidate(state, task) if stage == "final" else task["candidate"]
     record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], "task_id": task["plan"]["id"], "role_id": role_id, "stage": stage, "candidate": tested_candidate, "before": before, "after": after, "outputs": outputs}
+    if state["basis"].get("work_kind", "change") == "refactoring":
+        record.update(work_kind="refactoring", registry_revision=task["check_registry"]["revision"],
+                      registered_checks=deepcopy(task["checks"]))
     relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
     path = contained(directory, relative)
     write_json(path, record)
