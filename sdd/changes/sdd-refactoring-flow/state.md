@@ -5,10 +5,10 @@ change_id: sdd-refactoring-flow
 language: ru
 phase: plan_approved
 awaiting: none
-updated_at: '2026-10-24T17:26:17Z'
+updated_at: '2026-10-24T18:30:29Z'
 document_links: [proposal.md, design.md, specs/sdd-refactoring/spec.md, tasks.md, decisions.md, questions.md, premortem.md, review/decisions.md]
 review_links: [review/20261024T085539Z-refactoring-docs/consistency.md, review/20261024T092036Z-refactoring-plan/plan.md, review/summary.md]
-approval_refs: [USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command]
+approval_refs: [USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command, USER-approve-refactoring-plan-behavior-runner, USER-waive-refactoring-plan-behavior-runner]
 ---
 # Точка продолжения
 
@@ -25,7 +25,7 @@ Proposal/spec/design, все AC и граф задач не менялись. П
 review 2/3, test repair 3/5. Задача 2 принята:
 b0ecdf6ed148cab9f775ea77b3027db90f1e90f3, review 2/3, test repair 2/5.
 Обе записи tasks и полные исторические свидетельства сохраняются.
-Задачи 3–8 ещё не приняты. Актуальный прогресс: [dashboard](execution/dashboard.html).
+Задача 4 принята: 85ebd490265725712df76580f5fc643018032282, review 2/3, test repair 2/5. Задачи 3, 5, 6, 7, 8 ещё не приняты. Актуальный прогресс: [dashboard](execution/dashboard.html).
 
 Следующий поддерживаемый шаг sdd-apply: revised_plan сохраняет принятые задачи
 и бюджеты, обновляет основание и оставляет незавершённые задачи pending.
@@ -60,3 +60,24 @@ USER-approve-refactoring-plan-test-command и USER-waive-refactoring-plan-test-c
 Предыдущие предложения необязательной гуманизации остаются без ответа;
 новый проход не запускался и не блокирует продолжение. Согласование и waiver
 не разрешают гуманизацию. Поручения на отдельное пояснение нет.
+
+## Актуальная подготовка продолжения после задачи 4
+
+Задача 4 прошла self28/255, independent28/255, integration28/257 и два pass-review
+без findings. Существующие 227 регрессий сохранены; два дополнительных root-теста
+принадлежат пользователю и не изменялись. Её цикл1 закрыт настоящим независимым
+failed-набором после точного восстановления исходников; цикл2 зарезервирован ДО
+повторного применения исправлений и успешно закрыт independent. История не сброшена.
+
+Task3 source не менялся и baseline не выполнялся. Уточнён setup_required:
+реальный eval runner run_refactoring.py и соседний lock, внешние fixture/report paths,
+чистые CLI sessions и независимое оценивание вместо неподдерживаемого procedure-event.
+Tasks SHA256: f80542633b7d6739b17e2b5923eea11d68dbc4a44a3c818edbd95762652fefbf. Принятые YAML-записи задач 1/2/4 неизменны.
+Новые USER-approve/waive-refactoring-plan-behavior-runner привязаны к этому снимку.
+Далее поддерживаемый revised_plan сохраняет accepted1/2/4; новый executor заранее
+объявляет все runner/helper/fixture/test paths, затем проходит первый независимый
+baseline и требуемый показ conductor viewer до авторских правок.
+
+Реальные wording micro/pressure для apply остаются обязательной работой task6/8
+перед final package acceptance; synthetic unit roles их не заменяют. Покрытие:
+execution/reports/required-behavior-coverage.md. Финальный network-check ещё не выполнен.

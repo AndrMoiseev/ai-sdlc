@@ -200,6 +200,17 @@ verification:
         проектами и полным комплектом зависимостей по sdd-skill-conductor. Выполнить
         описанные в skills/sdd-spec/evals/refactoring.md прогоны, сохранить
         transcripts, assertions, grading, timings и итог сравнения вне пакетов.
+        Создать standalone uv runner skills/sdd-spec/evals/run_refactoring.py
+        с соседним run_refactoring.py.lock. Зарегистрировать реальную команду
+        uv run --locked --script skills/sdd-spec/evals/run_refactoring.py
+        --conductor-root <verified-conductor-root> --fixture-spec <frozen-fixture-spec>
+        --output-root <retained-output-root> --harness codex.
+        До check_setup раскрыть три пути в проверенные абсолютные значения вне
+        изменяемого пакета. Каждый запуск создаёт новые изолированные фикстуры,
+        выполняет настоящие чистые CLI-сессии и независимое оценивание по
+        наблюдённым свидетельствам; отсутствующие или неуспешные обязательные
+        результаты дают ненулевой код. Не подменять поведение exit 0 оболочки
+        или сохранённым успехом прежнего запуска.
   - criteria: [AC-refactoring-cross-module-plan, AC-refactoring-baseline-gap, AC-refactoring-plan-validation]
     test_description: Проверить положительные примеры через настоящий documents/plan check и диагностику с ID для пропущенного критерия design, отсутствующего локального результата, неверной ссылки и цикла; допустимый множественный вклад не отклоняется
     location: skills/sdd-spec/tests/test_refactoring_templates.py
@@ -216,6 +227,15 @@ verification:
 справочник маршрута, шаблоны, README и evals. Определение вида работы использует
 реальные функции задачи 2. Содержание общего процесса не копируется в независимый
 жизненный цикл.
+
+В evals входят run_refactoring.py, его lock-файл и необходимые ресурсы запуска
+и проверки. Полный список изменяемых файлов, включая runner, lock, вспомогательные
+ресурсы, фикстуры и тесты, определить до start. Сценарии, зависимые пакеты,
+контрольный old_skill и отчёты размещать вне коллекций скиллов. Нативный свежий
+контекст сам по себе не скрывает каталоги и файловую систему: чистый CLI допустим
+после настоящих version/login/fresh-session/workspace probes и проверки зависимостей.
+Baseline и требуемый показ conductor viewer предшествуют авторским правкам;
+свидетельства синтетических ролей в unit-тестах не заменяют реальные сессии.
 
 Прописать явный и самостоятельный выбор, уточнение при сомнении, обязательное
 уведомление и сохранение факта уведомления при resume. Оставить явный вызов

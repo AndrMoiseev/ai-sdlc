@@ -109,3 +109,14 @@ Plan-review остаётся stale и покрыт явным waiver; новог
 Задача 2 принята b0ecdf6 после двух независимых pass-review и успешного
 интеграционного набора. Её реализация не менялась при восстановлении uv cache.
 Следующий шаг — поддерживаемый revised_plan и выполнение оставшихся задач.
+
+## Актуальный runner поведения после приёмки задачи 4
+
+Task4 принята 85ebd490265725712df76580f5fc643018032282 после current integration
+28focused/257local и второго pass-review без findings; lifetime budgets 2/3 и 2/5.
+Её запись, как и принятые 1/2, не менялась. Реестр задачи 3 уточнён runnable CLI
+runner + lock без нового API и новых критериев. Точный снимок подтверждают
+USER-approve-refactoring-plan-behavior-runner и USER-waive-refactoring-plan-behavior-runner.
+Исторический plan-review остаётся stale, покрыт явным waiver; нового ревью/гуманизации нет.
+Финальное поведение и package readiness не заявлены: actual micro/pressure и network
+обязательны в оставшейся работе. Проверки и scope исходного плана сохраняются.

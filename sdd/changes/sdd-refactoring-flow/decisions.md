@@ -310,3 +310,17 @@ API смены реестра; она не выбрана и выходит за
 разделению task/final и не выбрана. Остальные focused-команды, критерии и записи
 принятых задач сохранены. Exact approval и waiver:
 USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command.
+
+## Исполнимый runner поведенческих проверок задачи 3
+
+Статус: принято в рамках того же исправления реестра. Автор предложения — агент.
+Пользователь разрешил: «ок, я разрешаю исправить реестр тестов, после этого план считать согласованным без нового ревью и продолжать выполнение».
+Фиксация 2026-10-24T18:30:29Z; ID и ссылка сообщения недоступны.
+Установленный API поддерживает check_setup.command, но не превращает
+setup_required в procedure. Поэтому выбран standalone runner с настоящими
+чистыми CLI-сессиями и независимым оцениванием, вместо фиктивного procedure-event
+или exit 0 оболочки. Команда и ресурсы описаны в tasks; внешние пути и manifest
+фиксируются при подготовке проверки. Приёмка задач 1, 2 и 4 и их записи сохранены.
+Полный ownership до start включает runner, lock, все нужные helpers/fixtures/tests.
+Основание: USER-approve-refactoring-plan-behavior-runner и
+USER-waive-refactoring-plan-behavior-runner в [решениях](review/decisions.md).
