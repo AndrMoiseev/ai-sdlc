@@ -43,6 +43,10 @@
     "schema_version": {"const": 2},
     "change_id": {"type": "string"},
     "work_kind": {"enum": ["change", "refactoring"]},
+    "final_checks": {"anyOf": [{"$ref": "#/$defs/object"}, {"type": "object", "required": ["checks", "revision", "history", "evidence", "procedures", "failures"], "properties": {
+      "revision": {"type": "integer", "minimum": 1}, "checks": {"anyOf": [{"type": "array"}, {"$ref": "#/$defs/object"}]},
+      "failures": {"type": "object"}
+    }}]},
     "run_id": {"type": "string"},
     "revision": {"type": "integer", "minimum": 0},
     "owner": {"type": "string"},

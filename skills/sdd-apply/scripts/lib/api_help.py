@@ -60,7 +60,7 @@ EVENTS = {
     "check_run": contract("Run the complete registered check set and save actual results.", ("role_id", "stage"), ("timeout",),
         choices={"stage": ["baseline", "self", "independent", "integration", "final"]}, defaults={"timeout": 300},
         rules=["Baseline precedes implementation in a clean worktree; self/independent/integration require a frozen local commit.",
-               "Final requires an independent final_verifier and an accepted task at final HEAD."]),
+               "Ordinary changes use task-scoped final_verifier; refactoring uses task_id=null and the whole confirmed applicable union."]),
     "check_setup": contract("Resolve planned setup/procedure after baseline while running or repairing.",
         ("check_id", "command", "description"), ("cwd", "configuration"),
         rules=["command is the exact executable argument array; keep existing checks and assertions."]),
@@ -97,8 +97,10 @@ EVENTS = {
         rules=["candidate is the complete script-issued reference; legacy source snapshots require explicit rebaseline.",
                "test_integrity covers assertions, skips/xfail and command weakening; only proven violations block."]),
     "repair": contract("Reserve any required repair budget and reopen the assigned executor with evidence.",
-        ("reason",), ("defect_evidence", "executor", "test_failure"),
-        rules=["Supply defect_evidence unless a failure is already recorded; self-check failure needs test_failure:true."]),
+        ("reason",), ("defect_evidence", "executor", "test_failure", "final_checks", "paths"),
+        rules=["Supply defect_evidence unless a failure is already recorded; self-check failure needs test_failure:true.",
+               "Refactoring final failures require final_checks IDs, reproducible defect_evidence and owned paths; task_id selects the responsible task.",
+               "Unknown or out-of-scope ownership returns to sdd-spec before edits; established ownership reserves the existing task test-repair budget."]),
     "commit": contract("Confirm the existing integration commit after current independent evidence and passing review."),
     "accept": contract("Accept only the confirmed task commit with current evidence and review."),
     "block": contract("Preserve partial work and record the condition for resuming.", ("reason", "resume_condition")),
@@ -122,6 +124,7 @@ EVENTS = {
                     "role_id": "lost predecessor for lost_role", "successor": "active registered successor for lost_role"},
         rules=["Resolve each lost role separately. A successor must name that predecessor and have the same task/kind.",
                "Legacy resolutions may omit role_id: successor_of supplies the specific predecessor.",
+               "For a lost run-level final verifier with pending procedures, resolution.abandon_procedures must list every unfinished check ID. Resume archives each predecessor attempt as abandoned with its trace; the successor starts a fresh procedure.",
                "Task phase restores only after every task blocker is resolved; review and repair reservations survive.",
                "Refactoring returns check_registries with confirmed_revision/confirmed_checks and pending_transition separately; resume never confirms a revision.",
                "Budget, normative, spec-conflict and mode blockers require their dedicated operations."]),
@@ -142,6 +145,7 @@ EVENTS = {
 }
 
 RUN_EVENTS = {"resume", "revised_plan", "handoff", "mode", "finalize"}
+WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
             "expected_revision": "current integer revision", "owner": "registered owner context",
             "type": "event name", "task_id": "TASK-ID or null for run event", "payload": {}}
@@ -156,7 +160,9 @@ def describe(operation=None, event=None):
     require(isinstance(name, str) and name in records, "help_unknown", "Unknown " + selector + ": " + str(name))
     result = {selector: name, **deepcopy(records[name])}
     if event is not None:
-        result["task_id"] = "null" if event in RUN_EVENTS else "TASK-ID or null" if event == "block" else "TASK-ID"
+        result["task_id"] = "null" if event in RUN_EVENTS else "TASK-ID or null" if event == "block" or event in WHOLE_EVENTS else "TASK-ID"
+        if event in WHOLE_EVENTS:
+            result.setdefault("rules", []).append("For refactoring, task_id=null addresses whole-result checks or the final_verifier; check_setup uses the check's approved setup_task.")
         result["envelope"] = {**ENVELOPE, "type": event}
     elif operation == "event":
         result["envelope"] = deepcopy(ENVELOPE)

@@ -141,3 +141,36 @@ evidence. A required unavailable check blocks; omission cannot make it green.
 
 Final checks use fresh `final_verifier` roles and a clean final-HEAD candidate separate
 from historical task candidates. Earlier logs do not replace that final run.
+
+## Refactoring whole-result checks
+
+Use `task_id: null` for `checks_register`, `check_setup`, final `check_run`, and
+final procedure events. Registration includes all tasks.md verification records
+and inspected project/CI checks. Prepare an unresolved whole check while its
+approved `setup_task` is running or repairing after baseline. Register the exact
+command and preparation description; an unavailable check blocks completion.
+
+After every task is accepted and integrated, a fresh run-level final_verifier
+executes the union of whole checks and confirmed applicable task/project checks.
+No synthetic owner task is created. Confirmed retired checks retain history and
+reasons; they are not rerun. Evidence binds work identity, clean integrated HEAD,
+normative manifest and the exact applicable registry. Every command and procedure
+must pass at that same basis; unrelated exit zero or historical success is insufficient.
+
+Each whole procedure begins a distinct attempt. A newer pending or nonpassing
+attempt invalidates an older aggregate pass, even at the same source and registry.
+After a new procedure pass, run `check_run` again so the aggregate links that exact
+attempt and log. Keep all superseded results as history.
+
+When a run-level final verifier is lost during a procedure, register its fresh
+successor and resolve `lost_role` through `resume`. The resolution includes
+`abandon_procedures`, listing every unfinished check ID of that predecessor,
+alongside the ownership evidence and host trace. Resume archives those attempts
+as abandoned, preserving their original role, basis and trace. The successor
+begins and executes a fresh attempt; abandoned work supplies no passing evidence.
+
+A failed final check requires an owned repair before retry. Supply `repair` with
+`final_checks` IDs, `defect_evidence` and exact owned `paths`; select its task ID.
+Unknown ownership or an unplanned area returns to sdd-spec before edits. Repairs
+consume the responsible task's existing test-repair budget and require the usual
+candidate, independent checks, review and integration before final verification.

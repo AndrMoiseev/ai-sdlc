@@ -135,6 +135,7 @@ def transition_basis(project, revise_documents=None):
         local_later = dict(sdd_record="acceptance", id="AC-later", task="TASK-three", lifetime="persistent",
                            conditions="The consumer is ready", expected="The consumer uses the direct arithmetic API")
         documents["tasks"] = [first, local, second, removed, later, local_later, whole]
+        whole.update(location="check_api.py", run={"command": [sys.executable, "-B", "check_api.py"]})
         if revise_documents:
             revise_documents(documents)
     return approved_basis(project, configure=configure)

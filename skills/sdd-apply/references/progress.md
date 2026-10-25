@@ -11,3 +11,9 @@ If the browser cannot load local updates, use the script's loopback-only `serve`
 Expanded evidence preferences are browser-local and scoped to the page path, change and run. They survive data updates and page reloads; when browser storage is unavailable, evidence stays visible without a disclosure control. These preferences do not change execution state.
 
 If state succeeded but view generation failed, run `dashboard` again. Preserve the accepted state and commit: regenerating HTML must not replay implementation or Git operations. Neither a manually edited summary nor dashboard grants acceptance.
+
+For refactoring, show accepted tasks separately from confirmed whole criteria.
+The whole-result panel reports current evidence gaps and retired checks with
+confirmed reasons. Contributions and accepted task counts do not establish the
+whole result. A changed integrated HEAD, manifest or applicable registry removes
+old confirmation from the current projection; historical logs remain available.

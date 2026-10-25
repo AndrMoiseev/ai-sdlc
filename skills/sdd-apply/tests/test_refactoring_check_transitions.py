@@ -165,20 +165,20 @@ def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_a
     assert {tuple(item["command"]) for item in api_baseline} == {(sys.executable, "-B", "check_api.py")}
     driver.implement()
     finish(driver)
-    for task_id in ("TASK-one", "TASK-two", "TASK-three"):
-        driver.task_id = task_id
-        role = task_id + "-final"
-        driver.role(role, "final_verifier")
-        final = driver.send("check_run", {"role_id": role, "stage": "final"})
-        assert final["outcome"] == "passed"
-        output = driver.log(final)
-        assert "TASK-one/local-result" not in {item["check_id"] for item in output["outputs"]}
-        assert {criterion for item in output["outputs"] for criterion in item["criteria"]} == {"AC-preserved", "AC-removed", "AC-later"}
-        api_final = [item for item in output["outputs"] if item["criteria"] == ["AC-preserved"]]
-        assert {item["check_id"] for item in api_final} == {"TASK-one/api-regression", "TASK-two/api-regression"}
-        assert {tuple(item["command"]) for item in api_final} == {(sys.executable, "-B", "check_api.py")}
-        assert valid_evidence(driver.state, driver.task, driver.directory, "final")
-    assert driver.state["final"] is None  # Whole-work completion belongs to task7.
+    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, task_id=None)
+    driver.send("role_register", {"role_id": "final", "kind": "final_verifier", "context_id": "final",
+        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
+    final = driver.send("check_run", {"role_id": "final", "stage": "final"}, task_id=None)
+    assert final["outcome"] == "passed"
+    output = driver.log(final)
+    assert "TASK-one/local-result" not in {item["check_id"] for item in output["outputs"]}
+    assert {criterion for item in output["outputs"] for criterion in item["criteria"]} == {"AC-result", "AC-preserved", "AC-removed", "AC-later"}
+    api_final = [item for item in output["outputs"] if item["criteria"] == ["AC-preserved"]]
+    assert {item["check_id"] for item in api_final} == {"TASK-one/api-regression", "TASK-two/api-regression"}
+    assert {tuple(item["command"]) for item in api_final} == {(sys.executable, "-B", "check_api.py")}
+    from lib.final_checks import evidence
+    assert evidence(driver.state, driver.directory)[2] == []
+    assert driver.state["final"] is None
 
 
 @pytest.mark.parametrize("damage,code", [

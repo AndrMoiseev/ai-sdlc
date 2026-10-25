@@ -60,6 +60,8 @@ def require_new_ids(state, task, checks):
     if not refactoring(state):
         return
     reserved = set()
+    reserved.update(state.get("verification", {}))
+    reserved.update(check["id"] for check in state.get("final_checks", {}).get("checks", []))
     for other in state["tasks"].values():
         if other["plan"]["id"] == task["plan"]["id"]:
             continue

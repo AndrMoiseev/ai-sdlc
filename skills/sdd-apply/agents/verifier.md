@@ -16,3 +16,14 @@ Use the [test evolution policy](../references/review-policy.md#tests-at-changed-
 to distinguish structural retirement from lost preservation.
 
 For final verification, inspect and run the full required set and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Attribute a defect to its task or report uncertain ownership for resolution.
+
+For refactoring final verification, use the run-level packet (`task: null`) and
+`task_id: null` for final checks and procedures. Trace every design result and
+preservation criterion across its declared scope, including every consumer and
+temporary conversion. Check persistent local obligations and project checks in
+the confirmed applicable union. A retired check needs its recorded transition
+and reason; its historical pass is not a final pass. Report missing consumers,
+remaining bypasses and integration regressions even when all tasks are accepted.
+Bind results to the packet's current integrated source, manifest and registry;
+changed inputs require fresh checks. Establish the repair owner before edits;
+an unplanned area requires returning to sdd-spec.

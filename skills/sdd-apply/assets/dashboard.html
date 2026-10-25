@@ -34,6 +34,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monos
 <header><div class="eyebrow">SPECIFICATION DRIVEN DEVELOPMENT</div><h1>__CHANGE__</h1><p id="meta" class="muted">Execution snapshot</p><p id="freshness" class="muted">Saved snapshot · __SAVED_AT__</p></header>
 <p id="progress"></p><progress id="bar" max="1" value="0" aria-label="Accepted tasks"></progress>
 <p id="blocked" role="status"></p>
+<section id="whole-result" hidden aria-label="Whole result"></section>
 <p class="plan-note"><strong>Execution waves</strong> group tasks planned to run in parallel. Each wave waits for acceptance of its listed tasks; it can overlap other waves. Actual starts depend on executor capacity, file ownership and resources. Integration into the execution branch is sequential.</p>
 <p id="mode-note" class="muted"></p>
 <section id="tasks" aria-label="Execution waves">__STATIC_TASKS__</section>
@@ -104,6 +105,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monos
     return card;
   }
   function draw(s){
+    const whole=el('whole-result');whole.hidden=!s.whole_result;whole.replaceChildren();
+    if(s.whole_result){
+      const w=s.whole_result;
+      whole.append(node('h2','Whole result'),node('p',w.confirmed_criteria.length+' / '+w.total_criteria+' criteria confirmed'),node('p',w.confirmed_criteria.join(', ')));
+      for(const gap of w.gaps)whole.append(node('p',(gap.criteria||[]).join(', ')+': '+gap.reason,'blocked'));
+      for(const retired of w.retired_checks)whole.append(node('p','Retired '+retired.check_id+': '+retired.reason));
+    }
     el('meta').textContent=s.mode+' · '+s.status+' · run '+s.run_id+' · revision '+s.revision;
     el('progress').textContent=s.accepted+' / '+s.total+' tasks accepted';el('bar').max=Math.max(s.total,1);el('bar').value=s.accepted;
     el('blocked').textContent=s.blockers.map(b=>b.reason+(b.detail?': '+b.detail:'')).join(' · ');

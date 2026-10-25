@@ -84,6 +84,8 @@ def current(state, task):
 
 def independent(state, task, role_id, kinds):
     role = state["roles"].get(role_id)
+    if state["basis"].get("work_kind") == "refactoring" and role and role["kind"] == "final_verifier":
+        require(False, "final_role", "Refactoring final verification uses task_id=null and the whole applicable registry")
     require(role and role["kind"] in kinds and role["task_id"] == task["plan"]["id"] and role["status"] == "active", "role_unavailable", "Active independent role required")
     authors = [state["roles"][r]["context_id"] for r in task["roles"] if state["roles"][r]["kind"] == "executor"]
     require(role["context_id"] not in authors and role["fresh"] is True, "role_not_independent", "Author context cannot independently verify or review")
@@ -181,6 +183,9 @@ def run_command(command, cwd, timeout):
 
 
 def transition(state, task, event, directory):
+    if task is None:
+        from .final_checks import transition as whole
+        return whole(state, event, directory)
     require(task is not None, "task_required", "Task required")
     kind, p = event["type"], event["payload"]
     if kind == "checks_revise":

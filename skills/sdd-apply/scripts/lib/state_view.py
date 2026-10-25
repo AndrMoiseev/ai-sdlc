@@ -15,7 +15,12 @@ def compact(state):
         key: {field: role[field] for field in ("task_id", "kind", "context_id")}
         for key, role in state["roles"].items() if role["status"] == "active"
     }
+    whole = {}
+    if state["basis"].get("work_kind") == "refactoring":
+        from .final_checks import progress
+        whole = {"whole_result": progress(state)}
     return {
+        **whole,
         "view": "compact", "view_version": 1,
         **({"work_kind": state["work_kind"]} if "work_kind" in state else {}),
         **{key: state[key] for key in (

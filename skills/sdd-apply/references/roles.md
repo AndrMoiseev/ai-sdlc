@@ -23,6 +23,13 @@ authors and do not edit the candidate. Wait for the generated packet; a reviewer
 also waits for a successful `review_start` reservation. Report unavailable inputs,
 permissions or tools rather than simulating a role or a successful check.
 
+A refactoring final verifier has `task_id: null`. Its run-level packet contains
+the whole criteria, original document paths, accepted task scopes and commits,
+the confirmed applicable check union, retired checks with reasons, and the
+current integrated source/manifest/registry basis. This scope grants verification
+authority without granting implementation ownership. Report ambiguous repair
+ownership before any author is reopened.
+
 Return task/role/context IDs, status, unchanged candidate reference and commit
 SHA, owned/inspected paths, AC-to-evidence mapping, commands and log
 paths, blockers/limitations and actual host trace. Keep full evidence in artifacts;

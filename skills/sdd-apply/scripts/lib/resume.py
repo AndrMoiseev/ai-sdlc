@@ -70,6 +70,7 @@ def transition(state, task, event, directory):
         state["previous_run"] = previous_run
         state["basis"] = basis
         if basis.get("work_kind", "change") == "refactoring":
+            state.pop("final_checks", None)
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
         state["tasks"] = {}
@@ -113,6 +114,9 @@ def transition(state, task, event, directory):
         if role["status"] == "active" and role["context_id"] not in p["live_contexts"]:
             role["status"] = "lost"
             t = state["tasks"].get(role["task_id"])
+            if t is None and role["kind"] == "final_verifier":
+                issues.append({"reason": "lost_role", "task_id": None, "role_id": role["role_id"],
+                               "resume_condition": "Register a fresh run-level final verifier successor"})
             if t and t["status"] not in {"pending", "accepted"}:
                 if t["status"] != "blocked":
                     t["before_block"] = t["status"]
@@ -155,6 +159,9 @@ def transition(state, task, event, directory):
             require(any(b["reason"] == reason and b.get("task_id") == resolution.get("task_id")
                         and b.get("role_id") == lost_role for b in state["blockers"]),
                     "successor_required", "No unresolved loss for this role")
+            if predecessor["task_id"] is None and predecessor["kind"] == "final_verifier":
+                from .final_checks import reconcile_procedures
+                reconcile_procedures(state, predecessor, successor, resolution, event, directory)
         def resolved(blocker):
             return (blocker["reason"] == reason
                     and blocker.get("task_id", resolution.get("task_id")) == resolution.get("task_id")
