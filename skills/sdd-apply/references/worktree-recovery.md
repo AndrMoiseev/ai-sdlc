@@ -14,9 +14,10 @@ registered `worktree.base` differs from the execution branch's current HEAD:
 2. Submit `worktree_refresh` with `reason` and `evidence` identifying the fixed
    base and its verification. This existing execution authorization covers local
    worktree replacement; a stale base alone does not require another user decision.
-   The script creates a new detached worktree at current HEAD, saves a binary
-   task patch and the old staged diff, transfers owned files with a three-way
-   merge, verifies the source and destination, then removes the old worktree.
+   First preserve unfinished edits in a local task commit and leave the source
+   worktree clean, including ignored data. The script creates a new task branch
+   and worktree at current HEAD, transfers committed owned changes with a
+   three-way merge, and retains the old worktree and branch for recovery.
 3. Use the returned worktree path for all subsequent roles. The script replaces
    the task's source baseline and invalidates its candidate and transfer package.
    Old reviews/checks remain historical and budgets retain their usage. Continue
@@ -30,9 +31,11 @@ registered `worktree.base` differs from the execution branch's current HEAD:
    Continue the selected execution flow through integration, checks and acceptance.
 
 The operation preserves accepted tasks and the execution branch/index. It rejects
-unexpected task commits, active roles and changed/untracked/ignored files outside
-task ownership before deleting anything. Preserve and account for such data before
-retrying; do not bypass the ownership check with a filesystem deletion.
+active roles, dirty source worktrees and committed changes outside task ownership.
+Preserve and account for that data before retrying. A retained worktree is not
+permission to delete it manually. Refresh also provides an explicit rebaseline
+for legacy snapshot-based execution; old evidence remains historical even when
+the execution branch's base has not changed.
 
 ## Interrupted transfer or conflict
 
@@ -46,7 +49,7 @@ that replacement path and the recorded patch; resolve and stage only task-owned
 paths there, preserving the external fix. End the resolver with `role_result`,
 then submit `worktree_refresh_resolve` with `intent_id` (the original refresh event),
 `role_id` and `resolution` describing the actual conflict decisions. This verifies
-the resolved tree before removing the unchanged old tree. It still requires fresh
+the resolved tree while retaining the old tree. It still requires fresh
 independent checks and review; a conflict resolution is not task acceptance.
 
 If HEAD, either tree or the normative basis changes unexpectedly during recovery,

@@ -37,6 +37,9 @@ def revise(project, names, modify=lambda tasks: None):
         for entry in record["inputs"]:
             entry["sha256"] = digest((change / entry["path"]).read_bytes())
     document(decisions.path, decisions.meta, decisions.records)
+    from repository_support import stage, commit
+    stage(project, "sdd")
+    commit(project, "Approved fixture revision")
 
 
 def accepted(driver, project):
@@ -58,6 +61,7 @@ def test_revision_preserves_accepted_and_revises_unfinished(project):
     accepted(d, project)
     completed = d.task
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, "TASK-two")
+    d.send("worktree_create", {"workspace": str(project.parent / "task-worktrees")}, "TASK-two")
     d.send("role_register", {"role_id": "second-author", "kind": "executor",
         "context_id": "second-context", "fresh": True, "host": "codex",
         "launch_ref": "unit-test", "capabilities": {"fresh_context": True}}, "TASK-two")

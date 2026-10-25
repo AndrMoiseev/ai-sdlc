@@ -83,7 +83,7 @@ def driver_for(basis, tmp_path, parallel):
 @pytest.fixture(scope="session")
 def acceptance_checkpoints(acceptance_templates, repository_seeds, tmp_path_factory):
     from conftest import copy_project
-    from checkpoints import Checkpoint, preparation
+    from checkpoints import LazyCheckpoints
     from memory_repository import MemoryRepositories
     saved = {}
     template_root, template_basis = acceptance_templates["refactoring"]
@@ -93,23 +93,24 @@ def acceptance_checkpoints(acceptance_templates, repository_seeds, tmp_path_fact
         root = copy_project(template_root, workspace / "project", backend)
         basis = deepcopy(template_basis)
         basis.update(project_root=str(root), change_root=str(root / "sdd/refactoring/demo"))
-        with preparation(backend) as states:
+        def steps(basis=basis, workspace=workspace, parallel=parallel):
             driver = driver_for(basis, workspace, parallel)
-            saved[parallel, "pending"] = Checkpoint(workspace, driver, backend, states)
+            yield "pending", driver
             assert driver.start()["outcome"] == "baseline_recorded"
-            saved[parallel, "started"] = Checkpoint(workspace, driver, backend, states)
+            yield "started", driver
             driver.implement()
-            saved[parallel, "implemented"] = Checkpoint(workspace, driver, backend, states)
+            yield "implemented", driver
             driver.freeze()
-            saved[parallel, "frozen"] = Checkpoint(workspace, driver, backend, states)
+            yield "frozen", driver
             assert driver.verify()["outcome"] == "passed"
-            saved[parallel, "verified"] = Checkpoint(workspace, driver, backend, states)
+            yield "verified", driver
+        saved[parallel] = LazyCheckpoints(workspace, backend, steps())
     return saved
 
 
 @pytest.fixture
 def acceptance_checkpoint(acceptance_checkpoints, repository_backend, state_backend, parallel):
-    return lambda stage: acceptance_checkpoints[parallel, stage].restore(repository_backend, state_backend)
+    return lambda stage: acceptance_checkpoints[parallel][stage].restore(repository_backend, state_backend)
 
 
 @pytest.mark.parametrize("parallel", [False, True])
@@ -125,13 +126,12 @@ def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, 
     if work_kind == "refactoring":
         assert not (project / "sdd/changes/demo/execution/candidates").exists()
     assert driver.verify()["outcome"] == "passed"
-    assert driver.review()["status"] == ("integrating" if parallel else "committing")
-    if parallel:
-        assert driver.integrate_verified()["outcome"] == "passed"
-        with pytest.raises(Rejected) as error:
-            driver.send("commit")
-        assert error.value.code == "commit_phase"
-        assert driver.review("integration-reviewer")["status"] == "committing"
+    assert driver.review()["status"] == "integrating"
+    assert driver.integrate_verified()["outcome"] == "passed"
+    with pytest.raises(Rejected) as error:
+        driver.send("commit")
+    assert error.value.code == "commit_phase"
+    assert driver.review("integration-reviewer")["status"] == "committing"
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
     assert driver.task["baseline_checks"] == baseline
@@ -220,7 +220,7 @@ def test_refactoring_acceptance_stale_source_blocks_review_and_accept(acceptance
     before = storage(driver.directory).read()
     with pytest.raises(Rejected) as error:
         driver.send("review_start", {"role_id": "reviewer"})
-    assert error.value.code == "stale_candidate"
+    assert error.value.code == "dirty_candidate"
     with pytest.raises(Rejected) as error:
         driver.send("accept")
     assert error.value.code == "commit_phase"
@@ -271,13 +271,12 @@ def test_refactoring_acceptance_real_failure_requires_reserved_repair_and_retain
     driver.freeze()
     assert driver.verify()["outcome"] == "passed"
     driver.review()
-    if parallel:
-        assert driver.integrate_verified()["outcome"] == "passed"
-        driver.review("integration-reviewer")
+    assert driver.integrate_verified()["outcome"] == "passed"
+    driver.review("integration-reviewer")
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
     assert driver.task["test_repair_cycles_started"] == 1
-    assert driver.task["review_rounds_started"] == (2 if parallel else 1)
+    assert driver.task["review_rounds_started"] == 2
     assert driver.task["baseline_checks"] == baseline
     assert artifacts.read_bytes(driver.directory / failed["log"]) == failed_bytes
     assert any(item["outcome"] == "failed" for item in driver.task["evidence"])

@@ -5,7 +5,7 @@ from lib.state import initialize, read, apply, lock
 
 @pytest.fixture
 def store(basis):
-    state = initialize(basis, "owner")
+    state = initialize(basis, "owner", isolation=True)
     return basis["change_root"] + "/execution", state
 
 

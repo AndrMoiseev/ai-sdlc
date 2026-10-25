@@ -3,9 +3,26 @@ import pytest
 from pathlib import Path
 
 
+@pytest.mark.parametrize("target", ["result.txt", "sdd/changes/demo/design.md"])
+def test_successful_command_cannot_hide_changes_during_verification(execution_checkpoint, target):
+    import json
+    from lib.candidates import resolve
+    driver = execution_checkpoint("started")
+    (driver.root / "check.py").write_text(
+        "from pathlib import Path\n" + f"Path({target!r}).write_text('changed by check')\n")
+    driver.freeze()
+    before = resolve(driver.state, driver.task["candidate"])["source"]
+    result = driver.verify()
+    assert result["outcome"] == "failed"
+    log = json.loads(artifacts.read_text(driver.directory / result["log"]))
+    assert log["outputs"][0]["exit_code"] == 0
+    assert log["before"] == before and log["after"] != before
+    assert driver.task["evidence"][-1]["outcome"] == "stale"
+
+
 def test_independent_run_catches_defect(execution_checkpoint):
     driver = execution_checkpoint("started")
-    project = Path(driver.state["basis"]["project_root"])
+    project = driver.root
     (project / "check.py").write_text("assert False, 'real defect'\n")
     driver.freeze()
     assert driver.verify()["outcome"] == "failed"
@@ -20,14 +37,14 @@ def test_independent_run_catches_defect(execution_checkpoint):
 
 def test_stale_candidate_and_log_tampering(execution_checkpoint):
     driver = execution_checkpoint("verified")
-    project = Path(driver.state["basis"]["project_root"])
+    project = driver.root
     log = driver.directory / driver.task["evidence"][-1]["log"]
     artifacts.write(log, "forged")
     driver.role("reviewer", "reviewer")
     with pytest.raises(ValueError):
         driver.send("review_start", {"role_id": "reviewer"})
     (project / "result.txt").write_text("changed")
-    with pytest.raises(ValueError, match="changed"):
+    with pytest.raises(ValueError, match="changed|before verification"):
         driver.verify()
 
 
@@ -65,8 +82,12 @@ def test_timeout_is_unavailable_and_stops_own_process(tmp_path):
 
 
 def test_initial_failing_check_blocks_plan(driver, project):
+    from repository_support import stage, commit
     driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     (project / "check.py").write_text("assert False\n")
+    stage(project, "check.py")
+    commit(project, "Existing failing check")
+    driver.worktree()
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt"]})
     assert driver.send("check_run", {"role_id": "author", "stage": "baseline"})["outcome"] == "failed"

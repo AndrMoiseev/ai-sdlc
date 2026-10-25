@@ -1,6 +1,6 @@
 from lib import artifact_storage as artifacts
 from lib.repository import repository
-from repository_support import stage as stage_files, commit, set_mode, ignore
+from repository_support import stage as stage_files, commit, set_mode, ignore, file_mode
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -17,6 +17,8 @@ def prepare(basis, tmp_path, paths=None):
     old = Path(d.send("worktree_create", {"workspace": str(tmp_path / "trees")})["path"])
     d.start(paths or ["result.txt", "check.py"])
     (old / "result.txt").write_bytes(b"partial\x00binary\xff")
+    stage_files(old, "result.txt")
+    commit(old, "Local partial candidate")
     d.send("role_result", {"role_id": "author", "result": "partial", "trace": "test-host"})
     return d, old
 
@@ -73,9 +75,9 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     event = refresh_event(d)
     result = apply(d.directory, event)
     new = Path(result["worktree"]["path"])
-    assert new != old and not old.exists()
+    assert new != old and old.exists()
     assert repository(new).head() == head
-    assert not repository(new).branch()
+    assert repository(new).branch() == result["worktree"]["branch"]
     assert (new / "external.txt").read_text() == "fixed"
     assert (new / "result.txt").read_bytes() == b"partial\x00binary\xff"
     assert d.task["candidate"] is None and "transfer" not in d.task
@@ -85,6 +87,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     assert apply(d.directory, event) == result
     assert len(d.task["worktree_history"]) == 1
     assert repository(root).index_patch() == index_before
+    commit(root, "User work committed before integration")
     d.send("candidate")  # New external file must not trip candidate_scope.
     d.verify("verifier-new")
     d.send("role_result", {"role_id": "verifier-new", "result": "checked", "trace": "test-host"})
@@ -100,10 +103,10 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     d.send("accept")
     d.send("worktree_remove")
     assert d.task["status"] == "accepted" and not new.exists()
-    assert repository(root).index_patch() == index_before
+    assert repository(root).content("HEAD", "unrelated.txt") == b"user staged work"
 
 
-@pytest.mark.parametrize("point", ["create", "before_apply", "apply", "remove", "state"])
+@pytest.mark.parametrize("point", ["create", "before_apply", "apply", "state"])
 def test_refresh_recovers_lost_response_at_each_effect(refresh_checkpoint, monkeypatch, point):
     import lib.worktree_refresh as refresh
     import lib.state as state_module
@@ -141,7 +144,7 @@ def test_refresh_recovers_lost_response_at_each_effect(refresh_checkpoint, monke
     with pytest.raises(RuntimeError, match="simulated crash"):
         apply(d.directory, event)
     result = apply(d.directory, event)
-    assert not old.exists()
+    assert old.exists()
     assert Path(result["worktree"]["path"]).joinpath("result.txt").read_bytes() == b"partial\x00binary\xff"
     assert len(d.task["worktree_history"]) == 1
 
@@ -149,6 +152,8 @@ def test_refresh_recovers_lost_response_at_each_effect(refresh_checkpoint, monke
 def test_conflict_preserves_both_trees_then_supported_resolution(refresh_checkpoint):
     d, old, basis = refresh_checkpoint
     (old / "check.py").write_text("assert 3 + 3 == 6\n")
+    stage_files(old, "check.py")
+    commit(old, "Task check change")
     fix_base(basis, "check.py", "assert 4 + 4 == 8\n")
     event = refresh_event(d)
     with pytest.raises(ValueError):
@@ -168,13 +173,13 @@ def test_conflict_preserves_both_trees_then_supported_resolution(refresh_checkpo
     stage_files(new, "check.py")
     d.send("role_result", {"role_id": "resolver", "result": "Both changes retained", "trace": "test-host"})
     result = d.send("worktree_refresh_resolve", {"intent_id": "refresh-one", "role_id": "resolver", "resolution": "Retained fix and task check"})
-    assert result["worktree"]["path"] == str(new) and not old.exists()
+    assert result["worktree"]["path"] == str(new) and old.exists()
     assert d.task["executor"] == "resolver"
     d.send("candidate")
     assert d.verify()["outcome"] == "passed"
 
 
-@pytest.mark.parametrize("hazard", ["ignored", "writer", "commit", "blocked", "normative", "staged_foreign"])
+@pytest.mark.parametrize("hazard", ["ignored", "writer", "foreign_commit", "blocked", "normative", "staged_foreign", "uncommitted"])
 def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
     d, old, basis = refresh_checkpoint
     fix_base(basis)
@@ -183,9 +188,12 @@ def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
         (old / "unknown.cache").write_text("irreplaceable")
     elif hazard == "writer":
         d.role("writer-new", "executor")
-    elif hazard == "commit":
-        stage_files(old, "result.txt")
-        commit(old, "Unexpected executor commit")
+    elif hazard == "foreign_commit":
+        (old / "foreign.txt").write_text("outside task")
+        stage_files(old, "foreign.txt")
+        commit(old, "Unexpected foreign commit")
+    elif hazard == "uncommitted":
+        (old / "check.py").write_text("uncommitted task change")
     elif hazard == "blocked":
         d.send("block", {"reason": "external_defect", "resume_condition": "fixed"}, task_id=None)
     elif hazard == "staged_foreign":
@@ -239,8 +247,11 @@ def test_repeat_refresh_preserves_active_repair_and_reviews(refresh_checkpoint):
     assert d.task["active_review"] is None and d.task["review_rounds_started"] == 1
     assert d.task["active_repair"] == "cycle-2" and d.task["test_repair_cycles_started"] == 2
     fix_base(basis, "external.txt", "second fix")
+    first_root = Path(first["worktree"]["path"])
+    stage_files(first_root, "result.txt")
+    commit(first_root, "Rebased task candidate")
     second = d.send("worktree_refresh", {"reason": "Second base fix", "evidence": "Commit and checks"})
-    assert not Path(first["worktree"]["path"]).exists()
+    assert Path(first["worktree"]["path"]).exists()
     assert Path(second["worktree"]["path"]).joinpath("result.txt").read_bytes() == b"partial\x00binary\xff"
     assert len(d.task["worktree_history"]) == 2
     assert d.task["active_repair"] == "cycle-2" and d.task["test_repair_cycles_started"] == 2
@@ -262,28 +273,27 @@ def test_refresh_before_any_task_edits(basis, tmp_path):
     d.send("role_result", {"role_id": "author", "result": "Stopped before edits", "trace": "test-host"})
     fix_base(basis)
     result = apply(d.directory, refresh_event(d))
-    assert not old.exists() and Path(result["worktree"]["path"]).joinpath("external.txt").exists()
+    assert old.exists() and Path(result["worktree"]["path"]).joinpath("external.txt").exists()
     assert d.task["status"] == "running"
 
 
-def test_refresh_preserves_deletions_modes_and_staged_history(basis, tmp_path):
+def test_refresh_preserves_committed_deletions_modes_and_content(basis, tmp_path):
     fix_base(basis, "obsolete.txt", "delete me")
     d, old = prepare(basis, tmp_path, ["result.txt", "check.py", "obsolete.txt", "future.txt"])
     (old / "obsolete.txt").unlink()
     (old / "check.py").chmod(0o755)
     set_mode(old, "check.py", True)
-    (old / "result.txt").write_text("staged version")
-    stage_files(old, "result.txt")
     (old / "result.txt").write_text("working version")
-    staged = repository(old).index_patch(full=True)
+    stage_files(old, "result.txt", "obsolete.txt", "check.py")
+    commit(old, "Committed complete task change")
     fix_base(basis)
     result = apply(d.directory, refresh_event(d))
     new = Path(result["worktree"]["path"])
     assert not (new / "obsolete.txt").exists()
     assert (new / "result.txt").read_text() == "working version"
-    assert repository(new).snapshot()["files"]["check.py"]["git_mode"] == "100755"
-    artifact = d.directory / "runs" / d.state["run_id"] / "refresh/refresh-one/index.patch"
-    assert artifacts.read_bytes(artifact) == staged
+    assert file_mode(new, "check.py") == "100755"
+    assert repository(old).content("HEAD", "result.txt") == b"working version"
+    assert old.exists()
 
 
 def test_recovery_does_not_adopt_unrecorded_destination_edits(refresh_checkpoint, monkeypatch):
@@ -305,7 +315,7 @@ def test_recovery_does_not_adopt_unrecorded_destination_edits(refresh_checkpoint
     effect = d.directory / "runs" / d.state["run_id"] / "effects/refresh-one.json"
     new = Path(json.loads(artifacts.read_bytes(effect))["request"]["precondition"]["new"])
     (new / "check.py").write_text("assert True\n# unrecorded edit after crash\n")
-    with pytest.raises(ValueError, match="differs from the recorded merge"):
+    with pytest.raises(ValueError, match="differs from recorded Git merge"):
         apply(d.directory, event)
     assert old.exists() and new.exists()
 
@@ -331,6 +341,8 @@ def test_retry_after_three_way_merge_with_changed_patch_context(basis, tmp_path,
     fix_base(basis, "check.py", initial)
     d, old = prepare(basis, tmp_path)
     (old / "check.py").write_text(initial.replace("# two", "# task edit"))
+    stage_files(old, "check.py")
+    commit(old, "Task edit before refresh")
     fix_base(basis, "check.py", initial.replace("# four", "# external fix"))
     event = refresh_event(d)
     adapter = type(repository(basis["project_root"]))
@@ -346,4 +358,4 @@ def test_retry_after_three_way_merge_with_changed_patch_context(basis, tmp_path,
     monkeypatch.setattr(adapter, "apply_patch", original)
     result = apply(d.directory, event)
     text = Path(result["worktree"]["path"]).joinpath("check.py").read_text()
-    assert "# task edit" in text and "# external fix" in text and not old.exists()
+    assert "# task edit" in text and "# external fix" in text and old.exists()

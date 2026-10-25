@@ -1,4 +1,4 @@
-"""Filesystem primitives and repository snapshot delegation."""
+"""Filesystem primitives and native Git fixture compatibility."""
 import hashlib
 import json
 import os
@@ -35,10 +35,13 @@ def contained(root, relative):
 def contained_paths(root, relatives):
     """Resolve a shared root once while checking every requested child."""
     root = resolve(root)
+    root_parts = tuple(part.lower() for part in root.parts) if os.name == "nt" else root.parts
     for relative in relatives:
         path = resolve(root / relative)
-        require(path.is_relative_to(root) and path != root, "path_escape", str(relative))
-        require(".git" not in [p.lower() for p in path.relative_to(root).parts], "git_path", str(relative))
+        parts = tuple(part.lower() for part in path.parts) if os.name == "nt" else path.parts
+        require(len(parts) > len(root_parts) and parts[:len(root_parts)] == root_parts,
+                "path_escape", str(relative))
+        require(".git" not in [p.lower() for p in parts[len(root_parts):]], "git_path", str(relative))
         yield path
 
 
@@ -68,8 +71,3 @@ def git(root, *args, env=None, check=True, raw=False):
     from .git_repository import GitRepository
     result = GitRepository(root)._run(*args, env=env, check=check)
     return result.stdout if raw else result.stdout.decode("utf-8", "replace").strip()
-
-
-def source_snapshot(root, exclude=(), include=()):
-    from .repository import repository
-    return repository(root).snapshot(exclude, include)

@@ -28,4 +28,6 @@ if __name__ == "__main__":
     if not any(not a.startswith("-") for a in args):
         args.insert(0, str(root / "tests"))
     temporary = Path(tempfile.mkdtemp(prefix="sdd-apply-tests-")) / "runs"
-    raise SystemExit(pytest.main(["-c", str(root / "tests/pytest.ini"), "-p", "no:cacheprovider", "--basetemp", str(temporary), *args]))
+    # Child-process contracts capture their own streams. Python-level capture
+    # avoids redirecting OS file descriptors for every fixture/test phase.
+    raise SystemExit(pytest.main(["-c", str(root / "tests/pytest.ini"), "-p", "no:cacheprovider", "--capture=sys", "--basetemp", str(temporary), *args]))

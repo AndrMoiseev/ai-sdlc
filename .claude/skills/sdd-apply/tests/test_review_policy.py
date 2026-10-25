@@ -37,12 +37,13 @@ def test_unsupported_blocker_becomes_debt_without_repair(reviewing_driver):
     driver = reviewing_driver
     result = review(driver, [finding()])
     assert result["verdict"] == "pass"
-    assert driver.task["status"] == "committing"
+    assert driver.task["status"] == "integrating"
     assert "failure" not in driver.task
     assert driver.task["test_repair_cycles_started"] == 0
     recorded = driver.task["reviews"][0]["findings"][0]
     assert recorded["severity"] == "recommendation"
     assert recorded["reported_severity"] == "blocker"
+    driver.integrate()
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
 
@@ -85,6 +86,7 @@ def test_mixed_review_preserves_debt_and_blocks_on_proof(reviewing_driver):
 
 def completed_with_debt(driver):
     review(driver, [finding()])
+    driver.integrate()
     driver.send("commit")
     driver.send("accept")
     driver.role("final-context", "final_verifier")

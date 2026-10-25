@@ -16,10 +16,7 @@ def refactoring_context(state, task):
     decisions = {change.get("decision") for change in task["plan"].get("test_changes", [])}
     registry = task.get("check_registry")
     baseline = task.get("baseline_checks")
-    baseline_event = next((entry for entry in reversed(state["events"])
-                           if entry["event"]["task_id"] == task["plan"]["id"]
-                           and entry["event"]["type"] == "check_run"
-                           and entry["event"]["payload"].get("stage") == "baseline"), None)
+    baseline_event = task.get("baseline_event")
     return {"scope": task["plan"]["scope"],
             "acceptance": [record for record in state["acceptance"].values() if record["task"] == task["plan"]["id"]],
             "preserves": task["plan"]["preserves"], "contributes_to": task["plan"]["contributes_to"],
@@ -32,7 +29,7 @@ def refactoring_context(state, task):
                 {key: entry[key] for key in ("revision", "event_id", "operation")} | {"checks_hash": digest(entry["checks"])}
                 for entry in registry["history"]]} if registry else None,
             "baseline": {"role_id": baseline["role_id"], "registry_revision": baseline["registry_revision"],
-                         "log": baseline_event["result"]["log"] if baseline_event else None,
+                         "log": baseline_event["log"] if baseline_event else None,
                          "outputs": [{key: output[key] for key in ("check_id", "outcome", "command", "exit_code") if key in output}
                                      for output in baseline["outputs"]]} if baseline else None,
             "whole_result": "contributes_to records scope of contribution; local acceptance does not prove the whole result"}
@@ -88,7 +85,7 @@ def transition(state, task, event, directory):
                 saved = record["request"]["precondition"]
                 packet["worktree_recovery"] = {"intent_id": record["request"]["event"]["event_id"],
                     "source": saved["old"]["path"], "replacement": saved["new"],
-                    "patch": str(artifacts.contained(saved["artifacts"], "task.patch"))}
+                    "patch": saved["patch"] if "patch" in saved else str(artifacts.contained(saved["artifacts"], "task.patch"))}
         path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
         write_json(path, packet)
         return {"role": role, "packet": str(path)}

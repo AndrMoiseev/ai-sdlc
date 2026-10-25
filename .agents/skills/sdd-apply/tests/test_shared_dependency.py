@@ -8,7 +8,7 @@ import pytest
 
 from lib.common import write_json
 from lib.inputs import basis_dependency
-from lib.state import read, seal
+from lib.state import read, seal, save
 from lib.subagents import resolve
 from conftest import SPEC
 
@@ -19,7 +19,7 @@ def test_legacy_basis_resolution_preserves_saved_bytes(driver):
     state['basis']['sdd_spec'] = str(SPEC)
     seal(state)
     path = driver.directory / 'state.json'
-    write_json(path, state)
+    save(driver.directory, state)
     before = path.read_bytes()
     loaded = read(driver.directory)
     selection = resolve(loaded, 'executor', host='codex', parent_model='fixture-parent')

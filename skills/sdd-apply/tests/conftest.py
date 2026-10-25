@@ -15,19 +15,20 @@ SPEC = Path(__file__).resolve().parents[2] / "sdd-spec"
 def path_resolver(request, tmp_path_factory, monkeypatch):
     from lib.path_resolution import use_path_resolver
     native = any(request.node.get_closest_marker(mark) for mark in
-                 ("native_state", "native_git", "native_process", "installation"))
+                 ("native_paths", "native_git", "installation"))
     if native:
         yield
         return
     root = tmp_path_factory.getbasetemp().resolve()
     prefix = os.path.normcase(str(root)) + os.sep
+    native_resolve = Path.resolve
     def no_links(path, strict=False):
         absolute = path if path.is_absolute() and ".." not in path.parts else Path(os.path.abspath(path))
         name = os.path.normcase(str(absolute))
         if name != prefix[:-1] and not name.startswith(prefix):
-            return path.resolve(strict=strict)
+            return native_resolve(path, strict=strict)
         if name[len(prefix):].partition(os.sep)[0].endswith("current"):
-            return path.resolve(strict=strict)
+            return native_resolve(path, strict=strict)
         if strict:
             absolute.stat()
         return absolute
@@ -36,8 +37,11 @@ def path_resolver(request, tmp_path_factory, monkeypatch):
         destination = Path(os.path.abspath(destination))
         if destination.parent == root and destination.name.endswith("current"):
             return symlink(source, destination, *args, **kwargs)  # pytest's temporary-directory bookkeeping.
-        pytest.fail("Filesystem-link tests require native_state or native_git")
+        pytest.fail("Filesystem-link tests require native_paths or native_git")
     monkeypatch.setattr(os, "symlink", unsupported)
+    # Companion validators and fixture helpers also resolve temporary paths.
+    # Apply the same no-links contract there; package paths still use the OS.
+    monkeypatch.setattr(Path, "resolve", no_links)
     with use_path_resolver(no_links):
         yield
 
@@ -71,7 +75,7 @@ def state_backend(request):
     from lib.artifact_storage import FileArtifacts, use_artifacts
     from lib.state_storage import FileStateStorage, use_storage
     from memory_state import MemoryStates
-    native = any(request.node.get_closest_marker(mark) for mark in ("native_state", "native_git", "installation"))
+    native = any(request.node.get_closest_marker(mark) for mark in ("native_state", "installation"))
     factory = FileStateStorage if native else MemoryStates()
     artifacts = FileArtifacts() if native else factory.artifacts
     with use_storage(factory), use_artifacts(artifacts):
@@ -80,7 +84,7 @@ def state_backend(request):
 
 @pytest.fixture(autouse=True)
 def check_runner(request, monkeypatch):
-    if any(request.node.get_closest_marker(mark) for mark in ("native_git", "native_process", "installation")):
+    if any(request.node.get_closest_marker(mark) for mark in ("native_process", "installation")):
         return
     from lib import verification
     from check_commands import run_command
@@ -121,7 +125,13 @@ def project_template(tmp_path_factory):
     document(change / "review/decisions.md", {"schema_version": 1}, records)
     document(change / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
     (root / "check.py").write_text("assert 2 + 3 == 5\n")
-    git(root, "init")
+    # Contract tests install the hooks they exercise. Git's sample hooks and
+    # default template files otherwise get copied into every native fixture.
+    template = root.parent / "empty-git-template"
+    template.mkdir()
+    git(root, "init", "--template=" + str(template))
+    (root / ".git/hooks").mkdir()
+    (root / ".git/info").mkdir()
     git(root, "config", "user.name", "Fixture")
     git(root, "config", "user.email", "fixture@example.invalid")
     git(root, "config", "core.autocrlf", "false")
@@ -205,7 +215,21 @@ class Driver:
 
     @property
     def task(self):
-        return json.loads(json.dumps(self._view()["tasks"]["TASK-one"]))
+        # Preserve lazy object references in the independent view. Serializing
+        # here eagerly reads the complete evidence/review history on every get.
+        return deepcopy(self._view()["tasks"]["TASK-one"])
+
+    @property
+    def root(self):
+        from lib.verification import root_for
+        state = self._view()
+        return Path(root_for(state, state["tasks"]["TASK-one"]))
+
+    def worktree(self):
+        if not self.task["worktree"]:
+            project = Path(self.state["basis"]["project_root"])
+            self.send("worktree_create", {"workspace": str(project.parent / "task-worktrees")})
+        return self.root
 
     def send(self, kind, payload=None, task_id="TASK-one"):
         from lib.state import apply
@@ -217,6 +241,7 @@ class Driver:
         return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
 
     def start(self, paths=None):
+        self.worktree()
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
         self.role("author", "executor")
         self.send("start", {"role_id": "author", "paths": paths or ["result.txt", "check.py"]})
@@ -236,6 +261,18 @@ class Driver:
         self.send("review_start", {"role_id": role})
         return self.send("review_result", {"role_id": role, "candidate": self.task["candidate"], "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
 
+    def integrate(self, prefix=""):
+        self.send("transfer")
+        self.send("integrate")
+        self.send("candidate")
+        verifier = prefix + "integration-verifier"
+        self.role(verifier, "verifier")
+        result = self.send("check_run", {"role_id": verifier, "stage": "integration"})
+        assert result["outcome"] == "passed"
+        self.review(prefix + "integration-reviewer")
+        self.send("role_result", {"role_id": verifier, "result": "DONE", "trace": "unit-test"})
+        return result
+
 
 @pytest.fixture
 def driver(basis):
@@ -244,36 +281,37 @@ def driver(basis):
 
 @pytest.fixture(scope="session")
 def execution_checkpoints(project_template, basis_template, repository_seeds, tmp_path_factory):
-    from checkpoints import Checkpoint, preparation
+    from checkpoints import LazyCheckpoints
     from memory_repository import MemoryRepositories
     workspace = tmp_path_factory.mktemp("execution-checkpoint")
     backend = MemoryRepositories(repository_seeds)
     root = copy_project(project_template, workspace / "project", backend)
     basis = deepcopy(basis_template)
     basis.update(project_root=str(root), change_root=str(root / "sdd/changes/demo"))
-    saved = {}
-    with preparation(backend) as states:
+    def steps():
         driver = Driver(basis)
-        saved["pending"] = Checkpoint(workspace, driver, backend, states)
+        yield "pending", driver
         driver.start()
         assert not driver.state["blockers"]
-        saved["started"] = Checkpoint(workspace, driver, backend, states)
-        (root / "result.txt").write_text("verified result\n")
+        yield "started", driver
+        (driver.root / "result.txt").write_text("verified result\n")
         driver.freeze()
-        saved["frozen"] = Checkpoint(workspace, driver, backend, states)
+        yield "frozen", driver
         assert driver.verify()["outcome"] == "passed"
-        saved["verified"] = Checkpoint(workspace, driver, backend, states)
+        yield "verified", driver
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
-        saved["reviewing"] = Checkpoint(workspace, driver, backend, states)
+        yield "reviewing", driver
         driver.send("review_result", {"role_id": "reviewer", "candidate": driver.task["candidate"],
             "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
-        saved["reviewed"] = Checkpoint(workspace, driver, backend, states)
+        yield "worktree-reviewed", driver
+        driver.integrate()
+        yield "reviewed", driver
         driver.send("commit")
         assert driver.send("accept")["status"] == "accepted"
         driver.send("role_result", {"role_id": "verifier", "result": "DONE", "trace": "unit-test"})
-        saved["accepted"] = Checkpoint(workspace, driver, backend, states)
-    return saved
+        yield "accepted", driver
+    return LazyCheckpoints(workspace, backend, steps())
 
 
 @pytest.fixture

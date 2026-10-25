@@ -35,8 +35,6 @@ def transition(state, task, event, directory):
             state["mode"] = pending["mode"]
             state["parallel_request"] = pending["decision"] if state["mode"] == "parallel" else None
             state["blockers"] = [b for b in state["blockers"] if b["reason"] != "mode_handoff"]
-            if state["mode"] == "sequential" and any(t["worktree"] and not t["worktree"].get("integrated") and t["status"] != "accepted" for t in state["tasks"].values()):
-                state["blockers"].append({"reason": "mode_switch_worktree", "resume_condition": "User resolution of preserved worktree candidates; no automatic integration"})
         state["status"] = "blocked" if state["blockers"] else "active"
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
@@ -63,7 +61,9 @@ def transition(state, task, event, directory):
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
         previous_run = state["run_id"]
-        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
+        from .state_objects import StateObjects
+        objects = StateObjects(directory)
+        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), objects.pack(state, root=True))
         previous_tasks = deepcopy(state["tasks"])
         state["run_id"] = uuid.uuid4().hex
         state["previous_run"] = previous_run
@@ -79,7 +79,7 @@ def transition(state, task, event, directory):
             if old:
                 for field in ("review_limit", "review_rounds_started", "review_rounds_completed", "test_repair_limit", "test_repair_cycles_started", "active_repair", "repair_cycles", "budget_decisions", "commits"):
                     fresh[field] = old[field]
-                fresh["prior_result"] = old
+                fresh["prior_result"] = {"$object": objects.put(objects.pack(old, root=True))}
             state["tasks"][plan["id"]] = fresh
         if state["mode"] == "parallel":
             state["parallel_request"] = basis["instruction"]
@@ -89,7 +89,7 @@ def transition(state, task, event, directory):
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
-        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), basis)
+        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), objects.pack(basis, root=True))
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
@@ -118,8 +118,12 @@ def transition(state, task, event, directory):
         if t["candidate"] and t["status"] not in {"accepted", "pending", "blocked"}:
             from .verification import candidate
             from .candidates import same
-            if not same(state, t["candidate"], candidate(state, t)):
-                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Re-freeze and independently verify changed candidate"})
+            try:
+                unchanged = same(state, t["candidate"], candidate(state, t))
+            except ValueError:
+                unchanged = False
+            if not unchanged:
+                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Rebaseline legacy evidence or re-freeze and independently verify the changed local commit"})
     for issue in issues:
         if issue not in state["blockers"]:
             state["blockers"].append(issue)

@@ -71,6 +71,7 @@ class AcceptanceDriver(Driver):
         return Path(worktree["path"]) if worktree and not worktree.get("integrated") else Path(state["basis"]["project_root"])
 
     def start(self, paths=None, additional=None):
+        self.worktree()
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": additional or []})
         self.role("author", "executor")
         owned = ["result.txt", "check.py"]

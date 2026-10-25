@@ -53,8 +53,11 @@ representation invalidates registry/candidate evidence and needs fresh checks.
 (`baseline`, `self`, `independent`, `integration`, `final`), with optional timeout.
 For a registered procedure, use `procedure_begin` with check/role/stage, execute
 it in that role, and submit `procedure_result` with the same IDs, outcome, actual
-steps and host trace. Then `check_run` reconciles the full assigned set. Snapshots
-detect edits; a procedure's semantic result is a role attestation, not an exit code.
+steps and host trace. Then `check_run` reconciles the full assigned set. Git commit
+identity and a clean working copy detect drift; a procedure's semantic result is
+a role attestation, not an exit code. Stop writers for the entire check. Ignored
+files may hold generated output or disposable environments; test inputs and
+source code must be tracked.
 
 After `more_checks`, `checks_extend` takes the requesting `review_round` and
 additional checks. Existing checks stay mandatory; new registry contents
@@ -63,22 +66,33 @@ or retries after failure.
 
 ## Candidate identity
 
-`candidate` freezes the stopped executor's result. New candidates are compact
-references with `candidate_id`, `sha256`, `path` and checked `root`. The full
-snapshot is stored under `candidates/` relative to the execution directory.
-Its `sha256` identifies the canonical JSON payload, not formatted file bytes.
-Pass the returned reference unchanged; never reconstruct it from a worker's
-description. The script verifies artifact integrity and source/registry/basis
-freshness. Legacy inline candidates remain readable. Packets provide task paths
-and original-source references; open the full snapshot only when needed.
+`candidate` commits the stopped executor's owned changes on the local task
+branch. After integration, the same event commits the integrated result before
+integration checks. A commit records a candidate; acceptance still requires the
+current checks and review. Reuse the identical event after an interrupted commit
+so its durable intent can recover the result.
+
+Candidates are compact references with `candidate_id`, `sha256`, `path` and checked
+`root`. The payload under `candidates/` records the tested Git commit, current-change
+documents, normative manifest and check registry. Its `sha256` identifies that
+canonical JSON payload. Pass the returned reference unchanged. The script checks
+the same commit and clean tracked/index/untracked state before and after tests
+and before reusing evidence. A status list alone cannot identify a dirty candidate.
+
+File-content snapshots are limited to the current change/refactoring directory,
+excluding `execution/`. Do not enumerate and hash repository sources, installed
+skill copies or unrelated documents. Git already records committed source content.
+Keep old source-snapshot evidence as history; it cannot certify a new commit
+candidate. Resume requires a fresh candidate and checks under this contract.
 
 ## Evidence gates
 
-Retain command, stdout/stderr, exit status, duration, source snapshots, launch
+Retain command, stdout/stderr, exit status, duration, tested commit SHA, Git
+cleanliness observations, current-change document hashes, launch
 trace and log hash. Inspect whether expected tests ran; a later successful
 command cannot repair an earlier failure. Unknown dependency scope needs rechecking.
 Changed bytes, configuration, registry or normative basis invalidate affected
 evidence. A required unavailable check blocks; omission cannot make it green.
 
-Final checks use fresh `final_verifier` roles and a final-HEAD snapshot separate
+Final checks use fresh `final_verifier` roles and a clean final-HEAD candidate separate
 from historical task candidates. Earlier logs do not replace that final run.

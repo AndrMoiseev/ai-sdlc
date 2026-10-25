@@ -49,12 +49,13 @@ def repair(state, task, p):
     require(role and role["kind"] == "executor" and role["task_id"] == task["plan"]["id"] and role["status"] in {"active", "finished"}, "executor_missing", "Use the available assigned author or registered successor")
     role["status"] = "active"
     task["executor"] = role["role_id"]
-    from .state import snapshot
-    from .verification import root_for
-    if task["status"] == "accepted":
-        task["start_snapshot"] = snapshot(state, root_for(state, task))
+    if task.get("worktree") and task["worktree"].get("integrated"):
+        task.setdefault("worktree_history", []).append({"worktree": task["worktree"], "reason": "repair integrated result"})
+        task["worktree"] = None
+        task["integration_active"] = False
         task.pop("freeze_base", None)
     task["candidate"] = None
+    task["repairing_result"] = True
     task["status"] = "repairing"
     affected = {task["plan"]["id"]}
     while True:

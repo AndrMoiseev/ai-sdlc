@@ -2,7 +2,7 @@ from pathlib import Path
 from conftest import Driver
 from lib import artifact_storage as artifacts
 from lib.repository import repository
-from repository_support import stage, commit, set_mode
+from repository_support import stage, commit, set_mode, file_mode
 import pytest
 
 
@@ -71,4 +71,4 @@ def test_staged_executable_mode_is_in_transfer(basis, tmp_path):
     package = d.send("transfer")
     assert artifacts.read_bytes(d.directory / package["path"])
     d.send("integrate")
-    assert repository(basis["project_root"]).snapshot()["files"]["check.py"]["git_mode"] == "100755"
+    assert file_mode(basis["project_root"], "check.py") == "100755"

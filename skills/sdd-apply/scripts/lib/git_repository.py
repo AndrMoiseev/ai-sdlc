@@ -37,48 +37,56 @@ class GitRepository:
     def has_conflicts(self):
         return bool(self._text("ls-files", "--unmerged"))
 
+    def status(self, exclude=(), include_ignored=False):
+        """Use Git's index cache; retain path names, never a source-file manifest."""
+        indexed = self._run("ls-files", "-v", "--stage", "-z").stdout.decode("utf-8").split("\0")
+        for record in filter(None, indexed):
+            tag, metadata = record[0], record[2:]
+            mode = metadata.split(" ", 1)[0]
+            require(not tag.islower() and tag != "S" and mode in {"100644", "100755"}, "unsupported_index",
+                    "Clear assume-unchanged/skip-worktree flags; links and submodules need an explicit verification contract")
+        pathspec = ("--", ".", *(f":(top,exclude,literal){name}" for name in exclude))
+        records = self._run("-c", "core.fsmonitor=false", "-c", "core.ignoreStat=false",
+                            *(["-c", "core.fileMode=true"] if os.name != "nt" else []),
+                            "status", "--porcelain=v2", "--branch", "--no-renames", "-z",
+                            "--untracked-files=all", "--ignore-submodules=none", *(["--ignored"] if include_ignored else []),
+                            *pathspec).stdout.decode("utf-8").split("\0")
+        dirty, untracked, ignored = [], [], []
+        head, branch = None, None
+        for record in filter(None, records):
+            if record.startswith("# branch.oid "):
+                head = record.removeprefix("# branch.oid ")
+                continue
+            if record.startswith("# branch.head "):
+                branch = record.removeprefix("# branch.head ")
+                if branch == "(detached)":
+                    branch = None
+                continue
+            if record.startswith("# "):
+                continue
+            code = record[0]
+            require(code in {"1", "u", "?", "!"}, "git_status", "Unexpected status record")
+            name = record.split(" ", 8)[8] if code == "1" else record.split(" ", 10)[10] if code == "u" else record[2:]
+            if code == "!":
+                ignored.append(name)
+            else:
+                dirty.append(name)
+                if code == "?":
+                    untracked.append(name)
+        require(head and head != "(initial)", "git_failed", "Repository has no HEAD commit")
+        return dict(head=head, branch=branch, dirty_paths=sorted(dirty),
+                    untracked_paths=sorted(untracked), ignored_paths=sorted(ignored))
+
+    def changed_paths(self, base, target="HEAD"):
+        return set(filter(None, self._run("diff", "--no-renames", "--name-only", "-z", base, target).stdout.decode("utf-8").split("\0")))
+
     def inspect(self, exclude=()):
-        head = self.head()
         require(not self.has_conflicts(), "unmerged_index", "Resolve the existing Git conflict before execution")
-        branch = self._text("symbolic-ref", "--quiet", "--short", "HEAD")
+        status = self.status(exclude)
+        require(status["branch"], "git_failed", "Execution requires a named branch")
         self._run("var", "GIT_AUTHOR_IDENT")
         self._run("var", "GIT_COMMITTER_IDENT")
-        dirty = set()
-        pathspec = ("--", ".", *(f":(top,exclude,literal){name}" for name in exclude))
-        for args in (("diff", "--name-only", "--cached", "-z"), ("diff", "--name-only", "-z"),
-                     ("ls-files", "--others", "--exclude-standard", "-z")):
-            dirty.update(filter(None, self._run(*args, *pathspec).stdout.decode("utf-8").split("\0")))
-        return dict(head=head, branch=branch, dirty_paths=sorted(dirty),
-                    index_patch=self._run("diff", "--binary", "--cached", *pathspec).stdout.decode("utf-8", "replace"),
-                    working_patch=self._run("diff", "--binary", *pathspec).stdout.decode("utf-8", "replace"),
-                    status=self._run("status", "--porcelain=v1", "-z", *pathspec).stdout.decode("utf-8"))
-
-    def snapshot(self, exclude=(), include=()):
-        records = self._run("ls-files", "-t", "--stage", "--others", "--exclude-standard", "-z").stdout.decode("utf-8").split("\0")
-        names, modes = set(), {}
-        for record in filter(None, records):
-            name = record[2:]
-            if not record.startswith("? "):
-                meta, name = name.split("\t", 1)
-                mode, _, stage = meta.split()
-                require(stage == "0", "unmerged_index", name)
-                modes[name] = mode
-            names.add(name)
-        files = {}
-        for name in sorted(names | set(include)):
-            if any(name == p or name.startswith(p.rstrip("/") + "/") for p in exclude):
-                continue
-            require(not (self.root / name).is_symlink(), "unsupported_file", name)
-            path = contained(self.root, name)
-            require(not path.is_dir(), "unsupported_file", f"Directory/submodule is not a supported source file: {name}")
-            if path.is_file():
-                executable = bool(path.stat().st_mode & 0o111)
-                mode = modes.get(name, "100644") if os.name == "nt" else ("100755" if executable else "100644")
-                require(mode in {"100644", "100755"}, "unsupported_file", f"Unsupported Git mode {mode}: {name}")
-                files[name] = dict(sha256=digest(path.read_bytes()), executable=executable, git_mode=mode)
-            elif name in names:
-                files[name] = None
-        return dict(files=files, digest=digest(files))
+        return {key: status[key] for key in ("head", "branch", "dirty_paths")}
 
     def tree(self, ref):
         return self._text("rev-parse", ref + "^{tree}")
@@ -87,16 +95,20 @@ class GitRepository:
         return set(filter(None, self._run("ls-tree", "-r", "--name-only", "-z", ref).stdout.decode("utf-8").split("\0")))
 
     def tree_for_paths(self, paths, base):
-        present = [p for p in paths if p in self.tracked(base) or (self.root / p).exists()]
+        tracked = self.tracked(base)
+        present = [p for p in paths if p in tracked or (self.root / p).exists()]
         if not present:
             return self.tree(base)
         with self._index(base) as env:
             self._run("add", "--force", "--all", "--", *present, env=env)
-            snapshot = self.snapshot(include=present)
-            for path in present:
-                metadata = snapshot["files"].get(path)
-                if metadata:
-                    self._run("update-index", "--chmod=" + ("+x" if metadata["git_mode"] == "100755" else "-x"), "--", path, env=env)
+            if os.name == "nt":
+                records = self._run("ls-files", "--stage", "-z", "--", *present).stdout.decode("utf-8").split("\0")
+                for record in filter(None, records):
+                    metadata, name = record.split("\t", 1)
+                    mode, _, stage = metadata.split()
+                    require(stage == "0", "unmerged_index", name)
+                    if (self.root / name).is_file():
+                        self._run("update-index", "--chmod=" + ("+x" if mode == "100755" else "-x"), "--", name, env=env)
             return self._text("write-tree", env=env)
 
     def content(self, ref, path, filtered=False):
@@ -104,26 +116,30 @@ class GitRepository:
         return self._run(*args, ref + ":" + path, check=False).stdout
 
     def commit_info(self, sha):
-        return dict(tree=self.tree(sha), parent=self._text("rev-parse", sha + "^"),
-                    message=self._text("show", "-s", "--format=%B", sha),
-                    reachable=sha in self._text("rev-list", "HEAD").splitlines())
+        tree, _, rest = self._text("show", "-s", "--format=%T%n%P%n%B", sha).partition("\n")
+        parents, _, message = rest.partition("\n")
+        return dict(tree=tree, parent=parents.split()[0] if parents else None,
+                    message=message.strip(),
+                    reachable=self._run("merge-base", "--is-ancestor", sha, "HEAD", check=False).returncode == 0)
 
     def find_commits(self, marker):
-        return self._text("log", "--format=%H", "--fixed-strings", "--grep", marker).splitlines()
+        records = self._text("log", "--format=%H%x00%B%x00", "--fixed-strings", "--grep", marker).split("\0")
+        return [records[index].strip() for index in range(0, len(records) - 1, 2)
+                if marker in records[index + 1].splitlines()]
 
     def commit_tree(self, tree, message):
         with self._index(tree) as env:
-            self._run("commit", "-m", message, env=env)
+            self._run("commit", "--allow-empty", "-m", message, env=env)
         return self.head()
 
     def reset_paths(self, sha, paths):
         self._run("reset", "--quiet", sha, "--", *paths)
 
-    def create_worktree(self, path, base):
-        self._run("worktree", "add", "--detach", str(path), base)
+    def create_worktree(self, path, base, branch=None):
+        self._run("worktree", "add", *(["-b", branch] if branch else ["--detach"]), str(path), base)
 
     def remove_worktree(self, path):
-        self._run("worktree", "remove", "--force", str(path))
+        self._run("worktree", "remove", str(path))
 
     def worktree(self, path):
         wanted = str(Path(path).resolve()).replace("\\", "/")
@@ -131,7 +147,10 @@ class GitRepository:
         for entry in entries:
             fields = dict(line.partition(" ")[::2] for line in entry.split("\0") if line)
             if fields.get("worktree", "").replace("\\", "/") == wanted:
-                return dict(head=fields["HEAD"], detached="detached" in fields)
+                result = dict(head=fields["HEAD"], detached="detached" in fields)
+                if "branch" in fields:
+                    result["branch"] = fields["branch"].removeprefix("refs/heads/")
+                return result
         return None
 
     def index_patch(self, full=False):

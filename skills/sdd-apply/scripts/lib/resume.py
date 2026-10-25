@@ -35,8 +35,6 @@ def transition(state, task, event, directory):
             state["mode"] = pending["mode"]
             state["parallel_request"] = pending["decision"] if state["mode"] == "parallel" else None
             state["blockers"] = [b for b in state["blockers"] if b["reason"] != "mode_handoff"]
-            if state["mode"] == "sequential" and any(t["worktree"] and not t["worktree"].get("integrated") and t["status"] != "accepted" for t in state["tasks"].values()):
-                state["blockers"].append({"reason": "mode_switch_worktree", "resume_condition": "User resolution of preserved worktree candidates; no automatic integration"})
         state["status"] = "blocked" if state["blockers"] else "active"
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
@@ -120,8 +118,12 @@ def transition(state, task, event, directory):
         if t["candidate"] and t["status"] not in {"accepted", "pending", "blocked"}:
             from .verification import candidate
             from .candidates import same
-            if not same(state, t["candidate"], candidate(state, t)):
-                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Re-freeze and independently verify changed candidate"})
+            try:
+                unchanged = same(state, t["candidate"], candidate(state, t))
+            except ValueError:
+                unchanged = False
+            if not unchanged:
+                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Rebaseline legacy evidence or re-freeze and independently verify the changed local commit"})
     for issue in issues:
         if issue not in state["blockers"]:
             state["blockers"].append(issue)

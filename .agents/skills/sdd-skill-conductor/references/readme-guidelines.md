@@ -41,12 +41,12 @@ outside the skill package. Verify relative links and the rendered diagram.
 
 ## Final editing and review
 
-After content and diagrams are complete, apply `humanizer-ru` to the Russian
-README prose (resolve `humanizer_ru` to this installed skill name). Read its
-instructions and complete its audit, editing, and verification workflow. Preserve
-facts, skill names, links, prompt semantics, and coverage of every flow. Use the
-README's established language; for a non-Russian README, edit for clarity in that
-language and report that `humanizer-ru` does not support it.
+After content and diagrams are complete, apply `humanizer-ru` to Russian README
+prose addressed to people. Follow its audit, editing and verification workflow;
+preserve facts, skill names, links, prompt semantics and coverage of every flow.
+This applies only to the README. Do not use `humanizer-ru` for other skill files,
+including skill instructions, agent contracts and runtime documentation.
+For a non-Russian README, edit for clarity in its established language.
 
 If a required dependency skill is unavailable, report which step remains
 incomplete; do not claim that diagram generation or final editing was performed.

@@ -30,8 +30,7 @@ def test_repeated_large_snapshots_are_stored_once_and_loaded_on_demand(driver, i
     task["start_snapshot"] = deepcopy(snapshot)
     task["freeze_base"] = deepcopy(snapshot)
     task["prior_result"] = {"evidence": [{"source": deepcopy(snapshot)} for _ in range(20)]}
-    seal(state)
-    save(driver.directory, state)
+    save(driver.directory, seal(state))
     packed = json.loads(storage(driver.directory).read())
     assert len(storage(driver.directory).read()) < 16384
     objects = StateObjects(driver.directory)
@@ -90,12 +89,34 @@ def test_uncommitted_event_is_not_replayed_after_failed_manifest_replace(driver,
     assert audit(driver.directory)["events"] == 1
 
 
-def test_idempotency_index_does_not_scan_the_event_chain(driver, implementation, monkeypatch):
+@pytest.fixture
+def event_history(basis):
+    """Build authentic history once in memory, then publish to the tested store.
+
+    This test measures lookup over existing history. Native transaction writes
+    and crash boundaries have their own contracts in this module/test_state.py.
+    """
+    from conftest import Driver
+    from memory_state import MemoryStates
+    from lib.artifact_storage import use_artifacts
+    from lib.state_storage import use_storage
+    memory = MemoryStates()
     requests = []
-    for number in range(25):
-        item = event(driver.state, f"event-{number}")
-        requests.append(item)
-        apply(driver.directory, item)
+    with use_storage(memory), use_artifacts(memory.artifacts):
+        driver = Driver(basis)
+        for number in range(25):
+            item = event(driver.state, f"event-{number}")
+            requests.append(item)
+            apply(driver.directory, item)
+    target = storage(driver.directory)
+    for path, content in memory.artifacts.files.items():
+        artifacts.write(path, content)
+    target.replace(memory(driver.directory).read())
+    return driver, requests
+
+
+def test_idempotency_index_does_not_scan_the_event_chain(event_history, implementation, monkeypatch):
+    driver, requests = event_history
     count = 0
     original = artifacts.read_bytes
     def observe(path):
@@ -108,7 +129,28 @@ def test_idempotency_index_does_not_scan_the_event_chain(driver, implementation,
     assert audit(driver.directory)["events"] == 25
 
 
-@pytest.mark.parametrize("damage", ["missing", "bytes", "path"])
+def test_sealed_manifest_is_detached_from_later_mutations(driver, implementation):
+    state = driver.state
+    packed = seal(state)
+    state["tasks"]["TASK-one"]["blockers"].append({"reason": "later mutation"})
+    # An unopened reference is mutable too; sealing must detach its descriptor.
+    dict.__getitem__(state, "baseline")["$object"]["bytes"] += 1
+    save(driver.directory, packed)
+    assert read(driver.directory)["tasks"]["TASK-one"]["blockers"] == []
+    assert read(driver.directory)["baseline"]["commit"]
+
+
+def test_audit_rereads_objects_and_rejects_tampering(driver, implementation):
+    apply(driver.directory, event(driver.state, "first"))
+    assert audit(driver.directory)["events"] == 1
+    reference = read(driver.directory)["event_head"]
+    artifacts.write(StateObjects(driver.directory).path(reference), b"corrupt")
+    with pytest.raises(ValueError) as failure:
+        audit(driver.directory)
+    assert failure.value.code == "object_corrupt"
+
+
+@pytest.mark.parametrize("damage", ["missing", "bytes", pytest.param("path", marks=pytest.mark.native_paths)])
 def test_accessed_object_is_verified(driver, implementation, damage):
     state = driver.state
     state["baseline"] = {"files": {"source": "x" * 5000}, "digest": "test"}
@@ -134,11 +176,24 @@ def test_accessed_object_is_verified(driver, implementation, damage):
 
 def test_lazy_copy_and_nested_mutations_are_independent(driver, implementation):
     original = read(driver.directory)
+    manifest = original.manifest
     copied = deepcopy(original)
     copied["tasks"]["TASK-one"]["evidence"].append({"outcome": "failed"})
     copied["tasks"]["TASK-one"].setdefault("checks", []).append({"id": "new"})
     assert original["tasks"]["TASK-one"]["evidence"] == []
     assert original["tasks"]["TASK-one"]["checks"] == []
+    assert original.manifest == manifest
     seal(copied)
     save(driver.directory, copied)
     assert read(driver.directory)["tasks"]["TASK-one"]["evidence"] == [{"outcome": "failed"}]
+
+
+def test_object_size_boundary_counts_json_escapes(driver, implementation):
+    objects = StateObjects(driver.directory)
+    for value in ("x" * 4094, "x" * 4095, "\n" * 2047, "\n" * 2048,
+                  "\U0001f642" * 341, "\U0001f642" * 342, [0] * 2048,
+                  {"quoted\"key": [0] * 1024, "other": [1] * 1024}):
+        packed = objects.pack(value)
+        external = len(json.dumps(value, ensure_ascii=True, separators=(",", ":")).encode()) > 4096
+        assert (isinstance(packed, dict) and set(packed) == {"$object"}) == external
+        assert objects.open(packed) == value

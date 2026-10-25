@@ -12,29 +12,41 @@ import runpy
 import sys
 from pathlib import Path
 from copy import deepcopy
-from functools import lru_cache, wraps
+from functools import wraps
+from collections import OrderedDict
 
 from lib.common import require
 
 
 _entrypoints = {}
+_parser_caches = {}
+
+
+def remember(cache, key, value):
+    cache[key] = value
+    cache.move_to_end(key)
+    if len(cache) > 512:
+        cache.popitem(last=False)
 
 
 def reuse_parsers(module):
     """Cache successful pure parses by exact text; return independent values."""
+    yaml_cache, document_cache = _parser_caches.setdefault(
+        Path(module.__file__), (OrderedDict(), OrderedDict()))
     parser = getattr(module, "safe_yaml", None)
     if parser is not None and not getattr(parser, "test_parse_cache", False):
-        cached = lru_cache(maxsize=256)(parser)
         @wraps(parser)
         def parse(text):
-            return deepcopy(cached(text))
+            if text not in yaml_cache:
+                # Invalid input must raise this import's own exception class.
+                remember(yaml_cache, text, parser(text))
+            yaml_cache.move_to_end(text)
+            return deepcopy(yaml_cache[text])
         parse.test_parse_cache = True
         module.safe_yaml = parse
     reader = getattr(module, "read_document", None)
     if reader is not None and not getattr(reader, "test_parse_cache", False):
-        @lru_cache(maxsize=256)
-        def document(path, work_kind, resolved, content):
-            return reader(path, work_kind)
+        document_type = module.Document
         @wraps(reader)
         def read(path, work_kind="change"):
             path = Path(path)
@@ -42,7 +54,13 @@ def reuse_parsers(module):
                 content = path.read_bytes()
             except OSError:
                 return reader(path, work_kind)  # Preserve the parser's InputError.
-            return deepcopy(document(path, work_kind, path.resolve(), content))
+            key = path, work_kind, path.resolve(), content
+            if key not in document_cache:
+                result = reader(path, work_kind)
+                remember(document_cache, key, (result.meta, result.records))
+            document_cache.move_to_end(key)
+            meta, records = deepcopy(document_cache[key])
+            return document_type(path, meta, records)
         read.test_parse_cache = True
         module.read_document = read
     return module
@@ -60,21 +78,23 @@ def shared(name):
 
 
 def entrypoint(dependency, script):
-    """Reuse imports for unchanged dependency code, never document results."""
+    """Reuse imports from a fixed fixture installation, never document results.
+
+    A changed dependency belongs in a new fixture root, like a separate Python
+    process. Reading every module on each CLI call does not improve isolation.
+    """
     root = Path(dependency) / "scripts"
-    signature = tuple((str(path), path.read_bytes())
-                      for path in sorted(root.rglob("*.py")))
     key = str(root), script
     saved = _entrypoints.get(key)
-    if saved is not None and saved[0] == signature:
-        sys.modules.update(saved[2])
-        return saved[1]
+    if saved is not None:
+        sys.modules.update(saved[1])
+        return saved[0]
     main = runpy.run_path(str(root / script))["main"]
     reuse_parsers(importlib.import_module("sdd_shared.documents"))
     modules = {name: module for name, module in sys.modules.copy().items() if shared(name)}
     for module in modules.values():
         reuse_parsers(module)
-    _entrypoints[key] = signature, main, modules
+    _entrypoints[key] = main, modules
     return main
 
 
@@ -95,7 +115,7 @@ def spec_call(dependency, project, change, stage, script, work_kind="change"):
             code = main(args)
             # Entry points import their domain modules inside main().
             loaded = {name: module for name, module in sys.modules.copy().items() if shared(name)}
-            _entrypoints[str(Path(dependency) / "scripts"), script][2].update(loaded)
+            _entrypoints[str(Path(dependency) / "scripts"), script][1].update(loaded)
     finally:
         sys.path[:] = previous_path
         for name in tuple(sys.modules):

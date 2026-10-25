@@ -56,7 +56,7 @@ class ChromeSession:
                 return event.get("params", {})
         raise TimeoutError(method)
 
-    def dom(self, context, directory, evidence, width, screenshot):
+    def dom(self, context, directory, evidence, width, screenshot, virtual_time=2500):
         target = self.call("Target.createTarget", {"url": "about:blank", "browserContextId": context})["targetId"]
         session = self.call("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
         try:
@@ -66,9 +66,10 @@ class ChromeSession:
             self.events.clear()
             self.call("Page.navigate", {"url": (directory / "dashboard.html").as_uri()}, session)
             self.wait("Page.loadEventFired", session)
-            self.call("Emulation.setVirtualTimePolicy", dict(policy="pauseIfNetworkFetchesPending",
-                      budget=6500, maxVirtualTimeTaskStarvationCount=10000), session)
-            self.wait("Emulation.virtualTimeBudgetExpired", session)
+            if virtual_time:
+                self.call("Emulation.setVirtualTimePolicy", dict(policy="pauseIfNetworkFetchesPending",
+                          budget=virtual_time, maxVirtualTimeTaskStarvationCount=10000), session)
+                self.wait("Emulation.virtualTimeBudgetExpired", session)
             result = self.call("Runtime.evaluate", dict(expression="document.documentElement.outerHTML",
                                returnByValue=True), session)
             assert "exceptionDetails" not in result, result

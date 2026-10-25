@@ -48,9 +48,14 @@ def merge_file(base, ours, theirs):
 def capture_seed(root, repo=None):
     from lib.git_repository import GitRepository
     repo = repo or GitRepository(root)
-    files = repo.snapshot()["files"]
+    if isinstance(repo, GitRepository):
+        records = repo._run("ls-files", "--stage", "-z").stdout.decode().split("\0")
+        modes = {record.split("\t", 1)[1]: record.split()[0] for record in records if record}
+        files = {name: (Path(root, name).read_bytes(), mode) for name, mode in modes.items()}
+    else:
+        files = repo._files()
     return dict(head=repo.head(), branch=repo.branch(),
-                files={name: (Path(root, name).read_bytes(), meta["git_mode"]) for name, meta in files.items() if meta})
+                files=files)
 
 
 class MemoryRepositories:
@@ -107,35 +112,22 @@ class MemoryRepository:
     def _files(self, exclude=(), include_ignored=False):
         result = {}
         patterns = self._ignore_patterns()
-        for directory, dirs, files in os.walk(self.root):
-            relative = Path(directory).relative_to(self.root)
-            dirs[:] = [name for name in dirs if name != ".git" and
-                       not any((relative / name).as_posix() == p.rstrip("/") for p in exclude)]
-            for name in files:
-                name = (relative / name).as_posix()
-                if name == ".git" or any(name == p or name.startswith(p.rstrip("/") + "/") for p in exclude):
-                    continue
-                if include_ignored or name in self.index or not any(fnmatch(name, pattern) for pattern in patterns):
-                    path = self.root / name
-                    require(not path.is_symlink(), "unsupported_file", name)
-                    mode = self.index.get(name, (None, "100644"))[1] if os.name == "nt" else ("100755" if path.stat().st_mode & 0o111 else "100644")
-                    result[name] = (path.read_bytes(), mode)
+        pending = [(self.root, "")]
+        while pending:
+            directory, prefix = pending.pop()
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    name = prefix + entry.name
+                    if entry.name == ".git" or any(name == p or name.startswith(p.rstrip("/") + "/") for p in exclude):
+                        continue
+                    require(not entry.is_symlink() and not (hasattr(entry, "is_junction") and entry.is_junction()),
+                            "unsupported_file", name)
+                    if entry.is_dir(follow_symlinks=False):
+                        pending.append((entry.path, name + "/"))
+                    elif include_ignored or name in self.index or not any(fnmatch(name, pattern) for pattern in patterns):
+                        mode = self.index.get(name, (None, "100644"))[1] if os.name == "nt" else ("100755" if entry.stat().st_mode & 0o111 else "100644")
+                        result[name] = (Path(entry.path).read_bytes(), mode)
         return result
-
-    def snapshot(self, exclude=(), include=()):
-        require(not self.conflicts, "unmerged_index", "Unresolved test index")
-        actual = self._files(exclude)
-        for name in include:
-            if name in actual:
-                continue
-            path = contained(self.root, name)
-            if path.is_file():
-                actual[name] = (path.read_bytes(), self.index.get(name, (None, "100644"))[1])
-        names = set(actual) | {n for n in self.index if not any(n == p or n.startswith(p.rstrip("/") + "/") for p in exclude)}
-        files = {name: (dict(sha256=digest(actual[name][0]), git_mode=actual[name][1],
-                            executable=bool((self.root / name).stat().st_mode & 0o111)) if name in actual else None)
-                 for name in sorted(names)}
-        return dict(files=files, digest=digest(files))
 
     def tree(self, ref):
         if ref == "HEAD":
@@ -195,11 +187,11 @@ class MemoryRepository:
                 self.index.pop(path, None)
             self.conflicts.discard(path)
 
-    def create_worktree(self, path, base):
+    def create_worktree(self, path, base, branch=None):
         path = Path(path).resolve()
         require(not path.exists(), "git_failed", "Worktree already exists")
         path.mkdir(parents=True)
-        repo = MemoryRepository(self.factory, path, self.store, base)
+        repo = MemoryRepository(self.factory, path, self.store, base, branch)
         repo._write(self._tree(base))
         (path / ".git").write_text("test worktree")
         self.store["worktrees"].add(path)
@@ -208,6 +200,7 @@ class MemoryRepository:
     def remove_worktree(self, path):
         path = Path(path).resolve()
         require(path != self.root and path in self.store["worktrees"], "git_failed", "Unregistered task worktree")
+        require(not self.factory(path).dirty(), "git_failed", "Worktree contains modified or untracked files")
         shutil.rmtree(path)
         self.store["worktrees"].remove(path)
 
@@ -215,7 +208,8 @@ class MemoryRepository:
         path = Path(path).resolve()
         if path in self.store["worktrees"]:
             repo = self.factory.repos[path]
-            return dict(head=repo.head(), detached=repo.branch() is None)
+            return dict(head=repo.head(), detached=repo.branch() is None,
+                        **({"branch": repo.branch()} if repo.branch() else {}))
         return None
 
     @staticmethod
@@ -236,17 +230,29 @@ class MemoryRepository:
         before = self._tree(base)
         return {n for n in set(before) | set(self.index) if before.get(n) != self.index.get(n)}
 
+    def changed_paths(self, base, target="HEAD"):
+        before, after = self._tree(base), self._tree(target)
+        return {name for name in set(before) | set(after) if before.get(name) != after.get(name)}
+
+    def status(self, exclude=(), include_ignored=False):
+        require(not self.conflicts, "unmerged_index", "Resolve the existing Git conflict before execution")
+        def included(name):
+            return not any(name == prefix or name.startswith(prefix.rstrip("/") + "/") for prefix in exclude)
+        actual = self._files(exclude)
+        base, index = self._tree("HEAD"), self.index
+        names = {name for name in set(base) | set(index) | set(actual) if included(name)}
+        dirty = sorted(name for name in names if base.get(name) != index.get(name) or index.get(name) != actual.get(name))
+        untracked = sorted(set(actual) - set(index))
+        ignored = sorted(set(self._files(exclude, include_ignored=True)) - set(actual)) if include_ignored else []
+        return dict(head=self.head(), branch=self.branch(), dirty_paths=dirty,
+                    untracked_paths=untracked, ignored_paths=ignored)
+
     def dirty(self, include_ignored=False):
         return bool(self.conflicts or self.index != self._tree("HEAD") or self._files(include_ignored=include_ignored) != self.index)
 
-    def inspect(self):
-        require(not self.conflicts, "unmerged_index", "Resolve the existing Git conflict before execution")
-        actual, base = self._files(), self._tree("HEAD")
-        dirty = sorted(n for n in set(base) | set(actual) | set(self.index)
-                       if base.get(n) != self.index.get(n) or self.index.get(n) != actual.get(n))
-        return dict(head=self.head(), branch=self.branch(), dirty_paths=dirty,
-                    index_patch=self.index_patch().decode(), working_patch=self._patch(self.index, actual).decode(),
-                    status="" if not dirty else "\0".join(dirty) + "\0")
+    def inspect(self, exclude=()):
+        state = self.status(exclude)
+        return {name: state[name] for name in ("head", "branch", "dirty_paths")}
 
     def _merge(self, current, patch):
         if not artifact_bytes(patch):
@@ -277,11 +283,17 @@ class MemoryRepository:
     def _write(self, files, previous=()):
         for name in set(previous) - set(files):
             (self.root / name).unlink(missing_ok=True)
+        directories = {self.root}
         for name, (data, mode) in files.items():
             path = contained(self.root, name)
-            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.parent not in directories:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                directories.add(path.parent)
             path.write_bytes(data)
-            path.chmod(0o755 if mode == "100755" else 0o644)
+            # Windows has no executable mode bit; this adapter keeps Git's
+            # mode in its index. New files are already writable there.
+            if os.name != "nt":
+                path.chmod(0o755 if mode == "100755" else 0o644)
 
     def apply_patch(self, patch):
         merged, conflicts = self._merge(self.index, patch)

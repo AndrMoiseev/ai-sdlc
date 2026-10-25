@@ -36,9 +36,9 @@ def browser_context(browser, monkeypatch):
         browser.call("Target.disposeBrowserContext", {"browserContextId": context})
 
 
-def dom(directory, tmp_path, width=1280, screenshot=False):
+def dom(directory, tmp_path, width=1280, screenshot=False, virtual_time=2500):
     browser, context = _browser
-    return browser.dom(context, directory, tmp_path, width, screenshot)
+    return browser.dom(context, directory, tmp_path, width, screenshot, virtual_time)
 
 
 def test_file_timer_updates_without_reload(driver, tmp_path):
@@ -107,10 +107,10 @@ def test_wave_layout_links_and_live_updates(monkeypatch, tmp_path, width):
       result.textContent=JSON.stringify(checks);document.body.append(result);
       document.querySelector('#task-D details').open=false;
       window.scrollTo(0,0);
-    },4500);
+    },2500);
     </script>"""
     html_path.write_text(saved.replace("</body>", probe.replace("__WIDTH__", str(width)) + "</body>"), encoding="utf-8")
-    result = dom(directory, tmp_path, width, screenshot=True)
+    result = dom(directory, tmp_path, width, screenshot=True, virtual_time=3000)
     assert 'id="wave-checks" data-result="pass"' in result, result[-6000:]
     assert (tmp_path / "browser.png").is_file()
     # Retain a clean standalone example alongside the instrumented browser evidence.
@@ -165,7 +165,7 @@ def test_evidence_survives_reload_and_updates(monkeypatch, tmp_path, storage_dis
     update["tasks"][2]["evidence"] = [{"stage": "independent", "outcome": "pass", "log": "runs/demo/result.json"}]
     probe = probe.replace("__DISABLED__", str(bool(storage_disabled)).lower()).replace("__UPDATE__", json.dumps(update))
     page.write_text(original.replace('</body>', probe + '</body>'), encoding="utf-8")
-    result = dom(directory, tmp_path)
+    result = dom(directory, tmp_path, virtual_time=1000)
     assert 'id="persistence-result" data-result="pass"' in result, result[-2000:]
 
 
@@ -180,9 +180,9 @@ def test_evidence_preferences_are_scoped_to_run(monkeypatch, tmp_path):
     render(directory)
     html = page.read_text(encoding="utf-8")
     page.write_text(html.replace('</body>', '<script>document.querySelector("#task-C summary").click();</script></body>'), encoding="utf-8")
-    assert '<details class="evidence" open="">' in dom(directory, tmp_path)
+    assert '<details class="evidence" open="">' in dom(directory, tmp_path, virtual_time=0)
     state["run_id"] = "another-run"
     render(directory)
     html = page.read_text(encoding="utf-8")
     page.write_text(html.replace('</body>', '<script>document.body.dataset.leaked=String(document.querySelector("#task-C details").open);</script></body>'), encoding="utf-8")
-    assert '<body data-leaked="false">' in dom(directory, tmp_path)
+    assert '<body data-leaked="false">' in dom(directory, tmp_path, virtual_time=0)

@@ -8,7 +8,8 @@ migrate or rewrite state.
 
 `state.json` is the atomic commit point. It holds run identity, revision, owner,
 mode, task control fields, budgets and references. It contains no inline event
-list. Task histories, source snapshots, patches and large values live under
+list. Task histories, current-change document snapshots, task transfer patches
+and large values live under
 `objects/<hash-prefix>/<sha256>.json`. Identical canonical JSON bytes share one
 file. A reference records the relative path, SHA-256, byte length and JSON kind.
 Paths must match their hashes and remain inside the execution directory.
@@ -16,7 +17,7 @@ Paths must match their hashes and remain inside the execution directory.
 The engine loads referenced fields on access. Copying state preserves unopened
 references; saving serializes accessed/changed branches without opening the
 others. Values over 4096 encoded bytes are externalized, as are designated source
-snapshots and history collections. Basis and task control mappings remain inline.
+document snapshots and history collections. Basis and task control mappings remain inline.
 The manifest therefore does not embed source inventories or accumulated reports.
 Keep large new runtime fields behind references; include a storage/read regression
 when adding them. Generated dashboards are disposable projections.
@@ -47,8 +48,21 @@ execution: archived runs and effects can retain references.
 
 When replacing a plan, archive the manifest and link previous task results through
 objects; do not hydrate and nest past attempts. Exclude the execution directory
-from input Git patches, dirty-path lists, status and source snapshots, including
+from dirty-path lists, status and document snapshots, including
 already tracked execution artifacts.
+
+## Source identity
+
+Use the local candidate commit SHA and clean Git state to identify source code.
+Check that identity before and after tests and before accepting their evidence.
+The runtime takes file-content snapshots only inside the current SDD change or
+refactoring directory, excluding its execution directory. It does not create
+per-file source hashes or full working-copy inventories elsewhere. Cleanup uses
+Git ownership and status checks and preserves unknown or ignored data.
+
+Historical source snapshots stay readable as historical evidence. They do not
+establish commit identity and cannot be reused for a new commit candidate. Keep
+their objects intact and obtain fresh evidence through the supported workflow.
 
 ## Reading evidence
 

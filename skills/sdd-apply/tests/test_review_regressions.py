@@ -53,7 +53,7 @@ def test_cleanup_preserves_unknown_ignored_user_data(cleanup_checkpoint):
     ignore(project, '*.local')
     valuable = wt / 'user-data.local'
     valuable.write_text('untransferred user data')
-    with pytest.raises(ValueError, match='ignored data'):
+    with pytest.raises(ValueError, match='ignored.*data'):
         d.send('worktree_remove')
     assert valuable.read_text() == 'untransferred user data'
 
@@ -103,6 +103,7 @@ def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
 def test_ownership_path_alias_rejected(basis, project):
     (project / 'check.py').write_text('assert 2 + 3 == 5\n# foreign user work\n')
     driver = Driver(basis)
+    driver.worktree()
     driver.send('checks_register', {'inventory': {'instructions': [], 'ci': []}})
     driver.role('author', 'executor')
     with pytest.raises(ValueError, match='canonical'):
@@ -114,8 +115,8 @@ def test_final_checks_cannot_accept_uncommitted_implementation(execution_checkpo
     committed = repository(project).content('HEAD', 'result.txt')
     (project / 'result.txt').write_text('different uncommitted implementation')
     driver.role('final', 'final_verifier')
-    assert driver.send('check_run', {'role_id': 'final', 'stage': 'final'})['outcome'] == 'passed'
-    assert driver.send('finalize', {}, task_id=None)['result'] == 'partial'
+    with pytest.raises(ValueError, match='before verification|changed'):
+        driver.send('check_run', {'role_id': 'final', 'stage': 'final'})
     assert repository(project).content('HEAD', 'result.txt') == committed
     assert committed.decode().splitlines() == ['verified result']
 
@@ -128,4 +129,4 @@ def test_lost_reviewer_successor_finishes_reserved_round(execution_checkpoint):
     with pytest.raises(ValueError, match='existing review'):
         driver.send('review_start', {'role_id': 'replacement'})
     result = driver.send('review_result', {'role_id': 'replacement', 'candidate': driver.task['candidate'], 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
-    assert result['status'] == 'committing'
+    assert result['status'] == 'integrating'

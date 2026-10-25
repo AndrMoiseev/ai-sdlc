@@ -85,7 +85,7 @@ def transition(state, task, event, directory):
                 saved = record["request"]["precondition"]
                 packet["worktree_recovery"] = {"intent_id": record["request"]["event"]["event_id"],
                     "source": saved["old"]["path"], "replacement": saved["new"],
-                    "patch": str(artifacts.contained(saved["artifacts"], "task.patch"))}
+                    "patch": saved["patch"] if "patch" in saved else str(artifacts.contained(saved["artifacts"], "task.patch"))}
         path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
         write_json(path, packet)
         return {"role": role, "packet": str(path)}

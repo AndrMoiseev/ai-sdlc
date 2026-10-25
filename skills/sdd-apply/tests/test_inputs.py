@@ -15,10 +15,11 @@ def test_approved_and_preserves_dirty(project):
     stage_files(project, "foreign.txt")
     (project / "foreign.txt").write_bytes(b"unstaged")
     (project / "untracked.txt").write_bytes(b"keep")
-    before = (repository(project).head(), repository(project).index_patch(), repository(project).inspect()["working_patch"])
+    before = (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
     result = call(project)
     assert result["tasks"][0]["id"] == "TASK-one"
-    assert before == (repository(project).head(), repository(project).index_patch(), repository(project).inspect()["working_patch"])
+    assert before == (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
+    assert "working_patch" not in result and "index_patch" not in result
     assert (project / "untracked.txt").read_bytes() == b"keep"
 
 

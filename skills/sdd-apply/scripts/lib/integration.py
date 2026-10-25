@@ -7,19 +7,19 @@ from . import artifact_storage as artifacts
 from .artifact_storage import write as atomic
 from .commits import index_tree, reviewed
 from .effects import intent, observed
-from .state import snapshot
-from .verification import current, valid_evidence
+from .state import snapshot, clean_source
+from .verification import valid_evidence
 
 
 def transition(state, task, event, directory):
-    require(task and task["worktree"] and state["mode"] == "parallel", "parallel_required", "Integration requires an authorized worktree task")
+    require(task and task["worktree"], "worktree_required", "Integration requires a registered worktree task")
     require(task["status"] == "integrating", "integration_phase", "Review the task before transfer")
-    current(state, task)
     reviewed(state, task)
     valid_evidence(state, task, directory)
     root = state["basis"]["project_root"]
     worktree = task["worktree"]
-    require(repository(worktree["path"]).head() == worktree["base"], "executor_commit", "Executor must leave uncommitted changes")
+    source_repo = repository(worktree["path"])
+    require(source_repo.head() == task["candidate_commit"]["sha"], "commit_candidate", "Transfer the verified local commit")
     if event["type"] == "integration_resolve":
         p = event["payload"]
         require(p.get("intent_id") and p.get("resolution") and p.get("role_id"), "resolution_evidence", "Reference the failed integration and actual resolver result")
@@ -38,16 +38,13 @@ def transition(state, task, event, directory):
         task["candidate"] = None
         return {"resolved": p["intent_id"], "next": "candidate; independent integration checks and review"}
     if event["type"] == "transfer":
-        from .worktrees import inventory
-        files = inventory(worktree["path"])
-        before_files = worktree["inventory"]
-        changed = {p for p in set(files) | set(before_files) if files.get(p) != before_files.get(p)}
+        changed = source_repo.changed_paths(worktree["base"])
         require(changed <= set(task["paths"]), "transfer_ownership", "Changed files outside task ownership require explicit accounting")
-        tree = index_tree(worktree["path"], task["paths"], worktree["base"])
-        patch = repository(worktree["path"]).diff_trees(worktree["base"], tree)
+        tree = source_repo.tree("HEAD")
+        patch = source_repo.diff_trees(worktree["base"], tree)
         relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/transfer.patch"
         atomic(artifacts.contained(directory, relative), patch)
-        task["transfer"] = {"path": relative, "sha256": digest(patch), "tree": tree, "base": worktree["base"], "snapshot": snapshot(state, worktree["path"]), "paths": task["paths"], "inventory": files}
+        task["transfer"] = {"path": relative, "sha256": digest(patch), "tree": tree, "base": worktree["base"], "commit": source_repo.head(), "snapshot": snapshot(state, worktree["path"]), "paths": task["paths"]}
         write_json(artifacts.contained(directory, relative + ".json"), task["transfer"])
         return task["transfer"]
     package = task.get("transfer")
@@ -59,8 +56,16 @@ def transition(state, task, event, directory):
         record = json.loads(artifacts.read_text(pending))
         require(not (record["phase"] == "prepared" and record["request"]["operation"] == "integrate" and record["request"]["event"]["event_id"] != event["event_id"]), "integration_unresolved", "Recover or resolve the existing integration intent first")
     before = snapshot(state, root)
+    effect_path = artifacts.contained(directory, f"runs/{state['run_id']}/effects/{event['event_id']}.json")
+    if not artifacts.exists(effect_path):
+        clean_source(before)
     effect, journal = intent(directory, state, event, "integrate", {"head": repository(root).head(), "before": before, "package": package["sha256"]})
     expected = journal["request"]["precondition"]
+    require(repository(root).head() == expected["head"], "integration_head", "Execution HEAD changed during integration")
+    require(set(before["dirty_paths"]) <= set(task["paths"]), "integration_scope", "Preserve changes outside the integration paths")
+    if "expected_tree" not in journal:
+        journal["expected_tree"] = repository(root).preview_patch(expected["head"], patch)
+        write_json(effect, journal)
     if journal["phase"] == "observed":
         require(before == journal["result"]["after"], "integration_drift", "Observed integration changed")
     elif before != expected["before"]:
@@ -68,8 +73,11 @@ def transition(state, task, event, directory):
         # ambiguous or partially conflicted result remains available for repair.
         require(repository(root).reverse_applicable(patch), "integration_ambiguous", "Inspect partial/conflicting transfer; do not replay")
     else:
-        repository(root).apply_patch(patch)
+        if artifacts.read_bytes(patch):
+            repository(root).apply_patch(patch)
     after = snapshot(state, root)
+    require(journal["expected_tree"] and index_tree(root, task["paths"], expected["head"]) == journal["expected_tree"],
+            "integration_drift", "Integration differs from the recorded Git merge; preserve and resolve explicitly")
     result = observed(effect, journal, {"before": expected["before"], "after": after, "head": repository(root).head()})
     worktree["integrated"] = True
     task["candidate"] = None

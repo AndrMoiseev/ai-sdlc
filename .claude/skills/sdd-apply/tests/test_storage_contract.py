@@ -42,7 +42,12 @@ def test_artifact_bytes_replacement_enumeration_and_removal(tmp_path, implementa
         artifacts.read_bytes(path)
     artifacts.write(path, b"\x00\xffbinary")
     assert artifacts.read_bytes(path) == b"\x00\xffbinary"
+    assert artifacts.exists(tmp_path / "runs")
+    assert artifacts.exists(tmp_path / "runs/one")
+    assert not artifacts.exists(tmp_path / "runs/absent")
     assert artifacts.exists(path.parent) and not artifacts.is_file(path.parent)
+    assert artifacts.paths(tmp_path / "runs") == [tmp_path / "runs/one"]
+    assert artifacts.paths(tmp_path / "runs/absent") == []
     assert artifacts.is_file(path)
     artifacts.write(path, "updated\n")
     artifacts.write(path.parent / "another.json", "another")
@@ -56,19 +61,26 @@ def test_artifact_bytes_replacement_enumeration_and_removal(tmp_path, implementa
         artifacts.remove(path)
     artifacts.remove(path.parent / "nested/hidden.json")
     assert artifacts.exists(path.parent / "nested")
+    assert artifacts.paths(path.parent / "nested") == []
     assert "nested" in {p.name for p in artifacts.paths(path.parent)}
+    artifacts.write(path.parent / "nested/recreated.json", "restored")
+    assert artifacts.read_text(path.parent / "nested/recreated.json") == "restored"
 
 
+@pytest.mark.native_paths
 def test_artifact_paths_stay_in_the_execution_namespace(tmp_path, implementation):
     storage(tmp_path)
     assert artifacts.contained(tmp_path, "runs/one/../two.json") == tmp_path / "runs/two.json"
     for relative, code in [("..", "path_escape"), (".", "path_escape"),
-                           ("../outside.json", "path_escape"), ("runs/.Git/config", "git_path")]:
+                           ("../outside.json", "path_escape"),
+                           ("../" + tmp_path.name + "-outside/file", "path_escape"),
+                           ("runs/.Git/config", "git_path")]:
         with pytest.raises(ValueError) as rejected:
             artifacts.contained(tmp_path, relative)
         assert rejected.value.code == code
 
 
+@pytest.mark.native_paths
 def test_path_resolution_and_batch_containment(tmp_path, implementation):
     from lib.common import contained_paths
     from lib.path_resolution import resolve

@@ -11,7 +11,7 @@ import pytest
 
 from lib.api import dispatch
 from lib.common import Rejected
-from lib.state import initialize, snapshot
+from lib.state import initialize, snapshot, read
 
 COLLECTION = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("refactoring_bundle_fixture", COLLECTION / "sdd-shared/tests/test_refactoring_work_basis.py")
@@ -37,18 +37,19 @@ def test_refactoring_inputs_public_initialize_read_and_dashboard(project, work_k
     if work_kind == "refactoring":
         assert basis["acceptance"] == [records[1]] and basis["verification"] == [records[2]]
         assert [r["path"] for r in basis["manifest"]] == ["design.md", "proposal.md", "tasks.md"]
-    state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "mode": "sequential"}})
+    state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "isolation": True, "mode": "sequential"}})
     directory = expected_root / "execution"
     before = (directory / "state.json").read_bytes()
-    assert dispatch({"operation": "read", "args": {"directory": str(directory)}}) == state
+    assert dispatch({"operation": "read", "args": {"directory": str(directory), "view": "full"}}) == state
     compact = dispatch({"operation": "read", "args": {"directory": str(directory), "view": "compact"}})
     assert compact["available_tasks"] == ["TASK-one"]
     assert (directory / "state.json").read_bytes() == before
     assert list(state["tasks"]) == ["TASK-one"] and state["tasks"]["TASK-one"]["status"] == "pending"
     assert state["final"] is None and state["revision"] == 0
     prefix = expected_root.relative_to(project).as_posix() + "/execution/"
-    assert not any(name.startswith(prefix) for name in snapshot(state)["files"])
-    assert expected_root.relative_to(project).as_posix() + "/tasks.md" in state["baseline"]["files"]
+    loaded = read(directory)
+    assert not any(name.startswith(prefix) for name in snapshot(loaded)["files"])
+    assert expected_root.relative_to(project).as_posix() + "/tasks.md" in loaded["baseline"]["files"]
     javascript = (directory / "dashboard-state.js").read_text(encoding="utf-8")
     view = json.loads(javascript.removeprefix("window.sddApplyUpdate(").removesuffix(");\n"))
     assert view["accepted"] == 0 and view["total"] == 1 and view["final"] is None
@@ -78,7 +79,7 @@ def test_refactoring_inputs_incomplete_work_still_makes_identity_ambiguous(proje
     root, _, _ = fixtures.approved_refactoring(project)
     (root / "tasks.md").unlink()
     with pytest.raises(Rejected) as error:
-        dispatch({"operation": "initialize", "args": {**arguments(project, None), "owner": "fixture-owner"}})
+        dispatch({"operation": "initialize", "args": {**arguments(project, None), "owner": "fixture-owner", "isolation": True}})
     assert error.value.code == "ambiguous_change"
     assert "'work_kind': 'change'" in str(error.value)
     assert "'work_kind': 'refactoring'" in str(error.value)
@@ -97,7 +98,7 @@ def test_refactoring_inputs_reject_foreign_approval_even_with_same_manifest(proj
             user[identity] = value
     fixtures.document(root, "review/decisions.md", "decisions", users)
     with pytest.raises(Rejected) as error:
-        dispatch({"operation": "initialize", "args": {**arguments(project), "owner": "fixture-owner"}})
+        dispatch({"operation": "initialize", "args": {**arguments(project), "owner": "fixture-owner", "isolation": True}})
     assert error.value.code == "sdd_check"
     diagnostic = json.loads(str(error.value))
     assert diagnostic["approval_status"]["ready"] is False
@@ -108,15 +109,16 @@ def test_refactoring_inputs_reject_foreign_approval_even_with_same_manifest(proj
     assert not (root / "execution").exists()
 
 
+@pytest.mark.native_paths
 def test_refactoring_inputs_reject_wrong_basis_and_copied_state(project):
     root, _, _ = fixtures.approved_refactoring(project)
     basis = dispatch({"operation": "validate", "args": arguments(project)})
     wrong = copy.deepcopy(basis)
     wrong["work_kind"] = "change"
     with pytest.raises(ValueError, match="outside its registered execution root"):
-        initialize(wrong, "fixture-owner")
+        initialize(wrong, "fixture-owner", isolation=True)
     assert not (root / "execution").exists()
-    dispatch({"operation": "initialize", "args": {**arguments(project), "owner": "fixture-owner"}})
+    dispatch({"operation": "initialize", "args": {**arguments(project), "owner": "fixture-owner", "isolation": True}})
     copied = project / "sdd/changes/demo/execution"
     copied.mkdir()
     shutil.copyfile(root / "execution/state.json", copied / "state.json")
@@ -127,7 +129,7 @@ def test_refactoring_inputs_reject_wrong_basis_and_copied_state(project):
 @pytest.mark.parametrize("change", ["../demo", "demo/child", "C:/demo", "demo\\child"])
 def test_refactoring_inputs_reject_paths_before_writing(project, change):
     with pytest.raises(ValueError):
-        dispatch({"operation": "initialize", "args": {**arguments(project), "change": change, "owner": "fixture-owner"}})
+        dispatch({"operation": "initialize", "args": {**arguments(project), "change": change, "owner": "fixture-owner", "isolation": True}})
     assert not (project / "sdd/refactoring/demo/execution").exists()
 
 
@@ -135,9 +137,9 @@ def test_refactoring_inputs_schema_and_root_mismatch(project):
     root, _, _ = fixtures.approved_refactoring(project)
     proposal = root / "proposal.md"
     proposal.write_text(proposal.read_text(encoding="utf-8").replace("work_kind: refactoring", "work_kind: change"), encoding="utf-8")
-    before = repository(project).inspect()["status"]
+    before = repository(project).inspect()["dirty_paths"]
     with pytest.raises(ValueError, match="work_kind_mismatch"):
         dispatch({"operation": "validate", "args": arguments(project)})
-    assert repository(project).inspect()["status"] == before
+    assert repository(project).inspect()["dirty_paths"] == before
 
 pytestmark = pytest.mark.native_state

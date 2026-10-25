@@ -23,6 +23,7 @@ MAX_YAML_CHARS = 1_000_000
 MAX_DOCUMENT_CHARS = 4_000_000
 MAX_YAML_DEPTH = 64
 MAX_YAML_TOKENS = 100_000
+YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 
 def valid_slug(value):
@@ -38,7 +39,7 @@ def safe_yaml(text):
         raise ValidationError("yaml_limit", "YAML exceeds the 1,000,000 character limit")
     try:
         depth = 0
-        for count, token in enumerate(yaml.scan(text), 1):
+        for count, token in enumerate(yaml.scan(text, Loader=YAML_LOADER), 1):
             if count > MAX_YAML_TOKENS:
                 raise ValidationError("yaml_limit", "YAML exceeds the 100,000 token limit")
             if isinstance(token, (yaml.tokens.BlockMappingStartToken, yaml.tokens.BlockSequenceStartToken, yaml.tokens.FlowMappingStartToken, yaml.tokens.FlowSequenceStartToken)):
@@ -49,7 +50,6 @@ def safe_yaml(text):
                 depth -= 1
             if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken, yaml.tokens.TagToken)):
                 raise ValidationError("unsafe_yaml", "YAML aliases, anchors and explicit tags are forbidden")
-        node = yaml.compose(text, Loader=yaml.SafeLoader)
         def inspect(current):
             if isinstance(current, yaml.MappingNode):
                 keys = set()
@@ -63,12 +63,17 @@ def safe_yaml(text):
             elif isinstance(current, yaml.SequenceNode):
                 for value in current.value:
                     inspect(value)
-        inspect(node)
+        loader = YAML_LOADER(text)
         try:
-            value = yaml.safe_load(text)
-        except (ValueError, OverflowError) as exc:
-            # SafeLoader's timestamp/int constructors can raise builtin errors.
-            raise ValidationError("invalid_yaml", f"Invalid YAML scalar: {exc}") from exc
+            node = loader.get_single_node()
+            inspect(node)
+            try:
+                value = loader.construct_document(node) if node is not None else None
+            except (ValueError, OverflowError) as exc:
+                # SafeLoader's timestamp/int constructors can raise builtin errors.
+                raise ValidationError("invalid_yaml", f"Invalid YAML scalar: {exc}") from exc
+        finally:
+            loader.dispose()
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValidationError("invalid_yaml", str(exc)) from exc
     if not isinstance(value, dict):

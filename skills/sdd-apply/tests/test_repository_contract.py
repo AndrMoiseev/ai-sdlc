@@ -5,7 +5,7 @@ import pytest
 
 from lib.common import Rejected
 from lib.repository import repository
-from repository_support import stage, commit, set_mode
+from repository_support import stage, commit, set_mode, file_mode
 
 
 pytestmark = pytest.mark.parametrize("implementation", [
@@ -27,8 +27,7 @@ def test_inspect_excludes_tracked_and_untracked_execution_artifacts(project, imp
     (project / "check.py").write_text("assert True")
     view = repository(project).inspect(exclude=["sdd/changes/demo/execution"])
     assert view["dirty_paths"] == ["check.py"]
-    assert "state.json" not in view["index_patch"] + view["working_patch"] + view["status"]
-    assert "dashboard.html" not in view["index_patch"] + view["working_patch"] + view["status"]
+    assert set(view) == {"head", "branch", "dirty_paths"}
 
 
 def test_owned_commit_preserves_foreign_index_and_working_bytes(project, implementation):
@@ -53,20 +52,56 @@ def test_owned_commit_preserves_foreign_index_and_working_bytes(project, impleme
     assert repo.changed_index_paths(sha) == {"foreign.txt"}
 
 
-def test_snapshot_tracks_deletions_modes_and_ignored_owned_files(project, implementation):
+def test_git_tree_retains_modes_deletions_and_explicit_ignored_owned_files(project, implementation):
     repo = repository(project)
     (project / "check.py").chmod(0o755)
     set_mode(project, "check.py", True)
     (project / ".gitignore").write_bytes(b"ignored.txt\n")
     (project / "ignored.txt").write_bytes(b"include explicitly")
     (project / "sdd/changes/demo/proposal.md").unlink()
-    assert "ignored.txt" not in repo.snapshot()["files"]
-    snapshot = repo.snapshot(exclude=["sdd/changes/demo/review"], include=["ignored.txt"])
-    assert snapshot["files"]["check.py"]["git_mode"] == "100755"
-    assert snapshot["files"]["sdd/changes/demo/proposal.md"] is None
-    assert snapshot["files"]["ignored.txt"]
-    assert not any(name.startswith("sdd/changes/demo/review/") for name in snapshot["files"])
+    assert "ignored.txt" not in repo.status()["dirty_paths"]
+    tree = repo.tree_for_paths(["ignored.txt", "check.py", "sdd/changes/demo/proposal.md"], repo.head())
+    assert file_mode(project, "check.py") == "100755"
+    assert "sdd/changes/demo/proposal.md" not in repo.tracked(tree)
+    assert repo.content(tree, "ignored.txt") == b"include explicitly"
     assert repo.dirty(include_ignored=True)
+
+
+def test_status_and_commit_comparison_include_each_change_kind(project, implementation):
+    repo = repository(project)
+    base = repo.head()
+    (project / ".gitignore").write_text("ignored.txt\n")
+    stage(project, ".gitignore")
+    commit(project, "Ignore generated fixture file")
+    (project / "ignored.txt").write_text("generated")
+    (project / "new file.txt").write_text("untracked")
+    (project / "check.py").write_text("staged change")
+    stage(project, "check.py")
+    (project / "check.py").write_text("unstaged change")
+    (project / "sdd/changes/demo/proposal.md").unlink()
+    view = repo.status(include_ignored=True)
+    assert view["head"] == repo.head() and view["branch"] == repo.branch()
+    assert view["dirty_paths"] == ["check.py", "new file.txt", "sdd/changes/demo/proposal.md"]
+    assert view["untracked_paths"] == ["new file.txt"]
+    assert view["ignored_paths"] == ["ignored.txt"]
+    assert repo.changed_paths(base) == {".gitignore"}
+
+
+def test_named_worktree_commit_keeps_main_head(project, tmp_path, implementation):
+    repo = repository(project)
+    main_head = repo.head()
+    path = tmp_path / "isolated-task"
+    repo.create_worktree(path, main_head, branch="sdd/test/task")
+    task = repository(path)
+    assert task.branch() == "sdd/test/task"
+    assert repo.worktree(path) == dict(head=main_head, detached=False, branch="sdd/test/task")
+    (path / "result.txt").write_bytes(b"committed candidate")
+    stage(path, "result.txt")
+    sha = commit(path, "Local candidate")
+    assert task.head() != main_head and repo.head() == main_head
+    assert not task.status()["dirty_paths"]
+    assert task.changed_paths(main_head) == {"result.txt"}
+    assert not (project / "result.txt").exists()
 
 
 def test_worktrees_and_binary_transfer_keep_unrelated_staged_data(project, tmp_path, implementation):
@@ -95,10 +130,15 @@ def test_worktrees_and_binary_transfer_keep_unrelated_staged_data(project, tmp_p
     assert repo.index_patch() == before and not (project / "result.bin").exists()
     repo.apply_patch(patch)
     assert (project / "result.bin").read_bytes() == b"\x00\xffresult"
-    assert repo.snapshot()["files"]["check.py"]["git_mode"] == "100755"
+    assert file_mode(project, "check.py") == "100755"
     assert repo.content("", "foreign.txt") == b"staged"
     assert (project / "foreign.txt").read_bytes() == b"unstaged"
     assert repo.reverse_applicable(patch)
+    with pytest.raises(Rejected):
+        repo.remove_worktree(path)
+    assert path.exists()
+    stage(path, "check.py", "result.bin")
+    commit(path, "Preserve task work before removal")
     repo.remove_worktree(path)
     assert not path.exists() and repo.worktree(path) is None
 
@@ -119,9 +159,9 @@ def test_preview_and_apply_report_merge_outcome_without_losing_source(project, t
     (project / "merge.txt").write_bytes(initial.replace(b"two" if conflict else b"four", b"external"))
     stage(project, "merge.txt")
     head = commit(project, "concurrent")
-    before = repo.snapshot()
+    before = (project / "merge.txt").read_bytes(), repo.index_patch()
     expected = repo.preview_patch(head, patch)
-    assert repo.snapshot() == before and repo.head() == head
+    assert ((project / "merge.txt").read_bytes(), repo.index_patch()) == before and repo.head() == head
     if conflict:
         assert expected is None
         with pytest.raises(Rejected):

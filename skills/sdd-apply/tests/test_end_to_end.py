@@ -17,10 +17,8 @@ def test_full_sequential_lifecycle(driver, project):
     assert view["revision"] == driver.state["revision"]
 
 
-def test_no_final_evidence_is_partial(driver, project):
-    prepared(driver, project)
-    driver.send("commit")
-    driver.send("accept")
+def test_no_final_evidence_is_partial(execution_checkpoint):
+    driver = execution_checkpoint("accepted")
     result = driver.send("finalize", {}, task_id=None)
     assert result["result"] == "partial"
     assert result["missing"][0]["criteria"] == ["AC-one"]

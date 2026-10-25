@@ -3,6 +3,7 @@ import json
 import re
 from . import artifact_storage as artifacts
 from .common import digest, require, write_json
+from .state_objects import StateObjects
 
 
 def directory_for(state):
@@ -21,10 +22,11 @@ def resolve(state, value):
             and value["candidate_id"] == "candidate-" + sha256
             and value["path"] == f"candidates/{sha256}.json",
             "candidate_reference", "Use the complete script-issued candidate reference")
-    path = artifacts.contained(directory_for(state), value["path"])
+    directory = directory_for(state)
+    path = artifacts.contained(directory, value["path"])
     require(artifacts.is_file(path), "candidate_missing", "Candidate artifact is missing: " + value["path"])
     try:
-        payload = json.loads(artifacts.read_text(path))
+        payload = StateObjects(directory).open(json.loads(artifacts.read_text(path)))
     except (ValueError, UnicodeError) as exc:
         raise ValueError("Candidate artifact is unreadable: " + value["path"]) from exc
     require(isinstance(payload, dict) and set(payload) == {"source", "manifest", "checks", "root"}
@@ -41,15 +43,19 @@ def store(state, payload):
     if artifacts.exists(path):
         resolve(state, reference)  # Never silently replace corrupted evidence.
     else:
-        write_json(path, payload)
+        write_json(path, StateObjects(directory_for(state)).pack(payload, root=True))
     return reference
 
 
 def same(state, left, right):
     if left is None or right is None:
         return left is right
-    return resolve(state, left) == resolve(state, right)
+    payload = resolve(state, left)
+    return True if left == right else payload == resolve(state, right)
 
 
 def reference(state, value):
-    return store(state, resolve(state, value)) if value is not None else None
+    if value is None:
+        return None
+    payload = resolve(state, value)
+    return store(state, payload) if set(value) == {"source", "manifest", "checks", "root"} else dict(value)

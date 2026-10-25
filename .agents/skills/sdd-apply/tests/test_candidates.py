@@ -12,20 +12,25 @@ from lib.verification import current
 
 def frozen(driver, project):
     driver.start()
-    (project / "result.txt").write_text("done")
+    (driver.root / "result.txt").write_text("done")
     driver.freeze()
     return driver.task["candidate"]
 
 
-def test_candidate_snapshot_is_deduplicated_in_packets_and_evidence(driver, project):
+def test_candidate_uses_commit_and_only_change_documents(driver, project):
+    from repository_support import stage, commit
     for number in range(100):
         (project / f"existing-{number}.txt").write_text(str(number))
+    stage(project, ".")
+    commit(project, "Unrelated tracked source collection")
     reference = frozen(driver, project)
     payload = resolve(driver.state, reference)
     assert reference["candidate_id"] == "candidate-" + digest(payload)
     assert reference["sha256"] == digest(payload)
-    assert len(payload["source"]["files"]) > 100
-    assert len(json.dumps(reference)) < len(json.dumps(payload)) / 10
+    assert payload["source"]["commit"]
+    assert not payload["source"]["dirty_paths"]
+    assert all(name.startswith("sdd/changes/demo/") for name in payload["source"]["files"])
+    assert not any("execution/" in name for name in payload["source"]["files"])
     role = driver.role("verifier", "verifier")
     packet = json.loads(artifacts.read_text(role["packet"]))
     assert packet["candidate"] == reference
@@ -53,6 +58,8 @@ def test_missing_or_corrupt_candidate_blocks_review_without_recreating_it(execut
         write_json(path, payload)
     before = storage(driver.directory).read()
     with pytest.raises(ValueError, match="Candidate artifact"):
+        same(driver.state, reference, dict(reference))
+    with pytest.raises(ValueError, match="Candidate artifact"):
         driver.send("review_start", {"role_id": "reviewer"})
     assert storage(driver.directory).read() == before
     if damage == "missing":
@@ -73,17 +80,19 @@ def test_review_rejects_forged_reference(execution_checkpoint, field, value):
 @pytest.mark.parametrize("changed", ["source", "registry", "basis"])
 def test_compact_candidate_detects_each_freshness_input(execution_checkpoint, changed):
     driver = execution_checkpoint("frozen")
-    project = Path(driver.state["basis"]["project_root"])
+    project = driver.root
     state = driver.state
     task = state["tasks"]["TASK-one"]
+    artifacts_before = set(artifacts.paths(driver.directory / "candidates"))
     if changed == "source":
         (project / "result.txt").write_text("changed")
     elif changed == "registry":
         task["checks"][0]["configuration"] = {"changed": True}
     else:
         state["basis"]["manifest"][0]["sha256"] = "0" * 64
-    with pytest.raises(ValueError, match="changed"):
+    with pytest.raises(ValueError, match="changed|before verification"):
         current(state, task)
+    assert set(artifacts.paths(driver.directory / "candidates")) == artifacts_before
 
 
 def test_inline_state_evidence_and_review_remain_usable(execution_checkpoint):
@@ -105,6 +114,7 @@ def test_inline_state_evidence_and_review_remain_usable(execution_checkpoint):
     assert result["candidate"] == reference
     driver.send("review_result", {"role_id": "reviewer", "candidate": reference,
         "verdict": "pass", "findings": [], "test_integrity": "preserved", "trace": "unit-test"})
+    driver.integrate()
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
 

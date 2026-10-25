@@ -45,8 +45,8 @@ def test_default_full_and_compact_are_read_only(driver):
     assert path.read_bytes() == before
 
 
-def test_compact_preserves_blockers_budgets_and_active_roles(driver):
-    driver.start()
+def test_compact_preserves_blockers_budgets_and_active_roles(execution_checkpoint):
+    driver = execution_checkpoint("started")
     view = compact(driver)
     assert view["active_roles"] == {
         "author": {"kind": "executor", "task_id": "TASK-one", "context_id": "author"},
@@ -103,6 +103,7 @@ def test_both_views_validate_current_manifest(driver, damage, reseal, error, vie
 
 @pytest.mark.parametrize("view", ["full", "compact"])
 @pytest.mark.native_state
+@pytest.mark.native_paths
 def test_read_rejects_copied_state_root(driver, tmp_path, view):
     copied = tmp_path / "wrong-root"
     copied.mkdir()

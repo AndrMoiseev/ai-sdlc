@@ -27,6 +27,13 @@ def set_mode(root, path, executable):
         repo.index[path] = (repo.index[path][0], "100755" if executable else "100644")
 
 
+def file_mode(root, path):
+    repo = repository(root)
+    if isinstance(repo, GitRepository):
+        return repo._text("ls-files", "--stage", "--", path).split()[0]
+    return repo.index[path][1]
+
+
 def ignore(root, pattern):
     repo = repository(root)
     if isinstance(repo, GitRepository):

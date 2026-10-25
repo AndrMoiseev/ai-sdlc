@@ -1,10 +1,10 @@
 """Revisioned event store. Rejected transitions never replace the state file."""
-from copy import deepcopy
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import uuid
 import re
-from .common import contained, contained_paths, digest, now, require, source_snapshot, write_json
+from .common import contained, contained_paths, digest, now, require, write_json
 
 from .state_storage import storage
 from .path_resolution import resolve
@@ -22,14 +22,23 @@ def recover_lock(directory):
     return storage(directory).recover_lock()
 
 
+@dataclass(frozen=True)
+class SealedState:
+    """The detached manifest whose integrity was calculated by seal()."""
+    manifest: dict
+
+
 def save(directory, state):
-    storage(directory).save(StateObjects(directory).pack(state, root=True))
+    packed = state.manifest if isinstance(state, SealedState) else StateObjects(directory).pack(state, root=True)
+    storage(directory).save(packed)
 
 
 def seal(state):
     objects = StateObjects(execution_directory(state["basis"]))
     packed = objects.pack(state, root=True)
     state["integrity"] = digest({k: v for k, v in packed.items() if k != "integrity"})
+    packed["integrity"] = state["integrity"]
+    return SealedState(packed)
 
 
 def execution_directory(basis):
@@ -46,11 +55,12 @@ def execution_directory(basis):
 
 def read(directory, view="full"):
     require(view in ("full", "compact"), "read_view", "Expected full or compact")
-    packed = json.loads(storage(directory).read().decode("utf-8"))
+    raw = storage(directory).read()
+    packed = json.loads(raw)
     require(packed.get("schema_version") == 2, "state_version", "Expected execution state schema 2")
     require(packed.get("integrity") == digest({k: v for k, v in packed.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
-    state = StateObjects(directory).open(deepcopy(packed))
-    state.manifest = packed
+    state = StateObjects(directory).open(packed)
+    state.manifest_bytes = raw
     require(state["change_id"] == state["basis"]["change_id"] and state.get("work_kind", "change") == state["basis"].get("work_kind", "change"), "state_root", "State work identity differs from its basis")
     expected_directory = execution_directory(state["basis"])
     require(resolve(directory) == expected_directory, "state_root", "State is outside its registered execution root")
@@ -79,8 +89,9 @@ def inspect(directory, view="compact"):
 
 def audit(directory):
     state = read(directory)
-    seen = state.objects.audit(state)
-    count = state_history.audit(state.objects, state)
+    with state.objects.cached_reads():
+        seen = state.objects.audit(state)
+        count = state_history.audit(state.objects, state)
     return {"revision": state["revision"], "events": count, "current_objects": len(seen), "status": "verified"}
 
 
@@ -102,9 +113,8 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
     require(isinstance(owner, str) and owner, "owner", "Orchestrator identity required")
     require(mode in {"parallel", "sequential"}, "mode", "Expected parallel or sequential")
     require(not parallel_request or (parallel_request.get("source") and parallel_request.get("text")), "parallel_authorization", "Record the actual execution instruction or mode request")
-    mode_reason = "isolation unavailable" if mode == "parallel" and not isolation else None
-    if mode_reason:
-        mode = "sequential"
+    require(isolation, "isolation_required", "Both execution modes require isolated task worktrees")
+    mode_reason = None
     parallel_request = (parallel_request or basis["instruction"]) if mode == "parallel" else None
     directory = execution_directory(basis)
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
@@ -119,15 +129,42 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
             state["tasks"][task["id"]] = new_task(task)
         state["baseline"] = snapshot(state, basis["project_root"])
         write_json(directory / "runs" / run / "input.json", StateObjects(directory).pack(basis, root=True))
-        seal(state)
-        save(directory, state)
+        save(directory, seal(state))
     return read(directory)
 
 
 def snapshot(state, root=None):
-    included = [p for t in state["tasks"].values() for p in t["paths"]]
-    excluded = execution_directory(state["basis"]).relative_to(resolve(state["basis"]["project_root"])).as_posix()
-    return source_snapshot(root or state["basis"]["project_root"], [excluded], included)
+    """Hash change documents only; Git identifies the code being checked."""
+    from .repository import repository
+    import os
+    project = resolve(state["basis"]["project_root"])
+    relative = resolve(state["basis"]["change_root"]).relative_to(project)
+    root = resolve(root or project)
+    change = contained(root, relative.as_posix())
+    files = {}
+    pending = [change]
+    while pending:
+        directory = pending.pop()
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if directory == change and entry.name == "execution":
+                    continue
+                path = Path(entry.path)
+                require(not entry.is_symlink() and not (hasattr(entry, "is_junction") and entry.is_junction()),
+                        "unsupported_file", str(path))
+                if entry.is_dir(follow_symlinks=False):
+                    pending.append(path)
+                elif entry.is_file(follow_symlinks=False):
+                    files[(relative / path.relative_to(change)).as_posix()] = {"sha256": digest(path.read_bytes())}
+    excluded = (relative / "execution").as_posix()
+    status = repository(root).status(exclude=[excluded])
+    return dict(files=files, digest=digest(files), commit=status["head"],
+                branch=status["branch"], dirty_paths=status["dirty_paths"])
+
+
+def clean_source(source):
+    require(source.get("commit"), "legacy_candidate", "Source snapshots require explicit rebaseline in a task worktree; preserve historical evidence")
+    require(not source["dirty_paths"], "dirty_candidate", "Commit or preserve changes before verification: " + ", ".join(source["dirty_paths"]))
 
 
 def assert_basis(state):
@@ -153,7 +190,9 @@ def apply(directory, event):
         require(event["owner"] == original["owner"], "owner_mismatch", "Another orchestrator owns this run")
         require(type(event["expected_revision"]) is int and event["expected_revision"] == original["revision"], "revision_conflict", "Re-read current state")
         require(event["task_id"] is None or event["task_id"] in original["tasks"], "unknown_task", "Unknown TASK-ID")
-        state = deepcopy(original)
+        # read() decoded private bytes for this operation. Reducer mutations
+        # cannot affect persisted state until the atomic save succeeds.
+        state = original
         if event["type"] in {"resume", "finalize"}:
             audit(directory)
         from .transitions import reduce
@@ -163,6 +202,5 @@ def apply(directory, event):
         if event["type"] == "check_run" and event["task_id"] and event["payload"].get("stage") == "baseline":
             state["tasks"][event["task_id"]]["baseline_event"] = {"event_id": event["event_id"], "log": result.get("log")}
         state_history.append(original.objects, state, event, result)
-        seal(state)
-        save(directory, state)
+        save(directory, seal(state))
     return result

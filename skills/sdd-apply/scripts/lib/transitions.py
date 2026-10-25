@@ -63,10 +63,11 @@ def reduce(state, event, directory):
             require(not owned.is_dir(), "task_paths", "List each owned file; directories obscure mixed ownership")
         occupied = {p.casefold() for key, t in state["tasks"].items() if key != event["task_id"] and t["status"] not in {"pending", "accepted"} for p in t["paths"]}
         require(not occupied & {p.casefold() for p in paths}, "shared_files", "Another unfinished task owns one of these files")
-        if state["mode"] == "parallel":
-            require(task["worktree"], "worktree_missing", "Parallel tasks need registered worktrees")
+        require(task["worktree"] and not task["worktree"].get("removed"), "worktree_missing", "Every task needs a registered isolated worktree")
         task.update(status="running", paths=paths, executor=payload["role_id"], attempt=task["attempt"] + 1)
         task["start_snapshot"] = snapshot(state, task["worktree"]["path"] if task["worktree"] else None)
+        from .state import clean_source
+        clean_source(task["start_snapshot"])
         return {"status": "running"}
     if kind == "repair":
         from .budgets import repair

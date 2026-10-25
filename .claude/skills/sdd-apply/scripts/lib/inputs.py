@@ -64,4 +64,5 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
         plan_records = {kind: [record for record in records if record["sdd_record"] == kind]
                         for kind in ("acceptance", "verification")}
     manifest = spec_call(dependency, project, change, "plan", "snapshot.py", work_kind)
-    return {"schema_version": 1, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "manifest": manifest, "tasks": tasks, **plan_records, **repository(project).inspect()}
+    excluded = (directory / "execution").relative_to(project).as_posix()
+    return {"schema_version": 1, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "manifest": manifest, "tasks": tasks, **plan_records, **repository(project).inspect(exclude=[excluded])}

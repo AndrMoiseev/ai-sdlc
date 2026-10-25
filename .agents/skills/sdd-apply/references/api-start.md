@@ -14,9 +14,9 @@ or a missing plan to sdd-spec.
 `parallel_request` and `isolation`. It validates, records a run and generates the
 initial dashboard. Existing state requires [resume](../flows/resume.md).
 
-The default mode is `parallel`. Set `isolation: true` only after verifying it;
-false falls back to `sequential` with `mode_reason: "isolation unavailable"`.
-An explicit `mode: "sequential"` wins even when isolation exists. Parallel mode
+The default mode is `parallel`. Set `isolation: true` only after verifying task
+worktrees; both modes require them. An explicit `mode: "sequential"` selects
+one task at a time, with the same worktree and commit checks. Parallel mode
 stores a supplied `{text, source}` request or the execution instruction; it needs
 no separate permission question. Resume and revised plans preserve saved mode;
 a revised parallel run records the new execution instruction.

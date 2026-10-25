@@ -1,23 +1,34 @@
 """Restore immutable source fixtures by bytes, without copying Git databases."""
+import os
+from pathlib import Path
 
 
 def restore(root, files, directories):
     assert root.resolve() == root and not root.is_symlink()
-    for path in sorted(root.rglob("*"), key=lambda path: len(path.parts), reverse=True):
-        assert not path.is_symlink()
-        relative = path.relative_to(root)
-        if path.is_file() and relative not in files:
-            path.unlink()
-        elif path.is_dir() and relative not in directories:
-            path.rmdir()
+    existing = {}
+    def visit(directory, prefix=Path()):
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                assert not entry.is_symlink() and not (hasattr(entry, "is_junction") and entry.is_junction())
+                relative = prefix / entry.name
+                if entry.is_dir(follow_symlinks=False):
+                    visit(entry.path, relative)
+                    if relative not in directories:
+                        os.rmdir(entry.path)
+                elif relative not in files:
+                    os.unlink(entry.path)
+                else:
+                    existing[relative] = entry.stat().st_mode
+    if root.exists():
+        visit(root)
     root.mkdir(parents=True, exist_ok=True)
     for relative in sorted(directories, key=lambda path: len(path.parts)):
         (root / relative).mkdir(exist_ok=True)
     for relative, (content, mode) in files.items():
         path = root / relative
-        if not path.is_file() or path.read_bytes() != content:
+        if relative not in existing or path.read_bytes() != content:
             path.write_bytes(content)
-        if path.stat().st_mode != mode:
+        if existing.get(relative) != mode:
             path.chmod(mode)
 
 
