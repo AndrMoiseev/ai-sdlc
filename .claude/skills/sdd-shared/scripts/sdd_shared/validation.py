@@ -6,7 +6,12 @@ from .documents import InputError, ValidationError, read_document, valid_id, par
 from .paths import contained, change_root as resolve_change, verification_location
 
 
-def validate_documents(project_root: Path, change_root: Path, stage: str):
+def validate_documents(project_root: Path, change_root: Path, stage: str, work_kind="change"):
+    if work_kind == "refactoring":
+        from .refactoring_validation import validate_refactoring
+        return validate_refactoring(project_root, change_root, stage)
+    if work_kind != "change":
+        raise InputError("unsupported_work_kind", f"Unsupported work kind: {work_kind}; install a matching SDD bundle or correct the selection")
     project_root, change_root = Path(project_root).resolve(), Path(change_root).resolve()
     if not change_root.is_relative_to(project_root):
         raise InputError("path_escape", "Change directory must be inside the project", change_root)

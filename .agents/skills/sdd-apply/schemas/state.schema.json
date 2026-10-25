@@ -3,14 +3,26 @@
   "title": "SDD execution state; semantic invariants are enforced by state.py",
   "type": "object",
   "required": ["schema_version", "change_id", "run_id", "revision", "status", "owner", "basis", "mode", "tasks", "roles", "events", "blockers", "integrity"],
+  "allOf": [{"if": {"required": ["work_kind"], "properties": {"work_kind": {"const": "refactoring"}}}, "then": {"required": ["acceptance", "verification"]}}],
   "properties": {
     "schema_version": {"const": 1},
     "change_id": {"type": "string"},
+    "work_kind": {"enum": ["change", "refactoring"]},
+    "acceptance": {"type": "object", "additionalProperties": {"type": "object", "required": ["id", "task", "lifetime"], "properties": {"sdd_record": {"const": "acceptance"}}}},
+    "verification": {"type": "object", "additionalProperties": {"type": "object", "required": ["id", "criteria", "run"], "properties": {"sdd_record": {"const": "verification"}}}},
     "run_id": {"type": "string"},
     "revision": {"type": "integer", "minimum": 0},
     "status": {"enum": ["active", "blocked", "completed"]},
     "mode": {"enum": ["sequential", "parallel"]},
-    "tasks": {"type": "object", "additionalProperties": {"type": "object", "required": ["plan", "status", "attempt", "candidate", "checks", "evidence", "reviews", "commits", "review_limit", "test_repair_limit"], "properties": {"status": {"enum": ["pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"]}}}},
+    "tasks": {"type": "object", "additionalProperties": {"type": "object", "required": ["plan", "status", "attempt", "candidate", "checks", "evidence", "reviews", "commits", "review_limit", "test_repair_limit"], "properties": {
+      "status": {"enum": ["pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"]},
+      "check_registry": {"type": "object", "required": ["revision", "history"], "properties": {
+        "revision": {"type": "integer", "minimum": 1},
+        "history": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["revision", "event_id", "operation", "checks"], "properties": {
+          "revision": {"type": "integer", "minimum": 1}, "event_id": {"type": "string"}, "operation": {"type": "string"}, "checks": {"type": "array", "minItems": 1}
+        }}}
+      }}
+    }}},
     "roles": {"type": "object"},
     "events": {"type": "array"},
     "blockers": {"type": "array"},

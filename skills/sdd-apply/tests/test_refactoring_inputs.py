@@ -1,4 +1,6 @@
 """Initialize and read both actual approved bundles through public dispatch."""
+from lib.repository import repository
+
 import copy
 import importlib.util
 import json
@@ -8,7 +10,7 @@ import shutil
 import pytest
 
 from lib.api import dispatch
-from lib.common import Rejected, git
+from lib.common import Rejected
 from lib.state import initialize, snapshot
 
 COLLECTION = Path(__file__).resolve().parents[2]
@@ -133,7 +135,9 @@ def test_refactoring_inputs_schema_and_root_mismatch(project):
     root, _, _ = fixtures.approved_refactoring(project)
     proposal = root / "proposal.md"
     proposal.write_text(proposal.read_text(encoding="utf-8").replace("work_kind: refactoring", "work_kind: change"), encoding="utf-8")
-    before = git(project, "status", "--porcelain")
+    before = repository(project).inspect()["status"]
     with pytest.raises(ValueError, match="work_kind_mismatch"):
         dispatch({"operation": "validate", "args": arguments(project)})
-    assert git(project, "status", "--porcelain") == before
+    assert repository(project).inspect()["status"] == before
+
+pytestmark = pytest.mark.native_state

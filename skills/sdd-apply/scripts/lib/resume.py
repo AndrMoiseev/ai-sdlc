@@ -1,7 +1,9 @@
 """Reconcile execution against normative bytes, Git and host observations."""
+from .repository import repository
 from copy import deepcopy
 from pathlib import Path
-from .common import contained, digest, git, require, write_json
+from . import artifact_storage as artifacts
+from .common import digest, require, write_json
 from .state import assert_basis, snapshot
 
 
@@ -9,7 +11,7 @@ def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
     if kind == "spec_conflict":
         require(p.get("reproduction") and p.get("criteria") and p.get("contract"), "conflict_evidence", "Record reproduction, AC and conflicting contract")
-        path = contained(directory, f"runs/{state['run_id']}/spec-return/{event['event_id']}.json")
+        path = artifacts.contained(directory, f"runs/{state['run_id']}/spec-return/{event['event_id']}.json")
         write_json(path, {"task_id": event["task_id"], "basis": state["basis"]["manifest"], **p})
         state["blockers"].append({"reason": "spec_conflict", "task_id": event["task_id"], "resume_condition": "Revised approved plan and execution instruction", "material": str(path)})
         state["status"] = "blocked"
@@ -61,7 +63,7 @@ def transition(state, task, event, directory):
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
         previous_run = state["run_id"]
-        write_json(contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
+        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
         previous_tasks = deepcopy(state["tasks"])
         state["run_id"] = uuid.uuid4().hex
         state["previous_run"] = previous_run
@@ -87,7 +89,7 @@ def transition(state, task, event, directory):
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
-        write_json(contained(directory, f"runs/{state['run_id']}/input.json"), basis)
+        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), basis)
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
@@ -98,7 +100,7 @@ def transition(state, task, event, directory):
     except ValueError as exc:
         issues.append({"reason": "normative_drift", "detail": str(exc), "resume_condition": "Restore approved bytes or use revised_plan"})
     root = state["basis"]["project_root"]
-    if git(root, "symbolic-ref", "--quiet", "--short", "HEAD") != state["basis"]["branch"]:
+    if repository(root).branch() != state["basis"]["branch"]:
         issues.append({"reason": "branch_changed", "resume_condition": "Restore execution branch"})
     require(p.get("host_trace") and isinstance(p.get("live_contexts"), list), "host_observation", "Supply actual host role liveness observation")
     for role in state["roles"].values():
@@ -167,7 +169,7 @@ def transition(state, task, event, directory):
                     confirm(state, t, t["commits"][-1])
                 t["status"] = target
     state["status"] = "blocked" if state["blockers"] else "active"
-    head = git(root, "rev-parse", "HEAD")
+    head = repository(root).head()
     stale_worktrees = [{"task_id": key, "path": t["worktree"]["path"], "base": t["worktree"]["base"],
                        "head": head, "next": "worktree_refresh"}
                       for key, t in state["tasks"].items()

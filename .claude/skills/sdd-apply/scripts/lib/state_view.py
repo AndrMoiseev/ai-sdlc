@@ -17,6 +17,7 @@ def compact(state):
     }
     return {
         "view": "compact", "view_version": 1,
+        **({"work_kind": state["work_kind"]} if "work_kind" in state else {}),
         **{key: state[key] for key in (
             "change_id", "run_id", "revision", "owner", "status", "mode",
             "updated_at", "blockers",

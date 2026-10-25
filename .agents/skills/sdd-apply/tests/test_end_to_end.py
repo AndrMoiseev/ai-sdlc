@@ -1,3 +1,4 @@
+import pytest
 from lib.api import dispatch
 from test_commits import prepared
 

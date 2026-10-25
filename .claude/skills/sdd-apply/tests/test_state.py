@@ -74,3 +74,5 @@ def test_interrupted_replace_preserves_state(store, monkeypatch):
     with pytest.raises(OSError, match="interrupted"):
         apply(directory, event(state))
     assert (Path(directory) / "state.json").read_bytes() == before
+
+pytestmark = pytest.mark.native_state

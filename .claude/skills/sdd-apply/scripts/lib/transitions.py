@@ -2,6 +2,7 @@
 from .common import require
 from .state import assert_basis, snapshot
 from .scheduler import available
+from . import artifact_storage as artifacts
 
 
 def reduce(state, event, directory):
@@ -31,8 +32,8 @@ def reduce(state, event, directory):
         assert_basis(state)
     if task and kind not in {"worktree_refresh", "worktree_refresh_resolve", "role_register", "role_result"}:
         import json
-        for path in (directory / "runs" / state["run_id"] / "effects").glob("*.json"):
-            effect = json.loads(path.read_text(encoding="utf-8"))
+        for path in artifacts.paths(directory / "runs" / state["run_id"] / "effects", "*.json"):
+            effect = json.loads(artifacts.read_text(path))
             require(not (effect["request"]["operation"] == "worktree_refresh"
                          and effect["request"]["task_id"] == event["task_id"]
                          and effect["phase"] == "prepared"),
@@ -48,7 +49,7 @@ def reduce(state, event, directory):
         return transition(state, task, event, directory)
     if kind == "start":
         require(event["task_id"] in available(state), "task_unavailable", "Dependencies or execution mode prevent admission")
-        require((directory / "dashboard.html").is_file(), "dashboard_missing", "Generate the initial dashboard before starting")
+        require(artifacts.is_file(directory / "dashboard.html"), "dashboard_missing", "Generate the initial dashboard before starting")
         require(task["checks"], "checks_missing", "Register planned and project checks first")
         role = state["roles"].get(payload.get("role_id"))
         require(role and role["kind"] == "executor" and role["task_id"] == event["task_id"] and role["status"] == "active", "executor_missing", "Register a fresh executor")

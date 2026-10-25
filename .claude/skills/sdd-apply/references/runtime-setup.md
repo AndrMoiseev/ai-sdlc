@@ -16,10 +16,9 @@ Run every Python entry point with its own PEP 723 metadata and shipped lockfile:
 
 ```text
 uv run --locked --script "<skill-root>/scripts/execute.py" --request "<absolute-request.json>"
-uv run --locked --script "<skill-root>/scripts/test.py" <test-path> -q
 ```
 
-Apply the shared runtime requirements to both entry points. Keep worktrees outside
+Apply the shared runtime requirements to runtime entry points. Keep worktrees outside
 skill collections and retained reports in the execution directory. Unit tests do
 not replace actual host or browser runs.
 

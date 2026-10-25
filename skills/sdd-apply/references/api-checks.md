@@ -5,6 +5,10 @@ evidence. Use installed event help for exact fields.
 
 ## Check registry
 
+For work on skills, apply the [skill development acceptance rule](../SKILL.md#skill-development-acceptance)
+before registering checks: task stages use deterministic tests, and behavioral
+checks run only at final acceptance of the whole plan.
+
 Read the installed sdd-shared `references/document-format-tasks.md`, section
 «Задача и ее проверка». `location` is relative to project or active worktree,
 independent of command cwd. At `check_run` it must identify an existing file or

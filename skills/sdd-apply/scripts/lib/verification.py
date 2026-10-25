@@ -1,4 +1,5 @@
 """Exact command registry and independently produced, snapshot-bound evidence."""
+from .repository import repository
 import json
 from pathlib import Path
 import subprocess
@@ -6,10 +7,11 @@ import time
 import os
 import signal
 from copy import deepcopy
-from .common import contained, digest, git, now, require, write_json
+from .common import contained, digest, now, require, write_json
 from .state import snapshot
 from .inputs import spec_modules, basis_dependency
 from .candidates import resolve, same, store
+from . import artifact_storage as artifacts
 
 
 def local_criteria(state, task):
@@ -87,9 +89,9 @@ def valid_evidence(state, task, directory, stage=None):
             continue
         seen.add(item["check_id"])
         require(item["outcome"] == "passed", "required_checks", "Latest required check is failed, unavailable or stale")
-        path = contained(directory, item["log"])
-        require(path.is_file() and digest(path.read_bytes()) == item["log_hash"], "evidence_corrupt", item["log"])
-        log_data = json.loads(path.read_text(encoding="utf-8"))
+        path = artifacts.contained(directory, item["log"])
+        require(artifacts.is_file(path) and digest(artifacts.read_bytes(path)) == item["log_hash"], "evidence_corrupt", item["log"])
+        log_data = json.loads(artifacts.read_text(path))
         if state["basis"].get("work_kind", "change") == "refactoring" and not item.get("procedure"):
             require(log_data.get("work_kind") == "refactoring"
                     and log_data.get("run_id") == state["run_id"]
@@ -110,8 +112,8 @@ def valid_evidence(state, task, directory, stage=None):
                         "An unrelated successful command cannot establish a registered criterion")
         for output in log_data.get("outputs", []):
             if output.get("procedure_log"):
-                linked = contained(directory, output["procedure_log"])
-                require(linked.is_file() and digest(linked.read_bytes()) == output["procedure_log_hash"], "evidence_corrupt", "Procedure log changed")
+                linked = artifacts.contained(directory, output["procedure_log"])
+                require(artifacts.is_file(linked) and digest(artifacts.read_bytes(linked)) == output["procedure_log_hash"], "evidence_corrupt", "Procedure log changed")
         require(item["role_id"] in state["roles"], "unknown_role", "Evidence role missing")
         role = state["roles"][item["role_id"]]
         require(stage != "final" or role["kind"] == "final_verifier", "final_role", "A fresh final verifier is required")
@@ -252,9 +254,9 @@ def transition(state, task, event, directory):
         outcome = p["outcome"] if after == pending["before"] else "stale"
         relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
         record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], **pending, "after": after, "steps": p["steps"], "trace": p["trace"], "outcome": outcome}
-        path = contained(directory, relative)
+        path = artifacts.contained(directory, relative)
         write_json(path, record)
-        item = {"check_id": p["check_id"], "stage": pending["stage"], "role_id": p["role_id"], "candidate": pending["candidate"], "outcome": outcome, "log": relative, "log_hash": digest(path.read_bytes()), "time": now(), "head": git(root_for(state, task), "rev-parse", "HEAD"), "procedure": True}
+        item = {"check_id": p["check_id"], "stage": pending["stage"], "role_id": p["role_id"], "candidate": pending["candidate"], "outcome": outcome, "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root_for(state, task)).head(), "procedure": True}
         task["evidence"].append(item)
         del task["procedures"][p["check_id"]]
         return item
@@ -297,8 +299,8 @@ def transition(state, task, event, directory):
                 tested = candidate(state, task) if stage == "final" else task["candidate"]
                 latest = next((e for e in reversed(task["evidence"]) if e["check_id"] == check["id"] and e["stage"] == stage and same(state, e["candidate"], tested) and e.get("procedure")), None)
                 if latest:
-                    path = contained(directory, latest["log"])
-                    require(path.is_file() and digest(path.read_bytes()) == latest["log_hash"], "evidence_corrupt", "Procedure evidence changed")
+                    path = artifacts.contained(directory, latest["log"])
+                    require(artifacts.is_file(path) and digest(artifacts.read_bytes(path)) == latest["log_hash"], "evidence_corrupt", "Procedure evidence changed")
                     outputs.append({"check_id": check["id"], "outcome": latest["outcome"], "procedure_log": latest["log"], "procedure_log_hash": latest["log_hash"]})
                     continue
             outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "No executable command for required procedure"})
@@ -315,7 +317,7 @@ def transition(state, task, event, directory):
         record.update(work_kind="refactoring", registry_revision=task["check_registry"]["revision"],
                       registered_checks=deepcopy(task["checks"]))
     relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
-    path = contained(directory, relative)
+    path = artifacts.contained(directory, relative)
     write_json(path, record)
     outcome = "passed" if all(r["outcome"] == "passed" for r in outputs) and before == after else "failed"
     if any(r["outcome"] == "unavailable" for r in outputs):
@@ -327,7 +329,7 @@ def transition(state, task, event, directory):
         state["status"] = "blocked"
         state["blockers"].append({"reason": "baseline_failed", "task_id": task["plan"]["id"], "resume_condition": "Resolve or explicitly scope the pre-existing failure", "log": relative})
     for result in outputs:
-        task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "candidate": tested_candidate, "outcome": result["outcome"] if before == after else "stale", "log": relative, "log_hash": digest(path.read_bytes()), "time": now(), "head": git(root, "rev-parse", "HEAD")})
+        task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "candidate": tested_candidate, "outcome": result["outcome"] if before == after else "stale", "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root).head()})
     if stage != "self" or outcome != "passed":
         task["last_check_failed"] = outcome != "passed"
         if task["active_repair"] and outcome != "unavailable" and stage in {"independent", "integration", "final"}:

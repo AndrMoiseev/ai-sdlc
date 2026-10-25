@@ -1,7 +1,7 @@
 # Runtime and installation
 
 Install and update the aisdlc-core bundle as one unit. It supplies sdd-shared,
-sdd-setup, sdd-spec and sdd-apply as sibling skill folders. Individual skills have
+sdd-setup, sdd-spec, sdd-apply and sdd-sync as sibling skill folders. Individual skills have
 no dependency manifests or separate installation lifecycle. For manual deployment,
 copy the bundle's folders together, preserving scripts, adjacent lockfiles,
 references, schemas and api.json. The shared API check detects an incomplete or

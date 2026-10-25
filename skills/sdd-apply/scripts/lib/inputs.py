@@ -1,10 +1,11 @@
 """Read approved documents through the versioned sdd-shared API."""
+from .repository import repository
 from shared import locate, load
 import json
 from pathlib import Path
 import subprocess
 import sys
-from .common import git, require
+from .common import require
 
 
 def companion(project, explicit=None, sdd_shared=None, work_kind="change"):
@@ -63,13 +64,4 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
         plan_records = {kind: [record for record in records if record["sdd_record"] == kind]
                         for kind in ("acceptance", "verification")}
     manifest = spec_call(dependency, project, change, "plan", "snapshot.py", work_kind)
-    head = git(project, "rev-parse", "HEAD")
-    require(not git(project, "ls-files", "--unmerged"), "unmerged_index", "Resolve the existing Git conflict before execution")
-    branch = git(project, "symbolic-ref", "--quiet", "--short", "HEAD")
-    git(project, "var", "GIT_AUTHOR_IDENT")
-    git(project, "var", "GIT_COMMITTER_IDENT")
-    index = git(project, "diff", "--cached", "--binary", raw=True)
-    dirty = set()
-    for args in (("diff", "--name-only", "--cached", "-z"), ("diff", "--name-only", "-z"), ("ls-files", "--others", "--exclude-standard", "-z")):
-        dirty.update(filter(None, git(project, *args, raw=True).decode("utf-8").split("\0")))
-    return {"schema_version": 1, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "manifest": manifest, "tasks": tasks, **plan_records, "head": head, "branch": branch, "dirty_paths": sorted(dirty), "index_patch": index.decode("utf-8", "replace"), "status": git(project, "status", "--porcelain=v1", "-z", raw=True).decode("utf-8"), "working_patch": git(project, "diff", "--binary", raw=True).decode("utf-8", "replace")}
+    return {"schema_version": 1, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "manifest": manifest, "tasks": tasks, **plan_records, **repository(project).inspect()}

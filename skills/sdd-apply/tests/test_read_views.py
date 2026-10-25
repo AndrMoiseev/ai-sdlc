@@ -8,7 +8,8 @@ import pytest
 
 from lib.api import dispatch
 from lib.common import write_json
-from lib.state import apply, read, seal
+from lib.state import apply, read, seal, save
+from lib.state_storage import storage
 
 
 def compact(driver):
@@ -24,6 +25,7 @@ def envelope(view, ident, **changes):
             "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
 
 
+@pytest.mark.native_state
 def test_default_full_and_compact_are_read_only(driver):
     path = driver.directory / "state.json"
     before = path.read_bytes()
@@ -61,7 +63,7 @@ def test_compact_preserves_blockers_budgets_and_active_roles(driver):
         review_rounds_completed=3, active_review="round-4", test_repair_limit=9,
         test_repair_cycles_started=7, active_repair="cycle-7")
     seal(full)
-    write_json(driver.directory / "state.json", full)
+    save(driver.directory, full)
     task = compact(driver)["tasks"]["TASK-one"]
     assert task["active_review"] == "round-4" and task["active_repair"] == "cycle-7"
     assert task["review_limit"] == 6 and task["test_repair_limit"] == 9
@@ -98,13 +100,14 @@ def test_both_views_validate_omitted_history(driver, damage, reseal, error, view
         data["events"][0]["event"]["payload"]["reason"] = "tampered"
     if reseal:
         seal(data)
-    write_json(driver.directory / "state.json", data)
+    save(driver.directory, data)
     with pytest.raises(ValueError) as rejected:
         dispatch({"operation": "read", "args": {"directory": str(driver.directory), "view": view}})
     assert rejected.value.code == error
 
 
 @pytest.mark.parametrize("view", ["full", "compact"])
+@pytest.mark.native_state
 def test_read_rejects_copied_state_root(driver, tmp_path, view):
     copied = tmp_path / "wrong-root"
     copied.mkdir()
@@ -119,13 +122,13 @@ def test_compact_revision_conflict_and_identical_retry(driver):
     result = apply(driver.directory, item)
     current = compact(driver)
     assert current["revision"] == initial["revision"] + 1
-    saved = (driver.directory / "state.json").read_bytes()
+    saved = storage(driver.directory).read()
     with pytest.raises(ValueError, match="Re-read current state"):
         apply(driver.directory, envelope(initial, "stale"))
     assert apply(driver.directory, item) == result
     with pytest.raises(ValueError, match="Event ID reused"):
         apply(driver.directory, {**item, "expected_revision": current["revision"]})
-    assert (driver.directory / "state.json").read_bytes() == saved
+    assert storage(driver.directory).read() == saved
     apply(driver.directory, envelope(current, "fresh"))
     assert compact(driver)["revision"] == current["revision"] + 1
 
@@ -149,6 +152,7 @@ def test_compact_size_does_not_repeat_finished_role_history(driver):
 
 
 @pytest.mark.parametrize("view,success", [("compact", True), ("full", True), ("short", False)])
+@pytest.mark.native_state
 def test_cli_read_view(driver, tmp_path, view, success):
     request = tmp_path / "read-request.json"
     write_json(request, {"operation": "read", "args": {

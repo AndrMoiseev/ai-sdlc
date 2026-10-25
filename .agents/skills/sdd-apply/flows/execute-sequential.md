@@ -1,6 +1,6 @@
 # Sequential execution
 
-Read [API](../references/api.md) and [roles](../references/roles.md). Keep the parallel flow unloaded.
+Read [task events](../references/api-tasks.md), [checks and evidence](../references/api-checks.md), and [role coordination](../references/role-coordination.md) if not already loaded. Keep the parallel flow unloaded.
 
 1. Ask the `available` operation for admission. Maintain one unfinished task. If a previous task is running, verifying, reviewing, repairing, committing or blocked, continue it; do not admit another task. A blocked current task blocks the entire run, even when other dependencies would permit work.
 2. Register the task's complete checks and inspected project/CI inventory. Launch a fresh executor using [executor](../agents/executor.md) and the host adapter. Register its observed launch, send its generated packet, then submit `start` with explicit owned paths. Before the executor writes, launch/register an independent verifier and run `check_run` at stage `baseline` for existing mandatory checks. Record planned absence only for approved setup requirements.

@@ -2,7 +2,7 @@
 from html import escape
 import json
 from pathlib import Path
-from .common import atomic
+from .artifact_storage import write as atomic
 from .state import read
 from .scheduler import available
 from .review_policy import technical_debt

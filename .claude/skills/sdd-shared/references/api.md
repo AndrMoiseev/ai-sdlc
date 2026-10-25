@@ -48,3 +48,51 @@ the existing stale-plan check prevents writes and preserves the old plan.
 The small `scripts/shared.py` bootstrap is shipped in each consumer because a
 missing dependency cannot locate itself. Its copies must stay identical. It performs
 discovery and API checks only; domain rules stay here.
+
+## Refactoring document model
+
+`api.json.work_kinds` advertises `change` and `refactoring`;
+`document_schemas` lists supported versions for each kind/type pair. Both kinds
+start with version 1. This adds capabilities to API v1; it does not migrate stored
+documents or change the meaning of ordinary `covers`.
+
+`documents.read_document(path, work_kind="change")` selects the schema using the
+explicit context, declared kind, document type and version. Refactoring requires
+an explicit context and `work_kind: refactoring` in frontmatter. Known SDD directory
+roots must match the selection. Missing kind retains the ordinary change contract.
+
+`validation.validate_documents(project_root, work_root, stage, work_kind="change")`
+validates either model. Refactoring reads proposal/design and, for plan, tasks;
+it requires `sdd/refactoring/<change_id>` and no specs. The return shape preserves
+errors/warnings and plan tasks/progress. These are structural facts, not evidence
+of whole-work completion or runtime retirement of transitional checks.
+
+Consumers call `shared.locate(..., work_kind="refactoring")` or
+`shared.load(root, module, work_kind="refactoring")` before dependent operations.
+A legacy package without advertised support remains usable for ordinary changes;
+an explicit refactoring request fails with an installation diagnostic instead of
+loading the change schema. Install the matching whole bundle to repair missing
+support. The full model is in the
+[refactoring format](document-format-refactoring.md) and its linked JSON schema.
+`paths.change_root(project_root, change_id, work_kind="change")` resolves either
+allowed root with containment checks, including existing linked parents.
+`paths.list_work(project_root, change_id=None)` returns explicit kind, ID, root
+and `has_plan` for both roots without selecting a first match.
+
+Check/snapshot accept `--work-kind change|refactoring`, defaulting to `change`.
+The compatible sdd-spec wrappers forward the same option. Snapshots retain the
+path/hash list shape: refactoring documents include proposal/design, and plan adds
+tasks. Review and approval checks additionally bind the work kind and ID; equal
+manifests do not transfer authority between identities.
+
+`reviews.review_status(project_root, work_root, stage, work_kind="change")`
+checks that the selected root and document identities agree. Ancillary state,
+questions, decisions, review and summary documents keep their generic schemas;
+refactoring adds explicit `work_kind` and `change_id` to their metadata.
+
+Apply validate/initialize accept `work_kind`, defaulting to `change` for existing
+calls. Explicit null requests discovery across both roots; ambiguity returns the
+available identities. Refactoring bases separate executable `tasks`, local
+`acceptance` and whole-work `verification`. Initialize stores the latter records
+as ID-keyed mappings without declaring them confirmed. Initial dashboards show
+pending tasks and local criteria; read verifies the selected execution root.

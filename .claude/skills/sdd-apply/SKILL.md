@@ -8,12 +8,26 @@ disable-model-invocation: true
 
 Use only on explicit invocation. Keep normative SDD documents unchanged.
 
+Only when changing the sdd-apply skill itself, read
+[maintenance and test rules](references/maintenance.md) before editing or testing.
+Leave that reference unloaded when using sdd-apply to implement another project.
+
 Before each fresh worker launch, apply [project subagent selection](references/subagents.md).
 Resolve the role's agent from `.sdd/settings.json` at the execution's original project root.
 
 ## Coordination and progress
 
 Before coordinating workers, read the [shared coordination contract](../sdd-shared/references/coordination.md).
+
+## Skill development acceptance
+
+When creating or changing skills, accept each individual planned task using only
+deterministic tests. Schedule all behavioral checks, including agent-based evals,
+trigger tests and pressure scenarios, exclusively for final acceptance of the
+whole plan. Apply this boundary to baseline, self-checks, independent verification,
+integration and repair retries as well. If the approved plan requires a behavioral
+check before final acceptance, return that conflict to sdd-spec before execution;
+do not silently omit the check or replace it with a deterministic test.
 
 ## Route
 

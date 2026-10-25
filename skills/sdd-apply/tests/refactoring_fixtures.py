@@ -1,13 +1,15 @@
 """Reusable synthetic approved work and host events; never real user consent."""
+from lib import artifact_storage as artifacts
+from lib.repository import repository
+from repository_support import stage as stage_files, commit
 from copy import deepcopy
 import json
 from pathlib import Path
 import sys
 
 from conftest import Driver, document
-from lib.common import git, write_json
 from lib.inputs import spec_modules, validate
-from lib.state import seal
+from lib.state import seal, save
 
 COLLECTION = Path(__file__).resolve().parents[2]
 
@@ -54,8 +56,8 @@ def approved_basis(project, work_kind="refactoring"):
         document(root / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
                                     "updated_at": "2026-10-24T00:00:00Z", "document_links": ["tasks.md"],
                                     "review_links": ["review/decisions.md"], "approval_refs": [a["id"] for a in approvals]})
-        git(project, "add", ".")
-        git(project, "commit", "-m", "Synthetic approved refactoring fixture")
+        stage_files(project, ".")
+        commit(project, "Synthetic approved refactoring fixture")
     return validate(project, "demo", {"text": "Execute the synthetic approved plan", "source": "synthetic-unit-test"},
                     sdd_shared=shared, work_kind=work_kind)
 
@@ -64,7 +66,9 @@ class AcceptanceDriver(Driver):
     """Actual reducer operations with explicitly synthetic native-role traces."""
     @property
     def root(self):
-        return Path(self.task["worktree"]["path"]) if self.task["worktree"] and not self.task["worktree"].get("integrated") else Path(self.state["basis"]["project_root"])
+        state = self._view()
+        worktree = state["tasks"]["TASK-one"]["worktree"]
+        return Path(worktree["path"]) if worktree and not worktree.get("integrated") else Path(state["basis"]["project_root"])
 
     def start(self, paths=None, additional=None):
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": additional or []})
@@ -95,7 +99,7 @@ class AcceptanceDriver(Driver):
         state = deepcopy(self.state)
         mutate(state["tasks"]["TASK-one"])
         seal(state)
-        write_json(self.directory / "state.json", state)
+        save(self.directory, state)
 
     def log(self, result):
-        return json.loads((self.directory / result["log"]).read_text(encoding="utf-8"))
+        return json.loads(artifacts.read_text(self.directory / result["log"]))

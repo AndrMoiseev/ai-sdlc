@@ -1,6 +1,9 @@
-﻿from lib.common import git
+from lib.repository import repository
+from repository_support import commit, ignore
 from conftest import Driver
 import pytest
+from pathlib import Path
+from copy import deepcopy
 
 def accepted_worktree(basis, tmp_path):
     from pathlib import Path
@@ -24,10 +27,30 @@ def accepted_worktree(basis, tmp_path):
     return d, wt
 
 
-def test_cleanup_preserves_unknown_ignored_user_data(basis, project, tmp_path):
-    d, wt = accepted_worktree(basis, tmp_path)
-    with (project / '.git/info/exclude').open('a') as stream:
-        stream.write('\n*.local\n')
+@pytest.fixture(scope="session")
+def cleanup_template(project_template, basis_template, repository_seeds, tmp_path_factory):
+    from checkpoints import Checkpoint, preparation
+    from conftest import copy_project
+    from memory_repository import MemoryRepositories
+    workspace = tmp_path_factory.mktemp("cleanup-checkpoint")
+    backend = MemoryRepositories(repository_seeds)
+    root = copy_project(project_template, workspace / "project", backend)
+    basis = deepcopy(basis_template)
+    basis.update(project_root=str(root), change_root=str(root / "sdd/changes/demo"))
+    with preparation(backend) as states:
+        driver, _ = accepted_worktree(basis, workspace)
+        return Checkpoint(workspace, driver, backend, states)
+
+
+@pytest.fixture
+def cleanup_checkpoint(cleanup_template, repository_backend, state_backend):
+    driver = cleanup_template.restore(repository_backend, state_backend)
+    return driver, Path(driver.task["worktree"]["path"]), Path(driver.state["basis"]["project_root"])
+
+
+def test_cleanup_preserves_unknown_ignored_user_data(cleanup_checkpoint):
+    d, wt, project = cleanup_checkpoint
+    ignore(project, '*.local')
     valuable = wt / 'user-data.local'
     valuable.write_text('untransferred user data')
     with pytest.raises(ValueError, match='ignored data'):
@@ -36,27 +59,23 @@ def test_cleanup_preserves_unknown_ignored_user_data(basis, project, tmp_path):
 
 
 @pytest.mark.parametrize('crash_point', ['after_git', 'before_state'])
-def test_cleanup_crash_reconciles_removed_worktree(basis, project, tmp_path, monkeypatch, crash_point):
-    """Synthetic crash injection; the Git removal itself runs against a real fixture."""
-    from lib import state, worktrees
-    d, wt = accepted_worktree(basis, tmp_path)
+def test_cleanup_crash_reconciles_removed_worktree(cleanup_checkpoint, monkeypatch, crash_point):
+    """The repository mutation succeeds, but its response is lost before persistence."""
+    from lib import state
+    d, wt, project = cleanup_checkpoint
     before = d.state
     with monkeypatch.context() as patch:
         if crash_point == 'after_git':
-            real_git = worktrees.git
-            def crash_after_git(root, *args, **kwargs):
-                result = real_git(root, *args, **kwargs)
-                if args[:2] == ('worktree', 'remove'):
-                    raise OSError('injected crash after Git removal')
-                return result
-            patch.setattr(worktrees, 'git', crash_after_git)
+            repo = repository(project)
+            remove = repo.remove_worktree
+            def crash_after_git(path):
+                remove(path)
+                raise OSError('injected crash after Git removal')
+            patch.setattr(repo, 'remove_worktree', crash_after_git)
         else:
-            real_write = state.write_json
             def crash_before_state(path, data):
-                if path.name == 'state.json':
-                    raise OSError('injected crash before state replacement')
-                return real_write(path, data)
-            patch.setattr(state, 'write_json', crash_before_state)
+                raise OSError('injected crash before state replacement')
+            patch.setattr(state, 'save', crash_before_state)
         with pytest.raises(OSError, match='injected crash'):
             d.send('worktree_remove')
     assert not wt.exists()
@@ -65,13 +84,10 @@ def test_cleanup_crash_reconciles_removed_worktree(basis, project, tmp_path, mon
     assert d.send('worktree_remove') == {'removed': str(wt)}
     assert d.task['worktree']['removed'] is True
     assert d.state['revision'] == before['revision'] + 1
-    assert str(wt).replace('\\', '/') not in git(project, 'worktree', 'list', '--porcelain').replace('\\', '/')
+    assert repository(project).worktree(wt) is None
 
-def test_failed_latest_run_blocks_acceptance(driver, project, monkeypatch):
-    driver.start()
-    (project / 'result.txt').write_text('result')
-    driver.freeze()
-    assert driver.verify()['outcome'] == 'passed'
+def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
+    driver = execution_checkpoint("verified")
     from lib import verification
     original = verification.run_command
     def failure(*args):
@@ -92,28 +108,20 @@ def test_ownership_path_alias_rejected(basis, project):
     with pytest.raises(ValueError, match='canonical'):
         driver.send('start', {'role_id': 'author', 'paths': ['./check.py']})
 
-def test_final_checks_cannot_accept_uncommitted_implementation(driver, project):
-    driver.start()
-    (project / 'result.txt').write_text('original')
-    driver.freeze()
-    driver.verify()
-    driver.review()
-    driver.send('commit')
-    driver.send('accept')
+def test_final_checks_cannot_accept_uncommitted_implementation(execution_checkpoint):
+    driver = execution_checkpoint("accepted")
+    project = Path(driver.state["basis"]["project_root"])
+    committed = repository(project).content('HEAD', 'result.txt')
     (project / 'result.txt').write_text('different uncommitted implementation')
     driver.role('final', 'final_verifier')
     assert driver.send('check_run', {'role_id': 'final', 'stage': 'final'})['outcome'] == 'passed'
     assert driver.send('finalize', {}, task_id=None)['result'] == 'partial'
-    assert git(project, 'show', 'HEAD:result.txt') == 'original'
+    assert repository(project).content('HEAD', 'result.txt') == committed
+    assert committed.decode().splitlines() == ['verified result']
 
-def test_lost_reviewer_successor_finishes_reserved_round(driver, project):
+def test_lost_reviewer_successor_finishes_reserved_round(execution_checkpoint):
     import pytest
-    driver.start()
-    (project / 'result.txt').write_text('result')
-    driver.freeze()
-    driver.verify()
-    driver.role('reviewer', 'reviewer')
-    driver.send('review_start', {'role_id': 'reviewer'})
+    driver = execution_checkpoint("reviewing")
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['verifier']}, task_id=None)
     driver.send('role_register', {'role_id': 'replacement', 'kind': 'reviewer', 'context_id': 'replacement', 'fresh': True, 'host': 'codex', 'launch_ref': 'synthetic', 'capabilities': {'fresh_context': True}, 'successor_of': 'reviewer'})
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['replacement', 'verifier'], 'resolutions': [{'reason': 'lost_role', 'task_id': 'TASK-one', 'successor': 'replacement', 'evidence': 'registered'}]}, task_id=None)
@@ -121,4 +129,3 @@ def test_lost_reviewer_successor_finishes_reserved_round(driver, project):
         driver.send('review_start', {'role_id': 'replacement'})
     result = driver.send('review_result', {'role_id': 'replacement', 'candidate': driver.task['candidate'], 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
     assert result['status'] == 'committing'
-

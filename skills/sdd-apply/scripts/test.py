@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["PyYAML==6.0.3", "markdown-it-py==4.0.0", "pytest==8.4.2", "pytest-xdist==3.8.0"]
+# dependencies = ["PyYAML==6.0.3", "markdown-it-py==4.0.0", "pytest==8.4.2", "pytest-xdist==3.8.0", "websocket-client==1.8.0"]
 # ///
 """Run package tests from any cwd, without writing caches into the package."""
 import sys

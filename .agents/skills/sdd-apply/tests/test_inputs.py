@@ -1,6 +1,8 @@
+from lib.repository import repository
+from repository_support import stage as stage_files
 import pytest
 from lib.inputs import validate, spec_modules
-from lib.common import git
+
 from conftest import SPEC
 
 
@@ -10,13 +12,13 @@ def call(project):
 
 def test_approved_and_preserves_dirty(project):
     (project / "foreign.txt").write_bytes(b"staged")
-    git(project, "add", "foreign.txt")
+    stage_files(project, "foreign.txt")
     (project / "foreign.txt").write_bytes(b"unstaged")
     (project / "untracked.txt").write_bytes(b"keep")
-    before = (git(project, "rev-parse", "HEAD"), git(project, "diff", "--cached", raw=True), git(project, "diff", raw=True))
+    before = (repository(project).head(), repository(project).index_patch(), repository(project).inspect()["working_patch"])
     result = call(project)
     assert result["tasks"][0]["id"] == "TASK-one"
-    assert before == (git(project, "rev-parse", "HEAD"), git(project, "diff", "--cached", raw=True), git(project, "diff", raw=True))
+    assert before == (repository(project).head(), repository(project).index_patch(), repository(project).inspect()["working_patch"])
     assert (project / "untracked.txt").read_bytes() == b"keep"
 
 

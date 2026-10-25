@@ -1,62 +1,27 @@
 """Revisioned event store. Rejected transitions never replace the state file."""
-from contextlib import contextmanager
 from copy import deepcopy
 import json
-import os
 from pathlib import Path
-import socket
 import uuid
 import re
-from .common import atomic, contained, digest, now, require, source_snapshot, write_json
+from .common import contained, contained_paths, digest, now, require, source_snapshot, write_json
+
+from .state_storage import storage
+from .path_resolution import resolve
 
 TASK_STATES = {"pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"}
 
 
-@contextmanager
 def lock(directory):
-    directory = Path(directory)
-    directory.mkdir(parents=True, exist_ok=True)
-    path = directory / "state.lock"
-    try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
-        raise ValueError(f"state_locked: inspect owner before recovery: {path}")
-    token = uuid.uuid4().hex
-    try:
-        with os.fdopen(fd, "w") as stream:
-            json.dump({"pid": os.getpid(), "host": socket.gethostname(), "token": token}, stream)
-        yield
-    finally:
-        if path.exists() and json.loads(path.read_text())["token"] == token:
-            path.unlink()
+    return storage(directory).lock()
 
 
 def recover_lock(directory):
-    path = Path(directory) / "state.lock"
-    owner = json.loads(path.read_text())
-    require(owner["host"] == socket.gethostname(), "unknown_lock_owner", "Owner is on another host")
-    # A failed permission check does not prove death. Windows kill(pid, 0) is
-    # unsafe; OpenProcess/GetExitCodeProcess is the read-only liveness probe.
-    if os.name == "nt":
-        import ctypes
-        api = ctypes.WinDLL("kernel32", use_last_error=True)
-        api.OpenProcess.restype = ctypes.c_void_p
-        handle = api.OpenProcess(0x1000, False, owner["pid"])
-        if handle:
-            api.CloseHandle.argtypes = [ctypes.c_void_p]
-            api.CloseHandle(handle)
-            raise ValueError("lock_owner_alive")
-        require(ctypes.get_last_error() == 87, "unknown_lock_owner", "Cannot prove owner exited")
-    else:
-        try:
-            os.kill(owner["pid"], 0)
-        except ProcessLookupError:
-            pass
-        else:
-            raise ValueError("lock_owner_alive")
-    require(json.loads(path.read_text()) == owner, "lock_changed", "Lock changed during recovery")
-    path.unlink()
-    return {"recovered": owner}
+    return storage(directory).recover_lock()
+
+
+def save(directory, state):
+    storage(directory).save(state)
 
 
 def seal(state):
@@ -71,17 +36,17 @@ def execution_directory(basis):
             "state_root", "Invalid work identity")
     root = "changes" if kind == "change" else "refactoring"
     directory = contained(basis["project_root"], f"sdd/{root}/{change}/execution")
-    require(directory.parent == Path(basis["change_root"]).resolve(), "state_root", "State is outside its registered execution root")
+    require(directory.parent == resolve(basis["change_root"]), "state_root", "State is outside its registered execution root")
     return directory
 
 
 def read(directory, view="full"):
     require(view in ("full", "compact"), "read_view", "Expected full or compact")
-    state = json.loads((Path(directory) / "state.json").read_text(encoding="utf-8"))
+    state = json.loads(storage(directory).read().decode("utf-8"))
     require(state.get("schema_version") == 1, "state_version", "Unsupported state schema")
     require(state["change_id"] == state["basis"]["change_id"] and state.get("work_kind", "change") == state["basis"].get("work_kind", "change"), "state_root", "State work identity differs from its basis")
     expected_directory = execution_directory(state["basis"])
-    require(Path(directory).resolve() == expected_directory and expected_directory.parent == Path(state["basis"]["change_root"]).resolve(), "state_root", "State is outside its registered execution root")
+    require(resolve(directory) == expected_directory, "state_root", "State is outside its registered execution root")
     require(state.get("integrity") == digest({k: v for k, v in state.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
     require(state["revision"] == len(state["events"]), "history_corrupt", "History length mismatch")
     require(state["status"] in {"active", "blocked", "completed"} and state["mode"] in {"sequential", "parallel"}, "state_schema", "Unknown execution status or mode")
@@ -114,7 +79,7 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
     directory = execution_directory(basis)
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
     with lock(directory):
-        require(not (directory / "state.json").exists(), "already_started", "Use resume for existing execution")
+        require(not storage(directory).exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
         state = {"schema_version": 1, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "events": [], "blockers": [], "updated_at": now(), "final": None}
         if basis.get("work_kind", "change") == "refactoring":
@@ -125,24 +90,25 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
         state["baseline"] = snapshot(state, basis["project_root"])
         write_json(directory / "runs" / run / "input.json", basis)
         seal(state)
-        write_json(directory / "state.json", state)
+        save(directory, state)
     return state
 
 
 def snapshot(state, root=None):
     included = [p for t in state["tasks"].values() for p in t["paths"]]
-    excluded = execution_directory(state["basis"]).relative_to(Path(state["basis"]["project_root"]).resolve()).as_posix()
+    excluded = execution_directory(state["basis"]).relative_to(resolve(state["basis"]["project_root"])).as_posix()
     return source_snapshot(root or state["basis"]["project_root"], [excluded], included)
 
 
 def assert_basis(state):
-    for entry in state["basis"]["manifest"]:
-        path = contained(state["basis"]["change_root"], entry["path"])
+    manifest = state["basis"]["manifest"]
+    paths = contained_paths(state["basis"]["change_root"], (entry["path"] for entry in manifest))
+    for entry, path in zip(manifest, paths):
         require(path.is_file() and digest(path.read_bytes()) == entry["sha256"], "normative_drift", entry["path"])
 
 
 def apply(directory, event):
-    directory = Path(directory).resolve()
+    directory = resolve(directory)
     with lock(directory):
         original = read(directory)
         require(set(event) == {"event_id", "run_id", "expected_revision", "owner", "type", "task_id", "payload"}, "event_schema", "Expected the complete typed event envelope")
@@ -165,5 +131,5 @@ def apply(directory, event):
         entry["hash"] = digest(entry)
         state["events"].append(entry)
         seal(state)
-        write_json(directory / "state.json", state)
+        save(directory, state)
     return result

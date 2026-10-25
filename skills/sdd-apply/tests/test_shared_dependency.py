@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import pytest
 
 from lib.common import write_json
 from lib.inputs import basis_dependency
@@ -34,6 +35,7 @@ def test_new_basis_explicit_root_precedes_old_path(basis):
     assert basis_dependency(mixed) == Path(basis['sdd_shared'])
 
 
+@pytest.mark.installation
 def test_installed_apply_validates_without_spec(project, tmp_path):
     source = Path(__file__).resolve().parents[1]
     collection = tmp_path / 'installed skills'
@@ -50,3 +52,5 @@ def test_installed_apply_validates_without_spec(project, tmp_path):
     assert basis['checks']['plan']['approval_status']['ready']
     assert basis['sdd_shared'] == str((collection / 'sdd-shared').resolve())
     assert 'sdd_spec' not in basis
+
+pytestmark = pytest.mark.native_state

@@ -1,7 +1,8 @@
 """Content-addressed candidate artifacts; references never replace validation."""
 import json
 import re
-from .common import contained, digest, require, write_json
+from . import artifact_storage as artifacts
+from .common import digest, require, write_json
 
 
 def directory_for(state):
@@ -20,10 +21,10 @@ def resolve(state, value):
             and value["candidate_id"] == "candidate-" + sha256
             and value["path"] == f"candidates/{sha256}.json",
             "candidate_reference", "Use the complete script-issued candidate reference")
-    path = contained(directory_for(state), value["path"])
-    require(path.is_file(), "candidate_missing", "Candidate artifact is missing: " + value["path"])
+    path = artifacts.contained(directory_for(state), value["path"])
+    require(artifacts.is_file(path), "candidate_missing", "Candidate artifact is missing: " + value["path"])
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(artifacts.read_text(path))
     except (ValueError, UnicodeError) as exc:
         raise ValueError("Candidate artifact is unreadable: " + value["path"]) from exc
     require(isinstance(payload, dict) and set(payload) == {"source", "manifest", "checks", "root"}
@@ -36,8 +37,8 @@ def store(state, payload):
     sha256 = digest(payload)
     reference = {"candidate_id": "candidate-" + sha256, "sha256": sha256,
                  "path": f"candidates/{sha256}.json", "root": payload["root"]}
-    path = contained(directory_for(state), reference["path"])
-    if path.exists():
+    path = artifacts.contained(directory_for(state), reference["path"])
+    if artifacts.exists(path):
         resolve(state, reference)  # Never silently replace corrupted evidence.
     else:
         write_json(path, payload)

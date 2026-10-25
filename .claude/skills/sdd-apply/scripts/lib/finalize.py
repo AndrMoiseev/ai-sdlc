@@ -1,5 +1,6 @@
 """Final acceptance requires fresh independent checks of every AC at final HEAD."""
-from .common import git, now, require
+from .repository import repository
+from .common import now, require
 from .commits import confirm, index_tree
 from .verification import valid_evidence
 from .review_policy import technical_debt
@@ -7,7 +8,7 @@ from .review_policy import technical_debt
 
 def finalize(state, payload, directory):
     root = state["basis"]["project_root"]
-    head = git(root, "rev-parse", "HEAD")
+    head = repository(root).head()
     missing, accepted, evidence = [{"reason": b["reason"], "criteria": [], "task_id": b.get("task_id")} for b in state["blockers"]], [], []
     for key, task in state["tasks"].items():
         if task["status"] != "accepted" or not task["commits"]:
@@ -16,7 +17,7 @@ def finalize(state, payload, directory):
         try:
             for commit in task["commits"]:
                 confirm(state, task, commit)
-            require(index_tree(root, task["paths"], head) == git(root, "rev-parse", "HEAD^{tree}"), "uncommitted_result", "Task files differ from final HEAD")
+            require(index_tree(root, task["paths"], head) == repository(root).tree("HEAD"), "uncommitted_result", "Task files differ from final HEAD")
             checks = valid_evidence(state, task, directory, "final")
             require(all(e.get("head") == head for e in checks), "final_head", "Final evidence must name current HEAD")
             evidence.extend(checks)

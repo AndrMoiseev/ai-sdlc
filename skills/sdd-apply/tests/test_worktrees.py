@@ -1,14 +1,16 @@
+from lib.repository import repository
+
 from pathlib import Path
 import pytest
 from conftest import Driver
-from lib.common import git
+
 
 
 def test_detached_preserved_and_no_branch(basis, tmp_path):
     d = Driver(basis, parallel=True)
     result = d.send("worktree_create", {"workspace": str(tmp_path / "trees"), "resources": ["db-task-one"]})
-    assert git(result["path"], "rev-parse", "HEAD") == basis["head"]
-    assert git(result["path"], "symbolic-ref", "-q", "HEAD", check=False) == ""
+    assert repository(result["path"]).head() == basis["head"]
+    assert repository(result["path"]).branch() is None
     (Path(result["path"]) / "unfinished").write_text("preserve")
     with pytest.raises(ValueError, match="unaccepted"):
         d.send("worktree_remove")

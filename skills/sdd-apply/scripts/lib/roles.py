@@ -1,9 +1,10 @@
 """Host-attested fresh contexts and separate implementation/review results."""
-from .common import contained, digest, now, require, write_json
+from .common import digest, now, require, write_json
 from .verification import current, independent, valid_evidence, local_criteria
 from .review_policy import proven
 from .candidates import reference, same
 import re
+from . import artifact_storage as artifacts
 from pathlib import Path
 
 
@@ -80,15 +81,15 @@ def transition(state, task, event, directory):
                                   if key not in {"snapshot", "inventory"}}
             packet["worktree_state"] = {"path": "state.json", "task_id": task["plan"]["id"]}
         import json
-        for effect in (directory / "runs" / state["run_id"] / "effects").glob("*.json"):
-            record = json.loads(effect.read_text(encoding="utf-8"))
+        for effect in artifacts.paths(directory / "runs" / state["run_id"] / "effects", "*.json"):
+            record = json.loads(artifacts.read_text(effect))
             if (record["phase"] == "prepared" and record["request"]["operation"] == "worktree_refresh"
                     and record["request"]["task_id"] == task["plan"]["id"]):
                 saved = record["request"]["precondition"]
                 packet["worktree_recovery"] = {"intent_id": record["request"]["event"]["event_id"],
                     "source": saved["old"]["path"], "replacement": saved["new"],
-                    "patch": str(contained(saved["artifacts"], "task.patch"))}
-        path = contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
+                    "patch": str(artifacts.contained(saved["artifacts"], "task.patch"))}
+        path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
         write_json(path, packet)
         return {"role": role, "packet": str(path)}
     if kind == "role_result":

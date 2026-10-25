@@ -1,39 +1,34 @@
 """Replace stale task worktrees without discarding unfinished work or evidence."""
+from .repository import repository
+from .path_resolution import resolve
 from copy import deepcopy
 import json
-import os
 from pathlib import Path
-import subprocess
-import tempfile
 
-from .common import atomic, contained, digest, git, require, write_json
-from .commits import index_tree
+from .common import contained, digest, require, write_json
+from . import artifact_storage as artifacts
+from .artifact_storage import write as atomic
 from .effects import intent, observed
 from .state import snapshot
 from .worktrees import inventory
 
 
 def registered(root, path):
-    lines = git(root, "worktree", "list", "--porcelain", "-z", raw=True).decode("utf-8").split("\0")
-    return str(Path(path).resolve()).replace("\\", "/") in {
-        line[9:].replace("\\", "/") for line in lines if line.startswith("worktree ")
-    }
+    return repository(root).worktree(path) is not None
 
 
 def owned_tree(root, paths, base):
-    tracked = set(git(root, "ls-tree", "-r", "--name-only", "-z", base, raw=True).decode("utf-8").split("\0"))
-    present = [p for p in paths if p in tracked or (Path(root) / p).exists()]
-    return index_tree(root, present, base) if present else git(root, "rev-parse", base + "^{tree}")
+    return repository(root).tree_for_paths(paths, base)
 
 
 def source_unchanged(state, old, saved):
     path = old["path"]
-    require(git(path, "rev-parse", "HEAD") == old["base"]
-            and not git(path, "symbolic-ref", "-q", "HEAD", check=False),
+    require(repository(path).head() == old["base"]
+            and not repository(path).branch(),
             "executor_commit", "Preserve unexpected task commits or branch changes")
     require(inventory(path) == saved["inventory"] and snapshot(state, path) == saved["source"]
-            and git(path, "diff", "--cached", "--binary", "--full-index", raw=True) ==
-            contained(saved["artifacts"], "index.patch").read_bytes(),
+            and repository(path).index_patch(full=True) ==
+            artifacts.read_bytes(artifacts.contained(saved["artifacts"], "index.patch")),
             "refresh_source_changed", "Source worktree changed; preserve both trees")
 
 
@@ -41,12 +36,12 @@ def finish(state, task, directory, effect, journal, resolution=None):
     saved = journal["request"]["precondition"]
     old, new = saved["old"], saved["new"]
     root = state["basis"]["project_root"]
-    require(git(root, "rev-parse", "HEAD") == saved["base"], "refresh_head_changed",
+    require(repository(root).head() == saved["base"], "refresh_head_changed",
             "Execution HEAD changed during refresh; preserve both trees")
-    require(registered(root, new) and git(new, "rev-parse", "HEAD") == saved["base"]
-            and not git(new, "symbolic-ref", "-q", "HEAD", check=False),
+    require(registered(root, new) and repository(new).head() == saved["base"]
+            and not repository(new).branch(),
             "refresh_destination_changed", "Expected registered detached replacement")
-    require(not git(new, "ls-files", "--unmerged"), "refresh_conflict",
+    require(not repository(new).has_conflicts(), "refresh_conflict",
             f"Resolve the recorded transfer in {new}; preserve the old worktree")
     after = snapshot(state, new)
     files = inventory(new)
@@ -59,8 +54,7 @@ def finish(state, task, directory, effect, journal, resolution=None):
                if files.get(p) != baseline["inventory"].get(p)}
     changed |= {p for p in set(after["files"]) | set(baseline["snapshot"]["files"])
                 if after["files"].get(p) != baseline["snapshot"]["files"].get(p)}
-    changed.update(filter(None, git(new, "diff", "--cached", "--name-only", "-z", saved["base"],
-                                    raw=True).decode("utf-8").split("\0")))
+    changed.update(repository(new).changed_index_paths(saved["base"]))
     require(changed <= set(task["paths"]), "refresh_scope", "Replacement changed files outside task ownership")
     # Persist the verified destination before deletion, so a crash between Git
     # cleanup and the state transaction can safely finish the same operation.
@@ -76,11 +70,11 @@ def finish(state, task, directory, effect, journal, resolution=None):
     if Path(old["path"]).exists():
         require(registered(root, old["path"]), "unregistered_worktree", "Source is no longer registered")
         source_unchanged(state, old, saved)
-        workspace = Path(old["workspace"]).resolve()
+        workspace = resolve(old["workspace"])
         source = contained(workspace, str(Path(old["path"]).relative_to(workspace)))
-        require(str(source) == old["path"] and source != Path(root).resolve(),
+        require(str(source) == old["path"] and source != resolve(root),
                 "worktree_escape", "Only the registered task worktree may be removed")
-        git(root, "worktree", "remove", "--force", str(source))
+        repository(root).remove_worktree(source)
     require(not registered(root, old["path"]), "refresh_cleanup", "Old worktree is still registered")
     task.setdefault("worktree_history", []).append({
         "worktree": old, "refresh_event": journal["request"]["event"]["event_id"],
@@ -120,16 +114,16 @@ def transition(state, task, event, directory):
             "writer_active", "Stop and reconcile all task roles before refreshing")
     require(not task.get("procedures"), "procedure_active", "Finish pending procedures first")
     root = state["basis"]["project_root"]
-    require(git(root, "symbolic-ref", "--quiet", "--short", "HEAD") == state["basis"]["branch"],
+    require(repository(root).branch() == state["basis"]["branch"],
             "branch_changed", "Restore the execution branch")
     effects = Path(directory) / "runs" / state["run_id"] / "effects"
     p = event["payload"]
     resolving = event["type"] == "worktree_refresh_resolve"
     original_id = p.get("intent_id") if resolving else event["event_id"]
     require(isinstance(original_id, str) and original_id, "refresh_intent", "Reference the original refresh event")
-    effect = contained(directory, f"runs/{state['run_id']}/effects/{original_id}.json")
-    for pending in effects.glob("*.json"):
-        record = json.loads(pending.read_text(encoding="utf-8"))
+    effect = artifacts.contained(directory, f"runs/{state['run_id']}/effects/{original_id}.json")
+    for pending in artifacts.paths(effects, "*.json"):
+        record = json.loads(artifacts.read_text(pending))
         if record["phase"] != "prepared":
             continue
         operation = record["request"]["operation"]
@@ -137,9 +131,9 @@ def transition(state, task, event, directory):
         require(not (operation == "worktree_refresh" and record["request"]["task_id"] == task["plan"]["id"]
                      and pending != effect), "refresh_pending", "Recover the original refresh intent before starting another")
     if resolving:
-        require(effect.is_file() and p.get("resolution") and p.get("role_id"),
+        require(artifacts.is_file(effect) and p.get("resolution") and p.get("role_id"),
                 "refresh_resolution", "Supply intent_id, resolution and finished resolver role_id")
-        journal = json.loads(effect.read_text(encoding="utf-8"))
+        journal = json.loads(artifacts.read_text(effect))
         require(journal["request"]["operation"] == "worktree_refresh"
                 and journal["request"]["task_id"] == task["plan"]["id"]
                 and journal["request"]["precondition"]["old"] == old and journal.get("apply_started"),
@@ -150,57 +144,56 @@ def transition(state, task, event, directory):
                 "resolution_role", "A registered resolver must finish and return its host trace")
         return finish(state, task, directory, effect, journal, p)
     require(p.get("reason") and p.get("evidence"), "refresh_evidence", "Record why refresh is needed and evidence of the fixed base")
-    if effect.exists():
+    if artifacts.exists(effect):
         effect, journal = intent(directory, state, event, "worktree_refresh", {})
     else:
         require(registered(root, old["path"]), "unregistered_worktree", "Source must be a registered worktree")
-        require(git(old["path"], "rev-parse", "HEAD") == old["base"]
-                and not git(old["path"], "symbolic-ref", "-q", "HEAD", check=False),
+        require(repository(old["path"]).head() == old["base"]
+                and not repository(old["path"]).branch(),
                 "executor_commit", "Executor changes must remain uncommitted")
-        base = git(root, "rev-parse", "HEAD")
+        base = repository(root).head()
         require(base != old["base"], "refresh_unchanged", "Worktree already uses current HEAD")
         files, source = inventory(old["path"]), snapshot(state, old["path"])
         changed = {name for name in set(files) | set(old["inventory"])
                    if files.get(name) != old["inventory"].get(name)}
         changed |= {name for name in set(source["files"]) | set(old["snapshot"]["files"])
                     if source["files"].get(name) != old["snapshot"]["files"].get(name)}
-        changed.update(filter(None, git(old["path"], "diff", "--cached", "--name-only", "-z",
-                                        old["base"], raw=True).decode("utf-8").split("\0")))
+        changed.update(repository(old["path"]).changed_index_paths(old["base"]))
         require(changed <= set(task["paths"]), "unknown_worktree_data",
                 "Preserve and account for changed, untracked or ignored data outside task ownership")
         new = contained(old["workspace"], state["run_id"] + "/" + task["plan"]["id"] + "-" + event["event_id"])
         require(not new.exists() and not registered(root, new), "refresh_destination_exists", "Replacement path must be unused")
-        artifacts = contained(directory, f"runs/{state['run_id']}/refresh/{event['event_id']}")
+        artifact_directory = artifacts.contained(directory, f"runs/{state['run_id']}/refresh/{event['event_id']}")
         tree = owned_tree(old["path"], task["paths"], old["base"])
-        patch = git(old["path"], "diff", "--binary", "--full-index", old["base"], tree, raw=True)
-        atomic(artifacts / "task.patch", patch)
-        atomic(artifacts / "index.patch", git(old["path"], "diff", "--cached", "--binary", "--full-index", raw=True))
+        patch = repository(old["path"]).diff_trees(old["base"], tree)
+        atomic(artifact_directory / "task.patch", patch)
+        atomic(artifact_directory / "index.patch", repository(old["path"]).index_patch(full=True))
         effect, journal = intent(directory, state, event, "worktree_refresh", {
             "old": deepcopy(old), "new": str(new), "base": base, "inventory": files,
-            "source": source, "patch_hash": digest(patch), "artifacts": str(artifacts)})
+            "source": source, "patch_hash": digest(patch), "artifacts": str(artifact_directory)})
     saved = journal["request"]["precondition"]
-    require(git(root, "rev-parse", "HEAD") == saved["base"], "refresh_head_changed", "Execution HEAD changed during refresh")
+    require(repository(root).head() == saved["base"], "refresh_head_changed", "Execution HEAD changed during refresh")
     new = Path(saved["new"])
     if "validated" in journal:
         return finish(state, task, directory, effect, journal)
     source_unchanged(state, old, saved)
     if not new.exists():
         require(not journal.get("baseline"), "refresh_destination_missing", "Preserve the intent; replacement disappeared")
-        git(root, "worktree", "add", "--detach", str(new), saved["base"])
-    require(registered(root, new) and git(new, "rev-parse", "HEAD") == saved["base"],
+        repository(root).create_worktree(new, saved["base"])
+    require(registered(root, new) and repository(new).head() == saved["base"],
             "refresh_destination_changed", "Expected the recorded replacement worktree")
     if "baseline" not in journal:
-        require(not git(new, "status", "--porcelain", "--untracked-files=all", "--ignored"),
+        require(not repository(new).dirty(include_ignored=True),
                 "refresh_destination_changed", "New worktree must be pristine before transfer")
         journal["baseline"] = {"snapshot": snapshot(state, new), "inventory": inventory(new)}
         write_json(effect, journal)
-    patch = contained(saved["artifacts"], "task.patch")
-    require(digest(patch.read_bytes()) == saved["patch_hash"], "transfer_corrupt", "Saved refresh patch changed")
-    pristine = (not git(new, "ls-files", "--unmerged")
+    patch = artifacts.contained(saved["artifacts"], "task.patch")
+    require(digest(artifacts.read_bytes(patch)) == saved["patch_hash"], "transfer_corrupt", "Saved refresh patch changed")
+    pristine = (not repository(new).has_conflicts()
                 and snapshot(state, new) == journal["baseline"]["snapshot"]
                 and inventory(new) == journal["baseline"]["inventory"])
     if journal.get("apply_started") and not pristine:
-        require(not git(new, "ls-files", "--unmerged"), "refresh_conflict",
+        require(not repository(new).has_conflicts(), "refresh_conflict",
                 f"Preserved both trees; resolve transfer in {new} using worktree_refresh_resolve")
         require(journal.get("expected_tree"), "refresh_ambiguous",
                 "Inspect the recorded replacement; use worktree_refresh_resolve after resolving")
@@ -210,14 +203,9 @@ def transition(state, task, event, directory):
         require(pristine, "refresh_destination_changed", "Replacement changed before transfer")
         # Compute the intended merge without touching the real index/worktree.
         # After a crash, reverse applicability alone cannot detect extra edits.
-        with tempfile.TemporaryDirectory(prefix="sdd-refresh-index-") as temp:
-            env = {**os.environ, "GIT_INDEX_FILE": str(Path(temp) / "index")}
-            git(new, "read-tree", saved["base"], env=env)
-            merged = subprocess.run(["git", "-C", str(new), "apply", "--cached", "--3way", str(patch)],
-                                    env=env, capture_output=True) if patch.stat().st_size else None
-            journal["expected_tree"] = git(new, "write-tree", env=env) if merged is None or merged.returncode == 0 else None
+        journal["expected_tree"] = repository(new).preview_patch(saved["base"], patch)
         journal["apply_started"] = True
         write_json(effect, journal)
-        if patch.stat().st_size:
-            git(new, "apply", "--3way", "--index", str(patch))
+        if artifacts.read_bytes(patch):
+            repository(new).apply_patch(patch)
     return finish(state, task, directory, effect, journal)

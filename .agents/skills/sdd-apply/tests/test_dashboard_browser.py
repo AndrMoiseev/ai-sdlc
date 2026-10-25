@@ -1,11 +1,11 @@
 """Real Chrome fallback when no Browser plugin surface is connected."""
 import json
-import os
 from pathlib import Path
 import shutil
-import subprocess
 import pytest
 from lib.dashboard import render, projection
+
+pytestmark = pytest.mark.native_state
 
 
 def chrome():
@@ -16,17 +16,29 @@ def chrome():
     return found
 
 
+@pytest.fixture(scope="module")
+def browser(tmp_path_factory):
+    from chrome_session import ChromeSession
+    session = ChromeSession(chrome(), tmp_path_factory.mktemp("browser-session"))
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+@pytest.fixture(autouse=True)
+def browser_context(browser, monkeypatch):
+    context = browser.call("Target.createBrowserContext")["browserContextId"]
+    monkeypatch.setitem(globals(), "_browser", (browser, context))
+    try:
+        yield
+    finally:
+        browser.call("Target.disposeBrowserContext", {"browserContextId": context})
+
+
 def dom(directory, tmp_path, width=1280, screenshot=False):
-    command = [chrome(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--user-data-dir=" + str(tmp_path / "chrome-profile"), "--virtual-time-budget=6500", "--dump-dom", (directory / "dashboard.html").as_uri()]
-    command[1:1] = [f"--window-size={width},1800"]
-    if screenshot:
-        command[1:1] = ["--screenshot=" + str(tmp_path / "browser.png")]
-    result = subprocess.run(command, capture_output=True, timeout=40)
-    (tmp_path / "browser-command.json").write_text(json.dumps(command))
-    (tmp_path / "browser-stderr.txt").write_bytes(result.stderr)
-    (tmp_path / "browser-dom.html").write_bytes(result.stdout)
-    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
-    return result.stdout.decode("utf-8", "replace")
+    browser, context = _browser
+    return browser.dom(context, directory, tmp_path, width, screenshot)
 
 
 def test_file_timer_updates_without_reload(driver, tmp_path):

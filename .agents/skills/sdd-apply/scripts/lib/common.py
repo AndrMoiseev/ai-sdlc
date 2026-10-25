@@ -1,11 +1,11 @@
-"""Filesystem and Git primitives shared by deterministic operations."""
+"""Filesystem primitives and repository snapshot delegation."""
 import hashlib
 import json
 import os
 from pathlib import Path
-import subprocess
 import tempfile
 from datetime import datetime, timezone
+from .path_resolution import resolve
 
 
 class Rejected(ValueError):
@@ -29,11 +29,17 @@ def now():
 
 
 def contained(root, relative):
-    root = Path(root).resolve()
-    path = (root / relative).resolve()
-    require(path.is_relative_to(root) and path != root, "path_escape", str(relative))
-    require(".git" not in [p.lower() for p in path.relative_to(root).parts], "git_path", str(relative))
-    return path
+    return next(contained_paths(root, [relative]))
+
+
+def contained_paths(root, relatives):
+    """Resolve a shared root once while checking every requested child."""
+    root = resolve(root)
+    for relative in relatives:
+        path = resolve(root / relative)
+        require(path.is_relative_to(root) and path != root, "path_escape", str(relative))
+        require(".git" not in [p.lower() for p in path.relative_to(root).parts], "git_path", str(relative))
+        yield path
 
 
 def atomic(path, data):
@@ -53,38 +59,17 @@ def atomic(path, data):
 
 
 def write_json(path, value):
-    atomic(path, json.dumps(value, ensure_ascii=True, indent=2) + "\n")
+    from .artifact_storage import write
+    write(path, json.dumps(value, ensure_ascii=True, indent=2) + "\n")
 
 
 def git(root, *args, env=None, check=True, raw=False):
-    result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, env=env)
-    require(not check or result.returncode == 0, "git_failed", result.stderr.decode("utf-8", "replace"))
+    """Compatibility helper for native-Git fixtures; execution uses repository()."""
+    from .git_repository import GitRepository
+    result = GitRepository(root)._run(*args, env=env, check=check)
     return result.stdout if raw else result.stdout.decode("utf-8", "replace").strip()
 
 
 def source_snapshot(root, exclude=(), include=()):
-    root = Path(root).resolve()
-    names = git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard", raw=True).decode("utf-8").split("\0")
-    modes = {}
-    for record in git(root, "ls-files", "--stage", "-z", raw=True).decode("utf-8").split("\0"):
-        if record:
-            meta, name = record.split("\t", 1)
-            mode, _, stage = meta.split()
-            require(stage == "0", "unmerged_index", name)
-            modes[name] = mode
-    files = {}
-    for name in sorted(set(filter(None, names)) | set(include)):
-        if any(name == p or name.startswith(p.rstrip("/") + "/") for p in exclude):
-            continue
-        lexical = root / name
-        require(not lexical.is_symlink(), "unsupported_file", name)
-        path = contained(root, name)
-        require(not path.is_dir(), "unsupported_file", f"Directory/submodule is not a supported source file: {name}")
-        if path.is_file():
-            executable = bool(path.stat().st_mode & 0o111)
-            mode = modes.get(name, "100644") if os.name == "nt" else ("100755" if executable else "100644")
-            require(mode in {"100644", "100755"}, "unsupported_file", f"Unsupported Git mode {mode}: {name}")
-            files[name] = {"sha256": digest(path.read_bytes()), "executable": executable, "git_mode": mode}
-        elif name in names:
-            files[name] = None
-    return {"files": files, "digest": digest(files)}
+    from .repository import repository
+    return repository(root).snapshot(exclude, include)

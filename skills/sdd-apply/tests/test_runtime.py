@@ -8,6 +8,7 @@ import pytest
 from lib.common import digest
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.installation
 
 
 def invoke(script, cwd, *args, env=None):

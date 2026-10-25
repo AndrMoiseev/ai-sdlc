@@ -4,9 +4,97 @@ import shutil
 import pytest
 import yaml
 import sys
+import json
+import os
 from lib.common import digest, git
 
 SPEC = Path(__file__).resolve().parents[2] / "sdd-spec"
+
+
+@pytest.fixture(autouse=True)
+def path_resolver(request, tmp_path_factory, monkeypatch):
+    from lib.path_resolution import use_path_resolver
+    native = any(request.node.get_closest_marker(mark) for mark in
+                 ("native_state", "native_git", "native_process", "installation"))
+    if native:
+        yield
+        return
+    root = tmp_path_factory.getbasetemp().resolve()
+    prefix = os.path.normcase(str(root)) + os.sep
+    def no_links(path, strict=False):
+        absolute = path if path.is_absolute() and ".." not in path.parts else Path(os.path.abspath(path))
+        name = os.path.normcase(str(absolute))
+        if name != prefix[:-1] and not name.startswith(prefix):
+            return path.resolve(strict=strict)
+        if name[len(prefix):].partition(os.sep)[0].endswith("current"):
+            return path.resolve(strict=strict)
+        if strict:
+            absolute.stat()
+        return absolute
+    symlink = os.symlink
+    def unsupported(source, destination, *args, **kwargs):
+        destination = Path(os.path.abspath(destination))
+        if destination.parent == root and destination.name.endswith("current"):
+            return symlink(source, destination, *args, **kwargs)  # pytest's temporary-directory bookkeeping.
+        pytest.fail("Filesystem-link tests require native_state or native_git")
+    monkeypatch.setattr(os, "symlink", unsupported)
+    with use_path_resolver(no_links):
+        yield
+
+
+@pytest.fixture(scope="session")
+def repository_seeds(project_template):
+    from memory_repository import capture_seed
+    seed = capture_seed(project_template)
+    return {seed["head"]: seed}
+
+
+@pytest.fixture(autouse=True)
+def repository_backend(request, monkeypatch):
+    from functools import lru_cache
+    from lib.repository import use_repositories
+    from lib.git_repository import GitRepository
+    from memory_repository import MemoryRepositories
+    native = request.node.get_closest_marker("native_git") or request.node.get_closest_marker("installation")
+    seeds = request.getfixturevalue("repository_seeds") if not native and "project_template" in request.fixturenames else {}
+    factory = lru_cache(None)(GitRepository) if native else MemoryRepositories(seeds)
+    if not native:
+        def unexpected(*args, **kwargs):
+            pytest.fail("Native Git escaped the repository test interface; mark a Git contract test native_git")
+        monkeypatch.setattr(GitRepository, "_run", unexpected)
+    with use_repositories(factory):
+        yield factory
+
+
+@pytest.fixture(autouse=True)
+def state_backend(request):
+    from lib.artifact_storage import FileArtifacts, use_artifacts
+    from lib.state_storage import FileStateStorage, use_storage
+    from memory_state import MemoryStates
+    native = any(request.node.get_closest_marker(mark) for mark in ("native_state", "native_git", "installation"))
+    factory = FileStateStorage if native else MemoryStates()
+    artifacts = FileArtifacts() if native else factory.artifacts
+    with use_storage(factory), use_artifacts(artifacts):
+        yield factory
+
+
+@pytest.fixture(autouse=True)
+def check_runner(request, monkeypatch):
+    if any(request.node.get_closest_marker(mark) for mark in ("native_git", "native_process", "installation")):
+        return
+    from lib import verification
+    from check_commands import run_command
+    monkeypatch.setattr(verification, "run_command", run_command)
+
+
+@pytest.fixture(autouse=True)
+def shared_cli(monkeypatch):
+    from lib import inputs
+    from shared_commands import spec_call, spec_modules
+    original = inputs.spec_call
+    monkeypatch.setattr(inputs, "spec_call", spec_call)
+    monkeypatch.setattr(inputs, "spec_modules", spec_modules)
+    return original
 
 
 def document(path, meta, records=()):
@@ -36,20 +124,44 @@ def project_template(tmp_path_factory):
     git(root, "init")
     git(root, "config", "user.name", "Fixture")
     git(root, "config", "user.email", "fixture@example.invalid")
+    git(root, "config", "core.autocrlf", "false")
     git(root, "add", ".")
     git(root, "commit", "-m", "fixture")
     return root
 
 
+def copy_project(template, destination, backend, omit=()):
+    from memory_repository import MemoryRepositories
+    if isinstance(backend, MemoryRepositories):
+        root = shutil.copytree(template, destination, ignore=shutil.ignore_patterns(".git", *omit))
+        backend.seed(root, backend.seeds[backend(template).head()])
+        return root
+    return shutil.copytree(template, destination)
+
+
 @pytest.fixture
-def project(tmp_path, project_template):
-    return shutil.copytree(project_template, tmp_path / "project")
+def project(tmp_path, project_template, repository_backend, working_copies):
+    from memory_repository import MemoryRepositories
+    if isinstance(repository_backend, MemoryRepositories):
+        return working_copies.copy(project_template, repository_backend)
+    return copy_project(project_template, tmp_path / "project", repository_backend)
 
 
 @pytest.fixture(scope="session")
-def basis_template(project_template):
+def working_copies(tmp_path_factory):
+    from working_copy import WorkingCopies
+    return WorkingCopies(tmp_path_factory.mktemp("working-copies"))
+
+
+@pytest.fixture(scope="session")
+def basis_template(project_template, repository_seeds):
+    from unittest.mock import patch
     from lib.inputs import validate
-    return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
+    from shared_commands import spec_call
+    from lib.repository import use_repositories
+    from memory_repository import MemoryRepositories
+    with use_repositories(MemoryRepositories(repository_seeds)), patch("lib.inputs.spec_call", spec_call):
+        return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
 
 
 @pytest.fixture
@@ -66,24 +178,39 @@ class Driver:
     def __init__(self, basis, parallel=False):
         from lib.state import initialize
         self.directory = Path(basis["change_root"]) / "execution"
+        self.directory.mkdir(parents=True, exist_ok=True)
         initialize(basis, "owner", isolation=True, **({} if parallel else {"mode": "sequential"}))
         # State-only tests do not exercise HTML; dashboard tests use the renderer.
-        (self.directory / "dashboard.html").write_text("test-only dashboard sentinel")
+        from lib.artifact_storage import write
+        write(self.directory / "dashboard.html", "test-only dashboard sentinel")
         self.number = 0
 
     @property
     def state(self):
+        view = self._view()
+        return json.loads(self._state_bytes) if hasattr(self, "_state_bytes") else view
+
+    def _view(self):
         from lib.state import read
-        return read(self.directory)
+        from lib.state_storage import storage
+        from memory_state import MemoryStateStorage
+        store = storage(self.directory)
+        if not isinstance(store, MemoryStateStorage):
+            return read(self.directory)
+        raw = store.read()
+        if raw != getattr(self, "_state_bytes", None):
+            self._state_view = read(self.directory)
+            self._state_bytes = raw
+        return self._state_view
 
     @property
     def task(self):
-        return self.state["tasks"]["TASK-one"]
+        return json.loads(json.dumps(self._view()["tasks"]["TASK-one"]))
 
     def send(self, kind, payload=None, task_id="TASK-one"):
         from lib.state import apply
         self.number += 1
-        state = self.state
+        state = self._view()
         return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "owner": state["owner"], "type": kind, "task_id": task_id, "payload": payload or {}})
 
     def role(self, ident, kind, context=None):
@@ -113,3 +240,42 @@ class Driver:
 @pytest.fixture
 def driver(basis):
     return Driver(basis)
+
+
+@pytest.fixture(scope="session")
+def execution_checkpoints(project_template, basis_template, repository_seeds, tmp_path_factory):
+    from checkpoints import Checkpoint, preparation
+    from memory_repository import MemoryRepositories
+    workspace = tmp_path_factory.mktemp("execution-checkpoint")
+    backend = MemoryRepositories(repository_seeds)
+    root = copy_project(project_template, workspace / "project", backend)
+    basis = deepcopy(basis_template)
+    basis.update(project_root=str(root), change_root=str(root / "sdd/changes/demo"))
+    saved = {}
+    with preparation(backend) as states:
+        driver = Driver(basis)
+        saved["pending"] = Checkpoint(workspace, driver, backend, states)
+        driver.start()
+        assert not driver.state["blockers"]
+        saved["started"] = Checkpoint(workspace, driver, backend, states)
+        (root / "result.txt").write_text("verified result\n")
+        driver.freeze()
+        saved["frozen"] = Checkpoint(workspace, driver, backend, states)
+        assert driver.verify()["outcome"] == "passed"
+        saved["verified"] = Checkpoint(workspace, driver, backend, states)
+        driver.role("reviewer", "reviewer")
+        driver.send("review_start", {"role_id": "reviewer"})
+        saved["reviewing"] = Checkpoint(workspace, driver, backend, states)
+        driver.send("review_result", {"role_id": "reviewer", "candidate": driver.task["candidate"],
+            "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
+        saved["reviewed"] = Checkpoint(workspace, driver, backend, states)
+        driver.send("commit")
+        assert driver.send("accept")["status"] == "accepted"
+        driver.send("role_result", {"role_id": "verifier", "result": "DONE", "trace": "unit-test"})
+        saved["accepted"] = Checkpoint(workspace, driver, backend, states)
+    return saved
+
+
+@pytest.fixture
+def execution_checkpoint(execution_checkpoints, repository_backend, state_backend):
+    return lambda stage: execution_checkpoints[stage].restore(repository_backend, state_backend)

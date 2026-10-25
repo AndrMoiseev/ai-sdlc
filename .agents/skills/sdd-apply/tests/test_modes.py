@@ -62,9 +62,10 @@ def test_legacy_parallel_request_is_preserved(basis):
 
 def test_invalid_mode_leaves_no_state(basis):
     from pathlib import Path
+    from lib.state_storage import storage
     with pytest.raises(ValueError, match="Expected parallel or sequential"):
         initialize(basis, "owner", isolation=True, mode="automatic")
-    assert not (Path(basis["change_root"]) / "execution/state.json").exists()
+    assert not storage(Path(basis["change_root"]) / "execution").exists()
 
 
 def test_revision_cannot_bypass_pending_sequential_handoff(basis):

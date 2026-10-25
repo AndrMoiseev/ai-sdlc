@@ -1,5 +1,6 @@
 """Normal uv entry points from copied installs and conflicting consumers."""
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -7,6 +8,7 @@ import pytest
 from lib.common import digest
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.installation
 
 
 def invoke(script, cwd, *args, env=None):
@@ -29,6 +31,8 @@ def test_source_and_installed_entrypoints(tmp_path, installed, conflict):
     for repeat in range(2):
         result = invoke(package / "scripts/execute.py", cwd, "--help")
         assert result.returncode == 0, result.stderr
+        result = invoke(package / "scripts/execute.py", cwd, "--help-event", "resume")
+        assert result.returncode == 0 and json.loads(result.stdout)["result"]["event"] == "resume", result.stderr
         result = invoke(package / "scripts/test.py", cwd, "tests/test_package.py", "-q")
         assert result.returncode == 0, result.stdout + result.stderr
     assert before == {p.name: p.read_bytes() for p in cwd.iterdir()}
@@ -52,6 +56,7 @@ def test_offline_empty_cache_and_stale_lock(tmp_path):
     assert lock.read_bytes() == original
 
 
+@pytest.mark.network
 def test_first_run_and_cache_restoration(tmp_path):
     cache = (tmp_path / "owned-uv-cache").resolve()
     package = tmp_path / "installed/sdd-apply"

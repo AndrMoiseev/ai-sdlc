@@ -27,7 +27,7 @@ def test_safe_generated_data_and_recovery(driver):
 def test_loopback_allowlist_and_owned_shutdown(driver):
     render(driver.directory)
     server, meta = make_server(driver.directory)
-    thread = threading.Thread(target=server.serve_forever)
+    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01})
     thread.start()
     try:
         with urlopen(meta["url"]) as response:
@@ -45,3 +45,5 @@ def test_loopback_allowlist_and_owned_shutdown(driver):
         if thread.is_alive():
             server.shutdown()
         server.server_close()
+
+pytestmark = pytest.mark.native_state

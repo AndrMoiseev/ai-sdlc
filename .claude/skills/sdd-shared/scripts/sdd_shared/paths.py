@@ -19,10 +19,34 @@ def contained(root, relative, must_exist=False):
     return result
 
 
-def change_root(project_root, change_id):
+WORK_ROOTS = {"change": "changes", "refactoring": "refactoring"}
+
+
+def change_root(project_root, change_id, work_kind="change"):
+    if not isinstance(work_kind, str) or work_kind not in WORK_ROOTS:
+        raise ValidationError("unsupported_work_kind", "Expected change or refactoring")
     if not valid_slug(change_id):
         raise ValidationError("invalid_change", "change_id must be lowercase-kebab-case, at most 64 characters")
-    return contained(project_root, f"sdd/changes/{change_id}")
+    return contained(project_root, f"sdd/{WORK_ROOTS[work_kind]}/{change_id}")
+
+
+def list_work(project_root, change_id=None):
+    """Return explicit route identities; discovery never selects the first match."""
+    if change_id is not None and not valid_slug(change_id):
+        raise ValidationError("invalid_change", "Invalid change_id")
+    result = []
+    for kind, directory in WORK_ROOTS.items():
+        parent = contained(project_root, f"sdd/{directory}")
+        if not parent.is_dir():
+            continue
+        for entry in sorted(parent.iterdir()):
+            if not valid_slug(entry.name) or (change_id is not None and entry.name != change_id):
+                continue
+            root = change_root(project_root, entry.name, kind)
+            if root.is_dir():
+                result.append({"work_kind": kind, "change_id": entry.name,
+                               "change_root": str(root), "has_plan": contained(root, "tasks.md").is_file()})
+    return result
 
 
 def verification_location(project_root, value):
