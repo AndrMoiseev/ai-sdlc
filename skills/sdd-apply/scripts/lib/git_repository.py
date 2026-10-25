@@ -37,20 +37,21 @@ class GitRepository:
     def has_conflicts(self):
         return bool(self._text("ls-files", "--unmerged"))
 
-    def inspect(self):
+    def inspect(self, exclude=()):
         head = self.head()
         require(not self.has_conflicts(), "unmerged_index", "Resolve the existing Git conflict before execution")
         branch = self._text("symbolic-ref", "--quiet", "--short", "HEAD")
         self._run("var", "GIT_AUTHOR_IDENT")
         self._run("var", "GIT_COMMITTER_IDENT")
         dirty = set()
+        pathspec = ("--", ".", *(f":(top,exclude,literal){name}" for name in exclude))
         for args in (("diff", "--name-only", "--cached", "-z"), ("diff", "--name-only", "-z"),
                      ("ls-files", "--others", "--exclude-standard", "-z")):
-            dirty.update(filter(None, self._run(*args).stdout.decode("utf-8").split("\0")))
+            dirty.update(filter(None, self._run(*args, *pathspec).stdout.decode("utf-8").split("\0")))
         return dict(head=head, branch=branch, dirty_paths=sorted(dirty),
-                    index_patch=self.index_patch().decode("utf-8", "replace"),
-                    working_patch=self._run("diff", "--binary").stdout.decode("utf-8", "replace"),
-                    status=self._run("status", "--porcelain=v1", "-z").stdout.decode("utf-8"))
+                    index_patch=self._run("diff", "--binary", "--cached", *pathspec).stdout.decode("utf-8", "replace"),
+                    working_patch=self._run("diff", "--binary", *pathspec).stdout.decode("utf-8", "replace"),
+                    status=self._run("status", "--porcelain=v1", "-z", *pathspec).stdout.decode("utf-8"))
 
     def snapshot(self, exclude=(), include=()):
         records = self._run("ls-files", "-t", "--stage", "--others", "--exclude-standard", "-z").stdout.decode("utf-8").split("\0")

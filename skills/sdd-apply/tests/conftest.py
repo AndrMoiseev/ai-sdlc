@@ -188,7 +188,7 @@ class Driver:
     @property
     def state(self):
         view = self._view()
-        return json.loads(self._state_bytes) if hasattr(self, "_state_bytes") else view
+        return deepcopy(view)
 
     def _view(self):
         from lib.state import read

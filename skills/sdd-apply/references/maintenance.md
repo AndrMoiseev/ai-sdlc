@@ -26,6 +26,9 @@ fast scenarios must fail rather than silently execute a slower fallback.
 
 Keep state schemas, integrity hashes, event chains, candidate freshness,
 evidence validation, ownership and acceptance checks active in scenario tests.
+For state storage changes, verify bounded manifest growth, deduplication, lazy
+reads, full-history audit, idempotent lookup and interruption before manifest
+replacement against both storage adapters. See [state storage](state-storage.md).
 Transfer bytes and object IDs are opaque to orchestration. A test adapter must
 not return unconditional success or duplicate the engine's decision rules.
 
@@ -66,10 +69,12 @@ retain `-n 4`. Keep the test path explicit when options have separate values.
 | --- | --- |
 | Documentation only | Package links/structure and consistency of affected instructions; use `tests/test_package.py` for the package contract |
 | Runtime, test or fixture changes | Relevant focused checks during editing, then the full default regression selection (`not installation`) |
-| Final acceptance of runtime, dependency or distribution changes | Regression plus the separate installation selection on the same final revision |
+| Final acceptance of runtime changes | Full default regression selection (`not installation`); installation is outside this run |
+| Dependency or distribution changes | Separate installation verification when that scope is requested; retain its evidence independently |
 
-Run installation checks separately with four workers; their independent cases
-can use the default distribution:
+Installation checks are a separate verification scope, not an automatic second
+command in the regression run. When requested, run them with four workers;
+their independent cases can use the default distribution:
 
 ```text
 uv run --locked --script "<skill-root>/scripts/test.py" tests/ -q -n 4 -m installation --durations=10
@@ -78,9 +83,9 @@ uv run --locked --script "<skill-root>/scripts/test.py" tests/ -q -n 4 -m instal
 Installation covers source/installed entry points, conflicting consumer projects,
 the shared uv CLI, offline and stale-lock failures, and cache restoration. The
 `network` case downloads dependencies into empty caches. Retain its evidence;
-missing or failed required installation checks leave final acceptance incomplete.
-Separate selection does not create a separate time allowance for the same
-acceptance run.
+missing or failed requested installation checks leave that verification scope
+incomplete. Splitting commands within a requested scope does not reset its time
+allowance.
 
 ## Speed and the stop condition
 
@@ -91,7 +96,8 @@ sequential diagnosis or benchmark, and label its results separately.
 
 Measure wall-clock time from command start through exit, including uv, worker
 startup, fixture preparation and teardown. Sum commands and retries belonging
-to one verification run, including required installation checks. Report the
+to one verification run. Count setup and downloads when installation verification
+is requested separately; do not add it to an ordinary regression run. Report the
 selected groups, worker count, result counts and total elapsed time. Worker
 durations are diagnostic data, not elapsed time for the run.
 

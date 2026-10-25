@@ -13,6 +13,24 @@ pytestmark = pytest.mark.parametrize("implementation", [
 ])
 
 
+def test_inspect_excludes_tracked_and_untracked_execution_artifacts(project, implementation):
+    directory = project / "sdd/changes/demo/execution"
+    directory.mkdir()
+    path = directory / "state.json"
+    path.write_text("initial")
+    stage(project, "sdd/changes/demo/execution/state.json")
+    commit(project, "saved execution")
+    path.write_text("staged state")
+    stage(project, "sdd/changes/demo/execution/state.json")
+    path.write_text("unstaged state")
+    (directory / "dashboard.html").write_text("generated")
+    (project / "check.py").write_text("assert True")
+    view = repository(project).inspect(exclude=["sdd/changes/demo/execution"])
+    assert view["dirty_paths"] == ["check.py"]
+    assert "state.json" not in view["index_patch"] + view["working_patch"] + view["status"]
+    assert "dashboard.html" not in view["index_patch"] + view["working_patch"] + view["status"]
+
+
 def test_owned_commit_preserves_foreign_index_and_working_bytes(project, implementation):
     repo = repository(project)
     parent = repo.head()

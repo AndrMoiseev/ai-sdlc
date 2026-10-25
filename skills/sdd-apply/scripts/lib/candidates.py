@@ -3,6 +3,7 @@ import json
 import re
 from . import artifact_storage as artifacts
 from .common import digest, require, write_json
+from .state_objects import StateObjects
 
 
 def directory_for(state):
@@ -24,7 +25,7 @@ def resolve(state, value):
     path = artifacts.contained(directory_for(state), value["path"])
     require(artifacts.is_file(path), "candidate_missing", "Candidate artifact is missing: " + value["path"])
     try:
-        payload = json.loads(artifacts.read_text(path))
+        payload = StateObjects(directory_for(state)).open(json.loads(artifacts.read_text(path)))
     except (ValueError, UnicodeError) as exc:
         raise ValueError("Candidate artifact is unreadable: " + value["path"]) from exc
     require(isinstance(payload, dict) and set(payload) == {"source", "manifest", "checks", "root"}
@@ -41,7 +42,7 @@ def store(state, payload):
     if artifacts.exists(path):
         resolve(state, reference)  # Never silently replace corrupted evidence.
     else:
-        write_json(path, payload)
+        write_json(path, StateObjects(directory_for(state)).pack(payload, root=True))
     return reference
 
 

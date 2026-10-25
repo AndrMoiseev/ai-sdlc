@@ -63,7 +63,9 @@ def transition(state, task, event, directory):
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
         previous_run = state["run_id"]
-        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
+        from .state_objects import StateObjects
+        objects = StateObjects(directory)
+        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), objects.pack(state, root=True))
         previous_tasks = deepcopy(state["tasks"])
         state["run_id"] = uuid.uuid4().hex
         state["previous_run"] = previous_run
@@ -79,7 +81,7 @@ def transition(state, task, event, directory):
             if old:
                 for field in ("review_limit", "review_rounds_started", "review_rounds_completed", "test_repair_limit", "test_repair_cycles_started", "active_repair", "repair_cycles", "budget_decisions", "commits"):
                     fresh[field] = old[field]
-                fresh["prior_result"] = old
+                fresh["prior_result"] = {"$object": objects.put(objects.pack(old, root=True))}
             state["tasks"][plan["id"]] = fresh
         if state["mode"] == "parallel":
             state["parallel_request"] = basis["instruction"]
@@ -89,7 +91,7 @@ def transition(state, task, event, directory):
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
-        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), basis)
+        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), objects.pack(basis, root=True))
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)

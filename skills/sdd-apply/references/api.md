@@ -47,20 +47,33 @@ only through the script's owner-liveness check; age alone proves nothing.
 
 For routine revision refreshes, including after revision conflict, use
 `{"operation":"read","args":{"directory":"<execution>","view":"compact"}}`.
-Both views validate the entire state, registered root, integrity and event chain.
-The default `view: "full"` preserves the complete response.
+The default is `view: "compact"`. Both views validate the current manifest,
+registered root, history head and accessed objects. `view: "full"` returns the
+stored manifest with references; it does not expand the execution history.
 
 | Needed information | View |
 |---|---|
 | Revision, task status, blockers, budgets, active role IDs | `compact` |
-| Resume, handoff, lost response/effect investigation or debugging | `full` |
-| Candidate, checks, evidence, findings, plan or authorization absent from compact | `full`, then referenced original artifacts |
+| Resume, handoff, lost response/effect investigation or debugging | `full`, then only relevant referenced objects |
+| Candidate, checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
 
 Compact view version 1 returns run identity/owner/revision/status/mode/time,
 task statuses and complete blockers/budget counters/reservations, active role
 IDs with task/kind/context, `available_tasks`, and artifact paths relative to the
-execution directory. Historical events, roles, plans and evidence stay in full
-state and artifacts. Use API `read` for verified full state.
+execution directory. Historical events and large values live in immutable objects.
+A `{"$object": {"path": "objects/...json", "sha256": "...", "bytes": 123,
+"kind": "object"}}` value is a reference. Pass its inner descriptor to
+`{"operation":"read_object","args":{"directory":"<execution>","reference":{...}}}`.
+The response verifies and returns one object, retaining nested references.
+Read only objects needed for the current decision; do not recursively expand
+the manifest into the model context. `initialize` returns the full manifest;
+event results also keep large values behind references.
+
+Use `{"operation":"audit","args":{"directory":"<execution>"}}` for a full
+integrity audit of current objects, the entire event chain and event-ID index.
+The script runs this audit before `resume` and `finalize`. Ordinary reads do not
+claim to detect corruption in unaccessed historical objects. See
+[state storage](state-storage.md) for commit boundaries and recovery.
 
 `available_tasks` reports dependency/mode eligibility, not admission permission.
 Active role IDs are not a liveness check. Neither view proves candidate bytes,

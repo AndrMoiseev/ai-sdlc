@@ -239,13 +239,16 @@ class MemoryRepository:
     def dirty(self, include_ignored=False):
         return bool(self.conflicts or self.index != self._tree("HEAD") or self._files(include_ignored=include_ignored) != self.index)
 
-    def inspect(self):
+    def inspect(self, exclude=()):
         require(not self.conflicts, "unmerged_index", "Resolve the existing Git conflict before execution")
-        actual, base = self._files(), self._tree("HEAD")
-        dirty = sorted(n for n in set(base) | set(actual) | set(self.index)
-                       if base.get(n) != self.index.get(n) or self.index.get(n) != actual.get(n))
+        def included(files):
+            return {name: value for name, value in files.items()
+                    if not any(name == prefix or name.startswith(prefix.rstrip("/") + "/") for prefix in exclude)}
+        actual, base, index = included(self._files()), included(self._tree("HEAD")), included(self.index)
+        dirty = sorted(n for n in set(base) | set(actual) | set(index)
+                       if base.get(n) != index.get(n) or index.get(n) != actual.get(n))
         return dict(head=self.head(), branch=self.branch(), dirty_paths=dirty,
-                    index_patch=self.index_patch().decode(), working_patch=self._patch(self.index, actual).decode(),
+                    index_patch=self._patch(base, index).decode(), working_patch=self._patch(index, actual).decode(),
                     status="" if not dirty else "\0".join(dirty) + "\0")
 
     def _merge(self, current, patch):

@@ -8,6 +8,8 @@ from .common import contained, contained_paths, digest, now, require, source_sna
 
 from .state_storage import storage
 from .path_resolution import resolve
+from .state_objects import StateObjects
+from . import state_history
 
 TASK_STATES = {"pending", "running", "verifying", "reviewing", "integrating", "repairing", "committing", "blocked", "accepted"}
 
@@ -21,11 +23,13 @@ def recover_lock(directory):
 
 
 def save(directory, state):
-    storage(directory).save(state)
+    storage(directory).save(StateObjects(directory).pack(state, root=True))
 
 
 def seal(state):
-    state["integrity"] = digest({k: v for k, v in state.items() if k != "integrity"})
+    objects = StateObjects(execution_directory(state["basis"]))
+    packed = objects.pack(state, root=True)
+    state["integrity"] = digest({k: v for k, v in packed.items() if k != "integrity"})
 
 
 def execution_directory(basis):
@@ -42,26 +46,52 @@ def execution_directory(basis):
 
 def read(directory, view="full"):
     require(view in ("full", "compact"), "read_view", "Expected full or compact")
-    state = json.loads(storage(directory).read().decode("utf-8"))
-    require(state.get("schema_version") == 1, "state_version", "Unsupported state schema")
+    packed = json.loads(storage(directory).read().decode("utf-8"))
+    require(packed.get("schema_version") == 2, "state_version", "Expected execution state schema 2")
+    require(packed.get("integrity") == digest({k: v for k, v in packed.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
+    state = StateObjects(directory).open(deepcopy(packed))
+    state.manifest = packed
     require(state["change_id"] == state["basis"]["change_id"] and state.get("work_kind", "change") == state["basis"].get("work_kind", "change"), "state_root", "State work identity differs from its basis")
     expected_directory = execution_directory(state["basis"])
     require(resolve(directory) == expected_directory, "state_root", "State is outside its registered execution root")
-    require(state.get("integrity") == digest({k: v for k, v in state.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
-    require(state["revision"] == len(state["events"]), "history_corrupt", "History length mismatch")
+    require(type(state["revision"]) is int and state["revision"] >= 0, "history_corrupt", "Invalid revision")
+    if state["revision"]:
+        head = state.objects.get(state["event_head"])
+        require(head["revision"] == state["revision"] and state["event_index"] is not None,
+                "history_corrupt", "History head mismatch")
+    else:
+        require(state["event_head"] is None and state["event_index"] is None, "history_corrupt", "Unexpected history")
     require(state["status"] in {"active", "blocked", "completed"} and state["mode"] in {"sequential", "parallel"}, "state_schema", "Unknown execution status or mode")
     require(all(t["status"] in TASK_STATES for t in state["tasks"].values()), "state_schema", "Unknown task state")
-    previous = None
-    ids = set()
-    for number, entry in enumerate(state["events"], 1):
-        require(entry["revision"] == number and entry["previous"] == previous and entry["event_id"] not in ids, "history_corrupt", "Event chain mismatch")
-        require(entry["hash"] == digest({k: v for k, v in entry.items() if k != "hash"}), "history_corrupt", "Event hash mismatch")
-        ids.add(entry["event_id"])
-        previous = entry["hash"]
     if view == "compact":
         from .state_view import compact
         return compact(state)
     return state
+
+
+def inspect(directory, view="compact"):
+    """Public views never recursively expand object references."""
+    state = read(directory, view=view)
+    if view == "compact":
+        return state
+    return state.manifest
+
+
+def audit(directory):
+    state = read(directory)
+    seen = state.objects.audit(state)
+    count = state_history.audit(state.objects, state)
+    return {"revision": state["revision"], "events": count, "current_objects": len(seen), "status": "verified"}
+
+
+def read_object(directory, reference):
+    read(directory, view="compact")
+    objects = StateObjects(directory)
+    # Return one stored object, with nested references intact.
+    value = json.loads(objects.raw(reference))
+    require(type(value) is {"object": dict, "array": list, "string": str}[reference["kind"]],
+            "object_corrupt", "Object type mismatch")
+    return value
 
 
 def new_task(task):
@@ -81,17 +111,17 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
     with lock(directory):
         require(not storage(directory).exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
-        state = {"schema_version": 1, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "events": [], "blockers": [], "updated_at": now(), "final": None}
+        state = {"schema_version": 2, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
         if basis.get("work_kind", "change") == "refactoring":
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
         for task in basis["tasks"]:
             state["tasks"][task["id"]] = new_task(task)
         state["baseline"] = snapshot(state, basis["project_root"])
-        write_json(directory / "runs" / run / "input.json", basis)
+        write_json(directory / "runs" / run / "input.json", StateObjects(directory).pack(basis, root=True))
         seal(state)
         save(directory, state)
-    return state
+    return read(directory)
 
 
 def snapshot(state, root=None):
@@ -114,22 +144,25 @@ def apply(directory, event):
         require(set(event) == {"event_id", "run_id", "expected_revision", "owner", "type", "task_id", "payload"}, "event_schema", "Expected the complete typed event envelope")
         require(isinstance(event["event_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", event["event_id"]), "event_id", "Use a filesystem-safe event ID")
         fingerprint = digest(event)
-        for entry in original["events"]:
-            if entry["event_id"] == event["event_id"]:
-                require(entry["fingerprint"] == fingerprint, "event_conflict", "Event ID reused with another payload")
-                return entry["result"]
+        entry = state_history.lookup(original.objects, original["event_index"], event["event_id"])
+        if entry is not None:
+            require(entry["fingerprint"] == fingerprint, "event_conflict", "Event ID reused with another payload")
+            require(entry["revision"] <= original["revision"], "history_corrupt", "Event is not committed")
+            return entry["result"]
         require(event["run_id"] == original["run_id"], "run_mismatch", "Wrong execution run")
         require(event["owner"] == original["owner"], "owner_mismatch", "Another orchestrator owns this run")
         require(type(event["expected_revision"]) is int and event["expected_revision"] == original["revision"], "revision_conflict", "Re-read current state")
         require(event["task_id"] is None or event["task_id"] in original["tasks"], "unknown_task", "Unknown TASK-ID")
         state = deepcopy(original)
+        if event["type"] in {"resume", "finalize"}:
+            audit(directory)
         from .transitions import reduce
         result = reduce(state, event, directory)
         state["revision"] += 1
         state["updated_at"] = now()
-        entry = {"event_id": event["event_id"], "fingerprint": fingerprint, "event": event, "revision": state["revision"], "previous": state["events"][-1]["hash"] if state["events"] else None, "result": result, "time": state["updated_at"]}
-        entry["hash"] = digest(entry)
-        state["events"].append(entry)
+        if event["type"] == "check_run" and event["task_id"] and event["payload"].get("stage") == "baseline":
+            state["tasks"][event["task_id"]]["baseline_event"] = {"event_id": event["event_id"], "log": result.get("log")}
+        state_history.append(original.objects, state, event, result)
         seal(state)
         save(directory, state)
     return result

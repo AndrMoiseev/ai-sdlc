@@ -11,7 +11,7 @@ import pytest
 
 from lib.api import dispatch
 from lib.common import Rejected
-from lib.state import initialize, snapshot
+from lib.state import initialize, snapshot, read
 
 COLLECTION = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("refactoring_bundle_fixture", COLLECTION / "sdd-shared/tests/test_refactoring_work_basis.py")
@@ -40,15 +40,16 @@ def test_refactoring_inputs_public_initialize_read_and_dashboard(project, work_k
     state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "mode": "sequential"}})
     directory = expected_root / "execution"
     before = (directory / "state.json").read_bytes()
-    assert dispatch({"operation": "read", "args": {"directory": str(directory)}}) == state
+    assert dispatch({"operation": "read", "args": {"directory": str(directory), "view": "full"}}) == state
     compact = dispatch({"operation": "read", "args": {"directory": str(directory), "view": "compact"}})
     assert compact["available_tasks"] == ["TASK-one"]
     assert (directory / "state.json").read_bytes() == before
     assert list(state["tasks"]) == ["TASK-one"] and state["tasks"]["TASK-one"]["status"] == "pending"
     assert state["final"] is None and state["revision"] == 0
     prefix = expected_root.relative_to(project).as_posix() + "/execution/"
-    assert not any(name.startswith(prefix) for name in snapshot(state)["files"])
-    assert expected_root.relative_to(project).as_posix() + "/tasks.md" in state["baseline"]["files"]
+    loaded = read(directory)
+    assert not any(name.startswith(prefix) for name in snapshot(loaded)["files"])
+    assert expected_root.relative_to(project).as_posix() + "/tasks.md" in loaded["baseline"]["files"]
     javascript = (directory / "dashboard-state.js").read_text(encoding="utf-8")
     view = json.loads(javascript.removeprefix("window.sddApplyUpdate(").removesuffix(");\n"))
     assert view["accepted"] == 0 and view["total"] == 1 and view["final"] is None
