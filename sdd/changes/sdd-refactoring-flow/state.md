@@ -5,12 +5,38 @@ change_id: sdd-refactoring-flow
 language: ru
 phase: plan_approved
 awaiting: none
-updated_at: '2026-10-24T18:30:29Z'
+updated_at: "2026-10-25T08:25:30.361451Z"
 document_links: [proposal.md, design.md, specs/sdd-refactoring/spec.md, tasks.md, decisions.md, questions.md, premortem.md, review/decisions.md]
 review_links: [review/20261024T085539Z-refactoring-docs/consistency.md, review/20261024T092036Z-refactoring-plan/plan.md, review/summary.md]
-approval_refs: [USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command, USER-approve-refactoring-plan-behavior-runner, USER-waive-refactoring-plan-behavior-runner]
+approval_refs: [USER-approve-refactoring-plan-current-requirements, USER-waive-refactoring-plan-current-requirements, USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command, USER-approve-refactoring-plan-behavior-runner, USER-waive-refactoring-plan-behavior-runner]
 ---
 # Точка продолжения
+
+## Продолжение после оптимизации feccead
+
+Пользователь поручил исправить план под новые требования, считать его
+согласованным без нового ревью и продолжить исполнение. Точный ответ сохранён
+в новых USER-approve/waive-refactoring-plan-current-requirements в
+[решениях](review/decisions.md). Ниже сохранены исторические checkpoints;
+их команды и указания о ранних eval заменены текущим разделом tasks.
+
+Задачи принимаются по детерминированным проверкам. Реальные поведенческие
+baseline, micro/pressure, независимое оценивание и viewer выполняются только
+при финальной приёмке всего плана. Команды apply используют четыре workers,
+loadscope и текущую регрессию not installation; полная installation-группа,
+включая network, проверяется в финале. Лимит всего прогона остаётся 30 секунд.
+
+Принятые задачи 1, 2 и 4 и их YAML-записи сохраняются. Сохранённый фактический
+результат второго ревью задачи 5 восстановлен: обнаружена коллизия ID проверок,
+позволяющая скрыть ранее обязательную проверку без разрешённого перехода.
+Исправление остаётся в области задачи 5. Её review-бюджет 2/3 и test repair 2/5
+не сбрасываются; задача 3 сохраняет test repair 1/5. Незавершённые рабочие деревья,
+runner задачи 3, тесты и отчёты сохранены до поддерживаемого revised_plan.
+
+После актуального plan check и записи snapshot выполнить revised_plan,
+сохранить принятые задачи и бюджеты, затем возобновить задачи 3 и 5 на новом
+HEAD с полным ownership и независимыми детерминированными проверками.
+Гуманизация не поручена; прежний выбор сохраняется. Нового ревью плана нет.
 
 ## Следующий шаг
 
