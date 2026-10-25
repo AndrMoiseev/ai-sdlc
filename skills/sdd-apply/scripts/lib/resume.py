@@ -42,7 +42,8 @@ def transition(state, task, event, directory):
         require(not any(r["status"] == "active" for r in state["roles"].values()), "active_roles", "Finish or reconcile active roles before replacing the basis")
         from .inputs import validate, basis_dependency
         import uuid
-        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"), sdd_shared=basis_dependency(state["basis"]))
+        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"),
+                         sdd_shared=basis_dependency(state["basis"]), work_kind=state["basis"].get("work_kind", "change"))
         require(basis["manifest"] != state["basis"]["manifest"], "plan_unchanged", "Use resume when the approved basis is unchanged")
         plans = {plan["id"]: plan for plan in basis["tasks"]}
         completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]
@@ -68,6 +69,9 @@ def transition(state, task, event, directory):
         state["run_id"] = uuid.uuid4().hex
         state["previous_run"] = previous_run
         state["basis"] = basis
+        if basis.get("work_kind", "change") == "refactoring":
+            state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
+                         for kind in ("acceptance", "verification")})
         state["tasks"] = {}
         from .state import new_task
         for plan in basis["tasks"]:
@@ -93,6 +97,8 @@ def transition(state, task, event, directory):
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
+    from .check_registry import recovery
+    registries = recovery(state)
     issues = []
     try:
         assert_basis(state)
@@ -181,4 +187,4 @@ def transition(state, task, event, directory):
                       and not t["worktree"].get("integrated") and not t["worktree"].get("removed")
                       and t["worktree"]["base"] != head]
     return {"status": state["status"], "issues": issues, "preserved_roles": state["roles"],
-            "stale_worktrees": stale_worktrees}
+            "stale_worktrees": stale_worktrees, **({"check_registries": registries} if registries else {})}

@@ -44,7 +44,7 @@ def reduce(state, event, directory):
     if kind in {"role_register", "role_result", "review_start", "review_result"}:
         from .roles import transition
         return transition(state, task, event, directory)
-    if kind in {"checks_register", "checks_extend", "check_setup", "check_run", "candidate", "procedure_begin", "procedure_result"}:
+    if kind in {"checks_register", "checks_extend", "checks_revise", "check_setup", "check_run", "candidate", "procedure_begin", "procedure_result"}:
         from .verification import transition
         return transition(state, task, event, directory)
     if kind == "start":

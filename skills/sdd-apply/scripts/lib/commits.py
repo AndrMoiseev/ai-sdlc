@@ -97,6 +97,8 @@ def transition(state, task, event, directory):
         require(task["commits"], "commit_required", "A commit is mandatory")
         confirm(state, task, task["commits"][-1])
         require(same(state, task["commits"][-1]["candidate"], task["candidate"]), "commit_candidate", "Commit did not record this candidate")
+        from .check_registry import confirm as confirm_registry
+        confirm_registry(state, task, event)
         task["status"] = "accepted"
         task["integration_active"] = False
         task.pop("repairing_result", None)

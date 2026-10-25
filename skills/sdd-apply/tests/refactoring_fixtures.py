@@ -14,7 +14,7 @@ from lib.state import seal, save
 COLLECTION = Path(__file__).resolve().parents[2]
 
 
-def approved_basis(project, work_kind="refactoring"):
+def approved_basis(project, work_kind="refactoring", configure=None):
     """Both routes use the real document validator and synthetic approvals."""
     shared = COLLECTION / "sdd-shared"
     if work_kind == "refactoring":
@@ -40,7 +40,10 @@ def approved_basis(project, work_kind="refactoring"):
                      location="check.py", run={"command": [sys.executable, "-B", "check.py"]})
         (project / "docs").mkdir(exist_ok=True)
         (project / "docs/baseline.md").write_text("# Arithmetic contract\nExisting clients receive their sum.\n", encoding="utf-8")
-        for name, records in (("proposal", []), ("design", [result, preserved, decision]), ("tasks", [task, local, whole])):
+        documents = {"proposal": [], "design": [result, preserved, decision], "tasks": [task, local, whole]}
+        if configure:
+            configure(documents)
+        for name, records in documents.items():
             document(root / (name + ".md"), {**meta, "document_type": name}, records)
         approvals = []
         snapshots = spec_modules(shared, "snapshots")
@@ -104,3 +107,115 @@ class AcceptanceDriver(Driver):
 
     def log(self, result):
         return json.loads(artifacts.read_text(self.directory / result["log"]))
+
+
+def transition_basis(project, revise_documents=None):
+    """An approved temporary adapter followed by its removal and a test move."""
+    def configure(documents):
+        first, local, whole = documents["tasks"]
+        first["scope"][0]["paths"] += ["adapter.py"]
+        local.update(lifetime="transitional", until_task="TASK-two", replaced_by=["AC-removed"])
+        second = deepcopy(first)
+        second.update(id="TASK-two", number=2, depends_on=["TASK-one"],
+                      scope=[dict(module="core", paths=["adapter.py", "check_removed.py", "check.py", "check_api.py"])],
+                      test_changes=[dict(id="move-api-check", action="move", group="Arithmetic API regression in check.py",
+                                         criteria=["AC-preserved"], replacement_criteria=["AC-preserved"],
+                                         reason="Move the same arithmetic assertion after removing the adapter")])
+        second["verification"][0].update(criteria=["AC-removed"], location="check_removed.py")
+        second["verification"][0]["run"] = {"setup_required": "Create a check that the adapter is absent"}
+        removed = dict(sdd_record="acceptance", id="AC-removed", task="TASK-two", lifetime="persistent",
+                       conditions="The adapter is removed", expected="The arithmetic API remains available directly")
+        later = deepcopy(second)
+        later.update(id="TASK-three", number=3, depends_on=["TASK-two"],
+                     scope=[dict(module="consumer", paths=["later.txt", "check_later.py"])], test_changes=[])
+        later["verification"] = [dict(id="consumer", criteria=["AC-later"], test_description="Check the final consumer",
+                                     location="check_later.py", run={"setup_required": "Create the consumer check"})]
+        later["preserves"] = []
+        later["preservation_reason"] = "The consumer task uses the confirmed mandatory API regression"
+        local_later = dict(sdd_record="acceptance", id="AC-later", task="TASK-three", lifetime="persistent",
+                           conditions="The consumer is ready", expected="The consumer uses the direct arithmetic API")
+        documents["tasks"] = [first, local, second, removed, later, local_later, whole]
+        if revise_documents:
+            revise_documents(documents)
+    return approved_basis(project, configure=configure)
+
+
+class RegistryDriver(AcceptanceDriver):
+    """Multi-task state operations, using synthetic native launches explicitly."""
+    task_id = "TASK-one"
+
+    @property
+    def task(self):
+        return deepcopy(self._view()["tasks"][self.task_id])
+
+    @property
+    def root(self):
+        worktree = self._view()["tasks"][self.task_id]["worktree"]
+        return Path(worktree["path"]) if worktree and not worktree.get("integrated") else Path(self._view()["basis"]["project_root"])
+
+    def send(self, kind, payload=None, task_id="current"):
+        return super().send(kind, payload, self.task_id if task_id == "current" else task_id)
+
+    @property
+    def author(self):
+        return self.task_id + "-author"
+
+    def start(self, additional=None):
+        self.worktree()
+        paths = self.task["plan"]["scope"][0]["paths"]
+        self.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": additional or []})
+        self.role(self.author, "executor")
+        self.send("start", {"role_id": self.author, "paths": paths})
+        verifier = self.task_id + "-baseline"
+        self.role(verifier, "verifier")
+        return self.send("check_run", {"role_id": verifier, "stage": "baseline"})
+
+    def implement(self):
+        if self.task_id == "TASK-one":
+            (self.root / "adapter.py").write_text("def add(left, right):\n    return left + right\n", encoding="utf-8")
+            (self.root / "result.txt").write_text("adapter introduced\n", encoding="utf-8")
+            name = "check_local.py"
+            code = "from pathlib import Path\nnamespace = {}\nexec(Path('adapter.py').read_text(), namespace)\nassert namespace['add'](2, 3) == 5\n"
+        elif self.task_id == "TASK-two":
+            name = "check_removed.py"
+            code = "from pathlib import Path\nassert not Path('adapter.py').exists()\nassert 2 + 3 == 5\n"
+            (self.root / "adapter.py").unlink()
+            (self.root / "check.py").rename(self.root / "check_api.py")
+        else:
+            name = "check_later.py"
+            code = "from pathlib import Path\nassert Path('later.txt').read_text() == 'direct API consumer\\n'\n"
+            (self.root / "later.txt").write_text("direct API consumer\n", encoding="utf-8")
+        (self.root / name).write_text(code, encoding="utf-8")
+        self.send("check_setup", {"check_id": self.task_id + ("/consumer" if self.task_id == "TASK-three" else "/local-result"),
+                                 "command": [sys.executable, "-B", name], "description": "Verify this approved local result exactly"})
+
+    def freeze(self):
+        self.send("role_result", {"role_id": self.author, "result": "DONE", "trace": "synthetic-unit-test"})
+        return self.send("candidate")
+
+    def verify(self, role=None):
+        return super().verify(role or self.task_id + "-verifier")
+
+    def review(self, role=None, verdict="pass"):
+        return super().review(role or self.task_id + "-reviewer", verdict)
+
+    def resume(self):
+        return self.send("resume", {"host_trace": "synthetic-unit-test liveness observation",
+                                    "live_contexts": [role["context_id"] for role in self.state["roles"].values() if role["status"] == "active"]}, task_id=None)
+
+    def revision(self):
+        from lib.check_registry import selected
+        before = deepcopy(selected(self.state, self.task))
+        after = []
+        for check in before:
+            if check["id"] == "TASK-one/local-result":
+                continue
+            check = deepcopy(check)
+            if check.get("location") == "check.py":
+                check.update(location="check_api.py", run={"command": [sys.executable, "-B", "check_api.py"]})
+            after.append(check)
+        changed = {item["id"] for item in before if item not in after} | {item["id"] for item in after if item not in before}
+        return dict(registry_revision=self.task["check_registry"]["revision"], before=before, after=after,
+                    basis=dict(test_changes=["move-api-check"], transitional_criteria=["AC-local"]),
+                    preserves=["AC-preserved"], reason="Approved adapter removal and preservation test move",
+                    mapping={ident: "Temporary adapter criterion" if ident == "TASK-one/local-result" else "Arithmetic API regression in check.py moved intact to check_api.py" for ident in changed})

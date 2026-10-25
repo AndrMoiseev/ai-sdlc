@@ -41,6 +41,51 @@ rewriting a check directly blocks freezing and acceptance; an authorized registr
 transition requires a supported operation and independent confirmation. Keep
 historical logs.
 
+In refactoring work, registration and review-requested extension cannot reuse
+another task's check ID. This includes additional project checks, retired IDs,
+and generated keys reserved by the approved plan before registration. Use an
+authorized `checks_revise` transition to change an existing obligation. Ordinary
+change work retains task-local check IDs.
+
+### Approved refactoring revisions
+
+Use `checks_revise` after baseline, within the running task or its reserved repair.
+Read its installed event help for the complete record shape. Submit the current
+`registry_revision`, exact applicable `before` and complete `after` records,
+approved `basis`, affected `preserves`, `reason`, and a `mapping` for every changed
+check. The mapping identifies the approved test group or transitional criterion
+and the actual tests affected. Keep unchanged project and CI checks in `after`.
+
+Bind `basis.test_changes` to this task's approved local change IDs. Bind
+`basis.transitional_criteria` to acceptance criteria whose `until_task` is this
+task. The replacing state needs executable checks at task acceptance; final-only
+evidence cannot retire an adapter check. A moved preservation test keeps its
+criterion ID. A structural retirement uses its approved architecture decision.
+Changing the obligation, group or lifetime itself returns through
+`spec_conflict` and `revised_plan`.
+
+The script stages a revision and retains the original registry snapshots and logs.
+Its pending applicability lets the removal candidate run the replacing-state
+checks after the old boundary is gone. Freeze a new candidate, run independent
+checks and review, and confirm the task commit. `accept` confirms the new
+applicability in the same state write as task acceptance. Failed or unavailable
+replacement checks keep the task unaccepted; reserve repair before editing or
+retrying and retain the existing lifetime counters.
+
+Later tasks and task-scoped `final` checks use the confirmed applicable set.
+Retired adapter checks remain historical observations with their original
+outcomes. Inspect `resume.check_registries` for the confirmed revision/checks and
+the separate pending transition after an interruption. Resume preserves that
+split and existing authorization; it cannot finish a revision from task status
+or an orphaned log. Exact event replay returns the saved result. Different
+content requires a new event/revision and fresh checks and review.
+
+For verification/review of a transition, read the saved registry object and its
+history and `transition` alongside the role packet, resolving `read_object`
+references as needed. Existing compact packets show
+registry hashes rather than the complete pending mapping. Carry the actual
+confirmed/pending fields and selected checks as supplemental role material.
+
 Every command is an argument array passed unchanged with `shell=False`. Register
 a required interpreter explicitly. Legacy strings are rejected at registration;
 persisted strings produce `unavailable` with `limitation: command_format`.
@@ -49,7 +94,7 @@ representation invalidates registry/candidate evidence and needs fresh checks.
 
 ## Running checks
 
-`check_run` executes the complete registry for the assigned `role_id` and stage
+`check_run` executes the complete applicable registry for the assigned `role_id` and stage
 (`baseline`, `self`, `independent`, `integration`, `final`), with optional timeout.
 For a registered procedure, use `procedure_begin` with check/role/stage, execute
 it in that role, and submit `procedure_result` with the same IDs, outcome, actual
