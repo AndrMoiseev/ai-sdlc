@@ -219,3 +219,88 @@ class RegistryDriver(AcceptanceDriver):
                     basis=dict(test_changes=["move-api-check"], transitional_criteria=["AC-local"]),
                     preserves=["AC-preserved"], reason="Approved adapter removal and preservation test move",
                     mapping={ident: "Temporary adapter criterion" if ident == "TASK-one/local-result" else "Arithmetic API regression in check.py moved intact to check_api.py" for ident in changed})
+
+
+ATOMIC_OPERATION = """def transfer(accounts, amount):
+    if amount < 0 or amount > accounts['left']:
+        raise ValueError('invalid amount')
+    accounts['left'] -= amount
+    accounts['right'] += amount
+"""
+ATOMIC_CHECK = """from pathlib import Path
+namespace = {}
+exec(Path('ledger.py').read_text(), namespace)
+accounts = {'left': 5, 'right': 2}
+namespace['transfer'](accounts, 3)
+assert accounts == {'left': 2, 'right': 5}
+for amount in (-1, 9):
+    before = dict(accounts)
+    try:
+        namespace['transfer'](accounts, amount)
+    except ValueError as error:
+        assert str(error) == 'invalid amount'
+    else:
+        raise AssertionError('invalid amount accepted')
+    assert accounts == before
+"""
+
+
+def boundary_basis(project, split=False):
+    """Persistent old structure, mixed atomicity test, then an approved new boundary."""
+    def configure(documents):
+        first, local, second, removed, later, local_later, whole = documents["tasks"]
+        local.update(lifetime="persistent")
+        local.pop("until_task")
+        local.pop("replaced_by")
+        second["scope"][0]["paths"] += ["ledger.py", "boundary.py", "check_contract.py", "check_local.py"]
+        second["test_changes"] = [
+            dict(id="retire-old-boundary", action="remove", group="adapter.py call asserted by check_local.py",
+                 criteria=["AC-local"], reason="Merge the old modules", decision="DEC-local-boundary"),
+            dict(id="move-api-check", action="adapt", group="check.py combines old adapter presence and atomic transfer",
+                 criteria=["AC-preserved"], replacement_criteria=["AC-preserved"],
+                 reason="Preserve atomicity at the public ledger boundary", decision="DEC-local-boundary"),
+            dict(id="new-boundary", action="add", group="New boundary contract and ledger integration",
+                 criteria=["AC-removed"], reason="Exercise invalid amounts across the extracted validator")]
+        if split:
+            second["verification"].append(dict(id="contract", criteria=["AC-removed"],
+                test_description="Check extracted validation contract", location="check_contract.py",
+                run={"setup_required": "Create the validator contract check"}))
+        documents["tasks"] = [first, local, second, removed, whole]
+        documents["design"][1].update(scope=["Public ledger"], conditions="Transfers succeed or reject invalid amounts",
+            expected="Balances update together; invalid operations leave both balances unchanged")
+        (project / "adapter.py").write_text("def add(left, right):\n    return left + right\n", encoding="utf-8")
+        (project / "ledger.py").write_text(ATOMIC_OPERATION, encoding="utf-8")
+        (project / "check.py").write_text(ATOMIC_CHECK + "assert Path('adapter.py').is_file()\n", encoding="utf-8")
+    return transition_basis(project, revise_documents=configure)
+
+
+class BoundaryDriver(RegistryDriver):
+    def implement_boundary(self, split=False):
+        super().implement()
+        (self.root / "check_local.py").unlink()
+        (self.root / "check_api.py").write_text(ATOMIC_CHECK, encoding="utf-8")
+        if split:
+            (self.root / "boundary.py").write_text(
+                "def validate(balance, amount):\n    if amount < 0 or amount > balance:\n        raise ValueError('invalid amount')\n", encoding="utf-8")
+            (self.root / "ledger.py").write_text(
+                "from pathlib import Path\nvalidation = {}\nexec(Path('boundary.py').read_text(), validation)\n"
+                "def transfer(accounts, amount):\n    validation['validate'](accounts['left'], amount)\n"
+                "    accounts['left'] -= amount\n    accounts['right'] += amount\n", encoding="utf-8")
+            (self.root / "check_contract.py").write_text(
+                "from pathlib import Path\nnamespace = {}\nexec(Path('boundary.py').read_text(), namespace)\n"
+                "assert namespace['validate'](5, 5) is None\n"
+                "for amount in (-1, 6):\n    try:\n        namespace['validate'](5, amount)\n"
+                "    except ValueError as error:\n        assert str(error) == 'invalid amount'\n"
+                "    else:\n        raise AssertionError('invalid amount accepted')\n", encoding="utf-8")
+            self.send("check_setup", {"check_id": "TASK-two/contract",
+                "command": [sys.executable, "-B", "check_contract.py"], "description": "Validate the new boundary at both limits"})
+
+    def revision(self):
+        revision = super().revision()
+        revision["basis"] = {"test_changes": ["retire-old-boundary", "move-api-check", "new-boundary"]}
+        revision["reason"] = "DEC-local-boundary retires the old call; atomicity stays under AC-preserved"
+        revision["mapping"]["TASK-one/local-result"] = "retire-old-boundary: check_local.py old call; DEC-local-boundary"
+        for ident in revision["mapping"]:
+            if ident != "TASK-one/local-result":
+                revision["mapping"][ident] = "move-api-check: check.py old adapter assertion retired; check_api.py retains success, error and atomicity assertions; AC-preserved"
+        return revision

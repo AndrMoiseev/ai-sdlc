@@ -12,6 +12,12 @@ Verify local acceptance and preservation independently. Contributions describe
 intended scope; they do not establish whole-result success. Use the current
 candidate and registry for task review and subsequent integrated-state review.
 
+The refactoring packet's `test_evolution` carries approved groups, complete
+applicable check records, the pending transition including its actual-test mapping,
+and the confirmed revision. Treat this as review input, not a coverage verdict.
+Read the [boundary-test policy](review-policy.md#tests-at-changed-module-boundaries)
+when tests change with module boundaries.
+
 Work only within the assignment. Verifiers and reviewers are independent of all
 authors and do not edit the candidate. Wait for the generated packet; a reviewer
 also waits for a successful `review_start` reservation. Report unavailable inputs,

@@ -38,3 +38,8 @@ do not silently omit the check or replace it with a deterministic test.
 5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed check or proven review violation, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 
 If a loaded mode must change, transfer ownership to a fresh context through the resume flow. Authorization to execute includes local task commits; delivery beyond those commits requires its own instruction.
+
+When refactoring changes module boundaries and their tests, apply the
+[test evolution policy](references/review-policy.md#tests-at-changed-module-boundaries).
+For maintenance of this behavior, use the [paired evaluation procedure](evals/refactoring-tests.md)
+only at final acceptance of the whole plan.

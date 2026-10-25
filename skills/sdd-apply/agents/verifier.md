@@ -8,4 +8,11 @@ Return passed, failed, or unavailable with candidate, command/cwd/configuration,
 
 For refactoring, map evidence to each local acceptance and preserved criterion in the packet. Inspect the baseline and registered revision, including existing mandatory commands and newly prepared checks. Confirm the command proves its declared criterion; a contribution to a design result does not establish that result across all modules. Parallel integration needs fresh evidence from the integrated candidate, followed by its own reserved review.
 
+For changed boundaries, inspect `test_evolution` and the actual test sources.
+Confirm that moved behavior checks exercise the preserved guarantee and new
+contract/integration checks exercise the identified risks. Report a missing
+baseline as a gap; a fresh passing replacement alone cannot prove old behavior.
+Use the [test evolution policy](../references/review-policy.md#tests-at-changed-module-boundaries)
+to distinguish structural retirement from lost preservation.
+
 For final verification, inspect and run the full required set and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Attribute a defect to its task or report uncertain ownership for resolution.

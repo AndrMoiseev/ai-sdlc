@@ -23,6 +23,36 @@ generic best practices, an easy fix, or reviewer insistence do not replace proof
 Unexplained test weakening is a blocker only with evidence of an affected AC or
 project rule. Keep mandatory checks and their failure handling unchanged.
 
+## Tests at changed module boundaries
+
+For refactoring, read the packet's `test_evolution`: approved `test_changes`
+groups, applicable checks, and the exact pending registry transition. Match each
+actual test addition, adaptation, move or removal to its group and criteria;
+identify the accepted DEC for a cancelled structural restriction. Inspect the
+test diff and original baseline rather than treating the author's mapping as proof.
+
+Distinguish the guarantees inside each test. A test solely for a cancelled
+internal call may disappear without recreating that call elsewhere. A mixed
+test that also checks atomicity, error handling or another preserved behavior
+keeps those assertions at an appropriate public or integration boundary. Moving
+a persistent property's test retains the criterion ID and its lifetime.
+
+For a new boundary, assess contract inputs, outputs, errors and interactions
+against the approved design and failure risks. The executor chooses concrete
+files and cases within the assigned scope and approved groups. Test count,
+coverage percentage and a green run do not establish this sufficiency. Record
+the old guarantee, its disposition, actual replacement tests where needed,
+registry IDs and remaining evidence gaps in `test_integrity`.
+
+Use `more_checks` for a specific unresolved contractual evidence gap. Use a
+proven blocker when a preserved guarantee or accepted architecture is violated.
+Do not block a justified structural retirement merely because a test was deleted.
+Changing the preservation obligation or architecture requires `spec_conflict`,
+not a weaker oracle. Apply registry changes through `checks_revise`; state edits
+and review prose cannot confirm a revision.
+
+## Recording the review
+
 Submit all findings through `review_result`. The script normalizes their severity
 using the proof and generates `execution/technical-debt.md` from recorded reviews.
 If only recommendations remain and mandatory verification is sufficient, return

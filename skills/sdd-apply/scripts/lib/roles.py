@@ -1,7 +1,7 @@
 """Host-attested fresh contexts and separate implementation/review results."""
 from .common import digest, now, require, write_json
 from .verification import current, independent, valid_evidence, local_criteria
-from .review_policy import proven
+from .review_policy import proven, test_change_context
 from .candidates import reference, same
 import re
 from . import artifact_storage as artifacts
@@ -13,6 +13,9 @@ def refactoring_context(state, task):
     root = Path(state["basis"]["change_root"])
     design = spec_modules(basis_dependency(state["basis"])).read_document(root / "design.md", "refactoring")
     criteria = local_criteria(state, task) | set(task["plan"]["contributes_to"])
+    for change in task["plan"].get("test_changes", []):
+        criteria.update(change["criteria"])
+        criteria.update(change.get("replacement_criteria", []))
     decisions = {change.get("decision") for change in task["plan"].get("test_changes", [])}
     registry = task.get("check_registry")
     baseline = task.get("baseline_checks")
@@ -22,6 +25,7 @@ def refactoring_context(state, task):
             "preserves": task["plan"]["preserves"], "contributes_to": task["plan"]["contributes_to"],
             "preservation_reason": task["plan"].get("preservation_reason"),
             "test_changes": task["plan"].get("test_changes", []),
+            "test_evolution": test_change_context(state, task),
             "design": [record for record in design.records if record.get("id") in criteria | decisions
                        or record["sdd_record"] == "decision" and criteria & set(record.get("criteria", []))],
             "sources": {name: str(root / name) for name in ("proposal.md", "design.md", "tasks.md")},

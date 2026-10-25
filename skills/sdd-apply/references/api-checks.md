@@ -80,11 +80,11 @@ split and existing authorization; it cannot finish a revision from task status
 or an orphaned log. Exact event replay returns the saved result. Different
 content requires a new event/revision and fresh checks and review.
 
-For verification/review of a transition, read the saved registry object and its
-history and `transition` alongside the role packet, resolving `read_object`
-references as needed. Existing compact packets show
-registry hashes rather than the complete pending mapping. Carry the actual
-confirmed/pending fields and selected checks as supplemental role material.
+For verification/review of a transition, read `refactoring.test_evolution` in
+the role packet: it includes the approved groups, selected checks, exact pending
+transition and confirmed revision. Resolve the saved registry history through
+`read_object` when earlier evidence is needed. Inspect actual test sources against
+the mapping under the [boundary-test policy](review-policy.md#tests-at-changed-module-boundaries).
 
 Every command is an argument array passed unchanged with `shell=False`. Register
 a required interpreter explicitly. Legacy strings are rejected at registration;
