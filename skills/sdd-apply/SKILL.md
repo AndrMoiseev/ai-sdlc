@@ -8,6 +8,9 @@ disable-model-invocation: true
 
 Use only on explicit invocation. Keep normative SDD documents unchanged.
 
+Before starting or resuming, exclude transient execution files from Git using
+the [runtime setup policy](references/runtime-setup.md#transient-execution-files).
+
 Only when changing the sdd-apply skill itself, read
 [maintenance and test rules](references/maintenance.md) before editing or testing.
 Leave that reference unloaded when using sdd-apply to implement another project.
