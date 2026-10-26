@@ -5,10 +5,10 @@ change_id: sdd-refactoring-flow
 language: ru
 phase: plan_approved
 awaiting: none
-updated_at: "2026-10-25T08:25:30.361451Z"
+updated_at: "2026-10-26T06:13:51.8940551Z"
 document_links: [proposal.md, design.md, specs/sdd-refactoring/spec.md, tasks.md, decisions.md, questions.md, premortem.md, review/decisions.md]
 review_links: [review/20261024T085539Z-refactoring-docs/consistency.md, review/20261024T092036Z-refactoring-plan/plan.md, review/summary.md]
-approval_refs: [USER-approve-refactoring-plan-current-requirements, USER-waive-refactoring-plan-current-requirements, USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command, USER-approve-refactoring-plan-behavior-runner, USER-waive-refactoring-plan-behavior-runner]
+approval_refs: [USER-approve-followup-documents, USER-waive-followup-documents, USER-plan-final-project-checks, USER-approve-followup-plan, USER-waive-followup-plan, USER-approve-refactoring-plan-current-requirements, USER-waive-refactoring-plan-current-requirements, USER-review-refactoring-docs, USER-approve-refactoring-documents, USER-plan-refactoring-flow, USER-review-refactoring-plan, USER-fix-refactoring-plan-findings, USER-approve-refactoring-plan, USER-waive-refactoring-plan-rereview, USER-approve-refactoring-plan-ancillary, USER-waive-refactoring-plan-ancillary, USER-approve-refactoring-plan-test-registry, USER-waive-refactoring-plan-test-registry, USER-approve-refactoring-plan-test-command, USER-waive-refactoring-plan-test-command, USER-approve-refactoring-plan-behavior-runner, USER-waive-refactoring-plan-behavior-runner]
 ---
 # Точка продолжения
 
@@ -107,3 +107,18 @@ baseline и требуемый показ conductor viewer до авторски
 Реальные wording micro/pressure для apply остаются обязательной работой task6/8
 перед final package acceptance; synthetic unit roles их не заменяют. Покрытие:
 execution/reports/required-behavior-coverage.md. Финальный network-check ещё не выполнен.
+
+## Дополнение задачей 9 от 2026-10-26
+
+Приняты задачи 1–8 на интегрированном HEAD 9152c8291c3b2c27711bd418927857400af24efa.
+Пользователь поручил оформить обнаруженный отказ регистрации финальных проверок
+отдельной задачей, считать обновлённый план согласованным без ревью и продолжить.
+Добавлены TASK-final-project-checks и её собственный AC; исходные записи задач
+и их бюджеты сохранены. Новые USER-записи связывают этот ответ с точными снимками.
+
+Далее: структурно проверить комплект, выполнить пересмотр исполнения с сохранением
+восьми принятых задач и явной связью последующей задачи 9 с прежней остановкой
+ремонта задачи 7; затем baseline, реализация и приёмка задачи 9. Поведенческие
+проверки и полный installation остаются обязательны при финальной приёмке всего
+обновлённого плана. Разрешение пользователя на временное превышение времени
+тестов сохраняется; лимиты ревью прежних задач не расширены и не сброшены.

@@ -383,3 +383,81 @@ status: active
 детерминированная. Команды и лимит времени приведены к текущим требованиям.
 Новое ревью и гуманизация не проводились; исторические ответы не переписаны.
 
+
+
+### USER-approve-followup-documents
+
+```yaml
+sdd_record: user
+id: USER-approve-followup-documents
+kind: document_approval
+scope: 
+  stage: document_review
+response: "оформи это как новую задачу в плане, после этого считай что план согласован без ревью и продолжай выполнение"
+date: "2026-10-26T06:13:51.8940551Z"
+inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"}]
+status: active
+```
+
+
+### USER-waive-followup-documents
+
+```yaml
+sdd_record: user
+id: USER-waive-followup-documents
+kind: review_waiver
+scope: 
+  stage: document_review
+  lenses: [consistency]
+response: "оформи это как новую задачу в плане, после этого считай что план согласован без ревью и продолжай выполнение"
+date: "2026-10-26T06:13:51.8940551Z"
+inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"}]
+status: active
+```
+
+
+### USER-plan-final-project-checks
+
+```yaml
+sdd_record: user
+id: USER-plan-final-project-checks
+kind: planning_command
+scope: 
+  stage: document_review
+  work: Дополнить план задачей 9 для регистрации финальных проверок обычного исполнения; сохранить принятые задачи 1–8
+response: "оформи это как новую задачу в плане, после этого считай что план согласован без ревью и продолжай выполнение"
+date: "2026-10-26T06:13:51.8940551Z"
+inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"}]
+status: active
+```
+
+
+### USER-approve-followup-plan
+
+```yaml
+sdd_record: user
+id: USER-approve-followup-plan
+kind: plan_approval
+scope: 
+  stage: plan_review
+response: "оформи это как новую задачу в плане, после этого считай что план согласован без ревью и продолжай выполнение"
+date: "2026-10-26T06:13:51.8940551Z"
+inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"},{"sha256":"2a7ad1ad711f64338894540e8df5ad333f2773b207cee0012a88e1195d9e5a59","path":"tasks.md"}]
+status: active
+```
+
+
+### USER-waive-followup-plan
+
+```yaml
+sdd_record: user
+id: USER-waive-followup-plan
+kind: review_waiver
+scope: 
+  stage: plan_review
+  lenses: [plan]
+response: "оформи это как новую задачу в плане, после этого считай что план согласован без ревью и продолжай выполнение"
+date: "2026-10-26T06:13:51.8940551Z"
+inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"},{"sha256":"2a7ad1ad711f64338894540e8df5ad333f2773b207cee0012a88e1195d9e5a59","path":"tasks.md"}]
+status: active
+```
