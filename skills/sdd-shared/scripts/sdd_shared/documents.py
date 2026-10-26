@@ -23,6 +23,7 @@ MAX_YAML_CHARS = 1_000_000
 MAX_DOCUMENT_CHARS = 4_000_000
 MAX_YAML_DEPTH = 64
 MAX_YAML_TOKENS = 100_000
+YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 
 def valid_slug(value):
@@ -38,7 +39,7 @@ def safe_yaml(text):
         raise ValidationError("yaml_limit", "YAML exceeds the 1,000,000 character limit")
     try:
         depth = 0
-        for count, token in enumerate(yaml.scan(text), 1):
+        for count, token in enumerate(yaml.scan(text, Loader=YAML_LOADER), 1):
             if count > MAX_YAML_TOKENS:
                 raise ValidationError("yaml_limit", "YAML exceeds the 100,000 token limit")
             if isinstance(token, (yaml.tokens.BlockMappingStartToken, yaml.tokens.BlockSequenceStartToken, yaml.tokens.FlowMappingStartToken, yaml.tokens.FlowSequenceStartToken)):
@@ -49,7 +50,6 @@ def safe_yaml(text):
                 depth -= 1
             if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken, yaml.tokens.TagToken)):
                 raise ValidationError("unsafe_yaml", "YAML aliases, anchors and explicit tags are forbidden")
-        node = yaml.compose(text, Loader=yaml.SafeLoader)
         def inspect(current):
             if isinstance(current, yaml.MappingNode):
                 keys = set()
@@ -63,12 +63,17 @@ def safe_yaml(text):
             elif isinstance(current, yaml.SequenceNode):
                 for value in current.value:
                     inspect(value)
-        inspect(node)
+        loader = YAML_LOADER(text)
         try:
-            value = yaml.safe_load(text)
-        except (ValueError, OverflowError) as exc:
-            # SafeLoader's timestamp/int constructors can raise builtin errors.
-            raise ValidationError("invalid_yaml", f"Invalid YAML scalar: {exc}") from exc
+            node = loader.get_single_node()
+            inspect(node)
+            try:
+                value = loader.construct_document(node) if node is not None else None
+            except (ValueError, OverflowError) as exc:
+                # SafeLoader's timestamp/int constructors can raise builtin errors.
+                raise ValidationError("invalid_yaml", f"Invalid YAML scalar: {exc}") from exc
+        finally:
+            loader.dispose()
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValidationError("invalid_yaml", str(exc)) from exc
     if not isinstance(value, dict):
@@ -100,9 +105,28 @@ FIELDS = {
     "task": ({"number", "covers", "depends_on", "status", "verification"}, {"cannot_parallel_with"}, "TASK"),
 }
 KINDS = {"proposal": set(), "spec": {"requirement", "acceptance"}, "design": {"decision"}, "tasks": {"task"}}
+WORK_KINDS = frozenset({"change", "refactoring"})
+ANCILLARY = frozenset({"state", "questions", "decisions", "review", "summary"})
 
 
-def read_document(path):
+def document_schema(meta, work_kind):
+    """Select a schema by explicit work context, type and version, never by version alone."""
+    if not isinstance(work_kind, str) or work_kind not in WORK_KINDS:
+        raise InputError("unsupported_work_kind", f"Unsupported work kind: {work_kind}; install a matching SDD bundle or correct the selection")
+    declared = meta.get("work_kind", "change")
+    if not isinstance(declared, str) or declared not in WORK_KINDS:
+        raise InputError("unsupported_work_kind", f"Unsupported declared work kind: {declared}; install a matching SDD bundle")
+    if declared != work_kind:
+        raise ValidationError("work_kind_mismatch", f"Document declares {declared}, selected work is {work_kind}; correct the work selection or document placement")
+    if type(meta.get("schema_version")) is not int or meta["schema_version"] != 1:
+        raise InputError("unsupported_version", f"Unsupported {work_kind} schema version: {meta.get('schema_version')}; install a matching SDD bundle")
+    if work_kind == "refactoring":
+        from .refactoring import FIELDS as REFACTORING_FIELDS, KINDS as REFACTORING_KINDS
+        return REFACTORING_FIELDS, REFACTORING_KINDS
+    return FIELDS, KINDS
+
+
+def read_document(path, work_kind="change"):
     path = Path(path)
     try:
         with path.open(encoding="utf-8-sig") as stream:
@@ -119,14 +143,32 @@ def read_document(path):
         raise ValidationError("frontmatter", "Unterminated frontmatter", path)
     try:
         meta = safe_yaml("".join(lines[1:end]))
-        if type(meta.get("schema_version")) is not int or meta["schema_version"] != 1:
-            raise InputError("unsupported_version", "Only schema_version: 1 is supported", path)
+        fields, kinds = document_schema(meta, work_kind)
+        # Standalone reads also reject a known SDD root of the other work kind.
+        for parent in path.resolve().parents:
+            if parent.parent.name == "sdd" and parent.name in {"changes", "refactoring"}:
+                located = "change" if parent.name == "changes" else "refactoring"
+                if located != work_kind:
+                    raise ValidationError("work_kind_mismatch", f"Selected {work_kind} document is under sdd/{parent.name}; correct the work selection or placement")
+                break
         # Lens indexes have only schema_version/lenses; callers validate generic schemas.
         kind = meta.get("document_type", "")
         if not isinstance(kind, str):
             raise ValidationError("document_type", "document_type must be a string")
-        if kind in KINDS:
+        if work_kind == "refactoring" and kind not in kinds and kind not in ANCILLARY:
+            raise ValidationError("document_type", f"Unsupported refactoring document_type: {kind}")
+        if work_kind == "refactoring" and kind in ANCILLARY:
+            if not valid_slug(meta.get("change_id")):
+                raise ValidationError("document_metadata", "Ancillary refactoring documents require change_id")
+            for parent in path.resolve().parents:
+                if parent.parent.name == "refactoring" and parent.parent.parent.name == "sdd":
+                    if meta["change_id"] != parent.name:
+                        raise ValidationError("document_identity", "Document change_id does not match its work root")
+                    break
+        if kind in kinds:
             required = {"schema_version", "document_type", "change_id", "language"}
+            if work_kind == "refactoring" or "work_kind" in meta:
+                required.add("work_kind")
             if kind == "spec":
                 required.add("capability")
             if set(meta) != required:
@@ -163,10 +205,10 @@ def read_document(path):
             if not isinstance(rid, str) or rid in seen:
                 raise ValidationError("duplicate_id", f"Missing or duplicate ID: {rid}")
             seen.add(rid)
-            if kind in KINDS:
-                if not isinstance(record_kind, str) or record_kind not in KINDS[kind]:
+            if kind in kinds:
+                if not isinstance(record_kind, str) or record_kind not in kinds[kind]:
                     raise ValidationError("record_type", f"Record {record_kind} is not allowed in {kind}", element_id=rid)
-                required, optional, prefix = FIELDS[record_kind]
+                required, optional, prefix = fields[record_kind]
                 required = required | {"sdd_record", "id"}
                 if not required <= record.keys() or record.keys() - required - optional:
                     raise ValidationError("record_fields", f"Invalid fields for {record_kind}", element_id=rid)

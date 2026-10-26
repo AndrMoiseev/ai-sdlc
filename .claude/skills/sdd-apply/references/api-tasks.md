@@ -1,0 +1,26 @@
+# Task transitions
+
+Use the [common event envelope](api.md) and `execute.py --help-event <type>`
+for the current operation's fields. The selected execution flow owns ordering;
+help owns payload names. Load [checks and evidence](api-checks.md) before check
+or candidate work and [review policy](review-policy.md) before acting on findings.
+
+Role registration attests an actual launch; role_result only ends that role's
+work. Review_start reserves a round before review; review_result returns the
+unchanged candidate reference and separate test_integrity assessment. Only current
+evidence, passing review and a confirmed task commit permit acceptance.
+
+`candidate` commits the stopped executor's owned changes locally before checks
+and review. A candidate commit is an unaccepted result. Both execution modes use
+task worktrees. After transfer, freeze and verify a new integration commit;
+`commit` confirms that reviewed commit and `accept` records task acceptance.
+Use [candidate identity](api-checks.md#candidate-identity) for freshness and scope.
+
+Load additional contracts at their transition: [repair](../flows/repair.md) for
+failed checks or proven violations, [worktree recovery](worktree-recovery.md) for
+a stale/conflicted worktree, [resume](../flows/resume.md) for lost roles, normative
+conflicts, plan revision or mode/owner changes, and [finalize](../flows/finalize.md)
+after all tasks are accepted. Preserve lifetime budgets across all transitions.
+
+Task states: pending, running, verifying, reviewing, integrating, repairing,
+committing, blocked, accepted. Run states: active, blocked, completed.

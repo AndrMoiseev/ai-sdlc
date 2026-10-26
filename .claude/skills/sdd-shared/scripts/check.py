@@ -18,6 +18,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project-root', required=True, type=Path)
     parser.add_argument('--change', required=True)
+    parser.add_argument('--work-kind', default='change', choices=('change', 'refactoring'))
     parser.add_argument('--stage', required=True, choices=('documents', 'plan'))
     args = parser.parse_args(argv)
     result = {'schema_version': 1, 'stage': args.stage, 'errors': [], 'warnings': [],
@@ -36,14 +37,14 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         project = args.project_root.resolve(strict=True)
-        root = change_root(project, args.change)
-        structure = validate_documents(project, root, args.stage)
+        root = change_root(project, args.change, args.work_kind)
+        structure = validate_documents(project, root, args.stage, args.work_kind)
         for key in ('errors', 'warnings'):
             result[key].extend(structure.get(key, []))
         for key in ('tasks', 'progress'):
             if key in structure:
                 result[key] = structure[key]
-        review = review_status(project, root, args.stage)
+        review = review_status(project, root, args.stage, args.work_kind)
         for key in ('errors', 'warnings'):
             result[key].extend(review.get(key, []))
         for key in ('discussion_status', 'review_status', 'approval_status'):

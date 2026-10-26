@@ -2,6 +2,7 @@
 from importlib import import_module
 
 API_VERSION = 1
+WORK_KINDS = frozenset({"change", "refactoring"})
 MODULES = frozenset({"documents", "paths", "validation", "snapshots", "reviews", "subagents"})
 
 def module(name):

@@ -17,8 +17,8 @@ def test_third_success_and_fourth_blocks(driver):
     assert task["test_repair_limit"] == 5
 
 
-def test_five_repairs_last_success(driver):
-    driver.start()
+def test_five_repairs_last_success(execution_checkpoint):
+    driver = execution_checkpoint("started")
     state = driver.state
     task = state["tasks"]["TASK-one"]
     task["last_check_failed"] = True
@@ -36,8 +36,8 @@ def test_five_repairs_last_success(driver):
     assert task["review_limit"] == 3
 
 
-def test_budget_blocks_unrelated_event(driver):
-    driver.start()
+def test_budget_blocks_unrelated_event(execution_checkpoint):
+    driver = execution_checkpoint("started")
     driver.send("block", {"reason": "test_repair_limit_reached", "resume_condition": "user decision"}, task_id=None)
     before = driver.state
     with pytest.raises(ValueError):

@@ -1,5 +1,7 @@
 # Полное восстановление контекста
 
+Для refactoring восстанавливай proposal/design и существующий tasks без требования specs по [справочнику](refactoring.md). Сверь вид, полный корень, основание выбора и уведомление; одинаковые ID в двух корнях различаются. При смене маршрута сообщи новые границы до зависимой работы.
+
 Прочитай [общую основу](../../sdd-shared/references/document-format.md) и
 [формат обсуждения и восстановления](../../sdd-shared/references/document-format-discussion.md).
 При наличии proposal/specs/design добавь [нормативный формат](../../sdd-shared/references/document-format-normative.md),

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import sys
 
-def locate(explicit=None, legacy=None):
+def locate(explicit=None, legacy=None, work_kind="change"):
     if explicit is not None and legacy is not None:
         raise ValueError("Choose sdd_shared or legacy sdd_spec, not both")
     root = (Path(explicit) if explicit is not None else
@@ -18,15 +18,26 @@ def locate(explicit=None, legacy=None):
         raise ValueError(f"Install matching sdd-shared alongside the consumer or supply sdd_shared: {root}") from exc
     if type(api) is not dict or type(api.get("api_version")) is not int or api["api_version"] != 1:
         raise ValueError(f"Incompatible sdd-shared API; expected 1: {root}")
+    if work_kind not in ("change", "refactoring"):
+        raise ValueError(f"Unsupported SDD work kind: {work_kind}; correct the selection")
+    if work_kind == "refactoring":
+        kinds, schemas = api.get("work_kinds"), api.get("document_schemas")
+        if (not isinstance(kinds, list) or "refactoring" not in kinds
+                or not isinstance(schemas, dict) or not isinstance(schemas.get("refactoring"), dict)
+                or any(schemas["refactoring"].get(kind) != [1] for kind in ("proposal", "design", "tasks"))):
+            raise ValueError(f"sdd-shared does not support refactoring v1; install the matching SDD bundle: {root}")
     required = ["SKILL.md", "scripts/sdd_shared/__init__.py"]
     required += [f"scripts/{name}.py{suffix}" for name in ("check", "snapshot", "resolve_agent") for suffix in ("", ".lock")]
     required += [f"scripts/sdd_shared/{name}.py" for name in ("documents", "paths", "validation", "snapshots", "reviews", "subagents")]
+    if work_kind == "refactoring":
+        required += ["scripts/sdd_shared/refactoring.py", "scripts/sdd_shared/refactoring_validation.py",
+                     "references/document-format-refactoring.md", "schemas/refactoring.schema.json"]
     if any(not (root / item).is_file() for item in required):
         raise ValueError(f"Incomplete sdd-shared package: {root}")
     return root
 
-def load(root, name):
-    root = locate(explicit=root)
+def load(root, name, work_kind="change"):
+    root = locate(explicit=root, work_kind=work_kind)
     key = "_sdd_shared_" + hashlib.sha256(str(root).encode()).hexdigest()[:16]
     if key not in sys.modules:
         package = root / "scripts/sdd_shared"

@@ -6,6 +6,9 @@ from . import state, dashboard, scheduler
 def dispatch(request):
     operation = request["operation"]
     args = request.get("args", {})
+    if operation == "help":
+        from .api_help import describe
+        return describe(**args)
     if operation == "validate":
         return validate(**args)
     if operation == "initialize":
@@ -15,10 +18,15 @@ def dispatch(request):
         isolation = args.pop("isolation", False)
         mode = args.pop("mode", "parallel")
         result = state.initialize(validate(**args), owner, parallel_request, isolation, mode)
-        dashboard.render(result["basis"]["change_root"] + "/execution")
-        return result
+        directory = result["basis"]["change_root"] + "/execution"
+        dashboard.render(directory)
+        return state.inspect(directory, view="full")
     if operation == "read":
-        return state.read(**args)
+        return state.inspect(**args)
+    if operation == "audit":
+        return state.audit(**args)
+    if operation == "read_object":
+        return state.read_object(**args)
     if operation == "resolve_agent":
         from .subagents import resolve
         args = dict(args)
@@ -28,6 +36,8 @@ def dispatch(request):
         return scheduler.available(state.read(args["directory"]))
     if operation == "event":
         result = state.apply(**args)
+        from .state_objects import StateObjects
+        result = StateObjects(args["directory"]).pack(result, root=True)
         try:
             view = dashboard.render(args["directory"])
         except (OSError, ValueError) as exc:

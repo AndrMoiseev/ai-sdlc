@@ -1,5 +1,7 @@
 # Рассмотрение результатов
 
+Для refactoring согласовывается текущий proposal/design вместо specs/design. Привяжи каждый ответ к виду и полному корню работы по [справочнику](../references/refactoring.md); совпадение ID с обычным изменением не переносит согласование.
+
 Перед чтением отчётов и записью USER-решений прочитай
 [общую основу](../../sdd-shared/references/document-format.md) и
 [формат ревью и согласований](../../sdd-shared/references/document-format-review.md).

@@ -4,12 +4,12 @@ from datetime import datetime
 from pathlib import Path
 
 from .documents import InputError, ValidationError, read_document, valid_id
-from .paths import contained
+from .paths import contained, change_root as resolve_work
 from .snapshots import snapshot
 
 STAGES = {"documents": "document_review", "plan": "plan_review"}
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
-COMMON = {"schema_version", "change_id", "document_type", "language"}
+COMMON = {"schema_version", "change_id", "document_type", "language", "work_kind"}
 
 
 def require(condition, message):
@@ -31,9 +31,12 @@ def strings(value):
     return isinstance(value, list) and all(text(v) for v in value) and len(value) == len(set(value))
 
 
-def identity(meta, kind, change_id):
+def identity(meta, kind, change_id, work_kind="change"):
     require(meta.get("document_type", kind) == kind, "Document type disagrees with its role")
     require(meta.get("change_id", change_id) == change_id, "Document change identity mismatch")
+    require(meta.get("work_kind", "change") == work_kind, "Document work kind mismatch")
+    if work_kind == "refactoring":
+        require(meta.get("change_id") == change_id, "Explicit refactoring change identity required")
     require(text(meta.get("language", "unspecified")), "Language must be text")
 
 
@@ -47,7 +50,7 @@ def timestamp(value):
     return parsed
 
 
-def manifest(value, root, stage):
+def manifest(value, root, stage, work_kind="change"):
     require(isinstance(value, list) and value, "Manifest must be a nonempty list")
     names = []
     for entry in value:
@@ -56,11 +59,11 @@ def manifest(value, root, stage):
         require(text(name), "Manifest path must be text")
         contained(root, name)
         require("\\" not in name and not any(p in {".", "..", ""} for p in name.split("/")), "Manifest path must be canonical")
-        require(name in {"proposal.md", "design.md"} or (stage == "plan_review" and name == "tasks.md") or (name.startswith("specs/") and name.endswith("/spec.md")), "Non-normative manifest input")
+        require(name in {"proposal.md", "design.md"} or (stage == "plan_review" and name == "tasks.md") or (work_kind == "change" and name.startswith("specs/") and name.endswith("/spec.md")), "Non-normative manifest input")
         require(isinstance(entry["sha256"], str) and re.fullmatch(r"[0-9a-f]{64}", entry["sha256"]), "Invalid SHA-256")
         names.append(name)
     require(names == sorted(set(names)), "Manifest paths must be sorted and unique")
-    require({"proposal.md", "design.md"} <= set(names) and any(n.startswith("specs/") for n in names), "Incomplete normative manifest")
+    require({"proposal.md", "design.md"} <= set(names) and (work_kind == "refactoring" or any(n.startswith("specs/") for n in names)), "Incomplete normative manifest")
     require(stage != "plan_review" or "tasks.md" in names, "Plan manifest requires tasks.md")
 
 
@@ -105,13 +108,14 @@ def _questions(document, root, questions, *, legacy=False):
         questions[question["id"]] = question
 
 
-def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
+def review_status(project_root: Path, change_root: Path, stage: str, work_kind="change") -> dict:
     require(stage in STAGES, "Unknown review stage")
-    root = Path(change_root)
+    root = Path(change_root).resolve()
     project_root = Path(project_root)
+    require(root == resolve_work(project_root, root.name, work_kind), "Review root disagrees with work identity")
     errors, warnings = [], []
     reports, findings, users = {}, {}, {}
-    current = {stage: snapshot(project_root, root.name, stage)}
+    current = {stage: snapshot(project_root, root.name, stage, work_kind)}
 
     def diagnose(path, exc, code="review_structure"):
         if isinstance(exc, InputError):
@@ -122,7 +126,7 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
         cli_stage = "plan" if review_stage == "plan_review" else "documents"
         if cli_stage not in current:
             try:
-                current[cli_stage] = snapshot(project_root, root.name, cli_stage)
+                current[cli_stage] = snapshot(project_root, root.name, cli_stage, work_kind)
             except InputError:
                 if cli_stage == stage:
                     raise
@@ -141,9 +145,9 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     for path in sorted(review_root.glob("*/*.md")):
         try:
             contained(root, path.relative_to(root).as_posix(), must_exist=True)
-            doc = read_document(path)
+            doc = read_document(path, work_kind)
             meta = doc.meta
-            identity(meta, "review", root.name)
+            identity(meta, "review", root.name, work_kind)
             fields(meta, {"schema_version", "run_id", "stage", "lens_id", "result", "started_at", "finished_at", "inputs", "inputs_after", "freshness", "limitations"}, COMMON)
             require(meta["stage"] in STAGES.values(), "Invalid report stage")
             require(meta.get("change_id", root.name) == root.name, "Report change mismatch")
@@ -155,8 +159,8 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
             require(meta["freshness"] in {"current", "stale"}, "Invalid recorded freshness")
             require(timestamp(meta["finished_at"]) >= timestamp(meta["started_at"]), "Report ends before start")
             require(strings(meta["limitations"]), "limitations must be a text list")
-            manifest(meta["inputs"], root, meta["stage"])
-            manifest(meta["inputs_after"], root, meta["stage"])
+            manifest(meta["inputs"], root, meta["stage"], work_kind)
+            manifest(meta["inputs_after"], root, meta["stage"], work_kind)
             local = {}
             for record in doc.records:
                 fields(record, {"sdd_record", "id", "source", "target", "severity", "problem", "impact", "suggestion"})
@@ -192,8 +196,8 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     summary = contained(root, "review/summary.md")
     if summary.exists():
         try:
-            doc = read_document(summary)
-            identity(doc.meta, "summary", root.name)
+            doc = read_document(summary, work_kind)
+            identity(doc.meta, "summary", root.name, work_kind)
             fields(doc.meta, {"schema_version", "findings"}, COMMON)
             require(isinstance(doc.meta["findings"], list), "Summary findings must be a list")
             for entry in doc.meta["findings"]:
@@ -206,12 +210,12 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     decisions = contained(root, "review/decisions.md")
     if decisions.exists():
         try:
-            doc = read_document(decisions)
-            identity(doc.meta, "decisions", root.name)
+            doc = read_document(decisions, work_kind)
+            identity(doc.meta, "decisions", root.name, work_kind)
             fields(doc.meta, {"schema_version"}, COMMON)
             for record in doc.records:
                 try:
-                    _validate_user(record, root, findings)
+                    _validate_user(record, root, findings, work_kind)
                     require(record["kind"] != "finding_disposition" or all(reports["/".join(key.split("/")[:2])]["stage"] == record["scope"]["stage"] for key in record["scope"].get("findings", [])), "Disposition stage mismatch")
                     require(record["id"] not in users, "Duplicate USER id")
                     users[record["id"]] = record
@@ -275,9 +279,9 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     try:
         questions_path = contained(root, "questions.md")
         if questions_path.exists():
-            discussion = read_document(questions_path)
-            fields(discussion.meta, COMMON)
-            identity(discussion.meta, "questions", root.name)
+            discussion = read_document(questions_path, work_kind)
+            fields(discussion.meta, COMMON - {"work_kind"}, {"work_kind"})
+            identity(discussion.meta, "questions", root.name, work_kind)
             _questions(discussion, root, questions)
     except (ValidationError, TypeError, KeyError, OSError) as exc:
         discussion_valid = False
@@ -286,10 +290,10 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     try:
         state = contained(root, "state.md")
         if state.exists():
-            checkpoint = read_document(state)
+            checkpoint = read_document(state, work_kind)
             _questions(checkpoint, root, questions, legacy=True)
-            identity(checkpoint.meta, "state", root.name)
-            fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language"})
+            identity(checkpoint.meta, "state", root.name, work_kind)
+            fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language", "work_kind"})
             require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
             require(checkpoint.meta["phase"] in {"discovery", "drafting", "document_review", "user_review", "planning", "plan_review", "plan_approved"}, "Invalid state phase")
             require(checkpoint.meta["awaiting"] in {"none", "clarification", "review_consent", "planning_command", "final_approval"}, "Invalid awaiting value")
@@ -313,8 +317,10 @@ def review_status(project_root: Path, change_root: Path, stage: str) -> dict:
     return {"errors": errors, "warnings": warnings, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and complete and discussion_status["complete"] and not unresolved and not unfinished and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
 
 
-def _validate_user(record, root, findings):
-    fields(record, {"sdd_record", "id", "kind", "scope", "response", "date", "inputs"}, {"message", "status", "supersedes", "action", "reason", "return_at", "completion"})
+def _validate_user(record, root, findings, work_kind="change"):
+    fields(record, {"sdd_record", "id", "kind", "scope", "response", "date", "inputs"}, {"message", "status", "supersedes", "action", "reason", "return_at", "completion", "work_kind", "change_id"})
+    require(record.get("work_kind", "change") == work_kind, "Authorization work kind mismatch")
+    require(record.get("change_id", root.name if work_kind == "change" else None) == root.name, "Authorization change identity mismatch")
     require(record["sdd_record"] == "user", "Expected USER record")
     require(valid_id(record["id"], "USER"), "Invalid USER id")
     kinds = {"review_consent", "finding_disposition", "review_waiver", "document_approval", "planning_command", "plan_approval"}
@@ -332,7 +338,7 @@ def _validate_user(record, root, findings):
         require(scope["stage"] == "document_review", "Document authorization requires document_review")
     if kind == "plan_approval":
         require(scope["stage"] == "plan_review", "Plan approval requires plan_review")
-    manifest(record["inputs"], root, scope["stage"])
+    manifest(record["inputs"], root, scope["stage"], work_kind)
     if "lenses" in scope:
         require(strings(scope["lenses"]) and scope["lenses"], "Explicit lenses required")
         require(all(SLUG.fullmatch(lens) for lens in scope["lenses"]), "Invalid lens id")

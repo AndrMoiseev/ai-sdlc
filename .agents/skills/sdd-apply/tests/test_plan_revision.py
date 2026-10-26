@@ -1,5 +1,8 @@
 """Plan revisions preserve accepted work and extend the remaining plan."""
+from lib import artifact_storage as artifacts
+from lib.state_storage import storage
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
@@ -34,6 +37,9 @@ def revise(project, names, modify=lambda tasks: None):
         for entry in record["inputs"]:
             entry["sha256"] = digest((change / entry["path"]).read_bytes())
     document(decisions.path, decisions.meta, decisions.records)
+    from repository_support import stage, commit
+    stage(project, "sdd")
+    commit(project, "Approved fixture revision")
 
 
 def accepted(driver, project):
@@ -55,6 +61,7 @@ def test_revision_preserves_accepted_and_revises_unfinished(project):
     accepted(d, project)
     completed = d.task
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, "TASK-two")
+    d.send("worktree_create", {"workspace": str(project.parent / "task-worktrees")}, "TASK-two")
     d.send("role_register", {"role_id": "second-author", "kind": "executor",
         "context_id": "second-context", "fresh": True, "host": "codex",
         "launch_ref": "unit-test", "capabilities": {"fresh_context": True}}, "TASK-two")
@@ -81,7 +88,7 @@ def test_revision_preserves_accepted_and_revises_unfinished(project):
     assert d.state["tasks"]["TASK-three"]["status"] == "pending"
     assert available(d.state) == ["TASK-two"]
     assert list(d.state["tasks"]) == ["TASK-one", "TASK-two", "TASK-three"]
-    assert (d.directory / "runs" / previous / "superseded-state.json").is_file()
+    assert artifacts.exists(d.directory / "runs" / previous / "superseded-state.json")
 
     revise(project, ["one", "two", "three", "four"], modify)
     revised(d)
@@ -90,10 +97,11 @@ def test_revision_preserves_accepted_and_revises_unfinished(project):
 
 
 @pytest.mark.parametrize("change", ["edit", "remove", "renumber"])
-def test_revision_rejects_changes_to_accepted_atomically(driver, project, change):
-    accepted(driver, project)
-    before = (driver.directory / "state.json").read_bytes()
-    runs = set((driver.directory / "runs").iterdir())
+def test_revision_rejects_changes_to_accepted_atomically(execution_checkpoint, change):
+    driver = execution_checkpoint("accepted")
+    project = Path(driver.state["basis"]["project_root"])
+    before = storage(driver.directory).read()
+    runs = set(artifacts.paths(driver.directory / "runs"))
     if change == "edit":
         revise(project, ["one"], lambda tasks: tasks[0]["verification"][0].update(test_description="Changed"))
     elif change == "remove":
@@ -103,9 +111,9 @@ def test_revision_rejects_changes_to_accepted_atomically(driver, project, change
     with pytest.raises(Rejected) as error:
         revised(driver)
     assert error.value.code == "completed_task_changed"
-    assert (driver.directory / "state.json").read_bytes() == before
-    assert set((driver.directory / "runs").iterdir()) == runs
-    assert not (driver.directory / "runs" / driver.state["run_id"] / "superseded-state.json").exists()
+    assert storage(driver.directory).read() == before
+    assert set(artifacts.paths(driver.directory / "runs")) == runs
+    assert not artifacts.exists(driver.directory / "runs" / driver.state["run_id"] / "superseded-state.json")
 
 
 @pytest.mark.parametrize("placement", ["number", "record"])
@@ -123,8 +131,9 @@ def test_revision_rejects_new_tasks_before_existing(driver, project, placement):
     assert driver.state == before
 
 
-def test_revision_keeps_acceptance_but_requires_fresh_final_checks(driver, project):
-    accepted(driver, project)
+def test_revision_keeps_acceptance_but_requires_fresh_final_checks(execution_checkpoint):
+    driver = execution_checkpoint("accepted")
+    project = Path(driver.state["basis"]["project_root"])
     driver.role("old-final", "final_verifier")
     driver.send("check_run", {"role_id": "old-final", "stage": "final"})
     driver.send("role_result", {"role_id": "old-final", "result": "DONE", "trace": "unit-test"})

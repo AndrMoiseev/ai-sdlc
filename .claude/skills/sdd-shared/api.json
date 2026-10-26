@@ -1,1 +1,1 @@
-{"api_version": 1}
+{"api_version": 1, "work_kinds": ["change", "refactoring"], "document_schemas": {"change": {"proposal": [1], "spec": [1], "design": [1], "tasks": [1]}, "refactoring": {"proposal": [1], "design": [1], "tasks": [1]}}}

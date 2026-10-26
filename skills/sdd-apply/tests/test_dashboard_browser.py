@@ -1,11 +1,11 @@
 """Real Chrome fallback when no Browser plugin surface is connected."""
 import json
-import os
 from pathlib import Path
 import shutil
-import subprocess
 import pytest
 from lib.dashboard import render, projection
+
+pytestmark = pytest.mark.native_state
 
 
 def chrome():
@@ -16,23 +16,35 @@ def chrome():
     return found
 
 
-def dom(directory, tmp_path, width=1280, screenshot=False):
-    command = [chrome(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--user-data-dir=" + str(tmp_path / "chrome-profile"), "--virtual-time-budget=6500", "--dump-dom", (directory / "dashboard.html").as_uri()]
-    command[1:1] = [f"--window-size={width},1800"]
-    if screenshot:
-        command[1:1] = ["--screenshot=" + str(tmp_path / "browser.png")]
-    result = subprocess.run(command, capture_output=True, timeout=40)
-    (tmp_path / "browser-command.json").write_text(json.dumps(command))
-    (tmp_path / "browser-stderr.txt").write_bytes(result.stderr)
-    (tmp_path / "browser-dom.html").write_bytes(result.stdout)
-    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
-    return result.stdout.decode("utf-8", "replace")
+@pytest.fixture(scope="module")
+def browser(tmp_path_factory):
+    from chrome_session import ChromeSession
+    session = ChromeSession(chrome(), tmp_path_factory.mktemp("browser-session"))
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+@pytest.fixture(autouse=True)
+def browser_context(browser, monkeypatch):
+    context = browser.call("Target.createBrowserContext")["browserContextId"]
+    monkeypatch.setitem(globals(), "_browser", (browser, context))
+    try:
+        yield
+    finally:
+        browser.call("Target.disposeBrowserContext", {"browserContextId": context})
+
+
+def dom(directory, tmp_path, width=1280, screenshot=False, virtual_time=2500):
+    browser, context = _browser
+    return browser.dom(context, directory, tmp_path, width, screenshot, virtual_time)
 
 
 def test_file_timer_updates_without_reload(driver, tmp_path):
     render(driver.directory)
     html = (driver.directory / "dashboard.html").read_bytes()
-    driver.send("block", {"reason": "browser-live-update", "resume_condition": "fix"})
+    driver.send("block", {"reason": "browser-live-update", "resume_condition": "fix"}, task_id=None)
     render(driver.directory)
     (driver.directory / "dashboard.html").write_bytes(html)
     result = dom(driver.directory, tmp_path)
@@ -51,6 +63,26 @@ def test_snapshot_and_stale_foreign_data(driver, tmp_path):
     (driver.directory / "dashboard-state.js").unlink()
     result = dom(driver.directory, tmp_path)
     assert "live data unavailable" in result
+
+
+def test_ordinary_final_project_panel_renders_live_criteria(basis, project, tmp_path, prepare_state):
+    from conftest import Driver
+    from test_commits import prepared
+    from test_final_project_checks import register, final_role, run_final
+    with prepare_state():
+        driver = Driver(basis)
+        prepared(driver, project)
+        driver.send("commit")
+        driver.send("accept")
+        register(driver)
+        final_role(driver)
+        assert run_final(driver)["outcome"] == "passed"
+    render(driver.directory)
+    result = dom(driver.directory, tmp_path)
+    assert 'aria-label="Final project checks"' in result
+    assert 'id="whole-result" hidden' not in result
+    assert "1 / 1 criteria confirmed" in result
+    assert "1 / 1 tasks accepted" in result
 
 
 @pytest.mark.parametrize("width", [1280, 540])
@@ -95,10 +127,10 @@ def test_wave_layout_links_and_live_updates(monkeypatch, tmp_path, width):
       result.textContent=JSON.stringify(checks);document.body.append(result);
       document.querySelector('#task-D details').open=false;
       window.scrollTo(0,0);
-    },4500);
+    },2500);
     </script>"""
     html_path.write_text(saved.replace("</body>", probe.replace("__WIDTH__", str(width)) + "</body>"), encoding="utf-8")
-    result = dom(directory, tmp_path, width, screenshot=True)
+    result = dom(directory, tmp_path, width, screenshot=True, virtual_time=3000)
     assert 'id="wave-checks" data-result="pass"' in result, result[-6000:]
     assert (tmp_path / "browser.png").is_file()
     # Retain a clean standalone example alongside the instrumented browser evidence.
@@ -153,7 +185,7 @@ def test_evidence_survives_reload_and_updates(monkeypatch, tmp_path, storage_dis
     update["tasks"][2]["evidence"] = [{"stage": "independent", "outcome": "pass", "log": "runs/demo/result.json"}]
     probe = probe.replace("__DISABLED__", str(bool(storage_disabled)).lower()).replace("__UPDATE__", json.dumps(update))
     page.write_text(original.replace('</body>', probe + '</body>'), encoding="utf-8")
-    result = dom(directory, tmp_path)
+    result = dom(directory, tmp_path, virtual_time=1000)
     assert 'id="persistence-result" data-result="pass"' in result, result[-2000:]
 
 
@@ -168,9 +200,9 @@ def test_evidence_preferences_are_scoped_to_run(monkeypatch, tmp_path):
     render(directory)
     html = page.read_text(encoding="utf-8")
     page.write_text(html.replace('</body>', '<script>document.querySelector("#task-C summary").click();</script></body>'), encoding="utf-8")
-    assert '<details class="evidence" open="">' in dom(directory, tmp_path)
+    assert '<details class="evidence" open="">' in dom(directory, tmp_path, virtual_time=0)
     state["run_id"] = "another-run"
     render(directory)
     html = page.read_text(encoding="utf-8")
     page.write_text(html.replace('</body>', '<script>document.body.dataset.leaked=String(document.querySelector("#task-C details").open);</script></body>'), encoding="utf-8")
-    assert '<body data-leaked="false">' in dom(directory, tmp_path)
+    assert '<body data-leaked="false">' in dom(directory, tmp_path, virtual_time=0)

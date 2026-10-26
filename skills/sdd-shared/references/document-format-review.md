@@ -22,6 +22,20 @@ explanation.md, explanation/ и archify/ также исключены из но
 
 Сводка `review/summary.md`: общий frontmatter document_type: summary плюс findings — список `{finding, related_to, duplicates}` с полными ключами. Для отсутствующих связей используйте []. Сохраняйте исходные отчеты; объединяйте дубли только в сводке, показывайте расхождения отдельно. related_to не переносит решения.
 
+## Идентичность рефакторинга
+
+Для `sdd/refactoring/<change_id>` общие документы state, questions, decisions,
+review и summary содержат в frontmatter `work_kind: refactoring` и свой
+`change_id`. Их назначение и остальные поля сохраняются. Отчёт связывается
+с видом работы и ID вместе с манифестом. Documents включает proposal/design,
+plan добавляет tasks; specs для этого вида не входят в снимок.
+
+Каждая USER-запись рефакторинга также содержит `work_kind: refactoring` и
+`change_id`: эти поля относятся к самой записи, а не только к файлу решений.
+Совпадающие ID и хеши документов в другой работе не переносят разрешение.
+Старые USER-записи обычных изменений без этих полей сохраняют прежний смысл
+в `sdd/changes`; они не становятся разрешениями рефакторинга при копировании.
+
 ## USER-решения и область разрешения
 
 `review/decisions.md` имеет document_type: decisions. USER-запись содержит kind, scope, response (реальный явный ответ), date (quoted ISO с timezone), inputs (манифест исходной версии). Необязательны message (ссылка при наличии), status (active/completed/cancelled), supersedes (список USER-ID).

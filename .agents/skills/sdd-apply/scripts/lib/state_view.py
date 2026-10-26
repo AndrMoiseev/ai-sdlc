@@ -3,7 +3,7 @@ from .scheduler import available
 
 
 def compact(state):
-    # Called only after state.read has validated the complete persisted history.
+    # Current manifest and accessed objects are verified; audit checks history.
     tasks = {}
     for key, task in state["tasks"].items():
         tasks[key] = {field: task[field] for field in (
@@ -17,6 +17,7 @@ def compact(state):
     }
     return {
         "view": "compact", "view_version": 1,
+        **({"work_kind": state["work_kind"]} if "work_kind" in state else {}),
         **{key: state[key] for key in (
             "change_id", "run_id", "revision", "owner", "status", "mode",
             "updated_at", "blockers",

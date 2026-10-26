@@ -5,7 +5,7 @@ from lib.state import initialize, read, apply, lock
 
 @pytest.fixture
 def store(basis):
-    state = initialize(basis, "owner")
+    state = initialize(basis, "owner", isolation=True)
     return basis["change_root"] + "/execution", state
 
 
@@ -74,3 +74,5 @@ def test_interrupted_replace_preserves_state(store, monkeypatch):
     with pytest.raises(OSError, match="interrupted"):
         apply(directory, event(state))
     assert (Path(directory) / "state.json").read_bytes() == before
+
+pytestmark = pytest.mark.native_state

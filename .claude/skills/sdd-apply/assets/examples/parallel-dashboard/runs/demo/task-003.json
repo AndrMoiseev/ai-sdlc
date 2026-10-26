@@ -1,0 +1,8 @@
+{
+  "demo": true,
+  "notice": "Synthetic documentation example. No checks or commits were performed.",
+  "task": "TASK-003",
+  "criterion": "AC-export-api",
+  "stage": "independent",
+  "outcome": "pass"
+}

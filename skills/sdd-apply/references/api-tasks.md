@@ -10,6 +10,18 @@ work. Review_start reserves a round before review; review_result returns the
 unchanged candidate reference and separate test_integrity assessment. Only current
 evidence, passing review and a confirmed task commit permit acceptance.
 
+`candidate` commits the stopped executor's owned changes locally before checks
+and review. A candidate commit is an unaccepted result. Both execution modes use
+task worktrees. After transfer, freeze and verify a new integration commit;
+`commit` confirms that reviewed commit and `accept` records task acceptance.
+Use [candidate identity](api-checks.md#candidate-identity) for freshness and scope.
+
+For an approved refactoring check replacement, use the staged registry contract
+in [checks and evidence](api-checks.md#approved-refactoring-revisions).
+Acceptance confirms applicability atomically; resume returns the last confirmed
+revision and unfinished transition separately. Preserve both during repair or
+handoff. A pending transition keeps its original authorization and budgets.
+
 Load additional contracts at their transition: [repair](../flows/repair.md) for
 failed checks or proven violations, [worktree recovery](worktree-recovery.md) for
 a stale/conflicted worktree, [resume](../flows/resume.md) for lost roles, normative

@@ -1,48 +1,59 @@
 """Reconcile execution against normative bytes, Git and host observations."""
+from .repository import repository
 from copy import deepcopy
 from pathlib import Path
-from .common import contained, digest, git, require, write_json
+from . import artifact_storage as artifacts
+from .common import digest, require, write_json
 from .state import assert_basis, snapshot
+
+
+def completed_followups(state, plans, payload):
+    """Resolve only an abandoned repair stop explicitly replaced by new work."""
+    mappings = payload.get("completed_followups", [])
+    require(isinstance(mappings, list), "completed_followup", "completed_followups must be a list")
+    completed, targets, removed = set(), set(), []
+    for mapping in mappings:
+        require(isinstance(mapping, dict) and set(mapping) == {"completed_task", "followup_task"}
+                and all(isinstance(value, str) and value for value in mapping.values()),
+                "completed_followup", "Map the completed_task to its new followup_task")
+        prior, target = mapping["completed_task"], mapping["followup_task"]
+        old = state["tasks"].get(prior)
+        require(old and old["status"] == "accepted" and old["commits"]
+                and not old.get("active_review") and not old.get("active_repair"),
+                "completed_followup", "Only an accepted task without active work can receive a follow-up")
+        require(prior not in completed and target not in targets and target not in state["tasks"]
+                and target in plans and prior in plans[target]["depends_on"],
+                "completed_followup", "Each mapping needs a distinct newly appended dependent task")
+        stops = [block for block in state["blockers"] if block.get("task_id") == prior
+                 and block["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
+        require(stops, "completed_followup", "Name an existing completed-task budget stop")
+        completed.add(prior)
+        targets.add(target)
+        removed.extend(stops)
+    return removed
 
 
 def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
     if kind == "spec_conflict":
         require(p.get("reproduction") and p.get("criteria") and p.get("contract"), "conflict_evidence", "Record reproduction, AC and conflicting contract")
-        path = contained(directory, f"runs/{state['run_id']}/spec-return/{event['event_id']}.json")
+        path = artifacts.contained(directory, f"runs/{state['run_id']}/spec-return/{event['event_id']}.json")
         write_json(path, {"task_id": event["task_id"], "basis": state["basis"]["manifest"], **p})
         state["blockers"].append({"reason": "spec_conflict", "task_id": event["task_id"], "resume_condition": "Revised approved plan and execution instruction", "material": str(path)})
         state["status"] = "blocked"
         return {"return_to": "sdd-spec", "material": str(path)}
-    if kind == "mode":
-        require(p.get("mode") in {"sequential", "parallel"} and p.get("source") and p.get("text"), "mode_decision", "Record the actual user's mode decision")
-        mode = p["mode"]
-        if mode == "parallel" and not p.get("isolation_available"):
-            return {"mode": state["mode"], "limitation": "worktree isolation unavailable"}
-        require(mode != state["mode"], "mode_unchanged", "Already in this mode")
-        state["pending_mode"] = {"mode": mode, "decision": p}
-        state["blockers"].append({"reason": "mode_handoff", "resume_condition": "Fresh orchestrator context with only the new flow"})
-        state["status"] = "blocked"
-        return {"handoff_required": mode}
     if kind == "handoff":
         require(p.get("new_owner") and p["new_owner"] != state["owner"] and p.get("fresh") is True and p.get("launch_ref"), "handoff_context", "Actual fresh host context required")
         state["previous_owner"] = state["owner"]
         state["owner"] = p["new_owner"]
-        pending = state.pop("pending_mode", None)
-        if pending:
-            state["mode"] = pending["mode"]
-            state["parallel_request"] = pending["decision"] if state["mode"] == "parallel" else None
-            state["blockers"] = [b for b in state["blockers"] if b["reason"] != "mode_handoff"]
-            if state["mode"] == "sequential" and any(t["worktree"] and not t["worktree"].get("integrated") and t["status"] != "accepted" for t in state["tasks"].values()):
-                state["blockers"].append({"reason": "mode_switch_worktree", "resume_condition": "User resolution of preserved worktree candidates; no automatic integration"})
         state["status"] = "blocked" if state["blockers"] else "active"
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
-        require(not state.get("pending_mode"), "mode_handoff", "Complete the pending mode handoff before replacing the basis")
         require(not any(r["status"] == "active" for r in state["roles"].values()), "active_roles", "Finish or reconcile active roles before replacing the basis")
         from .inputs import validate, basis_dependency
         import uuid
-        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"), sdd_shared=basis_dependency(state["basis"]))
+        basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"),
+                         sdd_shared=basis_dependency(state["basis"]), work_kind=state["basis"].get("work_kind", "change"))
         require(basis["manifest"] != state["basis"]["manifest"], "plan_unchanged", "Use resume when the approved basis is unchanged")
         plans = {plan["id"]: plan for plan in basis["tasks"]}
         completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]
@@ -60,12 +71,25 @@ def transition(state, task, event, directory):
             else:
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
+        resolved = completed_followups(state, plans, p)
         previous_run = state["run_id"]
-        write_json(contained(directory, f"runs/{previous_run}/superseded-state.json"), state)
+        from .state_objects import StateObjects
+        objects = StateObjects(directory)
+        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), objects.pack(state, root=True))
         previous_tasks = deepcopy(state["tasks"])
         state["run_id"] = uuid.uuid4().hex
         state["previous_run"] = previous_run
         state["basis"] = basis
+        if basis.get("work_kind", "change") == "refactoring":
+            state.pop("final_checks", None)
+            state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
+                         for kind in ("acceptance", "verification")})
+        elif state.get("final_checks"):
+            # Accepted covers and registered project obligations survive. The
+            # archived run owns interrupted attempts; new run identity makes all
+            # retained evidence historical and requires a fresh complete run.
+            state["final_checks"]["procedures"] = {}
+            state["final_checks"]["failures"] = {}
         state["tasks"] = {}
         from .state import new_task
         for plan in basis["tasks"]:
@@ -77,20 +101,26 @@ def transition(state, task, event, directory):
             if old:
                 for field in ("review_limit", "review_rounds_started", "review_rounds_completed", "test_repair_limit", "test_repair_cycles_started", "active_repair", "repair_cycles", "budget_decisions", "commits"):
                     fresh[field] = old[field]
-                fresh["prior_result"] = old
+                fresh["prior_result"] = {"$object": objects.put(objects.pack(old, root=True))}
             state["tasks"][plan["id"]] = fresh
-        if state["mode"] == "parallel":
-            state["parallel_request"] = basis["instruction"]
+        state["parallel_request"] = basis["instruction"]
         # Budget blockers survive a revised plan. Other old blockers are retained
         # in the archived run and checked again against the new basis.
-        state["blockers"] = [b for b in state["blockers"] if b["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
+        if p.get("completed_followups"):
+            state["blockers"] = [b for b in state["blockers"] if b not in resolved]
+        else:
+            state["blockers"] = [b for b in state["blockers"] if b["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
-        write_json(contained(directory, f"runs/{state['run_id']}/input.json"), basis)
+        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), objects.pack(basis, root=True))
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
+                **({"resolved_completed_repairs": {"mapping": deepcopy(p["completed_followups"]),
+                    "removed_blockers": resolved, "authorization": deepcopy(p["instruction"])}} if resolved else {}),
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
+    from .check_registry import recovery
+    registries = recovery(state)
     issues = []
     try:
         assert_basis(state)
@@ -98,13 +128,16 @@ def transition(state, task, event, directory):
     except ValueError as exc:
         issues.append({"reason": "normative_drift", "detail": str(exc), "resume_condition": "Restore approved bytes or use revised_plan"})
     root = state["basis"]["project_root"]
-    if git(root, "symbolic-ref", "--quiet", "--short", "HEAD") != state["basis"]["branch"]:
+    if repository(root).branch() != state["basis"]["branch"]:
         issues.append({"reason": "branch_changed", "resume_condition": "Restore execution branch"})
     require(p.get("host_trace") and isinstance(p.get("live_contexts"), list), "host_observation", "Supply actual host role liveness observation")
     for role in state["roles"].values():
         if role["status"] == "active" and role["context_id"] not in p["live_contexts"]:
             role["status"] = "lost"
             t = state["tasks"].get(role["task_id"])
+            if t is None and role["kind"] == "final_verifier":
+                issues.append({"reason": "lost_role", "task_id": None, "role_id": role["role_id"],
+                               "resume_condition": "Register a fresh run-level final verifier successor"})
             if t and t["status"] not in {"pending", "accepted"}:
                 if t["status"] != "blocked":
                     t["before_block"] = t["status"]
@@ -116,8 +149,12 @@ def transition(state, task, event, directory):
         if t["candidate"] and t["status"] not in {"accepted", "pending", "blocked"}:
             from .verification import candidate
             from .candidates import same
-            if not same(state, t["candidate"], candidate(state, t)):
-                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Re-freeze and independently verify changed candidate"})
+            try:
+                unchanged = same(state, t["candidate"], candidate(state, t))
+            except ValueError:
+                unchanged = False
+            if not unchanged:
+                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Rebaseline legacy evidence or re-freeze and independently verify the changed local commit"})
     for issue in issues:
         if issue not in state["blockers"]:
             state["blockers"].append(issue)
@@ -125,7 +162,7 @@ def transition(state, task, event, directory):
     # normative drift cannot be waived by this generic resume operation.
     resolutions = p.get("resolutions", [])
     for resolution in resolutions:
-        require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict", "mode_handoff", "mode_switch_worktree"}, "resume_resolution", "Use the dedicated operation for this blocker")
+        require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict"}, "resume_resolution", "Use the dedicated operation for this blocker")
         reason = resolution["reason"]
         lost_role = None
         if reason == "lost_role":
@@ -143,6 +180,9 @@ def transition(state, task, event, directory):
             require(any(b["reason"] == reason and b.get("task_id") == resolution.get("task_id")
                         and b.get("role_id") == lost_role for b in state["blockers"]),
                     "successor_required", "No unresolved loss for this role")
+            if predecessor["task_id"] is None and predecessor["kind"] == "final_verifier":
+                from .final_checks import reconcile_procedures
+                reconcile_procedures(state, predecessor, successor, resolution, event, directory)
         def resolved(blocker):
             return (blocker["reason"] == reason
                     and blocker.get("task_id", resolution.get("task_id")) == resolution.get("task_id")
@@ -167,7 +207,7 @@ def transition(state, task, event, directory):
                     confirm(state, t, t["commits"][-1])
                 t["status"] = target
     state["status"] = "blocked" if state["blockers"] else "active"
-    head = git(root, "rev-parse", "HEAD")
+    head = repository(root).head()
     stale_worktrees = [{"task_id": key, "path": t["worktree"]["path"], "base": t["worktree"]["base"],
                        "head": head, "next": "worktree_refresh"}
                       for key, t in state["tasks"].items()
@@ -175,4 +215,4 @@ def transition(state, task, event, directory):
                       and not t["worktree"].get("integrated") and not t["worktree"].get("removed")
                       and t["worktree"]["base"] != head]
     return {"status": state["status"], "issues": issues, "preserved_roles": state["roles"],
-            "stale_worktrees": stale_worktrees}
+            "stale_worktrees": stale_worktrees, **({"check_registries": registries} if registries else {})}

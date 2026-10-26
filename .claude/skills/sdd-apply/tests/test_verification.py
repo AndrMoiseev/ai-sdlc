@@ -1,8 +1,28 @@
+from lib import artifact_storage as artifacts
 import pytest
+from pathlib import Path
 
 
-def test_independent_run_catches_defect(driver, project):
-    driver.start()
+@pytest.mark.parametrize("target", ["result.txt", "sdd/changes/demo/design.md"])
+def test_successful_command_cannot_hide_changes_during_verification(execution_checkpoint, target):
+    import json
+    from lib.candidates import resolve
+    driver = execution_checkpoint("started")
+    (driver.root / "check.py").write_text(
+        "from pathlib import Path\n" + f"Path({target!r}).write_text('changed by check')\n")
+    driver.freeze()
+    before = resolve(driver.state, driver.task["candidate"])["source"]
+    result = driver.verify()
+    assert result["outcome"] == "failed"
+    log = json.loads(artifacts.read_text(driver.directory / result["log"]))
+    assert log["outputs"][0]["exit_code"] == 0
+    assert log["before"] == before and log["after"] != before
+    assert driver.task["evidence"][-1]["outcome"] == "stale"
+
+
+def test_independent_run_catches_defect(execution_checkpoint):
+    driver = execution_checkpoint("started")
+    project = driver.root
     (project / "check.py").write_text("assert False, 'real defect'\n")
     driver.freeze()
     assert driver.verify()["outcome"] == "failed"
@@ -15,23 +35,21 @@ def test_independent_run_catches_defect(driver, project):
         driver.send("review_start", {"role_id": "reviewer"})
 
 
-def test_stale_candidate_and_log_tampering(driver, project):
-    driver.start()
-    (project / "result.txt").write_text("ok")
-    driver.freeze()
-    assert driver.verify()["outcome"] == "passed"
+def test_stale_candidate_and_log_tampering(execution_checkpoint):
+    driver = execution_checkpoint("verified")
+    project = driver.root
     log = driver.directory / driver.task["evidence"][-1]["log"]
-    log.write_text("forged")
+    artifacts.write(log, "forged")
     driver.role("reviewer", "reviewer")
     with pytest.raises(ValueError):
         driver.send("review_start", {"role_id": "reviewer"})
     (project / "result.txt").write_text("changed")
-    with pytest.raises(ValueError, match="changed"):
+    with pytest.raises(ValueError, match="changed|before verification"):
         driver.verify()
 
 
-def test_author_cannot_verify_and_writer_must_stop(driver):
-    driver.start()
+def test_author_cannot_verify_and_writer_must_stop(execution_checkpoint):
+    driver = execution_checkpoint("started")
     with pytest.raises(ValueError, match="finish"):
         driver.send("candidate")
     driver.freeze()
@@ -39,10 +57,8 @@ def test_author_cannot_verify_and_writer_must_stop(driver):
         driver.send("check_run", {"role_id": "author", "stage": "independent"})
 
 
-def test_additional_review_checks_invalidate_previous_pass(driver):
-    driver.start()
-    driver.freeze()
-    driver.verify()
+def test_additional_review_checks_invalidate_previous_pass(execution_checkpoint):
+    driver = execution_checkpoint("verified")
     driver.review(verdict="more_checks")
     old = driver.task["candidate"]
     command = driver.task["checks"][0]["run"]["command"]
@@ -55,6 +71,7 @@ def test_additional_review_checks_invalidate_previous_pass(driver):
     assert driver.send("review_start", {"role_id": "new-reviewer"})["round"] == 2
 
 
+@pytest.mark.native_process
 def test_timeout_is_unavailable_and_stops_own_process(tmp_path):
     import sys
     from lib.verification import run_command
@@ -65,8 +82,12 @@ def test_timeout_is_unavailable_and_stops_own_process(tmp_path):
 
 
 def test_initial_failing_check_blocks_plan(driver, project):
+    from repository_support import stage, commit
     driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     (project / "check.py").write_text("assert False\n")
+    stage(project, "check.py")
+    commit(project, "Existing failing check")
+    driver.worktree()
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt"]})
     assert driver.send("check_run", {"role_id": "author", "stage": "baseline"})["outcome"] == "failed"
@@ -74,6 +95,7 @@ def test_initial_failing_check_blocks_plan(driver, project):
     assert driver.state["blockers"][0]["reason"] == "baseline_failed"
 
 
+@pytest.mark.native_process
 def test_arguments_are_literal_and_paths_with_spaces_work(tmp_path):
     import json
     import sys
@@ -92,6 +114,7 @@ def test_arguments_are_literal_and_paths_with_spaces_work(tmp_path):
 
 
 @pytest.mark.parametrize("command", ["echo unsafe > marker", [], [""], [None], ["runner", "bad\0arg"]])
+@pytest.mark.native_process
 def test_invalid_or_legacy_command_never_starts_process(tmp_path, monkeypatch, command):
     from lib import verification
     def unexpected(*args, **kwargs):
@@ -103,6 +126,7 @@ def test_invalid_or_legacy_command_never_starts_process(tmp_path, monkeypatch, c
     assert result["exit_code"] is None
 
 
+@pytest.mark.native_process
 def test_nonzero_exit_and_missing_executable(tmp_path):
     import sys
     from lib.verification import run_command
@@ -115,6 +139,7 @@ def test_nonzero_exit_and_missing_executable(tmp_path):
     assert result["exit_code"] is None
 
 
+@pytest.mark.native_process
 def test_explicit_shell_script(tmp_path):
     import os
     import shutil
@@ -139,10 +164,8 @@ def test_additional_check_rejects_string_command(driver):
     assert not driver.task["checks"]
 
 
-def test_extension_rejects_string_command(driver):
-    driver.start()
-    driver.freeze()
-    driver.verify()
+def test_extension_rejects_string_command(execution_checkpoint):
+    driver = execution_checkpoint("verified")
     driver.review(verdict="more_checks")
     with pytest.raises(ValueError, match="argument array"):
         driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [{"id": "extra", "source": "review", "criteria": ["AC-one"], "run": {"command": "pytest"}}]})

@@ -1,4 +1,5 @@
 """Synthetic selection attestations; these tests do not launch real hosts."""
+from lib import artifact_storage as artifacts
 import json
 from pathlib import Path
 import pytest
@@ -31,7 +32,7 @@ def test_configured_registration_requires_selection(driver):
         driver.role("author", "executor")
     selected = selection(driver, "executor")
     result = register(driver, "executor", "author", "ctx", selected)
-    packet = json.loads(Path(result["packet"]).read_text())
+    packet = json.loads(artifacts.read_text(result["packet"]))
     assert packet["role"]["agent_selection"] == selected
 
 

@@ -3,3 +3,4 @@ apm_modules/
 /.venv/
 /.cache/
 skill-workspaces/
+/sdd/changes/*/execution/

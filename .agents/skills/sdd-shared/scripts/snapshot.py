@@ -18,6 +18,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project-root', required=True, type=Path)
     parser.add_argument('--change', required=True)
+    parser.add_argument('--work-kind', default='change', choices=('change', 'refactoring'))
     parser.add_argument('--stage', required=True, choices=('documents', 'plan'))
     args = parser.parse_args(argv)
     try:
@@ -27,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({'code': 'environment', 'message': str(exc)}), file=sys.stderr)
         return 2
     try:
-        result = snapshot(args.project_root.resolve(strict=True), args.change, args.stage)
+        result = snapshot(args.project_root.resolve(strict=True), args.change, args.stage, args.work_kind)
     except (InputError, ValidationError, OSError, UnicodeError) as exc:
         print(json.dumps({'code': getattr(exc, 'code', 'input_unreadable'),
                           'path': str(getattr(exc, 'path', args.project_root)),

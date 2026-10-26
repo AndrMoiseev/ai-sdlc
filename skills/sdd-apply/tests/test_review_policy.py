@@ -1,6 +1,9 @@
+from lib import artifact_storage as artifacts
+from lib.state_storage import storage
 import pytest
 
 from lib.dashboard import render
+from lib.review_policy import proven
 
 
 def finding(proof=None, severity="blocker"):
@@ -11,13 +14,12 @@ def finding(proof=None, severity="blocker"):
     return result
 
 
-def review(driver, project, findings, verdict="changes"):
-    driver.start()
-    (project / "result.txt").write_text("verified result\n")
-    driver.freeze()
-    driver.verify()
-    driver.role("reviewer", "reviewer")
-    driver.send("review_start", {"role_id": "reviewer"})
+@pytest.fixture
+def reviewing_driver(execution_checkpoint):
+    return execution_checkpoint("reviewing")
+
+
+def review(driver, findings, verdict="changes"):
     return driver.send("review_result", {
         "role_id": "reviewer", "candidate": driver.task["candidate"],
         "verdict": verdict, "findings": findings,
@@ -27,22 +29,34 @@ def review(driver, project, findings, verdict="changes"):
 @pytest.mark.parametrize("proof", [None, {}, "AC-one", {"kind": []},
     {"kind": "best_practice", "source": "style guide", "violation": "Less elegant"},
     {"kind": "acceptance", "source": "spec.md#AC-one", "violation": " "}])
-def test_unsupported_blocker_becomes_debt_without_repair(driver, project, proof):
-    result = review(driver, project, [finding(proof)])
+def test_unsupported_proof_is_not_a_blocker(proof):
+    assert not proven(finding(proof))
+
+
+def test_unsupported_blocker_becomes_debt_without_repair(reviewing_driver):
+    driver = reviewing_driver
+    result = review(driver, [finding()])
     assert result["verdict"] == "pass"
-    assert driver.task["status"] == "committing"
+    assert driver.task["status"] == "integrating"
     assert "failure" not in driver.task
     assert driver.task["test_repair_cycles_started"] == 0
     recorded = driver.task["reviews"][0]["findings"][0]
     assert recorded["severity"] == "recommendation"
     assert recorded["reported_severity"] == "blocker"
+    driver.integrate()
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
 
 
 @pytest.mark.parametrize("kind", ["acceptance", "architecture", "project_rule"])
-def test_each_contract_source_can_block(driver, project, kind):
-    result = review(driver, project, [finding({"kind": kind,
+def test_each_contract_source_is_proven(kind):
+    assert proven(finding({"kind": kind,
+        "source": "approved-source.md#rule", "violation": "result.txt:1 contradicts the required format"}))
+
+
+def test_proven_contract_violation_blocks_commit(reviewing_driver):
+    driver = reviewing_driver
+    result = review(driver, [finding({"kind": "acceptance",
         "source": "approved-source.md#rule", "violation": "result.txt:1 contradicts the required format"})])
     assert result["verdict"] == "changes"
     assert driver.task["failure"]["budget"] == "review"
@@ -51,55 +65,80 @@ def test_each_contract_source_can_block(driver, project, kind):
         driver.send("commit")
 
 
-def test_proven_violation_cannot_hide_as_recommendation(driver, project):
+def test_proven_violation_cannot_hide_as_recommendation(reviewing_driver):
+    driver = reviewing_driver
     with pytest.raises(ValueError, match="proven violations"):
-        review(driver, project, [finding({"kind": "project_rule", "source": "AGENTS.md#format",
+        review(driver, [finding({"kind": "project_rule", "source": "AGENTS.md#format",
             "violation": "result.txt:1 has forbidden format"}, severity="recommendation")], verdict="pass")
 
 
-def test_mixed_review_preserves_debt_and_blocks_on_proof(driver, project):
-    result = review(driver, project, [finding(), finding({"kind": "architecture",
+def test_mixed_review_preserves_debt_and_blocks_on_proof(reviewing_driver):
+    driver = reviewing_driver
+    result = review(driver, [finding(), finding({"kind": "architecture",
         "source": "design.md#storage", "violation": "result.txt:1 contradicts the accepted storage format"})])
     assert result["verdict"] == "changes"
     assert [f["severity"] for f in driver.task["reviews"][0]["findings"]] == ["recommendation", "blocker"]
     render(driver.directory)
-    journal = (driver.directory / "technical-debt.md").read_text(encoding="utf-8")
+    journal = artifacts.read_text(driver.directory / "technical-debt.md")
     assert "Prefer another representation" in journal
     assert "## TASK-one/" in journal
 
 
-def completed_with_debt(driver, project):
-    review(driver, project, [finding()])
+def completed_with_debt(driver):
+    review(driver, [finding()])
+    driver.integrate()
     driver.send("commit")
     driver.send("accept")
     driver.role("final-context", "final_verifier")
     driver.send("check_run", {"role_id": "final-context", "stage": "final"})
 
 
-def test_debt_survives_reload_and_does_not_prevent_completion(driver, project):
-    completed_with_debt(driver, project)
+def test_debt_survives_reload_and_does_not_prevent_completion(reviewing_driver):
+    driver = reviewing_driver
+    completed_with_debt(driver)
     result = driver.send("finalize", {}, task_id=None)
     assert result["result"] == "complete"
     assert driver.state["status"] == "completed"
     assert result["decisions"][0]["action"] == "defer"
     assert result["decisions"][0]["finding_id"] == result["recommendations"][0]["finding_id"]
-    original = (driver.directory / "state.json").read_bytes()
+    original = storage(driver.directory).read()
     render(driver.directory)
-    journal = (driver.directory / "technical-debt.md").read_bytes()
-    (driver.directory / "technical-debt.md").write_text("damaged view")
+    journal = artifacts.read_bytes(driver.directory / "technical-debt.md")
+    artifacts.write(driver.directory / "technical-debt.md", "damaged view")
     render(driver.directory)
-    assert (driver.directory / "technical-debt.md").read_bytes() == journal
-    assert (driver.directory / "state.json").read_bytes() == original
-    assert "[Journal](technical-debt.md)" in (driver.directory / "summary.md").read_text(encoding="utf-8")
+    assert artifacts.read_bytes(driver.directory / "technical-debt.md") == journal
+    assert storage(driver.directory).read() == original
+    assert "[Journal](technical-debt.md)" in artifacts.read_text(driver.directory / "summary.md")
 
 
-def test_finalization_cannot_automatically_fix_debt(driver, project):
+def test_finalization_cannot_automatically_fix_debt(reviewing_driver):
+    driver = reviewing_driver
     from lib.review_policy import technical_debt
-    completed_with_debt(driver, project)
+    completed_with_debt(driver)
     ident = technical_debt(driver.state)[0]["finding_id"]
-    original = (driver.directory / "state.json").read_bytes()
+    original = storage(driver.directory).read()
     with pytest.raises(ValueError, match="Fixes require explicit user approval"):
         driver.send("finalize", {"recommendation_decisions": [
             {"finding_id": ident, "action": "fix", "reason": "Easy cleanup"}]}, task_id=None)
-    assert (driver.directory / "state.json").read_bytes() == original
+    assert storage(driver.directory).read() == original
     assert driver.send("finalize", {}, task_id=None)["result"] == "complete"
+
+
+def test_test_count_objection_does_not_block_authorized_structural_retirement(reviewing_driver):
+    objection = finding()
+    objection.update(path="tests/test_old_call.py", problem="A structural test was deleted; keep the test count",
+                     resolution="Recreate the cancelled internal-call assertion")
+    result = review(reviewing_driver, [objection])
+    assert result["verdict"] == "pass"
+    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "recommendation"
+    assert reviewing_driver.task["test_repair_cycles_started"] == 0
+
+
+def test_mixed_test_loss_has_a_preservation_proof_even_with_green_suite(reviewing_driver):
+    violation = finding({"kind": "acceptance", "source": "design.md#AC-atomic",
+        "violation": "tests/test_transfer.py removed rollback assertion together with the old internal-call assertion; no replacement checks balances on failure"})
+    violation.update(criteria=["AC-atomic"], path="tests/test_transfer.py",
+                     problem="Mixed test lost the preserved atomicity guarantee", resolution="Check both balances after a rejected transfer")
+    result = review(reviewing_driver, [violation])
+    assert result["verdict"] == "changes"
+    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "blocker"

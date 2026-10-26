@@ -1,20 +1,20 @@
 import pytest
 
 
-def test_done_is_not_acceptance(driver):
-    driver.start()
+def test_done_is_not_acceptance(execution_checkpoint):
+    driver = execution_checkpoint("started")
     driver.send("role_result", {"role_id": "author", "result": "DONE", "trace": "synthetic"})
     assert driver.task["status"] == "running"
     assert driver.task["commits"] == []
 
 
-def test_context_independence_and_review(driver):
-    driver.start()
+def test_context_independence_and_review(execution_checkpoint):
+    driver = execution_checkpoint("started")
     with pytest.raises(ValueError, match="share"):
         driver.role("fake-reviewer", "reviewer", "author")
     driver.freeze()
     driver.verify()
-    assert driver.review()["status"] == "committing"
+    assert driver.review()["status"] == "integrating"
     assert driver.task["review_rounds_started"] == 1
 
 

@@ -38,6 +38,6 @@ new registrations require selection evidence. Interrupted launches with changed 
 hashes require reconciliation, not invented attestations or duplicate writers.
 
 Repair and continuation retain the running executor's selection. Reconfigure only a
-fresh successor through the existing handoff. The orchestrator/mode handoff is not a
+fresh successor through the existing handoff. The orchestrator handoff is not a
 configurable worker role. Record actual model observations separately from requested
 parameters. These changes leave task budgets, approvals and independent checks intact.

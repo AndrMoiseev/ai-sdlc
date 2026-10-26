@@ -1,0 +1,126 @@
+"""Run the real shared CLI in process for document/rule tests.
+
+Installation tests still launch uv. This adapter replaces process startup only:
+argument parsing, document validation, JSON and exit-code handling remain real.
+"""
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+import json
+import importlib
+import os
+import runpy
+import sys
+from pathlib import Path
+from copy import deepcopy
+from functools import wraps
+from collections import OrderedDict
+
+from lib.common import require
+
+
+_entrypoints = {}
+_parser_caches = {}
+
+
+def remember(cache, key, value):
+    cache[key] = value
+    cache.move_to_end(key)
+    if len(cache) > 512:
+        cache.popitem(last=False)
+
+
+def reuse_parsers(module):
+    """Cache successful pure parses by exact text; return independent values."""
+    yaml_cache, document_cache = _parser_caches.setdefault(
+        Path(module.__file__), (OrderedDict(), OrderedDict()))
+    parser = getattr(module, "safe_yaml", None)
+    if parser is not None and not getattr(parser, "test_parse_cache", False):
+        @wraps(parser)
+        def parse(text):
+            if text not in yaml_cache:
+                # Invalid input must raise this import's own exception class.
+                remember(yaml_cache, text, parser(text))
+            yaml_cache.move_to_end(text)
+            return deepcopy(yaml_cache[text])
+        parse.test_parse_cache = True
+        module.safe_yaml = parse
+    reader = getattr(module, "read_document", None)
+    if reader is not None and not getattr(reader, "test_parse_cache", False):
+        document_type = module.Document
+        @wraps(reader)
+        def read(path, work_kind="change"):
+            path = Path(path)
+            try:
+                content = path.read_bytes()
+            except OSError:
+                return reader(path, work_kind)  # Preserve the parser's InputError.
+            key = path, work_kind, path.resolve(), content
+            if key not in document_cache:
+                result = reader(path, work_kind)
+                remember(document_cache, key, (result.meta, result.records))
+            document_cache.move_to_end(key)
+            meta, records = deepcopy(document_cache[key])
+            return document_type(path, meta, records)
+        read.test_parse_cache = True
+        module.read_document = read
+    return module
+
+
+def spec_modules(root, module_name="documents"):
+    from shared import load, locate
+    root = Path(root)
+    module = load(root if (root / "api.json").is_file() else locate(legacy=root), module_name)
+    return reuse_parsers(module) if module_name == "documents" else module
+
+
+def shared(name):
+    return name == "sdd_shared" or name.startswith("sdd_shared.")
+
+
+def entrypoint(dependency, script):
+    """Reuse imports from a fixed fixture installation, never document results.
+
+    A changed dependency belongs in a new fixture root, like a separate Python
+    process. Reading every module on each CLI call does not improve isolation.
+    """
+    root = Path(dependency) / "scripts"
+    key = str(root), script
+    saved = _entrypoints.get(key)
+    if saved is not None:
+        sys.modules.update(saved[1])
+        return saved[0]
+    main = runpy.run_path(str(root / script))["main"]
+    reuse_parsers(importlib.import_module("sdd_shared.documents"))
+    modules = {name: module for name, module in sys.modules.copy().items() if shared(name)}
+    for module in modules.values():
+        reuse_parsers(module)
+    _entrypoints[key] = main, modules
+    return main
+
+
+def spec_call(dependency, project, change, stage, script, work_kind="change"):
+    args = ["--project-root", str(project), "--change", change, "--stage", stage]
+    if work_kind != "change":
+        args += ["--work-kind", work_kind]
+    # A copied dependency must import its own modules, just like a fresh CLI.
+    modules = {name: module for name, module in sys.modules.copy().items() if shared(name)}
+    previous_path = sys.path[:]
+    stdout, stderr = StringIO(newline=os.linesep), StringIO(newline=os.linesep)
+    try:
+        for name in modules:
+            del sys.modules[name]
+        sys.path.insert(0, str(dependency / "scripts"))
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            main = entrypoint(dependency, script)
+            code = main(args)
+            # Entry points import their domain modules inside main().
+            loaded = {name: module for name, module in sys.modules.copy().items() if shared(name)}
+            _entrypoints[str(Path(dependency) / "scripts"), script][1].update(loaded)
+    finally:
+        sys.path[:] = previous_path
+        for name in tuple(sys.modules):
+            if shared(name):
+                del sys.modules[name]
+        sys.modules.update(modules)
+    require(code == 0, "sdd_check", stdout.getvalue() + stderr.getvalue())
+    return json.loads(stdout.getvalue())

@@ -1,4 +1,4 @@
-from lib.common import git
+from pathlib import Path
 import pytest
 
 
@@ -14,8 +14,9 @@ def test_drift_preserved_then_restored(driver, project):
     assert driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)["status"] == "active"
 
 
-def test_lost_author_successor_preserves_work(driver, project):
-    driver.start()
+def test_lost_author_successor_preserves_work(execution_checkpoint):
+    driver = execution_checkpoint("started")
+    project = driver.root
     (project / "result.txt").write_text("unfinished")
     result = driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     assert result["status"] == "blocked"
@@ -43,8 +44,9 @@ def successor(driver, role_id, kind, predecessor):
 
 
 @pytest.mark.parametrize("separate_observations", [False, True])
-def test_multiple_lost_roles_recover_individually(driver, project, separate_observations):
-    driver.start()
+def test_multiple_lost_roles_recover_individually(execution_checkpoint, separate_observations):
+    driver = execution_checkpoint("started")
+    project = driver.root
     (project / "result.txt").write_text("unfinished")
     driver.role("verifier", "verifier")
     driver.send("resume", {"host_trace": "unit-observation",
@@ -78,8 +80,8 @@ def test_multiple_lost_roles_recover_individually(driver, project, separate_obse
     assert driver.send("check_run", {"role_id": "new-verifier", "stage": "independent"})["outcome"] == "passed"
 
 
-def test_lost_role_resolution_must_match_predecessor_and_kind(driver):
-    driver.start()
+def test_lost_role_resolution_must_match_predecessor_and_kind(execution_checkpoint):
+    driver = execution_checkpoint("started")
     driver.role("verifier", "verifier")
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     successor(driver, "wrong-kind", "reviewer", "author")
@@ -93,13 +95,8 @@ def test_lost_role_resolution_must_match_predecessor_and_kind(driver):
     assert len(driver.task["blockers"]) == 2
 
 
-def test_reviewer_successor_continues_reserved_round_after_two_losses(driver, project):
-    driver.start()
-    (project / "result.txt").write_text("done")
-    driver.freeze()
-    driver.verify()
-    driver.role("reviewer", "reviewer")
-    driver.send("review_start", {"role_id": "reviewer"})
+def test_reviewer_successor_continues_reserved_round_after_two_losses(execution_checkpoint):
+    driver = execution_checkpoint("reviewing")
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     assert driver.task["before_block"] == "reviewing"
     successor(driver, "new-reviewer", "reviewer", "reviewer")
@@ -112,16 +109,11 @@ def test_reviewer_successor_continues_reserved_round_after_two_losses(driver, pr
     assert driver.task["review_rounds_started"] == 1
     result = driver.send("review_result", {"role_id": "new-reviewer", "candidate": driver.task["candidate"],
         "verdict": "pass", "findings": [], "test_integrity": "commands and assertions preserved", "trace": "unit-test"})
-    assert result["status"] == "committing"
+    assert result["status"] == "integrating"
 
 
-def test_replacing_another_reviewer_does_not_steal_reserved_round(driver, project):
-    driver.start()
-    (project / "result.txt").write_text("done")
-    driver.freeze()
-    driver.verify()
-    driver.role("reviewer", "reviewer")
-    driver.send("review_start", {"role_id": "reviewer"})
+def test_replacing_another_reviewer_does_not_steal_reserved_round(execution_checkpoint):
+    driver = execution_checkpoint("reviewing")
     driver.role("other-reviewer", "reviewer")
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": ["verifier", "reviewer"]}, task_id=None)
     successor(driver, "replacement", "reviewer", "other-reviewer")

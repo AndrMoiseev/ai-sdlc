@@ -6,7 +6,8 @@ Install the aisdlc-core bundle with its sibling SDD skill folders. For manual
 deployment copy the complete bundle. Follow [shared runtime setup](../../sdd-shared/references/runtime-setup.md)
 for discovery, API v1 compatibility and external cache storage. `sdd_shared` selects
 an explicit dependency root. Legacy `sdd_spec` selects its sibling sdd-shared.
-Keep execution directories when updating; old bases remain readable without rewriting.
+Keep execution directories when updating. Execution state uses schema version 2;
+older state requires an explicit, backed-up conversion before execution resumes.
 
 ## Preflight and recovery
 
@@ -16,10 +17,9 @@ Run every Python entry point with its own PEP 723 metadata and shipped lockfile:
 
 ```text
 uv run --locked --script "<skill-root>/scripts/execute.py" --request "<absolute-request.json>"
-uv run --locked --script "<skill-root>/scripts/test.py" <test-path> -q
 ```
 
-Apply the shared runtime requirements to both entry points. Keep worktrees outside
+Apply the shared runtime requirements to runtime entry points. Keep worktrees outside
 skill collections and retained reports in the execution directory. Unit tests do
 not replace actual host or browser runs.
 

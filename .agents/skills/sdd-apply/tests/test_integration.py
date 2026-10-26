@@ -1,6 +1,8 @@
 from pathlib import Path
 from conftest import Driver
-from lib.common import git
+from lib import artifact_storage as artifacts
+from lib.repository import repository
+from repository_support import stage, commit, set_mode, file_mode
 import pytest
 
 
@@ -13,7 +15,7 @@ def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, pr
     d.verify()
     assert d.review()["status"] == "integrating"
     package = d.send("transfer")
-    assert "GIT binary patch" in (d.directory / package["path"]).read_text()
+    assert artifacts.read_bytes(d.directory / package["path"])
     d.send("integrate")
     assert (project / "result.txt").read_bytes() == b"\x00\xffbinary\n"
     assert d.task["candidate"] is None
@@ -23,7 +25,7 @@ def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, pr
     assert d.review("integration-reviewer")["status"] == "committing"
     d.send("commit")
     assert d.send("accept")["status"] == "accepted"
-    assert git(project, "show", "HEAD:result.txt", raw=True) == b"\x00\xffbinary\n"
+    assert repository(project).content("HEAD", "result.txt") == b"\x00\xffbinary\n"
 
 
 def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, project):
@@ -36,15 +38,15 @@ def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, 
     d.review()
     d.send("transfer")
     (project / "result.txt").write_text("previous accepted task\n")
-    git(project, "add", "result.txt")
-    git(project, "commit", "-m", "fixture concurrent accepted task")
+    stage(project, "result.txt")
+    commit(project, "fixture concurrent accepted task")
     with pytest.raises(ValueError):
         d.send("integrate")
     operation = f"event-{d.number}"
-    assert git(project, "ls-files", "--unmerged")
+    assert repository(project).has_conflicts()
     d.role("resolver", "executor")
     (project / "result.txt").write_text("previous accepted task\ntask content\n")
-    git(project, "add", "result.txt")
+    stage(project, "result.txt")
     d.send("role_result", {"role_id": "resolver", "result": "Resolved both changes", "trace": "synthetic unit"})
     d.send("integration_resolve", {"intent_id": operation, "role_id": "resolver", "resolution": "Retained both task contributions"})
     d.send("candidate")
@@ -61,10 +63,12 @@ def test_staged_executable_mode_is_in_transfer(basis, tmp_path):
     d.start()
     path = Path(wt["path"]) / "check.py"
     path.chmod(0o755)
-    git(wt["path"], "update-index", "--chmod=+x", "check.py")
+    set_mode(wt["path"], "check.py", True)
     (Path(wt["path"]) / "result.txt").write_text("ok\n")
     d.freeze()
     d.verify()
     d.review()
     package = d.send("transfer")
-    assert "new mode 100755" in (d.directory / package["path"]).read_text()
+    assert artifacts.read_bytes(d.directory / package["path"])
+    d.send("integrate")
+    assert file_mode(basis["project_root"], "check.py") == "100755"

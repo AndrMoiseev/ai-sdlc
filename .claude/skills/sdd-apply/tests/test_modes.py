@@ -1,6 +1,7 @@
 import pytest
 from lib.state import initialize
 from lib.api import dispatch
+from lib.common import Rejected
 from conftest import Driver, SPEC
 
 
@@ -15,11 +16,10 @@ def test_mode_change_requires_fresh_owner(driver):
     assert driver.state["owner"] == "new-owner"
 
 
-def test_parallel_without_isolation_defaults_sequential(basis):
-    state = initialize(basis, "owner", {"source": "user", "text": "parallel"}, isolation=False)
-    assert state["mode"] == "sequential"
-    assert state["parallel_request"] is None
-    assert state["mode_reason"] == "isolation unavailable"
+def test_parallel_without_isolation_is_rejected(basis):
+    with pytest.raises(Rejected) as failure:
+        initialize(basis, "owner", {"source": "user", "text": "parallel"}, isolation=False)
+    assert failure.value.code == "isolation_required"
 
 
 @pytest.mark.parametrize("isolation", [False, True])
@@ -30,6 +30,11 @@ def test_initialize_mode_selection(project, isolation, mode):
             "sdd_spec": str(SPEC), "owner": "owner", "isolation": isolation}
     if mode is not None:
         args["mode"] = mode
+    if not isolation:
+        with pytest.raises(Rejected) as failure:
+            dispatch({"operation": "initialize", "args": args})
+        assert failure.value.code == "isolation_required"
+        return
     state = dispatch({"operation": "initialize", "args": args})
     parallel = isolation and mode != "sequential"
     assert state["mode"] == ("parallel" if parallel else "sequential")
@@ -49,8 +54,8 @@ def test_default_parallel_admits_worktree_and_survives_resume(basis, tmp_path):
 def test_explicit_sequential_survives_resume(driver):
     driver.send("resume", {"host_trace": "synthetic-host", "live_contexts": []}, task_id=None)
     assert driver.state["mode"] == "sequential"
-    with pytest.raises(ValueError, match="parallel mode required"):
-        driver.send("worktree_create", {"workspace": "unused"})
+    driver.worktree()
+    assert driver.task["worktree"]
 
 
 def test_legacy_parallel_request_is_preserved(basis):
@@ -62,9 +67,10 @@ def test_legacy_parallel_request_is_preserved(basis):
 
 def test_invalid_mode_leaves_no_state(basis):
     from pathlib import Path
+    from lib.state_storage import storage
     with pytest.raises(ValueError, match="Expected parallel or sequential"):
         initialize(basis, "owner", isolation=True, mode="automatic")
-    assert not (Path(basis["change_root"]) / "execution/state.json").exists()
+    assert not storage(Path(basis["change_root"]) / "execution").exists()
 
 
 def test_revision_cannot_bypass_pending_sequential_handoff(basis):

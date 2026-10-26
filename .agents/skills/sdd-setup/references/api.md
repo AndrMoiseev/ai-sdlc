@@ -1,101 +1,93 @@
 # Скриптовый интерфейс
 
-Все команды используют `uv run --locked --script "<skill-root>/scripts/setup.py"`.
-Ответ — JSON `{"ok": true, "result": ...}` либо `{"ok": false, "code": "sdd_setup",
-"message": ...}` с ненулевым exit code. В файлы для следующей операции сохраняй
-объект `result`, без внешней оболочки. JSON читается как UTF-8, включая BOM.
+Запускай `uv run --locked --script "<skill-root>/scripts/setup.py" <command>`.
+Ответ: `{"ok":true,"result":...}` либо `{"ok":false,"code":"sdd_setup","message":...}`
+с ненулевым exit code. JSON читается как UTF-8, включая BOM.
 
-## inspect — только чтение
+Для `inspect` и `plan` используй `--output <new-file.json>`: полный результат
+сохраняется без оболочки, stdout содержит `result.output_file`, `sha256` файла
+и `summary` для обсуждения. Создай рабочий каталог заранее, вне проекта и
+коллекций скиллов; существующие файлы и перенаправленные пути отклоняются.
+При повторном чтении/планировании выбирай новое имя файла.
+Без `--output` сохранён прежний интерфейс: stdout содержит полный `result`.
+
+## inspect — чтение настроек
 
 ```text
-uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root "<project>" --host codex
-uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root "<project>" --host claude-code --available-agents "<workspace>/catalog.json"
+uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root "<project>" --host codex --output "<workspace>/inspection.json"
 ```
 
-Необязательные параметры: `--sdd-shared <shared-root>` (прежний `--sdd-spec` выбирает соседний с ним sdd-shared), `--user-agent-dir <path>`
-(для отдельного пользовательского каталога/тестов), `--names <name> <name>`
-(выбранные пользователем имена вне текущих настроек и пресетов).
+Для Claude Code укажи `--host claude-code --available-agents <catalog.json>`.
+Дополнительные параметры: `--sdd-shared <shared-root>` (прежний `--sdd-spec`
+выбирает соседний sdd-shared), `--user-agent-dir <path>`, `--names <name> <name>`
+для имён вне настроек/пресетов.
 
-Результат содержит `roles` с `present`, `current`, `default`, `profile_default`;
-`agents` с текущими моделью, effort, областью и путём; `inputs`, `evidence`,
-`snapshot`. Сохрани результат целиком. Ошибки JSON/TOML/YAML и дубликаты имён
-не трактуются как отсутствие конфигурации. Пустой каталог допустим.
+Сводка содержит все `roles` (`present`, `current`, `default`, `profile_default`),
+`agents` (модель, effort, область, путь), корень, среду и `snapshot`.
+Полный файл также хранит `inputs` и `evidence`; их переносит скрипт.
+Ошибки конфигурации и дубликаты имён требуют исправления; пустой каталог допустим.
 
-## plan — только чтение
+## plan — подготовка записи
 
-Запиши request в отдельном рабочем каталоге:
+Запиши request с `inspection_file` (абсолютный путь или путь относительно
+request) и `inspection_sha256` из inspect. Добавь `roles` с решением для каждой
+из восьми ролей и `agents` с моделью/effort каждого уникального выбранного имени:
 
 ```json
 {
-  "inspection": "ЗАМЕНИТЬ целым объектом result из inspect",
-  "roles": {
-    "sdd-spec.document_reviewer": {"action": "default"},
-    "sdd-spec.plan_reviewer": {"action": "default"},
-    "sdd-spec.editor": {"action": "default"},
-    "sdd-spec.editorial_reviewer": {"action": "default"},
-    "sdd-apply.executor": {"action": "default"},
-    "sdd-apply.verifier": {"action": "default"},
-    "sdd-apply.reviewer": {"action": "default"},
-    "sdd-apply.final_verifier": {"action": "default"}
-  },
-  "agents": {
-    "sdd-document-reviewer": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-plan-reviewer": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-editor": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-editorial-reviewer": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-executor": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-verifier": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-reviewer": {"model": {"action": "default"}, "effort": {"action": "default"}},
-    "sdd-final-verifier": {"model": {"action": "default"}, "effort": {"action": "default"}}
-  }
+  "inspection_file": "inspection.json",
+  "inspection_sha256": "<sha256 из inspect>",
+  "roles": {"<каждая роль>": {"action": "default"}},
+  "agents": {"<каждое выбранное имя>": {
+    "model": {"action": "default"}, "effort": {"action": "default"}
+  }}
 }
 ```
 
-Это пример формы после согласия на пресеты, не разрешение применять их без
-диалога. Для всех восьми ролей требуется решение; для каждого уникального
-выбранного имени — решения по модели и effort.
+Замени условные ключи согласованными решениями из [диалога](dialogue.md).
 
 | Решение | Значение |
 | --- | --- |
-| `{"action":"keep"}` | Сохранить заданное значение; для отсутствующего поля отклоняется |
-| `{"action":"default"}` | Принять пресет роли в текущей среде |
-| `{"action":"set","value":"..."}` | Выбранное пользователем имя/модель/effort |
+| `{"action":"keep"}` | Сохранить заданное значение; отсутствующее поле отклоняется |
+| `{"action":"default"}` | Принять пресет роли текущей среды |
+| `{"action":"set","value":"..."}` | Выбранное имя/модель/effort |
 | `{"action":"set","value":null}` | Убрать сопоставление роли или явное поле модели/effort |
 
-Для имени только из нативного каталога Claude Code допустим лишь `keep` обоих
-полей: их значения скрыты, сохраняется определение целиком. При разных пресетах
-ролей одного агента выбирай явные `set`, либо раздели имена.
+Прежняя форма `{"inspection":<полный result>,"roles":...,"agents":...}` допустима.
+Смешивать формы нельзя. Хэш защищает файл от подмены; сравнение с новым
+`inspect` отклоняет устаревшие настройки и каталог. При расхождении повтори
+чтение и согласуй изменившиеся значения, сохранив остальные ответы.
 
 ```text
-uv run --locked --script "<skill-root>/scripts/setup.py" plan --request "<workspace>/request.json"
+uv run --locked --script "<skill-root>/scripts/setup.py" plan --request "<workspace>/request.json" --output "<workspace>/plan.json"
 ```
 
-Результат содержит `operations` с путями, исходными текстами, новым содержимым,
-хэшами и diff; `selected_roles`, предупреждения и `plan_id`. Сохрани result в
-`plan.json`. Скрипт сравнивает переданный inspection с новым чтением; при
-изменившихся данных нужно повторить inspect, а не редактировать хэши.
+Сводка показывает `selected_roles`, `selected_agents` с моделью/effort,
+`operations` с путями и точным diff, предупреждения, `plan_id`. Полный план
+содержит request с встроенным inspection, исходные/новые тексты и хэши;
+он самодостаточен для apply и восстановления. Читай полные тексты только для
+разбора ошибки или восстановления; для обсуждения достаточно сводки.
 
 ## apply — запись
+
+Перед записью проверь: решения пользователя покрывают все роли и агенты,
+точный diff показан, новых несогласованных изменений нет.
 
 ```text
 uv run --locked --script "<skill-root>/scripts/setup.py" apply --plan "<workspace>/plan.json"
 ```
 
-Скрипт пересчитывает план, проверяет пути и исходное содержимое, блокирует
-параллельный setup через `.sdd/.setup.lock`, записывает определения перед settings,
-затем проверяет хэши. Отдельные файлы заменяются атомарно. При обычной ошибке
-записи уже сделанные изменения откатываются, если их не изменил другой процесс.
-Пустые созданные каталоги могут остаться. Произвольная правка плана отклоняется.
+Скрипт пересчитывает план, проверяет пути/исходное содержимое и блокирует
+параллельный setup через `.sdd/.setup.lock`. Определения записываются перед
+settings; файлы заменяются атомарно, хэши проверяются. При обычной ошибке записи
+сделанные изменения откатываются, если их не изменил другой процесс.
+Произвольная правка плана отклоняется; пустые созданные каталоги могут остаться.
 
-Это не транзакция файловой системы: аварийное завершение процесса/питания может
-оставить часть записей и lock. Проверь PID и текущее содержимое, восстанови
-данные из сохранённого плана, затем повтори inspect; не удаляй lock активного
-процесса. Скрипт не защищает от всех одновременных изменений сторонним редактором.
+Авария процесса/питания может оставить часть записей и lock. Проверь PID и
+содержимое, восстанови данные из полного плана, повтори inspect. Lock активного
+процесса сохраняй. Защита от всех одновременных правок сторонним редактором
+не гарантируется.
 
-При успехе `changed` перечисляет записанные пути. Пустой список означает, что
-файлы не переписывались. После apply повтори inspect. Для отсутствующих полей,
-которые пользователь решил наследовать, повторное решение — `set: null`.
-
-Поддерживаемые параметры среды: model/effort определений. Неизвестные верхние
-поля settings сохраняются; неизвестные поля внутри subagents отклоняет общий
-контракт `sdd-shared`. Версия схемы фиксирована, миграции других версий не выполняются.
+`changed` перечисляет записанные пути; пустой список означает отсутствие записей.
+Повтори inspect после apply. Версия settings фиксирована: 1. Неизвестные верхние
+поля сохраняются; неизвестные поля subagents отклоняет контракт `sdd-shared`.
