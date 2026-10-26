@@ -17,6 +17,13 @@ to distinguish structural retirement from lost preservation.
 
 For final verification, inspect and run the full required set and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Attribute a defect to its task or report uncertain ownership for resolution.
 
+For ordinary additional project checks, use the run-level packet (`task: null`),
+null task scope and stage `final`. Execute every registered project command and
+procedure at the packet's current work identity, HEAD, manifest and registry.
+Report project evidence separately from the required task-scoped final checks.
+After a newer procedure attempt, obtain a new aggregate run linking that attempt;
+after a lost role, reconcile unfinished procedures before starting fresh work.
+
 For refactoring final verification, use the run-level packet (`task: null`) and
 `task_id: null` for final checks and procedures. Trace every design result and
 preservation criterion across its declared scope, including every consumer and

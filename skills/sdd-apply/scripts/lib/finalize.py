@@ -56,6 +56,21 @@ def finalize(state, payload, directory):
             accepted.extend(task["plan"]["covers"])
         except ValueError as exc:
             missing.append({"task_id": key, "criteria": task["plan"]["covers"], "reason": str(exc)})
+    if not is_refactoring and state.get("final_checks"):
+        from . import final_checks
+        current = None
+        project_evidence, gaps = [], []
+        required = sorted({criterion for check in final_checks.registry(state)["checks"] for criterion in check["criteria"]})
+        try:
+            final_checks.ready(state)
+            current, project_evidence, gaps = final_checks.evidence(state, directory)
+        except ValueError as exc:
+            gaps = [{"criteria": required, "reason": str(exc)}]
+        missing.extend(gaps)
+        evidence.extend(project_evidence)
+        failed = {criterion for gap in gaps for criterion in gap["criteria"]}
+        accepted = [criterion for criterion in accepted if criterion not in failed]
+        extra["project_checks"] = {"basis": current, "criteria": required, "gaps": gaps}
     recommendations = technical_debt(state)
     decisions = payload.get("recommendation_decisions")
     if decisions is None:

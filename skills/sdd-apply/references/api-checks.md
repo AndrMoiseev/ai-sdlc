@@ -174,3 +174,32 @@ A failed final check requires an owned repair before retry. Supply `repair` with
 Unknown ownership or an unplanned area returns to sdd-spec before edits. Repairs
 consume the responsible task's existing test-repair budget and require the usual
 candidate, independent checks, review and integration before final verification.
+
+## Ordinary final project checks
+
+After every ordinary task is accepted and integrated, register additional mandatory
+project checks with `checks_register`, `task_id: null`, inspected `inventory`, and
+nonempty `additional`. Each check has a distinct ID within this registry, source,
+approved `covers` criteria, and an exact command or existing procedure. The registry
+contains only these additional checks. Task registries and task-scoped final checks
+retain their existing meaning. Ordinary executions without this registry keep the
+original final acceptance contract.
+
+Launch a fresh `final_verifier` independent of every executor and register it with
+`task_id: null`. Use that role for `check_run` and procedure events with null task
+scope, only at stage `final`. Ordinary project checks have no `setup_task` and cannot
+use `check_setup`; planned preparation belongs to the task that implements it.
+Register checks only when their exact executable command or procedure is known.
+
+Once registered, every project check is mandatory alongside task final evidence.
+Evidence binds work kind, change ID, run ID, clean integrated HEAD, normative
+manifest, exact project registry and the task check definitions. Missing, failed,
+unavailable, foreign or stale evidence prevents `complete`. A successful project
+run cannot replace task-scoped final checks. The latest procedure attempt and
+lost-role recovery follow the run-level procedure contract above; rerun the aggregate
+after a fresh procedure pass. Assign final failures through the owned repair contract.
+
+On `revised_plan`, these registered obligations and their inventory remain required.
+The superseded run archives interrupted attempts and failures; retained logs are
+historical. The new run requires fresh evidence at its new basis after all appended
+tasks are accepted. Appending a task never silently removes a project check.

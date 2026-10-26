@@ -7,6 +7,32 @@ from .common import digest, require, write_json
 from .state import assert_basis, snapshot
 
 
+def completed_followups(state, plans, payload):
+    """Resolve only an abandoned repair stop explicitly replaced by new work."""
+    mappings = payload.get("completed_followups", [])
+    require(isinstance(mappings, list), "completed_followup", "completed_followups must be a list")
+    completed, targets, removed = set(), set(), []
+    for mapping in mappings:
+        require(isinstance(mapping, dict) and set(mapping) == {"completed_task", "followup_task"}
+                and all(isinstance(value, str) and value for value in mapping.values()),
+                "completed_followup", "Map the completed_task to its new followup_task")
+        prior, target = mapping["completed_task"], mapping["followup_task"]
+        old = state["tasks"].get(prior)
+        require(old and old["status"] == "accepted" and old["commits"]
+                and not old.get("active_review") and not old.get("active_repair"),
+                "completed_followup", "Only an accepted task without active work can receive a follow-up")
+        require(prior not in completed and target not in targets and target not in state["tasks"]
+                and target in plans and prior in plans[target]["depends_on"],
+                "completed_followup", "Each mapping needs a distinct newly appended dependent task")
+        stops = [block for block in state["blockers"] if block.get("task_id") == prior
+                 and block["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
+        require(stops, "completed_followup", "Name an existing completed-task budget stop")
+        completed.add(prior)
+        targets.add(target)
+        removed.extend(stops)
+    return removed
+
+
 def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
     if kind == "spec_conflict":
@@ -61,6 +87,7 @@ def transition(state, task, event, directory):
             else:
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
+        resolved = completed_followups(state, plans, p)
         previous_run = state["run_id"]
         from .state_objects import StateObjects
         objects = StateObjects(directory)
@@ -73,6 +100,12 @@ def transition(state, task, event, directory):
             state.pop("final_checks", None)
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
+        elif state.get("final_checks"):
+            # Accepted covers and registered project obligations survive. The
+            # archived run owns interrupted attempts; new run identity makes all
+            # retained evidence historical and requires a fresh complete run.
+            state["final_checks"]["procedures"] = {}
+            state["final_checks"]["failures"] = {}
         state["tasks"] = {}
         from .state import new_task
         for plan in basis["tasks"]:
@@ -90,12 +123,17 @@ def transition(state, task, event, directory):
             state["parallel_request"] = basis["instruction"]
         # Budget blockers survive a revised plan. Other old blockers are retained
         # in the archived run and checked again against the new basis.
-        state["blockers"] = [b for b in state["blockers"] if b["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
+        if p.get("completed_followups"):
+            state["blockers"] = [b for b in state["blockers"] if b not in resolved]
+        else:
+            state["blockers"] = [b for b in state["blockers"] if b["reason"] in {"review_limit_reached", "test_repair_limit_reached"}]
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
         write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), objects.pack(basis, root=True))
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
+                **({"resolved_completed_repairs": {"mapping": deepcopy(p["completed_followups"]),
+                    "removed_blockers": resolved, "authorization": deepcopy(p["instruction"])}} if resolved else {}),
                 "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
     from .check_registry import recovery

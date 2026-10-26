@@ -105,10 +105,10 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monos
     return card;
   }
   function draw(s){
-    const whole=el('whole-result');whole.hidden=!s.whole_result;whole.replaceChildren();
-    if(s.whole_result){
-      const w=s.whole_result;
-      whole.append(node('h2','Whole result'),node('p',w.confirmed_criteria.length+' / '+w.total_criteria+' criteria confirmed'),node('p',w.confirmed_criteria.join(', ')));
+    const whole=el('whole-result'),w=s.whole_result||s.final_project_checks;whole.hidden=!w;whole.replaceChildren();
+    if(w){
+      const label=s.whole_result?'Whole result':'Final project checks';whole.setAttribute('aria-label',label);
+      whole.append(node('h2',label),node('p',w.confirmed_criteria.length+' / '+w.total_criteria+' criteria confirmed'),node('p',w.confirmed_criteria.join(', ')));
       for(const gap of w.gaps)whole.append(node('p',(gap.criteria||[]).join(', ')+': '+gap.reason,'blocked'));
       for(const retired of w.retired_checks)whole.append(node('p','Retired '+retired.check_id+': '+retired.reason));
     }

@@ -41,12 +41,14 @@ def refactoring_context(state, task):
 
 def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
-    whole = task is None and state["basis"].get("work_kind") == "refactoring"
+    whole = task is None and (state["basis"].get("work_kind") == "refactoring" or bool(state.get("final_checks")))
     require(task is not None or whole and kind in {"role_register", "role_result"}, "task_required", "Task required")
     task_id = task["plan"]["id"] if task else None
     if kind == "role_register":
         require(set(p) >= {"role_id", "kind", "context_id", "fresh", "host", "launch_ref", "capabilities"}, "role_schema", "Host context and launch evidence required")
         require(p["kind"] in {"executor", "verifier", "reviewer", "final_verifier"} and p["fresh"] is True, "fresh_role", "A fresh context is mandatory")
+        if whole:
+            require(p["kind"] == "final_verifier", "final_role", "Run-level roles are final verifiers")
         if state["basis"].get("work_kind") == "refactoring":
             require((p["kind"] == "final_verifier") == whole, "final_role", "Register refactoring final_verifier with task_id=null")
         require(p["host"] in {"codex", "claude-code"} and p["launch_ref"] and p["context_id"], "host_evidence", "Record actual host launch; do not simulate a role")
@@ -78,13 +80,14 @@ def transition(state, task, event, directory):
         state["roles"][p["role_id"]] = role
         if whole:
             from .final_checks import applicable, basis, criteria, retired
-            packet = {"task": None, "work_kind": "refactoring", "role": role,
+            packet = {"task": None, "work_kind": state["basis"].get("work_kind", "change"), "role": role,
                 "project_root": state["basis"]["project_root"], "execution_directory": str(directory),
                 "basis": basis(state), "checks": applicable(state), "criteria": criteria(state),
-                "acceptance": state["acceptance"], "retired_checks": retired(state),
+                "acceptance": state.get("acceptance", {}), "retired_checks": retired(state),
                 "tasks": {key: {"plan": value["plan"], "status": value["status"], "paths": value["paths"],
                                 "commits": value["commits"]} for key, value in state["tasks"].items()},
-                "sources": {name: str(Path(state["basis"]["change_root"]) / name) for name in ("proposal.md", "design.md", "tasks.md")}}
+                "sources": {entry["path"]: str(Path(state["basis"]["change_root"]) / entry["path"])
+                            for entry in state["basis"]["manifest"]}}
             path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
             write_json(path, packet)
             return {"role": role, "packet": str(path)}

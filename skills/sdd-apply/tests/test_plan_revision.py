@@ -152,3 +152,92 @@ def test_revision_keeps_acceptance_but_requires_fresh_final_checks(execution_che
     driver.role("new-final", "final_verifier")
     assert driver.send("check_run", {"role_id": "new-final", "stage": "final"})["outcome"] == "passed"
     assert driver.send("finalize", task_id=None)["result"] == "complete"
+
+
+def stopped_completed_task(driver):
+    """Seed consumed historical rounds; the real repair reducer produces the stop."""
+    from lib.state import seal, save
+    state = driver.state
+    task = state["tasks"]["TASK-one"]
+    task["review_rounds_started"] = task["review_limit"]
+    task["review_rounds_completed"] = task["review_limit"]
+    seal(state)
+    save(driver.directory, state)
+    result = driver.send("repair", {"reason": "Post-acceptance defect", "defect_evidence": "New project scenario fails"})
+    assert result == {"blocked": "review_limit_reached"}
+    assert driver.task["status"] == "accepted"
+
+
+def followup_payload():
+    return {"instruction": {"text": "Execute the approved new dependent task instead of reopening completed work", "source": "synthetic-user-message"},
+            "completed_followups": [{"completed_task": "TASK-one", "followup_task": "TASK-two"}]}
+
+
+def test_completed_followup_clears_only_obsolete_stop_preserving_task_and_budgets(execution_checkpoint):
+    driver = execution_checkpoint("accepted")
+    stopped_completed_task(driver)
+    completed = driver.task
+    driver.send("block", {"reason": "external_service", "resume_condition": "Restore the service"}, task_id=None)
+    project = Path(driver.state["basis"]["project_root"])
+    revise(project, ["one", "two"], lambda tasks: tasks[1].update(depends_on=["TASK-one"]))
+    previous = driver.state["run_id"]
+    result = driver.send("revised_plan", followup_payload(), task_id=None)
+    assert result["previous_run"] == previous
+    assert driver.task == completed
+    assert driver.task["review_rounds_started"] == driver.task["review_limit"]
+    assert driver.state["tasks"]["TASK-two"]["status"] == "pending"
+    assert driver.state["tasks"]["TASK-two"]["review_rounds_started"] == 0
+    assert [block["reason"] for block in driver.state["blockers"]] == ["external_service"]
+    resolved = result["resolved_completed_repairs"]
+    assert resolved["mapping"] == followup_payload()["completed_followups"]
+    assert resolved["removed_blockers"][0]["reason"] == "review_limit_reached"
+    assert resolved["authorization"] == followup_payload()["instruction"]
+    assert artifacts.exists(driver.directory / "runs" / previous / "superseded-state.json")
+
+
+@pytest.mark.parametrize("invalid", ["existing", "unrelated", "unfinished", "active", "duplicate", "missing_stop", "missing_authorization"])
+def test_completed_followup_rejects_invalid_mapping_before_archiving(execution_checkpoint, invalid):
+    from lib.state import seal, save
+    driver = execution_checkpoint("accepted")
+    if invalid != "missing_stop":
+        stopped_completed_task(driver)
+    project = Path(driver.state["basis"]["project_root"])
+    revise(project, ["one", "two"], lambda tasks: tasks[1].update(depends_on=[] if invalid == "unrelated" else ["TASK-one"]))
+    payload = followup_payload()
+    if invalid == "existing":
+        payload["completed_followups"][0]["followup_task"] = "TASK-one"
+    elif invalid == "duplicate":
+        payload["completed_followups"] *= 2
+    elif invalid in {"unfinished", "active"}:
+        state = driver.state
+        if invalid == "unfinished":
+            state["tasks"]["TASK-one"]["status"] = "repairing"
+        else:
+            state["tasks"]["TASK-one"]["active_review"] = "unfinished-review"
+        seal(state)
+        save(driver.directory, state)
+    elif invalid == "missing_authorization":
+        payload.pop("instruction")
+    before = storage(driver.directory).read()
+    with pytest.raises(Rejected) as error:
+        driver.send("revised_plan", payload, task_id=None)
+    assert error.value.code in {"completed_followup", "execution_instruction"}
+    assert storage(driver.directory).read() == before
+    assert not artifacts.exists(driver.directory / "runs" / driver.state["run_id"] / "superseded-state.json")
+
+
+def test_followup_does_not_clear_unfinished_task_budget_stop(execution_checkpoint):
+    driver = execution_checkpoint("accepted")
+    project = Path(driver.state["basis"]["project_root"])
+    revise(project, ["one", "two"], lambda tasks: tasks[1].update(depends_on=["TASK-one"]))
+    revised(driver)
+    stopped_completed_task(driver)
+    driver.send("block", {"reason": "test_repair_limit_reached", "resume_condition": "Explicit budget extension"}, task_id="TASK-two")
+    previous = driver.state["tasks"]["TASK-two"]
+    revise(project, ["one", "two", "three"], lambda tasks: tasks[2].update(depends_on=["TASK-one"]))
+    payload = followup_payload()
+    payload["completed_followups"][0]["followup_task"] = "TASK-three"
+    driver.send("revised_plan", payload, task_id=None)
+    assert any(block["reason"] == "test_repair_limit_reached" and block["task_id"] == "TASK-two" for block in driver.state["blockers"])
+    assert driver.state["tasks"]["TASK-two"]["test_repair_cycles_started"] == previous["test_repair_cycles_started"]
+    assert driver.state["status"] == "blocked"

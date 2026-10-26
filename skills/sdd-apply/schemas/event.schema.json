@@ -10,7 +10,7 @@
     "expected_revision": {"type": "integer", "minimum": 0},
     "owner": {"type": "string", "minLength": 1},
     "type": {"enum": ["block", "resume", "spec_conflict", "revised_plan", "handoff", "mode", "budget_extend", "role_register", "role_result", "review_start", "review_result", "checks_register", "checks_extend", "checks_revise", "check_setup", "check_run", "procedure_begin", "procedure_result", "candidate", "start", "repair", "commit", "accept", "worktree_create", "worktree_remove", "worktree_refresh", "worktree_refresh_resolve", "integrate", "integration_resolve", "transfer", "finalize"]},
-    "task_id": {"type": ["string", "null"], "description": "Null selects run operations; refactoring also supports whole-result registry/setup/run/procedure and final-verifier role operations without a task owner."},
+    "task_id": {"type": ["string", "null"], "description": "Null selects run operations and final project registry/run/procedure/final-verifier operations. Ordinary changes register additional final checks after task acceptance; refactoring also supports whole-result setup through its approved setup_task."},
     "payload": {"type": "object"}
   }
 }

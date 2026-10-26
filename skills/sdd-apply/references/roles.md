@@ -30,6 +30,12 @@ current integrated source/manifest/registry basis. This scope grants verificatio
 authority without granting implementation ownership. Report ambiguous repair
 ownership before any author is reopened.
 
+An ordinary final project verifier also has `task_id: null` when additional project
+checks are registered. Its packet contains those exact additional checks, approved
+covers criteria, accepted tasks and current basis. This scope supplements the
+ordinary task-scoped final verifiers; it cannot replace their evidence. Every final
+verifier is independent of all authors.
+
 Return task/role/context IDs, status, unchanged candidate reference and commit
 SHA, owned/inspected paths, AC-to-evidence mapping, commands and log
 paths, blockers/limitations and actual host trace. Keep full evidence in artifacts;

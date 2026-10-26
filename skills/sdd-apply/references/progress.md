@@ -17,3 +17,8 @@ The whole-result panel reports current evidence gaps and retired checks with
 confirmed reasons. Contributions and accepted task counts do not establish the
 whole result. A changed integrated HEAD, manifest or applicable registry removes
 old confirmation from the current projection; historical logs remain available.
+
+Ordinary executions with an additional final registry show a separate final project
+checks panel (`final_project_checks` in compact and dashboard data). Its confirmed
+criteria describe only those project checks. Accepted task counts and task final
+evidence remain separate requirements; either missing set blocks final completion.

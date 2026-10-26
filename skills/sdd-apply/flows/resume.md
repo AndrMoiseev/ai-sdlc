@@ -23,6 +23,19 @@ on an already completed result, describe that work in a new follow-up task and
 retain the completed task unchanged. `revised_plan` rejects a changed or missing
 completed record and rejects new tasks inserted before existing ones.
 
+When the user explicitly chooses a new approved follow-up instead of reopening an
+accepted task stopped at its budget, include `completed_followups` in `revised_plan`.
+Each entry names `completed_task` and a distinct newly appended `followup_task`
+that depends on it. The execution instruction records that authorization. The
+completed task must have confirmed commits and no active review or repair.
+The operation removes only that task's obsolete budget stop, preserving its full
+record and spent counters. Unfinished-task budget stops and unrelated blockers
+remain; this mapping cannot authorize another repair of the completed task.
+
+Ordinary final project registries survive revision with their mandatory definitions
+and inventory. Prior attempts remain historical; obtain fresh final evidence at
+the revised basis after the new tasks are accepted.
+
 Complete any pending mode handoff before submitting `revised_plan`; a revision
 cannot clear the blocker for an unfinished mode change.
 

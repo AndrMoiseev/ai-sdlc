@@ -19,6 +19,9 @@ def compact(state):
     if state["basis"].get("work_kind") == "refactoring":
         from .final_checks import progress
         whole = {"whole_result": progress(state)}
+    elif state.get("final_checks"):
+        from .final_checks import progress
+        whole = {"final_project_checks": progress(state)}
     return {
         **whole,
         "view": "compact", "view_version": 1,

@@ -5,12 +5,22 @@ from pathlib import Path
 
 from . import artifact_storage as artifacts
 from .common import contained, digest, now, require, write_json
-from .check_registry import confirmed_tasks, confirmed_revision, selected
+from .check_registry import confirmed_tasks, confirmed_revision, selected, refactoring, strings
 from .state import snapshot, clean_source
 
 
 def criteria(state):
     from .inputs import basis_dependency, spec_modules
+    if not refactoring(state):
+        allowed = {ident for task in state["tasks"].values() for ident in task["plan"]["covers"]}
+        documents = spec_modules(basis_dependency(state["basis"]))
+        root = Path(state["basis"]["change_root"])
+        records = [record for entry in state["basis"]["manifest"]
+                   if entry["path"].startswith("specs/") and entry["path"].endswith("/spec.md")
+                   for record in documents.read_document(root / entry["path"]).records
+                   if record["sdd_record"] == "acceptance" and record["id"] in allowed]
+        require({record["id"] for record in records} == allowed, "criteria_uncovered", "Every covers criterion needs its approved specification")
+        return {record["id"]: record for record in records}
     document = spec_modules(basis_dependency(state["basis"])).read_document(
         Path(state["basis"]["change_root"]) / "design.md", "refactoring")
     return {record["id"]: record for record in document.records if record["sdd_record"] == "criterion"}
@@ -26,6 +36,8 @@ def registry(state):
 
 def applicable(state):
     whole = registry(state)["checks"]
+    if not refactoring(state):
+        return whole
     local = selected(state, None, final=True)
     require(not {check["id"] for check in whole} & {check["id"] for check in local},
             "duplicate_check", "Whole and task checks have distinct identities")
@@ -33,6 +45,8 @@ def applicable(state):
 
 
 def retired(state):
+    if not refactoring(state):
+        return []
     result = {}
     for task in confirmed_tasks(state):
         for entry in task["check_registry"]["history"][:confirmed_revision(task)]:
@@ -52,10 +66,14 @@ def retired(state):
 def basis(state):
     source = snapshot(state)
     clean_source(source)
-    return {"work_kind": "refactoring", "change_id": state["change_id"], "run_id": state["run_id"],
+    result = {"work_kind": state["basis"].get("work_kind", "change"), "change_id": state["change_id"], "run_id": state["run_id"],
             "source": source, "manifest": digest(state["basis"]["manifest"]),
-            "registry_revision": registry(state)["revision"], "checks": applicable(state),
-            "task_revisions": {key: confirmed_revision(task) for key, task in state["tasks"].items()}}
+            "registry_revision": registry(state)["revision"], "checks": applicable(state)}
+    if refactoring(state):
+        result["task_revisions"] = {key: confirmed_revision(task) for key, task in state["tasks"].items()}
+    else:
+        result["task_checks"] = {key: deepcopy(task["checks"]) for key, task in state["tasks"].items()}
+    return result
 
 
 def independent(state, role_id, active=True):
@@ -79,13 +97,28 @@ def register(state, event):
     payload = event["payload"]
     require(payload.get("inventory") and set(payload["inventory"]) == {"instructions", "ci"},
             "inventory_required", "Record inspected instructions and CI")
+    if not refactoring(state):
+        ready(state)
     checks = [{"id": item["id"], "criteria": item["criteria"], "source": "tasks.md",
                "location": item["location"], "run": item["run"], "setup_task": item.get("setup_task"),
-               "setup": None, "cwd": ".", "configuration": {}} for item in state["verification"].values()]
-    allowed = set(criteria(state)) | {key for key, item in state["acceptance"].items() if item["lifetime"] == "persistent"}
+               "setup": None, "cwd": ".", "configuration": {}} for item in state.get("verification", {}).values()]
+    allowed = set(criteria(state)) | {key for key, item in state.get("acceptance", {}).items() if item["lifetime"] == "persistent"}
+    require(isinstance(payload.get("additional", []), list), "check_schema", "Additional checks must be a list")
     for item in payload.get("additional", []):
-        require(item.get("id") and item.get("source") and item.get("run") and item.get("criteria")
+        require(isinstance(item, dict), "check_schema", "Additional checks must be objects")
+        require(item.get("id") and item.get("source") and item.get("run") and strings(item.get("criteria")) and item["criteria"]
                 and set(item["criteria"]) <= allowed, "check_schema", "Bind additional mandatory checks to approved final criteria")
+        require(isinstance(item["id"], str) and isinstance(item["source"], str)
+                and strings(item["criteria"]) and isinstance(item["run"], dict)
+                and set(item["run"]) in ({"command"}, {"procedure"})
+                and isinstance(item.get("cwd", "."), str) and isinstance(item.get("configuration", {}), dict),
+                "check_schema", "Additional final checks need an exact command or procedure and scoped criteria")
+        if "procedure" in item["run"]:
+            require(isinstance(item["run"]["procedure"], str) and item["run"]["procedure"].strip(),
+                    "check_schema", "Procedure path required")
+            contained(state["basis"]["project_root"], item["run"]["procedure"])
+        if item.get("cwd", ".") != ".":
+            contained(state["basis"]["project_root"], item["cwd"])
         checks.append({**item, "setup": None, "cwd": item.get("cwd", "."), "configuration": item.get("configuration", {})})
     require(checks and len({item["id"] for item in checks}) == len(checks), "duplicate_check", "Distinct whole-result checks required")
     for check in checks:
@@ -95,6 +128,7 @@ def register(state, event):
               "failures": {}, "inventory": payload["inventory"]}
     record_revision(result, event)
     state["final_checks"] = result
+    state["final"] = None
     applicable(state)
     return {"checks": checks, "registry_revision": result["revision"]}
 
@@ -121,13 +155,16 @@ def setup(state, event):
 
 def ready(state):
     from .commits import confirm
-    require(all(task["status"] == "accepted" and task["commits"] and task.get("worktree", {}).get("integrated")
+    require(all(task["status"] == "accepted" and task["commits"]
+                and (bool((task.get("worktree") or {}).get("integrated")) if refactoring(state) else
+                     not task.get("worktree") or task["worktree"].get("integrated"))
                 for task in state["tasks"].values()), "final_tasks", "Accept and integrate every task before final checks")
     for task in state["tasks"].values():
         for commit in task["commits"]:
             confirm(state, task, commit)
-        require(confirmed_revision(task) == task["check_registry"]["revision"],
-                "registry_unconfirmed", "Confirm every applicable registry transition")
+        if refactoring(state):
+            require(confirmed_revision(task) == task["check_registry"]["revision"],
+                    "registry_unconfirmed", "Confirm every applicable registry transition")
 
 
 def procedure(state, event, directory):
@@ -221,7 +258,8 @@ def execute(state, check, directory, current, timeout):
             return {"outcome": "unavailable", "description": "Required verification location is missing"}
     if "command" in run:
         cwd = run.get("cwd", check["cwd"])
-        return verification.run_command(run["command"], root if cwd == "." else contained(root, cwd), timeout)
+        output = verification.run_command(run["command"], root if cwd == "." else contained(root, cwd), timeout)
+        return {**output, "configuration": run.get("configuration", check["configuration"])}
     if "procedure" in run:
         return procedure_evidence(state, check, directory, current)
     return {"outcome": "unavailable", "description": "Required whole-result setup or procedure is unavailable"}
@@ -267,10 +305,10 @@ def evidence(state, directory):
                              "reason": latest_procedure.get("description", latest_procedure["outcome"])})
                 continue
         item = next((item for item in reversed(registry(state)["evidence"]) if not item.get("procedure")
-                     and item["check_id"] == check["id"] and item["basis"] == current), None)
-        if not item or item["outcome"] != "passed":
+                     and item["check_id"] == check["id"]), None)
+        if not item or item["basis"] != current or item["outcome"] != "passed":
             gaps.append({"check_id": check["id"], "criteria": check["criteria"], "location": check.get("location"),
-                         "reason": item["outcome"] if item else "final_evidence_missing"})
+                         "reason": item["outcome"] if item and item["basis"] == current else "final_evidence_missing"})
             continue
         independent(state, item["role_id"], active=False)
         path = artifacts.contained(directory, item["log"])
@@ -283,6 +321,13 @@ def evidence(state, directory):
         command = (check["setup"] or check["run"]).get("command")
         if command:
             require(output.get("command") == command and output.get("exit_code") == 0, "evidence_command", "Exact registered command must pass")
+            if not refactoring(state):
+                run = check["setup"] or check["run"]
+                cwd = run.get("cwd", check["cwd"])
+                root = Path(state["basis"]["project_root"])
+                require(output.get("cwd") == str(root if cwd == "." else contained(root, cwd))
+                        and output.get("configuration") == run.get("configuration", check["configuration"]),
+                        "evidence_command", "Registered command cwd and configuration must match")
         else:
             if any(output.get(key) != latest_procedure.get(key)
                    for key in ("procedure_log", "procedure_log_hash", "procedure_attempt")):
@@ -319,11 +364,11 @@ def repair(state, task, payload, directory, event):
 
 
 def transition(state, event, directory):
-    require(state["basis"].get("work_kind") == "refactoring", "task_required", "Task required for ordinary changes")
     kind = event["type"]
     if kind == "checks_register":
         return register(state, event)
     if kind == "check_setup":
+        require(refactoring(state), "setup_not_planned", "Ordinary final project checks require an existing command or procedure")
         return setup(state, event)
     if kind in {"procedure_begin", "procedure_result"}:
         return procedure(state, event, directory)
@@ -333,7 +378,8 @@ def transition(state, event, directory):
 
 def progress(state):
     from .state import execution_directory
-    required = set(criteria(state))
+    required = (set(criteria(state)) if refactoring(state) else
+                {criterion for check in registry(state)["checks"] for criterion in check["criteria"]})
     confirmed, gaps = set(), []
     try:
         ready(state)
