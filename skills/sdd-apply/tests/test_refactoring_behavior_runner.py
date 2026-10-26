@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def runner():
     path = Path(__file__).resolve().parents[1] / "evals/run_refactoring_tests.py"
     spec = importlib.util.spec_from_file_location("boundary_behavior_runner", path)
@@ -32,13 +32,29 @@ def isolation(runner, root, manifest):
     return path
 
 
-def test_prepare_covers_full_pair_matrix_and_frozen_dependency_parity(runner, tmp_path):
+def test_full_pair_matrix_has_every_scenario_role_variant_and_repetition(runner):
+    matrix = list(runner.scenario_matrix(5))
+    expected = {(scenario, role, variant, repeat)
+                for scenario in ("merge-mixed", "structural-retirement", "split-contract", "persistent-move")
+                for role in ("executor", "reviewer")
+                for variant in ("with_skill", "old_skill", "no_guidance")
+                for repeat in range(1, 6)}
+    assert len(matrix) == 120 and set(matrix) == expected
+
+
+def test_prepare_freezes_dependency_parity_and_excludes_grading_files(runner, tmp_path, monkeypatch):
+    # Repetition counts belong to the pure matrix contract. Exercise each package
+    # variant once, retaining both roles and the different source branches.
+    cases = [("merge-mixed", "executor", "with_skill", 1),
+             ("split-contract", "reviewer", "old_skill", 1),
+             ("structural-retirement", "executor", "no_guidance", 1)]
+    monkeypatch.setattr(runner, "scenario_matrix", lambda repetitions: iter(cases))
     candidate = packages(tmp_path / "candidate", runner, "candidate-")
     control = packages(tmp_path / "control", runner, "old-")
     root = tmp_path / "prepared"
     manifest = runner.prepare(root, candidate, control, 5)
-    assert len(manifest["runs"]) == 4 * 2 * 3 * 5
-    assert len({run["id"] for run in manifest["runs"]}) == 120
+    assert len(manifest["runs"]) == 3
+    assert len({run["id"] for run in manifest["runs"]}) == 3
     assert runner.preflight(root, isolation(runner, root, manifest)) == manifest
     for run in manifest["runs"]:
         skills = root / run["fixture"] / ".agents/skills"
@@ -50,6 +66,12 @@ def test_prepare_covers_full_pair_matrix_and_frozen_dependency_parity(runner, tm
             assert (skills / "sdd-apply/SKILL.md").read_text() == prefix + "sdd-apply"
             assert (skills / "sdd-shared/SKILL.md").read_text() == "old-sdd-shared"
         assert not (root / run["fixture"] / "grading.json").exists()
+        source = (root / run["fixture"] / "test_transfer.py").read_text()
+        assert ("def test_rollback" in source) == (run["scenario"] != "split-contract")
+        assert ("assert 'validate('" in source) == (run["scenario"] == "merge-mixed")
+        prompt = (root / run["input"] / "prompt.txt").read_text()
+        assert f"Act as the {run['role']} for task.md" in prompt
+        assert ("Read .agents/skills/" in prompt) == (run["variant"] != "no_guidance")
 
 
 def test_prepare_rejects_missing_package_and_insufficient_repetitions(runner, tmp_path):
@@ -59,11 +81,9 @@ def test_prepare_rejects_missing_package_and_insufficient_repetitions(runner, tm
         runner.prepare(tmp_path / "out", tmp_path / "new", tmp_path / "old", 5)
 
 
-@pytest.fixture
-def evidence(runner, tmp_path, monkeypatch):
-    # Keep the actual evidence validator; reduce fixture matrix dimensions only.
-    monkeypatch.setattr(runner, "SCENARIOS", {"merge-mixed": runner.SCENARIOS["merge-mixed"]})
-    monkeypatch.setattr(runner, "ROLES", ("executor",))
+@pytest.fixture(scope="module")
+def evidence_template(runner, tmp_path_factory):
+    tmp_path = tmp_path_factory.mktemp("behavior-evidence")
     runs = []
     for variant in runner.VARIANTS:
         for repeat in range(1, 6):
@@ -88,7 +108,24 @@ def evidence(runner, tmp_path, monkeypatch):
         "harness": "codex", "model": "synthetic"})
     runner.write(tmp_path / "benchmark.json", {"synthetic": True})
     (tmp_path / "review.html").write_text("<p>Synthetic viewer</p>", encoding="utf-8")
-    return tmp_path, tmp_path / runs[0]["output"]
+    files, directories = {}, set()
+    for path in tmp_path.rglob("*"):
+        relative = path.relative_to(tmp_path)
+        if path.is_dir():
+            directories.add(relative)
+        else:
+            files[relative] = path.read_bytes(), path.stat().st_mode
+    return tmp_path, tmp_path / runs[0]["output"], files, directories
+
+
+@pytest.fixture
+def evidence(runner, evidence_template, monkeypatch):
+    from working_copy import restore
+    monkeypatch.setattr(runner, "SCENARIOS", {"merge-mixed": runner.SCENARIOS["merge-mixed"]})
+    monkeypatch.setattr(runner, "ROLES", ("executor",))
+    root, output, files, directories = evidence_template
+    restore(root, files, directories)
+    return root, output
 
 
 def test_complete_synthetic_evidence_validates_without_model(runner, evidence):

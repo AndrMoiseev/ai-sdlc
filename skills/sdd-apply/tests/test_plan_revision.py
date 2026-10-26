@@ -232,7 +232,13 @@ def test_followup_does_not_clear_unfinished_task_budget_stop(execution_checkpoin
     revise(project, ["one", "two"], lambda tasks: tasks[1].update(depends_on=["TASK-one"]))
     revised(driver)
     stopped_completed_task(driver)
-    driver.send("block", {"reason": "test_repair_limit_reached", "resume_condition": "Explicit budget extension"}, task_id="TASK-two")
+    from lib.budgets import failure
+    from lib.state import seal, save
+    state = driver.state
+    task = state["tasks"]["TASK-two"]
+    task["test_repair_cycles_started"] = task["test_repair_limit"]
+    failure(state, task, "test", "failed")
+    save(driver.directory, seal(state))
     previous = driver.state["tasks"]["TASK-two"]
     revise(project, ["one", "two", "three"], lambda tasks: tasks[2].update(depends_on=["TASK-one"]))
     payload = followup_payload()

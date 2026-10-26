@@ -15,11 +15,11 @@ def reduce(state, event, directory):
             task["before_block"] = task["status"]
             task["status"] = "blocked"
             task["blockers"].append(payload)
-        if not task or state["mode"] == "sequential":
+        if not task:
             state["status"] = "blocked"
             state["blockers"].append({**payload, "task_id": event["task_id"]})
         return {"blocked": payload}
-    if kind in {"resume", "spec_conflict", "revised_plan", "handoff", "mode"}:
+    if kind in {"resume", "spec_conflict", "revised_plan", "handoff"}:
         from .resume import transition
         return transition(state, task, event, directory)
     if kind == "budget_extend":
@@ -48,7 +48,7 @@ def reduce(state, event, directory):
         from .verification import transition
         return transition(state, task, event, directory)
     if kind == "start":
-        require(event["task_id"] in available(state), "task_unavailable", "Dependencies or execution mode prevent admission")
+        require(event["task_id"] in available(state), "task_unavailable", "Dependencies or conflicts prevent admission")
         require(artifacts.is_file(directory / "dashboard.html"), "dashboard_missing", "Generate the initial dashboard before starting")
         require(task["checks"], "checks_missing", "Register planned and project checks first")
         role = state["roles"].get(payload.get("role_id"))

@@ -1,6 +1,6 @@
 # Parallel execution
 
-Read [task events](../references/api-tasks.md), [checks and evidence](../references/api-checks.md), and [role coordination](../references/role-coordination.md) if not already loaded. Keep the sequential flow unloaded. Require the saved execution instruction, parallel mode and working isolation before admission; the default mode needs no separate parallel request.
+Read [task events](../references/api-tasks.md), [checks and evidence](../references/api-checks.md), and [role coordination](../references/role-coordination.md) if not already loaded. Require the saved execution instruction and working isolation before admission; no separate parallel request is needed.
 
 1. Request `available`; respect accepted dependencies, `cannot_parallel_with`, shared files and mutable resources. Isolate ports, databases, scratch directories and mutable caches per task. A conflict serializes the affected work; free slots alone do not authorize unsafe overlap.
 2. Submit `worktree_create` with `workspace` outside skill collections and the task's `resources`. The script creates a registered worktree and local task branch at the execution branch's current HEAD. Register exact checks and project/CI inventory. Launch/register a fresh [executor](../agents/executor.md), pass the worktree and owned paths, then submit `start`. The script owns task commits; the executor edits only its assigned tree.

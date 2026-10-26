@@ -73,10 +73,9 @@ def test_acceptance_template_matches_validation_and_is_isolated(project, basis, 
     assert not repository(root).dirty()
 
 
-def driver_for(basis, tmp_path, parallel):
-    driver = AcceptanceDriver(basis, parallel=parallel)
-    if parallel:
-        driver.send("worktree_create", {"workspace": str(tmp_path / "task-worktrees")})
+def driver_for(basis, tmp_path):
+    driver = AcceptanceDriver(basis)
+    driver.send("worktree_create", {"workspace": str(tmp_path / "task-worktrees")})
     return driver
 
 
@@ -85,38 +84,34 @@ def acceptance_checkpoints(acceptance_templates, repository_seeds, tmp_path_fact
     from conftest import copy_project
     from checkpoints import LazyCheckpoints
     from memory_repository import MemoryRepositories
-    saved = {}
     template_root, template_basis = acceptance_templates["refactoring"]
-    for parallel in (False, True):
-        workspace = tmp_path_factory.mktemp("acceptance-checkpoint")
-        backend = MemoryRepositories(repository_seeds)
-        root = copy_project(template_root, workspace / "project", backend)
-        basis = deepcopy(template_basis)
-        basis.update(project_root=str(root), change_root=str(root / "sdd/refactoring/demo"))
-        def steps(basis=basis, workspace=workspace, parallel=parallel):
-            driver = driver_for(basis, workspace, parallel)
-            yield "pending", driver
-            assert driver.start()["outcome"] == "baseline_recorded"
-            yield "started", driver
-            driver.implement()
-            yield "implemented", driver
-            driver.freeze()
-            yield "frozen", driver
-            assert driver.verify()["outcome"] == "passed"
-            yield "verified", driver
-        saved[parallel] = LazyCheckpoints(workspace, backend, steps())
-    return saved
+    workspace = tmp_path_factory.mktemp("acceptance-checkpoint")
+    backend = MemoryRepositories(repository_seeds)
+    root = copy_project(template_root, workspace / "project", backend)
+    basis = deepcopy(template_basis)
+    basis.update(project_root=str(root), change_root=str(root / "sdd/refactoring/demo"))
+    def steps():
+        driver = driver_for(basis, workspace)
+        yield "pending", driver
+        assert driver.start()["outcome"] == "baseline_recorded"
+        yield "started", driver
+        driver.implement()
+        yield "implemented", driver
+        driver.freeze()
+        yield "frozen", driver
+        assert driver.verify()["outcome"] == "passed"
+        yield "verified", driver
+    return LazyCheckpoints(workspace, backend, steps())
 
 
 @pytest.fixture
-def acceptance_checkpoint(acceptance_checkpoints, repository_backend, state_backend, parallel):
-    return lambda stage: acceptance_checkpoints[parallel][stage].restore(repository_backend, state_backend)
+def acceptance_checkpoint(acceptance_checkpoints, repository_backend, state_backend):
+    return lambda stage: acceptance_checkpoints[stage].restore(repository_backend, state_backend)
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.parametrize("work_kind", ["change", "refactoring"])
-def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, basis, tmp_path, parallel, work_kind):
-    driver = driver_for(basis, tmp_path, parallel)
+def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, basis, tmp_path, work_kind):
+    driver = driver_for(basis, tmp_path)
     assert driver.start()["outcome"] == "baseline_recorded"
     baseline = deepcopy(driver.task["baseline_checks"])
     driver.implement()
@@ -146,7 +141,6 @@ def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, 
         assert driver.state["verification"]["CHECK-whole"]["criteria"] == ["AC-result", "AC-preserved"]
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 def test_refactoring_acceptance_packets_have_real_local_and_architectural_context(acceptance_checkpoint):
     driver = acceptance_checkpoint("frozen")
     packet = json.loads(artifacts.read_text(driver.role("verifier", "verifier")["packet"]))
@@ -166,7 +160,6 @@ def test_refactoring_acceptance_packets_have_real_local_and_architectural_contex
     assert "contributes_to" in context["whole_result"]
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.parametrize("damage", ["omit", "unrelated-success", "criteria"])
 def test_refactoring_acceptance_unapproved_registry_edit_cannot_freeze(acceptance_checkpoint, damage):
     driver = acceptance_checkpoint("implemented")
@@ -189,7 +182,6 @@ def test_refactoring_acceptance_unapproved_registry_edit_cannot_freeze(acceptanc
     assert driver.task["status"] == "running"
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.native_process
 def test_refactoring_acceptance_unavailable_new_check_does_not_accept(acceptance_checkpoint):
     driver = acceptance_checkpoint("started")
@@ -212,7 +204,6 @@ def test_refactoring_acceptance_unavailable_new_check_does_not_accept(acceptance
     assert error.value.code == "run_blocked"
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 def test_refactoring_acceptance_stale_source_blocks_review_and_accept(acceptance_checkpoint):
     driver = acceptance_checkpoint("verified")
     driver.role("reviewer", "reviewer")
@@ -227,7 +218,6 @@ def test_refactoring_acceptance_stale_source_blocks_review_and_accept(acceptance
     assert storage(driver.directory).read() == before
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 def test_refactoring_acceptance_registry_extension_requires_new_checks_and_review(acceptance_checkpoint):
     driver = acceptance_checkpoint("verified")
     old_candidate = driver.task["candidate"]
@@ -252,8 +242,7 @@ def test_refactoring_acceptance_registry_extension_requires_new_checks_and_revie
     assert all(artifacts.read_bytes(driver.directory / name) == content for name, content in old_logs.items())
 
 
-@pytest.mark.parametrize("parallel", [False, True])
-def test_refactoring_acceptance_real_failure_requires_reserved_repair_and_retains_history(acceptance_checkpoint, parallel):
+def test_refactoring_acceptance_real_failure_requires_reserved_repair_and_retains_history(acceptance_checkpoint):
     driver = acceptance_checkpoint("implemented")
     baseline = deepcopy(driver.task["baseline_checks"])
     (driver.root / "check.py").write_text("raise SystemExit(7)\n")
@@ -282,7 +271,6 @@ def test_refactoring_acceptance_real_failure_requires_reserved_repair_and_retain
     assert any(item["outcome"] == "failed" for item in driver.task["evidence"])
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 def test_refactoring_acceptance_contribution_cannot_be_registered_as_local_proof(acceptance_checkpoint):
     driver = acceptance_checkpoint("pending")
     before = storage(driver.directory).read()
@@ -294,7 +282,6 @@ def test_refactoring_acceptance_contribution_cannot_be_registered_as_local_proof
     assert storage(driver.directory).read() == before
 
 
-@pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.parametrize("damage", ["command", "revision", "foreign-task"])
 def test_refactoring_acceptance_rejects_evidence_for_unrelated_command_or_basis(acceptance_checkpoint, damage):
     driver = acceptance_checkpoint("verified")

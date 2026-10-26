@@ -121,7 +121,7 @@ def test_inline_state_evidence_and_review_remain_usable(execution_checkpoint):
 
 def test_parallel_packet_links_machine_worktree_inventory(basis, tmp_path):
     from conftest import Driver
-    driver = Driver(basis, parallel=True)
+    driver = Driver(basis)
     driver.send("worktree_create", {"workspace": str(tmp_path / "worktrees")})
     registered = driver.task["worktree"]
     role = driver.role("author", "executor")

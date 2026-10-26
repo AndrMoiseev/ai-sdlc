@@ -9,9 +9,22 @@ does not activate these rules or require running this package's tests.
 Keep most scenarios at the execution-engine boundary with fast adapters. Run
 the actual transition, validation and acceptance code; replace external I/O.
 
+Before adding a real browser, Git, filesystem, network or subprocess test,
+identify the concrete failure that cheaper tests cannot detect. Record that
+reason beside the test and use an existing adapter contract when it already
+covers the risk. Add a new integration case only when this gap is established;
+exercise combinations of domain rules through the fast adapters.
+
+Prioritize execution, evidence integrity and acceptance behavior over eval
+environment setup. Keep eval infrastructure tests to the minimum contracts for
+version/dependency isolation, exclusion of grading answers, and rejection of
+invalid evidence. Test scenario matrices and repetition counts without creating
+workspaces. Materialize one representative per distinct filesystem behavior;
+reuse pristine synthetic evidence instead of rebuilding it for each rejection.
+
 | Boundary | Scenario tests | Real contract checks |
 | --- | --- | --- |
-| Git | `tests/memory_repository.py` models commits, indexes, trees and worktrees through `scripts/lib/repository.py`; working files remain real | `native_git`: `git_repository.py`, binary patches, modes, conflicts, hooks and filters |
+| Git | `tests/memory_repository.py` models commits, indexes, trees and worktrees through `scripts/lib/repository.py`; checkpoint rule scenarios use an explicit working-file map | `native_git`: `git_repository.py`, binary patches, modes, conflicts, hooks and filters |
 | State and artifacts | `state_storage.py` and `artifact_storage.py` inject serialized bytes in memory | `native_state`: files, atomic replacement, locks, recovery and external reads |
 | Paths | `path_resolution.py` uses a test resolver in temporary workspaces without links; link creation fails loudly | `native_paths`, `native_git` and installation retain filesystem resolution and containment checks |
 | Verification commands | `tests/check_commands.py` executes supported fixture Python checks in process, including assertions and side effects | `native_process` and runner contracts: arguments, shells, exit codes and timeouts |
@@ -77,6 +90,21 @@ their bytes to the tested store; retain real transaction, crash and audit tests.
 Native Git fixtures need empty `hooks` and `info` directories, but no sample
 hooks copied from Git's template.
 
+Use `Checkpoint.restore(..., memory_worktree=True)` for repeated rule scenarios
+whose repository edits are explicit inputs. Arrange those edits with
+`repository_support.write_file` / `remove_file`, then stage and commit as needed.
+Status and owned trees must derive from the independent byte map, without disk
+scans or a constant clean-status stub. The existing shared repository contracts
+cover exclusions, staging, deletion, ignored paths and modes; their memory
+variant rejects disk scans and byte reads.
+
+This option replaces the repository working-tree boundary only. Checkpoint
+restoration, specification reads and executable check fixtures still use real
+files. Keep the disk working tree for tests of check-command side effects,
+source mutations, patch materialization and worktree lifecycle. Use those
+representative contracts to cover external changes instead of repeating them
+for every registry, permission, evidence-identity or procedure-state variant.
+
 Cache successful parsing by exact input contents, path and work kind; copy
 returned mutable data. Changed bytes must invalidate the cache even when size
 and timestamps match. Always revalidate document relationships and approvals.
@@ -121,6 +149,7 @@ output written directly to OS file descriptors.
 | --- | --- |
 | Documentation only | Package links/structure and consistency of affected instructions; use `tests/test_package.py` for the package contract |
 | Runtime, test or fixture changes | Relevant focused checks during editing, then the full default regression selection (`not installation`) |
+| New or expanded tests | Full default selection with `-n 0`; accept the additions only when total wall time is at most 30 seconds |
 | Final acceptance of runtime changes | Full default regression selection (`not installation`); installation is outside this run |
 | Dependency or distribution changes | Separate installation verification when that scope is requested; retain its evidence independently |
 
@@ -140,6 +169,17 @@ incomplete. Splitting commands within a requested scope does not reset its time
 allowance.
 
 ## Speed and the stop condition
+
+**Make total suite time an acceptance condition for every new test.** After
+adding or expanding tests, measure the full default selection sequentially.
+Accept the additions only when all required tests pass within 30 seconds,
+including environment and fixture preparation. If the limit is exceeded,
+redesign the new test and its prerequisites or discard redundant coverage;
+preserve required behavioral coverage. A baseline already over budget requires
+optimization before accepting more tests. Record the exact command, selection
+and total elapsed time. A focused pass, exit code zero, or parallel run does not
+satisfy this gate. Explicit authorization to run long optimization experiments
+permits measurement; it is not evidence that the timing target was achieved.
 
 Keep the full default regression selection capable of finishing within **30 seconds
 sequentially**. Four-worker execution is the normal development command; it does

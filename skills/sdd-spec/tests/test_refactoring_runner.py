@@ -186,3 +186,136 @@ def test_refactoring_runner_can_reuse_selected_system_interpreter(monkeypatch):
     monkeypatch.setattr(runner.shutil, "which", lambda name: "uv")
     assert runner.uv_command(Path("script.py"), "arg", python="Python with spaces/python.exe") == [
         "uv", "run", "--python", "Python with spaces/python.exe", "--locked", "--script", "script.py", "arg"]
+
+
+@pytest.fixture
+def frozen_runtime_packages(tmp_path):
+    """Actual files keep the copy operation and its manifests under test."""
+    frozen = tmp_path / "frozen inputs"
+    runtime = {
+        "SKILL.md": "Read references/runtime-setup.md and flows/draft.md.\n",
+        "references/runtime-setup.md": "Use scripts/check.py with its adjacent lock.\n",
+        "references/document-format-refactoring.md": "Runtime refactoring contract.\n",
+        "references/reviewer-plan.md": "Runtime independent plan review contract.\n",
+        "references/patterns.md": "Runtime editorial patterns.\n",
+        "flows/draft.md": "Read templates/design.md.\n",
+        "templates/design.md": "Runtime document template.\n",
+        "scripts/check.py": "from shared import validate\n",
+        "scripts/check.py.lock": "version = 1\n",
+        "scripts/shared.py": "def validate(): return []\n",
+        "scripts/snapshot.py": "print('snapshot')\n",
+        "scripts/snapshot.py.lock": "version = 1\n",
+        "scripts/resolve_agent.py": "print('runtime role resolution')\n",
+        "scripts/resolve_agent.py.lock": "version = 1\n",
+        "scripts/lint.py": "print('runtime editorial lint')\n",
+        "agents/openai.yaml": "policy: {allow_implicit_invocation: false}\n",
+        "schemas/refactoring.schema.json": '{"type": "object"}\n',
+        "api.json": '{"version": 1}\n',
+        ".gitignore": "__pycache__/\n",
+        "references/.runtime-resource": "Required hidden resource.\n",
+        "assets/fixture.bin": "Binary runtime resource: \u0000\u0001\n",
+    }
+    answer = "GRADER_ONLY_EXACT_ASSERTION_DO_NOT_EXPOSE"
+    development = {
+        "evals/evals.json": json.dumps({"prompt": "task", "expectations": [answer]}),
+        "evals/nested/.heldout.json": json.dumps({"expected_output": answer}),
+        "evals/refactoring.md": answer,
+        "tests/test_expected.py": f"assert result == {answer!r}\n",
+        "tests/fixtures/answers.json": json.dumps([answer]),
+        "eval-viewer/answers.html": answer,
+        "agents/grader.md": answer,
+        "agents/comparator.md": answer,
+        "agents/analyzer.md": answer,
+        "agents/bineval.md": answer,
+        "scripts/test.py": answer,
+        "scripts/test.py.lock": answer,
+        "scripts/prepare_subagent_eval.py": answer,
+        "scripts/prepare_subagent_eval.py.lock": answer,
+    }
+    roots, records = {}, {}
+    for name in ("old_skill", "candidate", "sdd-shared", "humanizer-ru", "sdd-skill-conductor"):
+        package = frozen / name
+        for relative, content in (runtime | development).items():
+            path = package / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content.encode("utf-8"))
+        roots[name] = package
+        records[name] = {"path": str(package), "files": runner.inventory(package)}
+    runner.write_json(frozen / "fixture-spec.json", {"packages": records, "assertions": [answer]})
+    runner.write_json(frozen / "split.json", {"train_ids": [1], "heldout_ids": [2]})
+    return frozen, roots, records, runtime, development, answer
+
+
+def test_refactoring_runner_runtime_copies_hide_answers_preserve_dependencies_and_frozen_inputs(
+        tmp_path, frozen_runtime_packages):
+    frozen, roots, records, runtime, development, answer = frozen_runtime_packages
+    original_bytes = {path.relative_to(frozen): path.read_bytes()
+                      for path in frozen.rglob("*") if path.is_file()}
+    before = runner.inventory(frozen)
+    dependency_copies = []
+    selected_copies = []
+    scenario = {"files": {"src/product.py": "product_id = 1\n"}}
+
+    for variant in ("with_skill", "old_skill", "without_skill"):
+        workspace = runner.make_workspace(tmp_path / "fixtures", variant)
+        manifest = runner.prepare_fixture(workspace, scenario, roots, roots["candidate"], variant)
+        installed = workspace / ".agents/skills"
+        packages = ["sdd-shared", "humanizer-ru"]
+        if variant != "without_skill":
+            packages.append("sdd-spec")
+        assert {path.name for path in installed.iterdir()} == set(packages)
+        expected_manifest = {"src/product.py"}
+        for name in packages:
+            target = installed / name
+            assert set(runner.inventory(target)) == set(runtime)
+            for relative, content in runtime.items():
+                assert (target / relative).read_bytes() == content.encode("utf-8")
+                expected_manifest.add(f".agents/skills/{name}/{relative}")
+            for relative in development:
+                assert not (target / relative).exists()
+        assert set(manifest["required_files"]) == expected_manifest
+        assert all(answer.encode("utf-8") not in path.read_bytes()
+                   for path in workspace.rglob("*") if path.is_file())
+        dependency_copies.append({name: runner.inventory(installed / name)
+                                  for name in ("sdd-shared", "humanizer-ru")})
+        if variant == "without_skill":
+            assert not (installed / "sdd-spec").exists()
+            assert manifest["expected_missing_files"] == [".agents/skills/sdd-spec/SKILL.md"]
+        else:
+            selected_copies.append(runner.inventory(installed / "sdd-spec"))
+            assert manifest["expected_missing_files"] == []
+
+        # Source inventories still include development assets; nothing is sanitized in place.
+        assert runner.inventory(frozen) == before
+        assert {path.relative_to(frozen): path.read_bytes()
+                for path in frozen.rglob("*") if path.is_file()} == original_bytes
+        for name, record in records.items():
+            assert runner.verify_package(record) == roots[name]
+            assert "evals/evals.json" in record["files"]
+    assert dependency_copies[0] == dependency_copies[1] == dependency_copies[2]
+    assert selected_copies[0] == selected_copies[1]
+
+
+@pytest.mark.parametrize("damage", ["missing", "changed", "extra"])
+def test_refactoring_runner_rejects_damaged_runtime_copy(tmp_path, frozen_runtime_packages, monkeypatch, damage):
+    _, roots, _, _, _, _ = frozen_runtime_packages
+    source = roots["candidate"]
+    before = runner.inventory(source)
+    copytree = runner.shutil.copytree
+
+    def damaged_copy(source, target, *args, **kwargs):
+        result = copytree(source, target, *args, **kwargs)
+        if Path(target) == tmp_path / "runtime":
+            resource = Path(target) / "references/.runtime-resource"
+            if damage == "missing":
+                resource.unlink()
+            elif damage == "changed":
+                resource.write_bytes(b"changed")
+            else:
+                (Path(target) / "unexpected.md").write_bytes(b"extra")
+        return result
+
+    monkeypatch.setattr(runner.shutil, "copytree", damaged_copy)
+    with pytest.raises(ValueError, match="Runtime package bytes or membership changed"):
+        runner.copy_runtime_package(source, tmp_path / "runtime")
+    assert runner.inventory(source) == before

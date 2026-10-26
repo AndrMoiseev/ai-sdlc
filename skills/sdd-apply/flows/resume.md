@@ -6,9 +6,8 @@ Use installed `--help-event` for the selected recovery operation's exact payload
 2. Inspect drift, worktrees, index, HEAD and pending effect results through supported operations. After a pre-existing defect is fixed on the execution branch, use [worktree recovery](../references/worktree-recovery.md) for unfinished tasks still based on the old revision. Reuse an identical event after a lost response; let its journal establish whether the effect happened. Do not replay transfer or commit under a new ID merely because the response was missing.
 3. For a lost executor, preserve files and hand the successor completed work, remaining AC, findings, decisions and rejected approaches. Register a fresh successor and resolve the lost-role blocker through supported API operations. Resume the saved task phase and active budget reservation; retain prior evidence only where still applicable.
 4. On normative drift, stop work against the old basis. For a substantive conflict, submit `spec_conflict` with `reproduction`, `criteria`, and `contract`, plus affected tasks. Return its material and the completed task IDs to sdd-spec without modifying proposal/specs/design/tasks. Apply the revision contract below. After a revised approved plan and execution instruction, submit `revised_plan` with `instruction: {text, source}`.
-5. Preserve the saved mode on resume and plan revision. Recheck current authorization and task-worktree isolation; the new-execution default alone does not switch an existing run. Both modes now require worktrees. Preserve legacy source-snapshot evidence as history and obtain fresh commit-bound candidates and checks; do not relabel old passing checks. To change a loaded mode, submit `mode` with `mode`, `source`, `text`, and `isolation_available` where applicable. Start a genuinely fresh orchestrator, then submit `handoff` from the old owner with `new_owner`, `fresh: true`, and actual `launch_ref`. Transfer only state, common contracts, and the new flow. The old owner stops issuing events. If fresh context is unavailable, preserve the blocker rather than claiming to forget loaded instructions.
-6. A mode change with preserved unintegrated worktrees can return `mode_switch_worktree`. Keep candidates and request resolution; the package does not automatically integrate them after authorization is withdrawn. A revised run that changes the selected flow likewise requires fresh-context handoff before loading it.
-7. Regenerate derived views using [progress](../references/progress.md) and show current blockers, budget use, next supported action and dashboard. Load only the verified mode's flow. When a necessary reconciliation operation is missing, return a partial result with the exact limitation.
+5. Recheck current authorization and task-worktree isolation. Only parallel execution is supported; preserve unsupported legacy states and reconcile them with their original skill version. Preserve legacy source-snapshot evidence as history and obtain fresh commit-bound candidates and checks; do not relabel old passing checks. To transfer coordination, start a genuinely fresh orchestrator, then submit `handoff` from the old owner with `new_owner`, `fresh: true`, and actual `launch_ref`. Transfer saved state, common contracts, and the execution flow. The old owner stops issuing events. If fresh context is unavailable, report the gap.
+6. Regenerate derived views using [progress](../references/progress.md) and show current blockers, budget use, next supported action and dashboard. Read [execute-parallel](execute-parallel.md). When a necessary reconciliation operation is missing, return a partial result with the exact limitation.
 
 ## Revision contract
 
@@ -35,9 +34,6 @@ remain; this mapping cannot authorize another repair of the completed task.
 Ordinary final project registries survive revision with their mandatory definitions
 and inventory. Prior attempts remain historical; obtain fresh final evidence at
 the revised basis after the new tasks are accepted.
-
-Complete any pending mode handoff before submitting `revised_plan`; a revision
-cannot clear the blocker for an unfinished mode change.
 
 Unfinished tasks return to `pending` for reassessment against the revised basis;
 their prior results, commits and continuing budgets remain linked. Preserve run

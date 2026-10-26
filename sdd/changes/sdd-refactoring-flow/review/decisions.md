@@ -461,3 +461,81 @@ date: "2026-10-26T06:13:51.8940551Z"
 inputs: [{"sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5","path":"design.md"},{"sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4","path":"proposal.md"},{"sha256":"0a06a923a4234f76a1d14decdd3db8c36d8376df3af07bd86a514e3a85f71f8c","path":"specs/sdd-refactoring/spec.md"},{"sha256":"2a7ad1ad711f64338894540e8df5ad333f2773b207cee0012a88e1195d9e5a59","path":"tasks.md"}]
 status: active
 ```
+
+
+### USER-approve-eval-isolation-documents
+
+```yaml
+sdd_record: user
+id: USER-approve-eval-isolation-documents
+kind: document_approval
+scope:
+  stage: document_review
+response: "заводи новую задачу на доработку, план считай согласованным без ревью, продолжай выполнение"
+date: "2026-10-26T08:54:03.007558+00:00"
+inputs: [{"path":"design.md","sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5"},{"path":"proposal.md","sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4"},{"path":"specs/sdd-refactoring/spec.md","sha256":"34c3e27a213dde667001d486c3a04cc2f273dd7dd6779830764d8cddf1636377"}]
+status: active
+```
+
+
+### USER-waive-eval-isolation-documents
+
+```yaml
+sdd_record: user
+id: USER-waive-eval-isolation-documents
+kind: review_waiver
+scope:
+  stage: document_review
+  lenses: [consistency]
+response: "заводи новую задачу на доработку, план считай согласованным без ревью, продолжай выполнение"
+date: "2026-10-26T08:54:03.007558+00:00"
+inputs: [{"path":"design.md","sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5"},{"path":"proposal.md","sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4"},{"path":"specs/sdd-refactoring/spec.md","sha256":"34c3e27a213dde667001d486c3a04cc2f273dd7dd6779830764d8cddf1636377"}]
+status: active
+```
+
+
+### USER-plan-eval-isolation
+
+```yaml
+sdd_record: user
+id: USER-plan-eval-isolation
+kind: planning_command
+scope:
+  stage: document_review
+  work: Добавить задачу 10 для изоляции eval и переноса незавершённой доработки с сохранением принятой истории и расходов задач 1–9
+response: "заводи новую задачу на доработку, план считай согласованным без ревью, продолжай выполнение"
+date: "2026-10-26T08:54:03.007558+00:00"
+inputs: [{"path":"design.md","sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5"},{"path":"proposal.md","sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4"},{"path":"specs/sdd-refactoring/spec.md","sha256":"34c3e27a213dde667001d486c3a04cc2f273dd7dd6779830764d8cddf1636377"}]
+status: active
+```
+
+
+### USER-approve-eval-isolation-plan
+
+```yaml
+sdd_record: user
+id: USER-approve-eval-isolation-plan
+kind: plan_approval
+scope:
+  stage: plan_review
+response: "заводи новую задачу на доработку, план считай согласованным без ревью, продолжай выполнение"
+date: "2026-10-26T08:54:03.007558+00:00"
+inputs: [{"path":"design.md","sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5"},{"path":"proposal.md","sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4"},{"path":"specs/sdd-refactoring/spec.md","sha256":"34c3e27a213dde667001d486c3a04cc2f273dd7dd6779830764d8cddf1636377"},{"path":"tasks.md","sha256":"f7cfe07044c191bdd4b1318b72292f117f245a30a69471b10b9d51a9bd712a1c"}]
+status: active
+```
+
+
+### USER-waive-eval-isolation-plan
+
+```yaml
+sdd_record: user
+id: USER-waive-eval-isolation-plan
+kind: review_waiver
+scope:
+  stage: plan_review
+  lenses: [plan]
+response: "заводи новую задачу на доработку, план считай согласованным без ревью, продолжай выполнение"
+date: "2026-10-26T08:54:03.007558+00:00"
+inputs: [{"path":"design.md","sha256":"6414698288bb7cf593615d49c9a0f8c0caf778d5a2c8bd316801b07656e49de5"},{"path":"proposal.md","sha256":"f99bc2bd23ad1afcb8bcafc94b47589a034bc859bdf97935edf2baa42b29f5c4"},{"path":"specs/sdd-refactoring/spec.md","sha256":"34c3e27a213dde667001d486c3a04cc2f273dd7dd6779830764d8cddf1636377"},{"path":"tasks.md","sha256":"f7cfe07044c191bdd4b1318b72292f117f245a30a69471b10b9d51a9bd712a1c"}]
+status: active
+```

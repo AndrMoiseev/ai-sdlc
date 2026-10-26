@@ -20,7 +20,8 @@ OPERATIONS = {
     "initialize": contract("Validate, create execution state and render its initial dashboard.",
                            (*VALIDATION, "owner"), (*SELECTORS, "mode", "parallel_request", "isolation"),
                            defaults={"mode": "parallel", "isolation": False, "work_kind": "change"},
-                           rules=["Both modes require verified worktree isolation; unavailable isolation blocks execution.",
+                           choices={"mode": ["parallel"]},
+                           rules=["Execution requires verified worktree isolation; unavailable isolation blocks execution.",
                                   "Existing executions use resume; initialization never overwrites state.",
                                   "instruction and optional parallel_request contain actual user text and source."]),
     "read": contract("Validate the current manifest and accessed objects; return statuses or the manifest with references.",
@@ -34,7 +35,7 @@ OPERATIONS = {
                               ("parent_effort", "available_agents", "user_agent_dir"),
                               rules=["Preserve the result as agent_selection in role_register.",
                                      "For Claude Code supply the observed available_agents."]),
-    "available": contract("Return task IDs eligible under dependencies and mode; other admission gates still apply.", ("directory",)),
+    "available": contract("Return task IDs eligible under dependencies and conflicts; other admission gates still apply.", ("directory",)),
     "event": contract("Apply one typed event using current revision and owner; render the dashboard.", ("directory", "event")),
     "dashboard": contract("Regenerate views from verified saved state.", ("directory",)),
     "recover_lock": contract("Remove a state lock only after proving its local owner exited.", ("directory",)),
@@ -58,7 +59,7 @@ EVENTS = {
                "A lost-role successor names successor_of; resume resolves that specific predecessor."]),
     "role_result": contract("Finish registered role work; this does not accept its task.", ("role_id", "result", "trace")),
     "start": contract("Admit an eligible task with checks, dashboard and active executor.", ("role_id", "paths"),
-        rules=["List canonical project-relative owned files individually; both modes require an isolated worktree."]),
+        rules=["List canonical project-relative owned files individually; each task requires an isolated worktree."]),
     "check_run": contract("Run the complete registered check set and save actual results.", ("role_id", "stage"), ("timeout",),
         choices={"stage": ["baseline", "self", "independent", "integration", "final"]}, defaults={"timeout": 300},
         rules=["Baseline precedes implementation in a clean worktree; self/independent/integration require a frozen local commit.",
@@ -130,7 +131,7 @@ EVENTS = {
                "For a lost run-level final verifier with pending procedures, resolution.abandon_procedures must list every unfinished check ID. Resume archives each predecessor attempt as abandoned with its trace; the successor starts a fresh procedure.",
                "Task phase restores only after every task blocker is resolved; review and repair reservations survive.",
                "Refactoring returns check_registries with confirmed_revision/confirmed_checks and pending_transition separately; resume never confirms a revision.",
-               "Budget, normative, spec-conflict and mode blockers require their dedicated operations."]),
+               "Budget, normative and spec-conflict blockers require their dedicated operations."]),
     "spec_conflict": contract("Save reproduction and conflicting contract, block, and return to sdd-spec.",
         ("reproduction", "criteria", "contract")),
     "revised_plan": contract("Validate a newly approved basis while preserving accepted tasks and lifetime budgets.",
@@ -140,10 +141,7 @@ EVENTS = {
                "instruction contains actual execution text and source authorizing the revised plan and any mapped follow-up.",
                "Each completed_followups mapping replaces only that accepted task's obsolete budget stop with a new approved dependent task; counters and unrelated blockers remain.",
                "Unfinished tasks and active review/repair reservations cannot use completed_followups. Ordinary final project obligations survive revision; old attempts are archived and current-basis evidence is required."]),
-    "mode": contract("Record the actual user mode decision and require fresh-context handoff.",
-        ("mode", "source", "text"), ("isolation_available",), choices={"mode": ["sequential", "parallel"]},
-        rules=["Changing to parallel requires isolation_available:true."]),
-    "handoff": contract("Transfer ownership to a distinct actual fresh context, applying any pending mode decision.",
+    "handoff": contract("Transfer ownership to a distinct actual fresh context while preserving the execution.",
         ("new_owner", "fresh", "launch_ref"), rules=["fresh must be true; preserve existing task branches and worktrees."]),
     "finalize": contract("Require accepted commits and fresh independent final-HEAD evidence for every AC.",
         optional=("recommendation_decisions",),
@@ -151,7 +149,7 @@ EVENTS = {
         rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once."]),
 }
 
-RUN_EVENTS = {"resume", "revised_plan", "handoff", "mode", "finalize"}
+RUN_EVENTS = {"resume", "revised_plan", "handoff", "finalize"}
 WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
             "expected_revision": "current integer revision", "owner": "registered owner context",

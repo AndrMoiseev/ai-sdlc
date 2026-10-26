@@ -1,4 +1,4 @@
-"""Approved check evolution through real state/Git operations; host traces are synthetic."""
+"""Approved check evolution through the engine with isolated test adapters."""
 from copy import deepcopy
 from pathlib import Path
 import sys
@@ -19,8 +19,7 @@ from refactoring_fixtures import AcceptanceDriver, RegistryDriver, approved_basi
 
 def start(driver, task_id, tmp_path):
     driver.task_id = task_id
-    if driver.state["mode"] == "parallel":
-        driver.send("worktree_create", {"workspace": str(tmp_path / "worktrees")})
+    driver.send("worktree_create", {"workspace": str(tmp_path / "worktrees")})
     assert driver.start()["outcome"] == "baseline_recorded"
 
 
@@ -43,19 +42,48 @@ def finish(driver):
     assert driver.send("accept")["status"] == "accepted"
 
 
-def removing(project, tmp_path, parallel=False, non_topological=False):
+def removing(project, tmp_path, non_topological=False):
     def permute_numbers(documents):
         numbers = {"TASK-one": 2, "TASK-two": 1, "TASK-three": 3}
         for record in documents["tasks"]:
             if record["sdd_record"] == "task":
                 record["number"] = numbers[record["id"]]
-    driver = RegistryDriver(transition_basis(project, revise_documents=permute_numbers if non_topological else None), parallel=parallel)
+    driver = RegistryDriver(transition_basis(project, revise_documents=permute_numbers if non_topological else None))
     start(driver, "TASK-one", tmp_path)
     driver.implement()
     finish(driver)
     start(driver, "TASK-two", tmp_path)
     driver.implement()
     return driver
+
+
+@pytest.fixture(scope="session")
+def removal_checkpoints(project_template, repository_seeds, tmp_path_factory):
+    from conftest import copy_project
+    from checkpoints import LazyCheckpoints
+    from memory_repository import MemoryRepositories
+    workspace = tmp_path_factory.mktemp("removal-checkpoint")
+    backend = MemoryRepositories(repository_seeds)
+    root = copy_project(project_template, workspace / "project", backend)
+
+    def steps():
+        driver = removing(root, workspace)
+        yield "implemented", driver
+        driver.send("checks_revise", driver.revision())
+        driver.freeze()
+        yield "frozen", driver
+        assert driver.verify()["outcome"] == "passed"
+        driver.review()
+        driver.integrate(prefix=driver.task_id + "-")
+        driver.send("commit")
+        yield "committed", driver
+
+    return LazyCheckpoints(workspace, backend, steps())
+
+
+@pytest.fixture
+def removal_checkpoint(removal_checkpoints, repository_backend, state_backend):
+    return lambda stage="implemented", **options: removal_checkpoints[stage].restore(repository_backend, state_backend, **options)
 
 
 def event(driver, kind, payload, ident):
@@ -77,26 +105,44 @@ def project_check(ident, criterion, filename="check.py"):
                 run={"command": [sys.executable, "-B", filename]})
 
 
-@pytest.mark.parametrize("operation", ["checks_register", "checks_extend"])
-@pytest.mark.parametrize("ident", ["shared-check", "TASK-one/api-regression"])
-def test_cross_task_check_collision_cannot_replace_confirmed_obligation(project, tmp_path, operation, ident):
-    driver = RegistryDriver(transition_basis(project))
-    assert driver.start(additional=[project_check("shared-check", "AC-preserved")])["outcome"] == "baseline_recorded"
-    driver.implement()
-    finish(driver)
-    old = deepcopy(selected(driver.state, driver.task, final=True))
-    driver.task_id = "TASK-two"
-    collision = project_check(ident, "AC-removed", "check_removed.py")
-    payload = {"additional": [collision]}
-    if operation == "checks_register":
-        payload["inventory"] = {"instructions": [], "ci": []}
-    else:
+@pytest.fixture(scope="session")
+def collision_checkpoints(project_template, repository_seeds, tmp_path_factory):
+    from conftest import copy_project
+    from checkpoints import LazyCheckpoints
+    from memory_repository import MemoryRepositories
+    workspace = tmp_path_factory.mktemp("collision-checkpoint")
+    backend = MemoryRepositories(repository_seeds)
+    root = copy_project(project_template, workspace / "project", backend)
+
+    def steps():
+        driver = RegistryDriver(transition_basis(root))
+        assert driver.start(additional=[project_check("shared-check", "AC-preserved")])["outcome"] == "baseline_recorded"
+        driver.implement()
+        finish(driver)
+        driver.task_id = "TASK-two"
+        yield "checks_register", driver
         assert driver.start()["outcome"] == "baseline_recorded"
         driver.implement()
         driver.send("checks_revise", driver.revision())
         driver.freeze()
         assert driver.verify()["outcome"] == "passed"
         driver.review(verdict="more_checks")
+        yield "checks_extend", driver
+
+    return LazyCheckpoints(workspace, backend, steps())
+
+
+@pytest.mark.parametrize("operation", ["checks_register", "checks_extend"])
+@pytest.mark.parametrize("ident", ["shared-check", "TASK-one/api-regression"])
+def test_cross_task_check_collision_cannot_replace_confirmed_obligation(
+        collision_checkpoints, repository_backend, state_backend, operation, ident):
+    driver = collision_checkpoints[operation].restore(repository_backend, state_backend, memory_worktree=True)
+    old = deepcopy(selected(driver.state, driver.state["tasks"]["TASK-one"], final=True))
+    collision = project_check(ident, "AC-removed", "check_removed.py")
+    payload = {"additional": [collision]}
+    if operation == "checks_register":
+        payload["inventory"] = {"instructions": [], "ci": []}
+    else:
         payload["review_round"] = driver.task["reviews"][-1]["round_id"]
     before = deepcopy(selected(driver.state, driver.task, final=operation == "checks_register"))
     assert_rejected(driver, "duplicate_check", operation, payload)
@@ -127,11 +173,11 @@ def test_ordinary_check_ids_remain_task_local(project):
         assert [check["id"] for check in result["checks"]] == ["plan-1", "shared-check"]
 
 
-@pytest.mark.parametrize("parallel", [False, True])
-@pytest.mark.parametrize("non_topological", [False, True], ids=["dependency-numbering", "permuted-numbering"])
-def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_and_final(project, tmp_path, parallel, non_topological):
-    driver = removing(project, tmp_path, parallel, non_topological)
-    assert [driver.state["tasks"][ident]["plan"]["number"] for ident in ("TASK-one", "TASK-two", "TASK-three")] == ([2, 1, 3] if non_topological else [1, 2, 3])
+def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_and_final(project, tmp_path):
+    # Exercise the full lifecycle with numbering that disagrees with dependencies.
+    # Ordering combinations belong to scheduler/wave tests, not repeated migrations.
+    driver = removing(project, tmp_path, non_topological=True)
+    assert [driver.state["tasks"][ident]["plan"]["number"] for ident in ("TASK-one", "TASK-two", "TASK-three")] == [2, 1, 3]
     old = deepcopy(driver.state["tasks"]["TASK-one"])
     logs = {item["log"]: artifacts.read_bytes(driver.directory / item["log"])
             for item in old["evidence"]}
@@ -188,8 +234,8 @@ def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_a
     ("coverage", "criteria_uncovered"), ("contribution", "check_schema"),
     ("string-command", "command_format"), ("duplicate", "duplicate_check"),
 ])
-def test_refactoring_check_transitions_reject_unapproved_or_incomplete_revision(project, tmp_path, damage, code):
-    driver = removing(project, tmp_path)
+def test_refactoring_check_transitions_reject_unapproved_or_incomplete_revision(removal_checkpoint, damage, code):
+    driver = removal_checkpoint(memory_worktree=True)
     request = driver.revision()
     if damage == "revision":
         request["registry_revision"] -= 1
@@ -216,8 +262,8 @@ def test_refactoring_check_transitions_reject_unapproved_or_incomplete_revision(
 
 
 @pytest.mark.native_process
-def test_refactoring_check_transitions_event_repeat_conflicts_and_new_revision(project, tmp_path):
-    driver = removing(project, tmp_path)
+def test_refactoring_check_transitions_event_repeat_conflicts_and_new_revision(removal_checkpoint):
+    driver = removal_checkpoint()
     result = driver.send("checks_revise", driver.revision())
     original_event = deepcopy(lookup(driver.state.objects, driver.state["event_index"], f"event-{driver.number}")["event"])
     before = storage(driver.directory).read()
@@ -261,8 +307,8 @@ def test_refactoring_check_transitions_event_repeat_conflicts_and_new_revision(p
 
 @pytest.mark.native_process
 @pytest.mark.parametrize("outcome", ["failed", "unavailable"])
-def test_refactoring_check_transitions_failed_replacement_never_confirms(project, tmp_path, outcome):
-    driver = removing(project, tmp_path)
+def test_refactoring_check_transitions_failed_replacement_never_confirms(removal_checkpoint, outcome):
+    driver = removal_checkpoint()
     request = driver.revision()
     if outcome == "failed":
         (driver.root / "check_removed.py").write_text("raise SystemExit(17)\n", encoding="utf-8")
@@ -289,13 +335,14 @@ def test_refactoring_check_transitions_failed_replacement_never_confirms(project
         assert driver.task["active_repair"] == "cycle-1"
 
 
-@pytest.mark.parametrize("native", [False, pytest.param(True, marks=pytest.mark.native_state)])
-@pytest.mark.parametrize("boundary", ["log-before", "log-after", "state-before"])
-def test_refactoring_check_transitions_resume_after_interrupted_evidence(project, tmp_path, monkeypatch, boundary, native):
+@pytest.mark.parametrize("boundary,native", [
+    ("log-before", False), ("log-after", False), ("state-before", False),
+    # Keep one real orphan file across recovery; storage contracts cover failed replacement.
+    pytest.param("log-after", True, marks=pytest.mark.native_state),
+])
+def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal_checkpoint, monkeypatch, boundary, native):
     from lib import state, verification
-    driver = removing(project, tmp_path)
-    driver.send("checks_revise", driver.revision())
-    driver.freeze()
+    driver = removal_checkpoint("frozen", memory_worktree=not native)
     driver.role("interrupted-verifier", "verifier")
     attempt = event(driver, "check_run", {"role_id": "interrupted-verifier", "stage": "independent"}, "interrupted-evidence")
     target = type(storage(driver.directory)) if boundary == "state-before" else verification
@@ -325,17 +372,14 @@ def test_refactoring_check_transitions_resume_after_interrupted_evidence(project
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
 
 
-@pytest.mark.parametrize("native", [False, pytest.param(True, marks=pytest.mark.native_state)])
-@pytest.mark.parametrize("written", [False, True])
-def test_refactoring_check_transitions_acceptance_confirmation_is_atomic_and_repeatable(project, tmp_path, monkeypatch, written, native):
+@pytest.mark.parametrize("written,native", [
+    (False, False), (True, False),
+    # A persisted acceptance must survive a lost response without applying twice.
+    pytest.param(True, True, marks=pytest.mark.native_state),
+])
+def test_refactoring_check_transitions_acceptance_confirmation_is_atomic_and_repeatable(removal_checkpoint, monkeypatch, written, native):
     from lib import state
-    driver = removing(project, tmp_path)
-    driver.send("checks_revise", driver.revision())
-    driver.freeze()
-    assert driver.verify()["outcome"] == "passed"
-    driver.review()
-    driver.integrate(prefix=driver.task_id + "-")
-    driver.send("commit")
+    driver = removal_checkpoint("committed", memory_worktree=not native)
     attempt = event(driver, "accept", {}, "interrupted-acceptance")
     target = type(storage(driver.directory))
     original_write = target.save
@@ -362,8 +406,8 @@ def test_refactoring_check_transitions_acceptance_confirmation_is_atomic_and_rep
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is None
 
 
-def test_refactoring_check_transitions_resume_normative_drift_retains_pending_revision(project, tmp_path):
-    driver = removing(project, tmp_path)
+def test_refactoring_check_transitions_resume_normative_drift_retains_pending_revision(removal_checkpoint):
+    driver = removal_checkpoint()
     driver.send("checks_revise", driver.revision())
     path = Path(driver.state["basis"]["change_root"]) / "design.md"
     original = path.read_bytes()
@@ -384,8 +428,9 @@ def test_refactoring_check_transitions_ordinary_work_keeps_its_contract(project)
     assert "check_registry" not in driver.task
 
 
-def test_refactoring_check_transitions_approved_revised_plan_preserves_old_transition_and_route(project, tmp_path):
-    driver = removing(project, tmp_path)
+def test_refactoring_check_transitions_approved_revised_plan_preserves_old_transition_and_route(removal_checkpoint):
+    driver = removal_checkpoint()
+    project = Path(driver.state['basis']['project_root'])
     driver.send("checks_revise", driver.revision())
     prior = deepcopy(driver.task)
     accepted = deepcopy(driver.state["tasks"]["TASK-one"])

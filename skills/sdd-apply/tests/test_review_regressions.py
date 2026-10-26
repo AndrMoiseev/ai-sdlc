@@ -7,7 +7,7 @@ from copy import deepcopy
 
 def accepted_worktree(basis, tmp_path):
     from pathlib import Path
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     wt = Path(d.send('worktree_create', {'workspace': str(tmp_path / 'trees')})['path'])
     d.start()
     (wt / 'result.txt').write_text('result')

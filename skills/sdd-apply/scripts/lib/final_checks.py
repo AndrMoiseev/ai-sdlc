@@ -79,7 +79,8 @@ def basis(state):
 def independent(state, role_id, active=True):
     role = state["roles"].get(role_id)
     require(role and role["kind"] == "final_verifier" and role["task_id"] is None
-            and (not active or role["status"] == "active"), "final_role", "Use a run-level fresh final verifier")
+            and role["status"] in ({"active"} if active else {"active", "finished"}),
+            "final_role", "Use a run-level fresh final verifier; lost-role proof requires fresh execution")
     authors = {role["context_id"] for role in state["roles"].values() if role["kind"] == "executor"}
     require(role["fresh"] and role["context_id"] not in authors, "role_not_independent", "Final evidence is independent of every author")
     return role
@@ -212,6 +213,8 @@ def procedure_evidence(state, check, directory, current):
                  if item.get("procedure") and item["check_id"] == check["id"]), None)
     if not item:
         return {"outcome": "unavailable", "description": "procedure_missing"}
+    if state["roles"].get(item["role_id"], {}).get("status") == "lost":
+        return {"outcome": "unavailable", "description": "final_role_lost"}
     independent(state, item["role_id"], active=False)
     path = artifacts.contained(directory, item["log"])
     require(artifacts.is_file(path) and digest(artifacts.read_bytes(path)) == item["log_hash"],
@@ -309,6 +312,10 @@ def evidence(state, directory):
         if not item or item["basis"] != current or item["outcome"] != "passed":
             gaps.append({"check_id": check["id"], "criteria": check["criteria"], "location": check.get("location"),
                          "reason": item["outcome"] if item and item["basis"] == current else "final_evidence_missing"})
+            continue
+        if state["roles"].get(item["role_id"], {}).get("status") == "lost":
+            gaps.append({"check_id": check["id"], "criteria": check["criteria"], "location": check.get("location"),
+                         "reason": "final_role_lost"})
             continue
         independent(state, item["role_id"], active=False)
         path = artifacts.contained(directory, item["log"])

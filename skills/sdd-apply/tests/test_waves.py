@@ -7,13 +7,13 @@ from lib.dashboard import projection
 from lib.state import new_task
 
 
-def wave_state(mode="parallel"):
+def wave_state():
     dependencies = {"A": [], "B": [], "C": ["A"], "D": ["A"], "E": ["A"],
                     "F": ["B"], "G": ["B"], "H": ["C", "F"]}
     tasks = {key: new_task(dict(id=key, number=i, depends_on=deps, covers=["AC-demo"]))
              for i, (key, deps) in enumerate(dependencies.items(), 1)}
     return dict(schema_version=1, change_id="Execution waves", run_id="demo", revision=0,
-                updated_at="2026-10-15T12:00:00Z", mode=mode, status="active",
+                updated_at="2026-10-15T12:00:00Z", mode="parallel", status="active",
                 tasks=tasks, blockers=[], final=None)
 
 
@@ -52,17 +52,6 @@ def test_conflicting_candidates_do_not_share_wave(reverse):
     state["tasks"]["A"]["status"] = "running"
     reason = next(t for t in projection(state)["tasks"] if t["id"] == "B")["waiting"]
     assert any(r["kind"] == "conflict" and r["tasks"] == ["A"] for r in reason)
-
-
-def test_sequential_singletons_explain_waiting():
-    state = wave_state("sequential")
-    data = projection(state)
-    assert all(len(w["tasks"]) == 1 for w in data["waves"])
-    assert data["waves"][0]["status"] == "ready"
-    assert data["waves"][1]["status"] == "waiting"
-    state["tasks"]["A"]["status"] = "running"
-    task = next(t for t in projection(state)["tasks"] if t["id"] == "B")
-    assert task["waiting"] == [{"kind": "sequential", "tasks": ["A"]}]
 
 
 def test_review_is_not_acceptance_and_blockers_do_not_hide_active_work():
@@ -131,17 +120,17 @@ def test_invalid_graph_reports_a_useful_error(dependency):
 
 def test_static_html_and_summary_include_waves_and_safe_dependency_links(monkeypatch, tmp_path):
     from lib import dashboard
-    state = wave_state("sequential")
+    state = wave_state()
     state["tasks"]["A"]["status"] = "running"
     monkeypatch.setattr(dashboard, "read", lambda directory: state)
     before = deepcopy(state)
     dashboard.render(tmp_path)
     html = (tmp_path / "dashboard.html").read_text(encoding="utf-8").split("<script>")[0]
     summary = (tmp_path / "summary.md").read_text(encoding="utf-8")
-    assert html.count('class="wave"') == 8
+    assert html.count('class="wave"') == 4
     assert 'href="#task-A"' in html
-    assert "Sequential mode; waiting for: A" in html
-    assert "Wave 3: C; after acceptance: A" in summary
+    assert "Waiting for acceptance: A" in html
+    assert "Wave 2: C, D, E; after acceptance: A" in summary
     assert before == state
     data = projection(state)
     data["tasks"][0]["waiting_text"] = ['<script>bad()</script>']

@@ -209,16 +209,52 @@ def make_workspace(parent, label):
     return workspace
 
 
+def copy_runtime_package(source, target):
+    """Keep complete frozen inputs separate from the executor's runtime copy.
+
+    These package-relative development assets contain evaluation answers or
+    launch development checks; they are not authoring/runtime dependencies.
+    Apply the same selection to the old skill, candidate and dependency skills.
+    All other resources, including hidden files and runtime reviewer contracts,
+    retain their original bytes and paths.
+    """
+    source = Path(source)
+    development_directories = {"evals", "tests", "eval-viewer"}
+    development_files = {
+        "scripts/test.py", "scripts/test.py.lock",
+        "scripts/prepare_subagent_eval.py", "scripts/prepare_subagent_eval.py.lock",
+        "agents/grader.md", "agents/comparator.md", "agents/analyzer.md",
+        "agents/bineval.md",
+    }
+
+    def is_development(relative):
+        return (relative.parts[0] in development_directories
+                or relative.as_posix() in development_files)
+
+    # Establish required bytes before copying: a lost resource must not silently
+    # disappear from the manifest derived by prepare_fixture.
+    expected = {name: digest for name, digest in inventory(source).items()
+                if not is_development(Path(name))}
+
+    def excluded(directory, names):
+        relative = Path(directory).relative_to(source)
+        return [name for name in names if is_development(relative / name)]
+
+    shutil.copytree(source, target, ignore=excluded)
+    if inventory(target) != expected:
+        raise ValueError(f"Runtime package bytes or membership changed while copying: {source}")
+
+
 def prepare_fixture(workspace, scenario, roots, candidate, variant):
     required = []
     for name in ("sdd-shared", "humanizer-ru"):
         target = workspace / ".agents/skills" / name
-        shutil.copytree(roots[name], target)
+        copy_runtime_package(roots[name], target)
         required.extend(f".agents/skills/{name}/{p}" for p in inventory(target))
     if variant != "without_skill":
         source = roots["old_skill"] if variant == "old_skill" else candidate
         target = workspace / ".agents/skills/sdd-spec"
-        shutil.copytree(source, target)
+        copy_runtime_package(source, target)
         required.extend(f".agents/skills/sdd-spec/{p}" for p in inventory(target))
     for name, content in scenario.get("files", {}).items():
         target = relative_path(workspace, name)

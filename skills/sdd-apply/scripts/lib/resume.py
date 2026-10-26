@@ -42,29 +42,13 @@ def transition(state, task, event, directory):
         state["blockers"].append({"reason": "spec_conflict", "task_id": event["task_id"], "resume_condition": "Revised approved plan and execution instruction", "material": str(path)})
         state["status"] = "blocked"
         return {"return_to": "sdd-spec", "material": str(path)}
-    if kind == "mode":
-        require(p.get("mode") in {"sequential", "parallel"} and p.get("source") and p.get("text"), "mode_decision", "Record the actual user's mode decision")
-        mode = p["mode"]
-        if mode == "parallel" and not p.get("isolation_available"):
-            return {"mode": state["mode"], "limitation": "worktree isolation unavailable"}
-        require(mode != state["mode"], "mode_unchanged", "Already in this mode")
-        state["pending_mode"] = {"mode": mode, "decision": p}
-        state["blockers"].append({"reason": "mode_handoff", "resume_condition": "Fresh orchestrator context with only the new flow"})
-        state["status"] = "blocked"
-        return {"handoff_required": mode}
     if kind == "handoff":
         require(p.get("new_owner") and p["new_owner"] != state["owner"] and p.get("fresh") is True and p.get("launch_ref"), "handoff_context", "Actual fresh host context required")
         state["previous_owner"] = state["owner"]
         state["owner"] = p["new_owner"]
-        pending = state.pop("pending_mode", None)
-        if pending:
-            state["mode"] = pending["mode"]
-            state["parallel_request"] = pending["decision"] if state["mode"] == "parallel" else None
-            state["blockers"] = [b for b in state["blockers"] if b["reason"] != "mode_handoff"]
         state["status"] = "blocked" if state["blockers"] else "active"
         return {"owner": state["owner"], "mode": state["mode"], "status": state["status"]}
     if kind == "revised_plan":
-        require(not state.get("pending_mode"), "mode_handoff", "Complete the pending mode handoff before replacing the basis")
         require(not any(r["status"] == "active" for r in state["roles"].values()), "active_roles", "Finish or reconcile active roles before replacing the basis")
         from .inputs import validate, basis_dependency
         import uuid
@@ -119,8 +103,7 @@ def transition(state, task, event, directory):
                     fresh[field] = old[field]
                 fresh["prior_result"] = {"$object": objects.put(objects.pack(old, root=True))}
             state["tasks"][plan["id"]] = fresh
-        if state["mode"] == "parallel":
-            state["parallel_request"] = basis["instruction"]
+        state["parallel_request"] = basis["instruction"]
         # Budget blockers survive a revised plan. Other old blockers are retained
         # in the archived run and checked again against the new basis.
         if p.get("completed_followups"):
@@ -179,7 +162,7 @@ def transition(state, task, event, directory):
     # normative drift cannot be waived by this generic resume operation.
     resolutions = p.get("resolutions", [])
     for resolution in resolutions:
-        require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict", "mode_handoff", "mode_switch_worktree"}, "resume_resolution", "Use the dedicated operation for this blocker")
+        require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict"}, "resume_resolution", "Use the dedicated operation for this blocker")
         reason = resolution["reason"]
         lost_role = None
         if reason == "lost_role":

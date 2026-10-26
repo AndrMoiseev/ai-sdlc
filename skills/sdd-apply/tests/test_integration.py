@@ -7,7 +7,7 @@ import pytest
 
 
 def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, project):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     wt = d.send("worktree_create", {"workspace": str(tmp_path / "trees")})
     d.start()
     (Path(wt["path"]) / "result.txt").write_bytes(b"\x00\xffbinary\n")
@@ -29,7 +29,7 @@ def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, pr
 
 
 def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, project):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     wt = d.send("worktree_create", {"workspace": str(tmp_path / "trees")})
     d.start()
     (Path(wt["path"]) / "result.txt").write_text("task content\n")
@@ -58,7 +58,7 @@ def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, 
 
 
 def test_staged_executable_mode_is_in_transfer(basis, tmp_path):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     wt = d.send("worktree_create", {"workspace": str(tmp_path / "trees")})
     d.start()
     path = Path(wt["path"]) / "check.py"

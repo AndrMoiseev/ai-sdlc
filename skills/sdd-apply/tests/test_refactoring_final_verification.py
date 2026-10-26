@@ -15,7 +15,7 @@ from lib.state import read, seal, save
 from lib.state_storage import storage
 from lib.state_view import compact
 from refactoring_fixtures import RegistryDriver, approved_basis
-from repository_support import stage as stage_files, commit
+from repository_support import stage as stage_files, commit, write_file
 
 
 CORE = """class ProductId:
@@ -160,20 +160,54 @@ class FinalDriver(RegistryDriver):
         return self.send('check_run', {'role_id': role, 'stage': 'final'}, task_id=None)
 
 
-def completed(project, parallel=False, defect=None, setup=True, procedure=False):
-    driver = FinalDriver(typed_basis(project, procedure=procedure), parallel=parallel)
-    driver.send('checks_register', {'inventory': {'instructions': [], 'ci': []}}, task_id=None)
-    for task_id in ('TASK-one', 'TASK-two', 'TASK-three'):
-        driver.task_id = task_id
-        assert driver.start()['outcome'] == 'baseline_recorded'
-        driver.implement(defect, setup=setup and not procedure)
-        driver.finish()
-    return driver
+@pytest.fixture(scope="session")
+def completed_migrations(project_template, repository_seeds, tmp_path_factory):
+    from conftest import copy_project
+    from checkpoints import Checkpoint, LazyCheckpoints, preparation
+    from memory_repository import MemoryRepositories
+    prefixes, saved = {}, {}
+
+    def checkpoint(defect=None, setup=True, procedure=False):
+        key = defect, setup, procedure
+        if key not in saved:
+            if procedure not in prefixes:
+                workspace = tmp_path_factory.mktemp("completed-migration")
+                backend = MemoryRepositories(repository_seeds)
+                root = copy_project(project_template, workspace / "project", backend)
+                def steps(root=root, procedure=procedure):
+                    driver = FinalDriver(typed_basis(root, procedure=procedure))
+                    driver.send('checks_register', {'inventory': {'instructions': [], 'ci': []}}, task_id=None)
+                    for task_id in ('TASK-one', 'TASK-two'):
+                        driver.task_id = task_id
+                        assert driver.start()['outcome'] == 'baseline_recorded'
+                        driver.implement()
+                        driver.finish()
+                    yield "two-accepted", driver
+                prefixes[procedure] = LazyCheckpoints(workspace, backend, steps())
+            prefix = prefixes[procedure]
+            prepared = prefix["two-accepted"]
+            with preparation(prefix.repositories, prefix.states):
+                driver = prepared.restore(prefix.repositories, prefix.states)
+                driver.task_id = 'TASK-three'
+                assert driver.start()['outcome'] == 'baseline_recorded'
+                driver.implement(defect, setup=setup and not procedure)
+                driver.finish()
+                saved[key] = Checkpoint(prefix.workspace, driver, prefix.repositories, prefix.states)
+        return saved[key]
+
+    return checkpoint
 
 
-@pytest.mark.parametrize('parallel', [False, True])
-def test_complete_typed_migration_with_independent_whole_result(project, parallel):
-    driver = completed(project, parallel)
+@pytest.fixture
+def completed_migration(completed_migrations, repository_backend, state_backend):
+    return lambda memory_worktree=True, **options: completed_migrations(**options).restore(
+        repository_backend, state_backend, memory_worktree=memory_worktree)
+
+
+def test_complete_typed_migration_with_independent_whole_result(completed_migration):
+    # The representative executable lifecycle observes actual working files.
+    driver = completed_migration(memory_worktree=False)
+    project = Path(driver.state['basis']['project_root'])
     driver.final_role()
     result = driver.run_final()
     assert result['outcome'] == 'passed'
@@ -194,8 +228,9 @@ def test_complete_typed_migration_with_independent_whole_result(project, paralle
 
 
 @pytest.mark.parametrize('defect', ['missing-consumer', 'adapter-bypass'])
-def test_local_acceptance_does_not_prove_complete_migration(project, defect):
-    driver = completed(project, defect=defect)
+def test_local_acceptance_does_not_prove_complete_migration(completed_migration, defect):
+    driver = completed_migration(defect=defect, memory_worktree=False)
+    project = Path(driver.state['basis']['project_root'])
     # An inlined temporary adapter is an unauthorized bypass even if externally compatible.
     if defect == 'adapter-bypass':
         # The whole assertion inspects conversion at the boundary as well as actual calls.
@@ -211,8 +246,8 @@ def test_local_acceptance_does_not_prove_complete_migration(project, defect):
     assert any(gap.get('check_id') == 'CHECK-whole' for gap in final['missing'])
 
 
-def test_unprepared_whole_setup_fails_closed(project):
-    driver = completed(project, setup=False)
+def test_unprepared_whole_setup_fails_closed(completed_migration):
+    driver = completed_migration(setup=False, memory_worktree=False)
     driver.final_role()
     result = driver.run_final()
     assert result['outcome'] == 'failed'
@@ -221,13 +256,14 @@ def test_unprepared_whole_setup_fails_closed(project):
 
 
 @pytest.mark.parametrize('drift', ['head', 'manifest', 'registry'])
-def test_final_evidence_is_bound_to_current_head_manifest_and_registry(project, drift):
-    driver = completed(project)
+def test_final_evidence_is_bound_to_current_head_manifest_and_registry(completed_migration, drift):
+    driver = completed_migration()
+    project = Path(driver.state['basis']['project_root'])
     driver.final_role()
     assert driver.run_final()['outcome'] == 'passed'
     state = driver.state
     if drift == 'head':
-        (project / 'new-code.txt').write_text('new integrated code\n')
+        write_file(project, 'new-code.txt', b'new integrated code\n')
         stage_files(project, 'new-code.txt')
         commit(project, 'Independent integrated change')
     elif drift == 'manifest':
@@ -240,8 +276,8 @@ def test_final_evidence_is_bound_to_current_head_manifest_and_registry(project, 
     assert gaps and all(gap['reason'] == 'final_evidence_missing' for gap in gaps)
 
 
-def test_final_rejects_author_and_task_bound_final_context(project):
-    driver = completed(project)
+def test_final_rejects_author_and_task_bound_final_context(completed_migration):
+    driver = completed_migration()
     before = storage(driver.directory).read()
     with pytest.raises(Rejected) as error:
         driver.final_role(context='TASK-one-author')
@@ -253,8 +289,8 @@ def test_final_rejects_author_and_task_bound_final_context(project):
     assert storage(driver.directory).read() == before
 
 
-def test_unrelated_success_and_changed_logs_cannot_prove_final_checks(project):
-    driver = completed(project)
+def test_unrelated_success_and_changed_logs_cannot_prove_final_checks(completed_migration):
+    driver = completed_migration()
     driver.final_role()
     assert driver.run_final()['outcome'] == 'passed'
     state = driver.state
@@ -276,8 +312,8 @@ def test_unrelated_success_and_changed_logs_cannot_prove_final_checks(project):
     assert artifacts.read_bytes(path) == before_log
 
 
-def test_final_failure_requires_owned_budgeted_repair_before_retry(project):
-    driver = completed(project, defect='missing-consumer')
+def test_final_failure_requires_owned_budgeted_repair_before_retry(completed_migration):
+    driver = completed_migration(defect='missing-consumer')
     driver.final_role()
     assert driver.run_final()['outcome'] == 'failed'
     before = storage(driver.directory).read()
@@ -297,8 +333,8 @@ def test_final_failure_requires_owned_budgeted_repair_before_retry(project):
     assert storage(driver.directory).read() == before
 
 
-def test_unknown_final_repair_owner_returns_to_spec(project):
-    driver = completed(project, defect='missing-consumer')
+def test_unknown_final_repair_owner_returns_to_spec(completed_migration):
+    driver = completed_migration(defect='missing-consumer')
     driver.final_role()
     assert driver.run_final()['outcome'] == 'failed'
     result = driver.send('repair', dict(reason='Unplanned consumer', defect_evidence='Consumer outside all authorized task paths',
@@ -308,8 +344,10 @@ def test_unknown_final_repair_owner_returns_to_spec(project):
     assert all(task['status'] == 'accepted' for task in driver.state['tasks'].values())
 
 
-def test_post_integration_regression_invalidates_success_and_is_detected(project):
-    driver = completed(project)
+def test_post_integration_regression_invalidates_success_and_is_detected(completed_migration):
+    # A source edit must be detected and executed again at the real file boundary.
+    driver = completed_migration(memory_worktree=False)
+    project = Path(driver.state['basis']['project_root'])
     driver.final_role()
     assert driver.run_final()['outcome'] == 'passed'
     (project / 'consumer_b.py').write_text(TYPED.replace('lookup(ProductId(value))', "{'id': value, 'name': 'wrong'}"))
@@ -321,8 +359,8 @@ def test_post_integration_regression_invalidates_success_and_is_detected(project
     assert driver.send('finalize', task_id=None)['result'] == 'partial'
 
 
-def test_dashboard_separates_tasks_criteria_gaps_and_retirement(project):
-    driver = completed(project, defect='missing-consumer')
+def test_dashboard_separates_tasks_criteria_gaps_and_retirement(completed_migration):
+    driver = completed_migration(defect='missing-consumer')
     driver.final_role()
     assert driver.run_final()['outcome'] == 'failed'
     data = projection(driver.state)
@@ -363,10 +401,38 @@ def procedure_pass(driver):
     return result, aggregate
 
 
+@pytest.fixture(scope="session")
+def passed_procedure_checkpoint(completed_migrations, repository_seeds):
+    """Execute the shared successful procedure once, preserving its authentic evidence."""
+    from checkpoints import Checkpoint, preparation
+    from memory_repository import MemoryRepositories
+    saved = None
+
+    def checkpoint():
+        nonlocal saved
+        # Defer execution until function-scoped shared-CLI adapters are installed.
+        if saved is None:
+            prepared = completed_migrations(procedure=True)
+            backend = MemoryRepositories(repository_seeds)
+            with preparation(backend) as states:
+                driver = prepared.restore(backend, states)
+                previous, aggregate = procedure_pass(driver)
+                saved = Checkpoint(prepared.workspace, driver, backend, states), previous, aggregate
+        return saved
+
+    return checkpoint
+
+
+@pytest.fixture
+def passed_procedure(passed_procedure_checkpoint, repository_backend, state_backend):
+    saved, previous, aggregate = passed_procedure_checkpoint()
+    driver = saved.restore(repository_backend, state_backend, memory_worktree=True)
+    return driver, deepcopy(previous), deepcopy(aggregate)
+
+
 @pytest.mark.parametrize('outcome', ['pending', 'failed', 'unavailable', 'skipped', 'unstable'])
-def test_newer_same_basis_procedure_supersedes_aggregate_pass(project, outcome):
-    driver = completed(project, procedure=True)
-    previous, aggregate = procedure_pass(driver)
+def test_newer_same_basis_procedure_supersedes_aggregate_pass(passed_procedure, outcome):
+    driver, previous, aggregate = passed_procedure
     before_basis = deepcopy(previous['basis'])
     next_attempt = begin_procedure(driver)
     assert next_attempt['basis'] == before_basis
@@ -393,9 +459,8 @@ def test_newer_same_basis_procedure_supersedes_aggregate_pass(project, outcome):
     assert any(gap.get('check_id') == 'CHECK-whole' for gap in final['missing'])
 
 
-def test_newer_pass_requires_aggregate_to_link_latest_procedure_attempt(project):
-    driver = completed(project, procedure=True)
-    previous, _ = procedure_pass(driver)
+def test_newer_pass_requires_aggregate_to_link_latest_procedure_attempt(passed_procedure):
+    driver, previous, _ = passed_procedure
     begin_procedure(driver)
     latest = finish_procedure(driver)
     assert latest['basis'] == previous['basis'] and latest['attempt_id'] != previous['attempt_id']
@@ -410,11 +475,11 @@ def test_newer_pass_requires_aggregate_to_link_latest_procedure_attempt(project)
     assert driver.send('finalize', task_id=None)['result'] == 'complete'
 
 
-def test_procedure_result_becomes_stale_when_integrated_head_changes(project):
-    driver = completed(project, procedure=True)
-    previous, _ = procedure_pass(driver)
+def test_procedure_result_becomes_stale_when_integrated_head_changes(passed_procedure):
+    driver, previous, _ = passed_procedure
+    project = Path(driver.state['basis']['project_root'])
     begin_procedure(driver)
-    (project / 'integration.txt').write_text('Source changed during procedure\n', encoding='utf-8')
+    write_file(project, 'integration.txt', b'Source changed during procedure\n')
     stage_files(project, 'integration.txt')
     commit(project, 'Change integrated source during procedure')
     latest = finish_procedure(driver)
@@ -429,9 +494,8 @@ def test_procedure_result_becomes_stale_when_integrated_head_changes(project):
     assert driver.send('finalize', task_id=None)['result'] == 'partial'
 
 
-def test_final_successor_explicitly_archives_interrupted_attempt_and_executes_fresh(project):
-    driver = completed(project, procedure=True)
-    previous, _ = procedure_pass(driver)
+def test_final_successor_explicitly_archives_interrupted_attempt_and_executes_fresh(passed_procedure):
+    driver, previous, _ = passed_procedure
     interrupted = begin_procedure(driver)
     live = [role['context_id'] for role in driver.state['roles'].values()
             if role['status'] == 'active' and role['role_id'] != 'final']

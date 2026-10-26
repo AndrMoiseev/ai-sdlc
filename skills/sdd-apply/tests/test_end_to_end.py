@@ -3,7 +3,7 @@ from lib.api import dispatch
 from test_commits import prepared
 
 
-def test_full_sequential_lifecycle(driver, project):
+def test_full_lifecycle(driver, project):
     prepared(driver, project)
     driver.send("commit")
     driver.send("accept")

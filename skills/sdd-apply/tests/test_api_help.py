@@ -51,16 +51,25 @@ def test_help_rejects_invalid_selectors(args):
         describe(**args)
 
 
-@pytest.mark.parametrize("args,key,expected", [
-    (["--help-event", "resume"], "event", "resume"),
-    (["--help-operation", "read"], "operation", "read"),
-    (["--help-operation"], "events", None),
+@pytest.mark.parametrize("args,key,expected,native", [
+    # One fresh interpreter proves imports and executable entrypoint wiring.
+    pytest.param(["--help-event", "resume"], "event", "resume", True, marks=pytest.mark.native_process),
+    (["--help-operation", "read"], "operation", "read", False),
+    (["--help-operation"], "events", None, False),
 ])
-def test_cli_help_needs_no_request_or_project(tmp_path, args, key, expected):
-    result = subprocess.run([sys.executable, "-B", str(ROOT / "scripts/execute.py"), *args],
-                            cwd=tmp_path, capture_output=True, shell=False, timeout=30)
-    assert result.returncode == 0, result.stderr
-    payload = json.loads(result.stdout)
+def test_cli_help_needs_no_request_or_project(tmp_path, monkeypatch, capsys, args, key, expected, native):
+    if native:
+        result = subprocess.run([sys.executable, "-B", str(ROOT / "scripts/execute.py"), *args],
+                                cwd=tmp_path, capture_output=True, shell=False, timeout=30)
+        assert result.returncode == 0, result.stderr
+        output = result.stdout
+    else:
+        from execute import main
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(sys, "argv", ["execute.py", *args])
+        assert main() == 0
+        output = capsys.readouterr().out
+    payload = json.loads(output)
     assert payload["ok"] is True
     if expected is None:
         assert "resume" in payload["result"][key]

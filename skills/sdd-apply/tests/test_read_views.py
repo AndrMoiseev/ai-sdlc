@@ -51,7 +51,7 @@ def test_compact_preserves_blockers_budgets_and_active_roles(execution_checkpoin
     assert view["active_roles"] == {
         "author": {"kind": "executor", "task_id": "TASK-one", "context_id": "author"},
     }
-    driver.send("block", {"reason": "needs decision", "resume_condition": "user answers"})
+    driver.send("block", {"reason": "needs decision", "resume_condition": "user answers"}, task_id=None)
     view = compact(driver)
     full = driver.state
     assert view["status"] == "blocked" and view["available_tasks"] == []

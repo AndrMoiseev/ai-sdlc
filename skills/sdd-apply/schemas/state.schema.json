@@ -51,7 +51,7 @@
     "revision": {"type": "integer", "minimum": 0},
     "owner": {"type": "string"},
     "status": {"enum": ["active", "blocked", "completed"]},
-    "mode": {"enum": ["sequential", "parallel"]},
+    "mode": {"const": "parallel"},
     "basis": {"type": "object"},
     "tasks": {"type": "object", "additionalProperties": {"type": "object", "properties": {
       "check_registry": {"$ref": "#/$defs/check_registry"}

@@ -12,7 +12,7 @@ from lib.dashboard import projection, render
 from lib.final_checks import evidence
 from lib.state_view import compact
 from lib.state_storage import storage
-from repository_support import stage, commit
+from repository_support import stage, commit, write_file
 
 
 COMMAND = [sys.executable, "-B", "-c",
@@ -41,18 +41,41 @@ def task_final(driver):
     assert driver.send("check_run", {"role_id": "task-final", "stage": "final"})["outcome"] == "passed"
 
 
-def prepare(execution_checkpoint, procedure=False, task_checks=True):
-    driver = execution_checkpoint("accepted")
-    if procedure:
-        root = Path(driver.state["basis"]["project_root"])
-        (root / "release.md").write_text("Check result.txt equals verified result followed by a newline. Record the command and outcome.\n")
-        stage(root, "release.md")
-        commit(root, "Add project release procedure")
-    register(driver, {"procedure": "release.md"} if procedure else None)
-    final_role(driver)
-    if task_checks:
-        task_final(driver)
-    return driver
+@pytest.fixture(scope="session")
+def final_project_checkpoints(execution_checkpoints, repository_seeds):
+    from checkpoints import LazyCheckpoints
+    from memory_repository import MemoryRepositories
+    branches = {}
+
+    def checkpoint(procedure=False, task_checks=True):
+        # Build lazily after the function-scoped CLI adapters have been installed.
+        if procedure not in branches:
+            backend = MemoryRepositories(repository_seeds)
+
+            def steps():
+                driver = execution_checkpoints["accepted"].restore(backend, branch.states)
+                if procedure:
+                    root = Path(driver.state["basis"]["project_root"])
+                    (root / "release.md").write_text("Check result.txt equals verified result followed by a newline. Record the command and outcome.\n")
+                    stage(root, "release.md")
+                    commit(root, "Add project release procedure")
+                register(driver, {"procedure": "release.md"} if procedure else None)
+                final_role(driver)
+                yield "registered", driver
+                task_final(driver)
+                yield "task-verified", driver
+
+            branch = LazyCheckpoints(execution_checkpoints.workspace, backend, steps())
+            branches[procedure] = branch
+        return branches[procedure]["task-verified" if task_checks else "registered"]
+
+    return checkpoint
+
+
+@pytest.fixture
+def prepared_project(final_project_checkpoints, repository_backend, state_backend):
+    return lambda memory_worktree=True, **options: final_project_checkpoints(**options).restore(
+        repository_backend, state_backend, memory_worktree=memory_worktree)
 
 
 def begin(driver, role="project-final"):
@@ -71,8 +94,8 @@ def log(driver, result):
     return json.loads(artifacts.read_text(driver.directory / result["log"]))
 
 
-def test_additional_registry_preserves_task_contract_and_requires_both_finals(execution_checkpoint):
-    driver = prepare(execution_checkpoint, task_checks=False)
+def test_additional_registry_preserves_task_contract_and_requires_both_finals(prepared_project):
+    driver = prepared_project(task_checks=False, memory_worktree=False)
     before = deepcopy(driver.task)
     result = run_final(driver)
     assert result["outcome"] == "passed"
@@ -92,8 +115,8 @@ def test_additional_registry_preserves_task_contract_and_requires_both_finals(ex
     assert result["project_checks"]["gaps"] == []
 
 
-def test_missing_project_evidence_blocks_complete_after_task_final(execution_checkpoint):
-    driver = prepare(execution_checkpoint)
+def test_missing_project_evidence_blocks_complete_after_task_final(prepared_project):
+    driver = prepared_project()
     final = driver.send("finalize", task_id=None)
     assert final["result"] == "partial" and final["accepted_criteria"] == []
     assert final["missing"][0]["reason"] == "final_evidence_missing"
@@ -116,8 +139,8 @@ def test_register_requires_accepted_integrated_tasks(driver):
 
 
 @pytest.mark.parametrize("stage", ["baseline", "self", "independent", "integration"])
-def test_project_registry_runs_only_at_final(execution_checkpoint, stage):
-    driver = prepare(execution_checkpoint)
+def test_project_registry_runs_only_at_final(prepared_project, stage):
+    driver = prepared_project()
     before = storage(driver.directory).read()
     with pytest.raises(Rejected) as error:
         run_final(driver, stage=stage)
@@ -171,13 +194,13 @@ def test_failed_or_unavailable_project_check_blocks_retry_and_completion(executi
 
 
 @pytest.mark.parametrize("drift", ["head", "manifest", "registry", "task_checks", "work_kind", "change_id", "run_id"])
-def test_project_evidence_binds_full_current_identity(execution_checkpoint, drift):
-    driver = prepare(execution_checkpoint)
+def test_project_evidence_binds_full_current_identity(prepared_project, drift):
+    driver = prepared_project()
     assert run_final(driver)["outcome"] == "passed"
     state = driver.state
     if drift == "head":
         root = Path(state["basis"]["project_root"])
-        (root / "new.txt").write_text("New integrated content\n")
+        write_file(root, "new.txt", b"New integrated content\n")
         stage(root, "new.txt")
         commit(root, "Change final HEAD")
     elif drift == "manifest":
@@ -198,8 +221,8 @@ def test_project_evidence_binds_full_current_identity(execution_checkpoint, drif
 
 
 @pytest.mark.parametrize("corruption", ["command", "role", "outcome", "cwd", "configuration"])
-def test_unrelated_or_tampered_log_does_not_prove_project_check(execution_checkpoint, corruption):
-    driver = prepare(execution_checkpoint)
+def test_unrelated_or_tampered_log_does_not_prove_project_check(prepared_project, corruption):
+    driver = prepared_project()
     result = run_final(driver)
     record = log(driver, result)
     if corruption == "command":
@@ -221,8 +244,8 @@ def test_unrelated_or_tampered_log_does_not_prove_project_check(execution_checkp
 
 
 @pytest.mark.parametrize("outcome", ["pending", "passed", "failed", "unavailable", "skipped", "unstable"])
-def test_latest_procedure_attempt_supersedes_same_basis_pass(execution_checkpoint, outcome):
-    driver = prepare(execution_checkpoint, procedure=True)
+def test_latest_procedure_attempt_supersedes_same_basis_pass(prepared_project, outcome):
+    driver = prepared_project(procedure=True)
     begin(driver)
     previous = finish(driver)
     assert run_final(driver)["outcome"] == "passed"
@@ -240,8 +263,8 @@ def test_latest_procedure_attempt_supersedes_same_basis_pass(execution_checkpoin
         assert driver.send("finalize", task_id=None)["result"] == "partial"
 
 
-def test_lost_final_verifier_archives_pending_procedure_and_requires_fresh_attempt(execution_checkpoint):
-    driver = prepare(execution_checkpoint, procedure=True)
+def test_lost_final_verifier_archives_pending_procedure_and_requires_fresh_attempt(prepared_project):
+    driver = prepared_project(procedure=True)
     begin(driver)
     finish(driver)
     assert run_final(driver)["outcome"] == "passed"
@@ -270,8 +293,8 @@ def test_lost_final_verifier_archives_pending_procedure_and_requires_fresh_attem
     assert driver.send("finalize", task_id=None)["result"] == "complete"
 
 
-def test_project_progress_is_distinct_from_task_acceptance(execution_checkpoint):
-    driver = prepare(execution_checkpoint)
+def test_project_progress_is_distinct_from_task_acceptance(prepared_project):
+    driver = prepared_project()
     data = projection(driver.state)
     assert data["accepted"] == data["total"] == 1
     assert "whole_result" not in data
@@ -283,6 +306,74 @@ def test_project_progress_is_distinct_from_task_acceptance(execution_checkpoint)
     render(driver.directory)
     assert "Final project checks" in artifacts.read_text(driver.directory / "dashboard.html")
     assert "Final project checks" in artifacts.read_text(driver.directory / "summary.md")
+
+
+@pytest.mark.parametrize("procedure", [False, True], ids=["command", "completed-procedure"])
+def test_lost_verifier_completed_proof_requires_successor_execution(prepared_project, procedure):
+    driver = prepared_project(procedure=procedure)
+    if procedure:
+        begin(driver)
+        previous_procedure = finish(driver)
+    assert run_final(driver)["outcome"] == "passed"
+    history = deepcopy(driver.state["final_checks"]["evidence"])
+    logs = {item["log"]: artifacts.read_bytes(driver.directory / item["log"]) for item in history}
+    assert driver.state["final_checks"]["procedures"] == {}
+    live = [role["context_id"] for role in driver.state["roles"].values()
+            if role["status"] == "active" and role["role_id"] != "project-final"]
+    driver.send("resume", {"host_trace": "synthetic-unit-test loss after completed proof", "live_contexts": live}, task_id=None)
+    final_role(driver, "successor", successor_of="project-final")
+    driver.send("resume", {"host_trace": "synthetic-unit-test successor with no pending work",
+        "live_contexts": live + ["successor"], "resolutions": [{"reason": "lost_role", "task_id": None,
+        "role_id": "project-final", "successor": "successor", "abandon_procedures": [],
+        "evidence": "No unfinished attempt; successor must independently execute the registered checks"}]}, task_id=None)
+    assert driver.state["roles"]["project-final"]["status"] == "lost"
+    assert driver.state["final_checks"]["evidence"] == history
+    assert driver.state["final_checks"]["procedures"] == {}
+    _, matches, gaps = evidence(driver.state, driver.directory)
+    assert matches == [] and gaps[0]["reason"] == "final_role_lost"
+    assert driver.send("finalize", task_id=None)["result"] == "partial"
+    driver.send("resume", {"host_trace": "synthetic-unit-test before fresh execution", "live_contexts": live + ["successor"],
+        "resolutions": [{"reason": "final_incomplete", "task_id": None,
+                         "evidence": "Successor will execute fresh project checks"}]}, task_id=None)
+    if procedure:
+        from lib.final_checks import basis, procedure_evidence
+        state = driver.state
+        previous = procedure_evidence(state, state["final_checks"]["checks"][0], driver.directory, basis(state))
+        assert previous == {"outcome": "unavailable", "description": "final_role_lost"}
+        begin(driver, "successor")
+        fresh_procedure = finish(driver, "successor")
+        assert fresh_procedure["attempt_id"] != previous_procedure["attempt_id"]
+        # A fresh procedure alone cannot reuse the lost predecessor's aggregate.
+        assert evidence(driver.state, driver.directory)[1] == []
+    result = run_final(driver, "successor")
+    assert result["outcome"] == "passed"
+    record = log(driver, result)
+    assert record["role_id"] == "successor"
+    if procedure:
+        assert record["outputs"][0]["procedure_attempt"] == fresh_procedure["attempt_id"]
+    else:
+        assert record["outputs"][0]["command"] == COMMAND
+    assert driver.send("finalize", task_id=None)["result"] == "complete"
+    assert driver.state["final_checks"]["evidence"][:len(history)] == history
+    assert {path: artifacts.read_bytes(driver.directory / path) for path in logs} == logs
+
+
+@pytest.mark.parametrize("procedure", [False, True], ids=["command", "completed-procedure"])
+def test_normally_finished_final_verifier_proof_remains_eligible(prepared_project, procedure):
+    driver = prepared_project(procedure=procedure)
+    if procedure:
+        begin(driver)
+        finish(driver)
+    assert run_final(driver)["outcome"] == "passed"
+    history = deepcopy(driver.state["final_checks"]["evidence"])
+    driver.send("role_result", {"role_id": "project-final", "result": "DONE", "trace": "synthetic-unit-test normal completion"}, task_id=None)
+    live = [role["context_id"] for role in driver.state["roles"].values() if role["status"] == "active"]
+    assert driver.send("resume", {"host_trace": "synthetic-unit-test completed verifier exited", "live_contexts": live}, task_id=None)["status"] == "active"
+    assert driver.state["roles"]["project-final"]["status"] == "finished"
+    _, matches, gaps = evidence(driver.state, driver.directory)
+    assert len(matches) == 1 and gaps == []
+    assert driver.send("finalize", task_id=None)["result"] == "complete"
+    assert driver.state["final_checks"]["evidence"] == history
 
 
 def complete_followup(driver):
@@ -321,9 +412,9 @@ def complete_followup(driver):
     assert send("check_run", {"role_id": "followup-final", "stage": "final"})["outcome"] == "passed"
 
 
-def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(execution_checkpoint):
+def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(prepared_project):
     from test_plan_revision import revise, revised
-    driver = prepare(execution_checkpoint)
+    driver = prepared_project(memory_worktree=False)
     assert run_final(driver)["outcome"] == "passed"
     original = deepcopy(driver.state["final_checks"])
     for role in driver.state["roles"].values():

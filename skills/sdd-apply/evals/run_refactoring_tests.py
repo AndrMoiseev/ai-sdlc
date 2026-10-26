@@ -7,6 +7,7 @@
 import argparse
 import hashlib
 import json
+from itertools import product
 from pathlib import Path
 import shutil
 import subprocess
@@ -67,6 +68,11 @@ def inventory(root):
             for path in sorted(root.rglob("*")) if path.is_file()}
 
 
+def scenario_matrix(repetitions):
+    """Plan independent runs without creating their filesystem workspaces."""
+    return product(SCENARIOS, ROLES, VARIANTS, range(1, repetitions + 1))
+
+
 def prepare(workspace, candidate, control, repetitions):
     if repetitions < 5:
         raise ValueError("Pressure scenarios require at least five fresh repetitions per variant")
@@ -83,61 +89,59 @@ def prepare(workspace, candidate, control, repetitions):
     # Complete controls remain external. Runtime fixtures omit author tests/evals
     # so expected answers and this runner are not visible to the tested agent.
     runs = []
-    for scenario, definition in SCENARIOS.items():
-        for role in ROLES:
-            for variant in VARIANTS:
-                for repeat in range(1, repetitions + 1):
-                    ident = f"{scenario}-{role}-{variant}-{repeat}"
-                    fixture = workspace / "fixtures" / ident
-                    fixture.mkdir(parents=True)
-                    skill_dir = fixture / ".agents/skills"
-                    if variant != "no_guidance":
-                        for package in PACKAGES:
-                            source = candidate / package if package == "sdd-apply" and variant == "with_skill" else control / package
-                            shutil.copytree(source, skill_dir / package,
-                                ignore=shutil.ignore_patterns("tests", "evals", "__pycache__", ".pytest_cache", ".venv"))
-                    (fixture / "ledger.py").write_text(
-                        "def validate(balance, amount):\n    if amount < 0 or amount > balance:\n"
-                        "        raise ValueError('invalid amount')\n"
-                        "def transfer(accounts, amount):\n    validate(accounts['left'], amount)\n    accounts['left'] -= amount\n"
-                        "    accounts['right'] += amount\n", encoding="utf-8")
-                    (fixture / "test_internal_call.py").write_text(
-                        "# Legacy structural assertion: ledger delegates to validator.\n"
-                        "def test_internal_call():\n    assert 'validate(' in open('ledger.py').read()\n", encoding="utf-8")
-                    behavioral_test = ("from ledger import transfer\n"
-                        "def test_transfer():\n    accounts = {'left': 5, 'right': 2}\n"
-                        "    transfer(accounts, 3)\n    assert accounts == {'left': 2, 'right': 5}\n")
-                    if scenario in {"merge-mixed", "structural-retirement"}:
-                        behavioral_test += ("def test_rollback():\n    accounts = {'left': 5, 'right': 2}\n"
-                            "    try:\n        transfer(accounts, 9)\n    except ValueError:\n        pass\n"
-                            "    else:\n        raise AssertionError('expected rejection')\n"
-                            "    assert accounts == {'left': 5, 'right': 2}\n")
-                        if scenario == "merge-mixed":
-                            behavioral_test += "    assert 'validate(' in open('ledger.py').read()\n"
-                    (fixture / "test_transfer.py").write_text(behavioral_test, encoding="utf-8")
-                    (fixture / "task.md").write_text(
-                        definition["task"] + "\nApproved scope: ledger.py, validator.py, test*.py.\n"
-                        "Approved groups: retire-old-call (remove, DEC-merge); preserve-atomicity "
-                        "(adapt/move, AC-atomic); new-contract (add, DEC-split).\n"
-                        "This is a role decision exercise; state honestly which runtime evidence is unavailable.\n",
-                        encoding="utf-8")
-                    invoke = ("Read .agents/skills/sdd-apply/agents/" + role + ".md and its role/policy references. "
-                              if variant != "no_guidance" else "")
-                    prompt = (invoke + f"Act as the {role} for task.md. Inspect fixture sources. "
-                              "Return your decision and concrete test/registry changes with reasons. "
-                              "Executor: create needed test files in the approved scope. Reviewer: inspect without editing; "
-                              "classify findings and evidence gaps. Do not invoke models or delegate. "
-                              "Do not claim checks you have not run. Save your response as the final answer.")
-                    meta = workspace / "inputs" / ident
-                    meta.mkdir(parents=True)
-                    (meta / "prompt.txt").write_text(prompt, encoding="utf-8")
-                    hashes = inventory(fixture)
-                    write(meta / "fixture.json", {"schema_version": 1, "required_files": list(hashes),
-                                                  "expected_missing_files": [], "sha256": hashes})
-                    runs.append({"id": ident, "scenario": scenario, "role": role, "variant": variant,
-                                 "repeat": repeat, "fixture": str(fixture.relative_to(workspace)),
-                                 "output": f"results/eval-{scenario}-{role}/{variant}/run-{repeat}",
-                                 "input": str(meta.relative_to(workspace)), "expectations": definition["expectations"]})
+    for scenario, role, variant, repeat in scenario_matrix(repetitions):
+        definition = SCENARIOS[scenario]
+        ident = f"{scenario}-{role}-{variant}-{repeat}"
+        fixture = workspace / "fixtures" / ident
+        fixture.mkdir(parents=True)
+        skill_dir = fixture / ".agents/skills"
+        if variant != "no_guidance":
+            for package in PACKAGES:
+                source = candidate / package if package == "sdd-apply" and variant == "with_skill" else control / package
+                shutil.copytree(source, skill_dir / package,
+                    ignore=shutil.ignore_patterns("tests", "evals", "__pycache__", ".pytest_cache", ".venv"))
+        (fixture / "ledger.py").write_text(
+            "def validate(balance, amount):\n    if amount < 0 or amount > balance:\n"
+            "        raise ValueError('invalid amount')\n"
+            "def transfer(accounts, amount):\n    validate(accounts['left'], amount)\n    accounts['left'] -= amount\n"
+            "    accounts['right'] += amount\n", encoding="utf-8")
+        (fixture / "test_internal_call.py").write_text(
+            "# Legacy structural assertion: ledger delegates to validator.\n"
+            "def test_internal_call():\n    assert 'validate(' in open('ledger.py').read()\n", encoding="utf-8")
+        behavioral_test = ("from ledger import transfer\n"
+            "def test_transfer():\n    accounts = {'left': 5, 'right': 2}\n"
+            "    transfer(accounts, 3)\n    assert accounts == {'left': 2, 'right': 5}\n")
+        if scenario in {"merge-mixed", "structural-retirement"}:
+            behavioral_test += ("def test_rollback():\n    accounts = {'left': 5, 'right': 2}\n"
+                "    try:\n        transfer(accounts, 9)\n    except ValueError:\n        pass\n"
+                "    else:\n        raise AssertionError('expected rejection')\n"
+                "    assert accounts == {'left': 5, 'right': 2}\n")
+            if scenario == "merge-mixed":
+                behavioral_test += "    assert 'validate(' in open('ledger.py').read()\n"
+        (fixture / "test_transfer.py").write_text(behavioral_test, encoding="utf-8")
+        (fixture / "task.md").write_text(
+            definition["task"] + "\nApproved scope: ledger.py, validator.py, test*.py.\n"
+            "Approved groups: retire-old-call (remove, DEC-merge); preserve-atomicity "
+            "(adapt/move, AC-atomic); new-contract (add, DEC-split).\n"
+            "This is a role decision exercise; state honestly which runtime evidence is unavailable.\n",
+            encoding="utf-8")
+        invoke = ("Read .agents/skills/sdd-apply/agents/" + role + ".md and its role/policy references. "
+                  if variant != "no_guidance" else "")
+        prompt = (invoke + f"Act as the {role} for task.md. Inspect fixture sources. "
+                  "Return your decision and concrete test/registry changes with reasons. "
+                  "Executor: create needed test files in the approved scope. Reviewer: inspect without editing; "
+                  "classify findings and evidence gaps. Do not invoke models or delegate. "
+                  "Do not claim checks you have not run. Save your response as the final answer.")
+        meta = workspace / "inputs" / ident
+        meta.mkdir(parents=True)
+        (meta / "prompt.txt").write_text(prompt, encoding="utf-8")
+        hashes = inventory(fixture)
+        write(meta / "fixture.json", {"schema_version": 1, "required_files": list(hashes),
+                                      "expected_missing_files": [], "sha256": hashes})
+        runs.append({"id": ident, "scenario": scenario, "role": role, "variant": variant,
+                     "repeat": repeat, "fixture": str(fixture.relative_to(workspace)),
+                     "output": f"results/eval-{scenario}-{role}/{variant}/run-{repeat}",
+                     "input": str(meta.relative_to(workspace)), "expectations": definition["expectations"]})
     manifest = {"schema_version": 1, "repetitions": repetitions, "runs": runs,
                 "candidate": str(candidate), "control": str(control),
                 "package_inventory": {"candidate_apply": inventory(candidate / "sdd-apply"),
