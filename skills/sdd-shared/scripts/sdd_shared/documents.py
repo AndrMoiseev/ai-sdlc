@@ -128,6 +128,8 @@ def document_schema(meta, work_kind):
 
 def read_document(path, work_kind="change"):
     path = Path(path)
+    if path.name == "state.md":
+        raise ValidationError("state_format", "Checkpoint metadata requires state.yaml; Markdown state documents are unsupported", path)
     try:
         with path.open(encoding="utf-8-sig") as stream:
             text = stream.read(MAX_DOCUMENT_CHARS + 1)
@@ -155,6 +157,8 @@ def read_document(path, work_kind="change"):
         kind = meta.get("document_type", "")
         if not isinstance(kind, str):
             raise ValidationError("document_type", "document_type must be a string")
+        if kind == "state":
+            raise ValidationError("state_format", "Checkpoint metadata requires state.yaml; Markdown state documents are unsupported")
         if work_kind == "refactoring" and kind not in kinds and kind not in ANCILLARY:
             raise ValidationError("document_type", f"Unsupported refactoring document_type: {kind}")
         if work_kind == "refactoring" and kind in ANCILLARY:
@@ -233,13 +237,11 @@ def read_document(path, work_kind="change"):
 
 
 def read_checkpoint(root, work_kind="change"):
-    """Read machine state, or legacy frontmatter when no YAML checkpoint exists."""
+    """Read the required YAML checkpoint and validate its companion prose."""
     from .paths import contained
 
     machine = contained(root, "state.yaml")
     prose = contained(root, "state.md")
-    if not machine.exists():
-        return read_document(prose, work_kind) if prose.exists() else None
     try:
         with machine.open(encoding="utf-8-sig") as stream:
             meta = safe_yaml(stream.read(MAX_YAML_CHARS + 1))
@@ -248,10 +250,27 @@ def read_checkpoint(root, work_kind="change"):
             raise ValidationError("document_type", "state.yaml requires document_type: state")
         if not valid_slug(meta.get("change_id")) or not isinstance(meta.get("language"), str) or not meta["language"].strip():
             raise ValidationError("document_metadata", "state.yaml requires change_id and language")
-        # Only inspect the header: machine readers do not parse the prose body.
+        if meta["change_id"] != machine.parent.name:
+            raise ValidationError("document_identity", "Checkpoint change_id does not match its work root")
+        required = {"schema_version", "document_type", "change_id", "language", "phase", "flow",
+                    "awaiting", "updated_at", "document_links", "review_links", "approval_refs",
+                    "next_question", "checks"}
+        if not required <= meta.keys() or meta.keys() - required - {"work_kind"}:
+            raise ValidationError("state_fields", "state.yaml requires all checkpoint fields and permits only optional work_kind")
         with prose.open(encoding="utf-8-sig") as stream:
-            if stream.readline(MAX_DOCUMENT_CHARS + 1).strip() == "---":
-                raise ValidationError("state_conflict", "Move legacy questions to questions.md and remove state.md frontmatter before using state.yaml", prose)
+            body = stream.read(MAX_DOCUMENT_CHARS + 1)
+        if body.partition("\n")[0].strip() == "---":
+            raise ValidationError("state_format", "state.md must contain prose without YAML frontmatter", prose)
+        for token in parse_markdown(body):
+            if token.type == "fence" and token.info.strip() == "yaml":
+                try:
+                    record = safe_yaml(token.content)
+                except ValidationError as exc:
+                    if exc.code == "yaml_mapping":
+                        continue
+                    raise
+                if "sdd_record" in record:
+                    raise ValidationError("state_format", "state.md cannot contain machine records; questions belong in questions.md", prose)
         return Document(machine, meta, [])
     except (OSError, UnicodeError) as exc:
         raise InputError("unreadable_input", str(exc), getattr(exc, "filename", None) or machine) from exc

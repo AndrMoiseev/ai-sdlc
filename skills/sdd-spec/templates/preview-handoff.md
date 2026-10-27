@@ -8,7 +8,7 @@
 
 Продолжи пояснение изменения `<change-id>`. Корень проекта: `<repo в этой среде>`.
 Каталог изменения: `sdd/changes/<change-id>/`. Прочитай `<пути документов пояснения>`,
-`archify/index.md`, `state.yaml` и `state.md` (или старый `state.md`), proposal.md, design.md и все specs/**/spec.md.
+`archify/index.md`, `state.yaml` и `state.md`, proposal.md, design.md и все specs/**/spec.md.
 Найди установленные sdd-spec и archify через каталог скиллов среды, прочитай их
 инструкции и контракт проверки archify со снимками. Это продолжение поручения
 в области `<сохранённая область>`; выполнено `<готовая часть>`, осталось `<остаток>`.

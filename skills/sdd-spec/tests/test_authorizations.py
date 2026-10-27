@@ -1,7 +1,8 @@
 from lib.reviews import review_status
 from lib.snapshots import snapshot
-from test_review_records import project, report, write, finding
+from test_review_records import checkpoint, project, report, write, finding
 import pytest
+import yaml
 
 
 def user(tmp_path, kind, **extra):
@@ -72,7 +73,9 @@ def test_deferred_requires_return_and_cancelled_work_not_active(tmp_path):
 
 def test_state_never_authorizes_and_broken_state_recovers(tmp_path):
     root = project(tmp_path)
-    write(root / "state.md", {"schema_version": 1, "phase": "plan_approved", "approval_refs": ["USER-missing"]})
+    meta = checkpoint(root)
+    meta.update(phase="plan_approved", approval_refs=["USER-missing"])
+    (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
     result = review_status(tmp_path, root, "documents")
     assert not result["approval_status"]["approved"]
     assert result["warnings"][0]["code"] == "state_recovery"

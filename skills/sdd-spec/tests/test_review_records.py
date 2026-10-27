@@ -24,7 +24,19 @@ def project(tmp_path):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"normative\n")
+    checkpoint(root)
     return root
+
+
+def checkpoint(root):
+    meta = dict(schema_version=1, document_type="state", change_id=root.name, language="en",
+                phase="drafting", flow="draft", awaiting="clarification",
+                updated_at="2026-01-01T00:00:00Z", document_links=[], review_links=[],
+                approval_refs=[], next_question=None,
+                checks={"structure": "not_run", "freshness": "not_checked"})
+    (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
+    (root / "state.md").write_text("# Continuation\nKeep the user's remaining scope.\n", encoding="utf-8")
+    return meta
 
 
 def finding():

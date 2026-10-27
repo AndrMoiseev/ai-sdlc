@@ -40,6 +40,12 @@ def digest(value):
 
 def write_document(root, relative, kind, records=(), **extra):
     meta = dict(schema_version=1, change_id="demo", language="en", document_type=kind, **extra)
+    if kind == "state":
+        assert relative == "state.yaml" and not records
+        meta.update(flow="plan", next_question=None, checks={"structure": "passed", "freshness": "current"})
+        (root / relative).write_text(yaml.safe_dump(meta), encoding="utf-8")
+        (root / "state.md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return
     text = "---\n" + yaml.safe_dump(meta, sort_keys=False) + "---\n# Synthetic legacy fixture\n"
     for record in records:
         text += "\n### Record\n\n```yaml\n" + yaml.safe_dump(record, sort_keys=False) + "```\n"
@@ -81,7 +87,7 @@ def ordinary(tmp_path):
                               kind=kind, scope=scope, response="Synthetic test approval only",
                               date=STAMP, inputs=manifest(root, stage)))
     write_document(root, "review/decisions.md", "decisions", users)
-    write_document(root, "state.md", "state", phase="plan_approved", awaiting="none",
+    write_document(root, "state.yaml", "state", phase="plan_approved", awaiting="none",
                    updated_at=STAMP, document_links=["tasks.md"],
                    review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     (project / "check.py").write_bytes(b"assert 2 + 3 == 5\n")

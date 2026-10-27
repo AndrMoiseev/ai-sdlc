@@ -7,7 +7,7 @@
 для проверки исходных specs/design — [нормативный формат](../../sdd-shared/references/document-format-normative.md).
 
 Проверь происхождение существенных положений по [discussion](../references/discussion.md),
-decisions.md и questions.md, включая старые Q-записи в state. Новые существенные
+decisions.md и questions.md. Новые существенные
 выборы при детализации плана также верни в обсуждение; сохранять независимую
 часть уже порученного плана допустимо.
 

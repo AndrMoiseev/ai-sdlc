@@ -1,4 +1,4 @@
-﻿"""Structural review and authorization checks; never proof of user provenance."""
+"""Structural review and authorization checks; never proof of user provenance."""
 import re
 from datetime import datetime
 from pathlib import Path
@@ -88,7 +88,7 @@ def required_lenses(project_root: Path) -> list[str]:
     return result
 
 
-def _questions(document, root, questions, *, legacy=False):
+def _questions(document, root, questions):
     for question in document.records:
         fields(question, {"sdd_record", "id", "text", "blocking", "status"}, {"reason", "return_at", "resolution"})
         require(question["sdd_record"] == "question" and valid_id(question["id"], "Q"), "Invalid question record")
@@ -97,7 +97,7 @@ def _questions(document, root, questions, *, legacy=False):
         require(text(question["text"]) and type(question["blocking"]) is bool and question["status"] in {"open", "resolved"}, "Invalid question fields")
         if question["status"] == "open" and not question["blocking"]:
             require(text(question.get("reason")) and text(question.get("return_at")), "Deferred question needs reason and return_at")
-        if not legacy and question["status"] == "resolved":
+        if question["status"] == "resolved":
             require(text(question.get("resolution")), "Resolved question needs a resolution reference")
         if "resolution" in question:
             require(text(question["resolution"]), "Resolution reference must be text")
@@ -289,38 +289,29 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
     state = root / "state.yaml"
     try:
         checkpoint = read_checkpoint(root, work_kind)
-        if checkpoint is not None:
-            state = checkpoint.path
-            _questions(checkpoint, root, questions, legacy=True)
-            identity(checkpoint.meta, "state", root.name, work_kind)
-            fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language", "work_kind", "flow", "next_question", "checks"})
-            require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
-            require(checkpoint.meta["phase"] in {"discovery", "drafting", "document_review", "user_review", "planning", "plan_review", "plan_approved"}, "Invalid state phase")
-            require(checkpoint.meta["awaiting"] in {"none", "clarification", "review_consent", "planning_command", "final_approval"}, "Invalid awaiting value")
-            timestamp(checkpoint.meta["updated_at"])
-            for field in ("document_links", "review_links"):
-                require(strings(checkpoint.meta[field]), "State links must be unique text lists")
-                for link in checkpoint.meta[field]:
-                    contained(root, link, must_exist=True)
-            require(strings(checkpoint.meta.get("approval_refs", [])), "approval_refs must be a list")
-            require(all(i in users for i in checkpoint.meta.get("approval_refs", [])), "State refers to missing USER decision")
-            if "flow" in checkpoint.meta:
-                require(checkpoint.meta["flow"] in ("explore", "draft", "revise", "explain", "review", "user-review", "plan", "resume"), "Invalid state flow")
-            if checkpoint.meta.get("next_question") is not None:
-                require(isinstance(checkpoint.meta["next_question"], str) and checkpoint.meta["next_question"] in questions, "State refers to missing question")
-                require(questions[checkpoint.meta["next_question"]]["status"] == "open", "Next question must be open")
-            if "checks" in checkpoint.meta:
-                checks = checkpoint.meta["checks"]
-                fields(checks, {"structure", "freshness"})
-                require(checks["structure"] in ("not_run", "passed", "failed"), "Invalid structure check status")
-                require(checks["freshness"] in ("not_checked", "current", "stale", "missing"), "Invalid freshness check status")
-        else:
-            # Legacy bundles may have valid approval evidence without a checkpoint.
-            warnings.append({"code": "state_recovery", "path": str(state), "element_id": None, "message": "State is missing; recover a draft checkpoint without inferring approvals."})
+        state = checkpoint.path
+        identity(checkpoint.meta, "state", root.name, work_kind)
+        require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
+        require(checkpoint.meta["phase"] in {"discovery", "drafting", "document_review", "user_review", "planning", "plan_review", "plan_approved"}, "Invalid state phase")
+        require(checkpoint.meta["awaiting"] in {"none", "clarification", "review_consent", "planning_command", "final_approval"}, "Invalid awaiting value")
+        timestamp(checkpoint.meta["updated_at"])
+        for field in ("document_links", "review_links"):
+            require(strings(checkpoint.meta[field]), "State links must be unique text lists")
+            for link in checkpoint.meta[field]:
+                contained(root, link, must_exist=True)
+        require(strings(checkpoint.meta["approval_refs"]), "approval_refs must be a list")
+        require(all(i in users for i in checkpoint.meta["approval_refs"]), "State refers to missing USER decision")
+        require(checkpoint.meta["flow"] in ("explore", "draft", "revise", "explain", "review", "user-review", "plan", "resume"), "Invalid state flow")
+        if checkpoint.meta["next_question"] is not None:
+            require(isinstance(checkpoint.meta["next_question"], str) and checkpoint.meta["next_question"] in questions, "State refers to missing question")
+            require(questions[checkpoint.meta["next_question"]]["status"] == "open", "Next question must be open")
+        checks = checkpoint.meta["checks"]
+        fields(checks, {"structure", "freshness"})
+        require(checks["structure"] in ("not_run", "passed", "failed"), "Invalid structure check status")
+        require(checks["freshness"] in ("not_checked", "current", "stale", "missing"), "Invalid freshness check status")
     except (ValidationError, TypeError, KeyError, OSError) as exc:
         discussion_valid = False
-        duplicate = getattr(exc, "code", None) == "duplicate_question"
-        (errors if duplicate else warnings).append({"code": "duplicate_question" if duplicate else "state_recovery", "path": getattr(exc, "path", "") or str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
+        warnings.append({"code": "state_recovery", "path": getattr(exc, "path", "") or str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
     open_questions = sorted(i for i, question in questions.items() if question["status"] == "open")
     blocking_questions = [i for i in open_questions if questions[i]["blocking"]]
     discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not blocking_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}

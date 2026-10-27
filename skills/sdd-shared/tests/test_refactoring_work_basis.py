@@ -22,6 +22,13 @@ reviews = loader.load(ROOT, "reviews")
 
 def document(root, relative, kind, records=(), **extra):
     meta = dict(schema_version=1, work_kind="refactoring", document_type=kind, change_id=root.name, language="en", **extra)
+    if kind == "state":
+        assert relative == "state.yaml" and not records
+        meta.update(flow="plan", next_question=None, checks={"structure": "passed", "freshness": "current"})
+        target = root / relative
+        target.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        target.with_suffix(".md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return target
     text = "---\n" + yaml.safe_dump(meta, sort_keys=False) + "---\n# Document\n"
     for record in records:
         text += "\n### " + record["id"] + "\n\n```yaml\n" + yaml.safe_dump(record, sort_keys=False) + "```\n"
@@ -56,7 +63,7 @@ def approved_refactoring(project):
                               scope=dict(stage=reviews.STAGES[stage], **({"lenses": ["plan" if stage == "plan" else "consistency"]} if kind == "review_waiver" else {})),
                               response="Approved synthetic fixture", date="2026-10-24T00:00:00Z", inputs=manifest))
     document(root, "review/decisions.md", "decisions", users)
-    document(root, "state.md", "state", phase="plan_approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
+    document(root, "state.yaml", "state", phase="plan_approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
              document_links=["proposal.md", "design.md", "tasks.md"], review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     document(root, "questions.md", "questions")
     document(root, "review/summary.md", "summary", findings=[])
@@ -116,11 +123,13 @@ def test_refactoring_work_basis_copied_authorizations_cannot_transfer(tmp_path, 
 @pytest.mark.parametrize("kind", ["state", "questions", "decisions", "review", "summary"])
 def test_refactoring_work_basis_ancillary_route_identity(tmp_path, kind):
     root, _, _ = approved_refactoring(tmp_path)
-    target = document(root, "aux.md", kind)
-    assert documents.read_document(target, "refactoring").meta["work_kind"] == "refactoring"
+    target = root / "state.yaml" if kind == "state" else document(root, "aux.md", kind)
+    def read():
+        return documents.read_checkpoint(root, "refactoring") if kind == "state" else documents.read_document(target, "refactoring")
+    assert read().meta["work_kind"] == "refactoring"
     target.write_text(target.read_text(encoding="utf-8").replace("change_id: demo", "change_id: other"), encoding="utf-8")
     with pytest.raises(documents.ValidationError, match="change_id"):
-        documents.read_document(target, "refactoring")
+        read()
 
 
 def test_refactoring_work_basis_current_review_and_stale_inputs(tmp_path):

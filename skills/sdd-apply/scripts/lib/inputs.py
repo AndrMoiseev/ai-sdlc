@@ -55,9 +55,7 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
         require(checks[stage].get("schema_version") == 1 and checks[stage].get("approval_status", {}).get("ready") is True, "approval_missing", f"{stage}: {checks[stage]}")
         require(not any(w["code"] == "state_recovery" for w in checks[stage].get("warnings", [])), "state_recovery", "Recover sdd-spec checkpoint first")
     docs = spec_modules(dependency)
-    checkpoint = docs.read_checkpoint(directory, work_kind)
-    require(checkpoint is not None, "state_recovery", "Recover sdd-spec checkpoint first")
-    require(not any(r.get("blocking") and r.get("status") == "open" for r in checkpoint.records), "open_question", "Resolve blocking questions in sdd-spec")
+    docs.read_checkpoint(directory, work_kind)
     records = docs.read_document(directory / "tasks.md", work_kind).records
     tasks = [record for record in records if record["sdd_record"] == "task"]
     plan_records = {}

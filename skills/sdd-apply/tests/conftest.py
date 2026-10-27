@@ -129,6 +129,13 @@ def shared_cli(monkeypatch):
 
 def document(path, meta, records=()):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if meta.get("document_type") == "state":
+        assert path.name == "state.yaml" and not records
+        meta = dict(meta, flow="plan", next_question=None,
+                    checks={"structure": "passed", "freshness": "current"})
+        path.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        path.with_suffix(".md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return
     path.write_text("---\n" + yaml.safe_dump(meta) + "---\n" + "\n".join("### Record\n\n```yaml\n" + yaml.safe_dump(r) + "```\n\nDescription.\n" for r in records), encoding="utf-8")
 
 
@@ -149,7 +156,7 @@ def project_template(tmp_path_factory):
         for decision in (kind, "review_waiver"):
             records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", inputs=manifest))
     document(change / "review/decisions.md", {"schema_version": 1}, records)
-    document(change / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
+    document(change / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
     (root / "check.py").write_text("assert 2 + 3 == 5\n")
     # Contract tests install the hooks they exercise. Git's sample hooks and
     # default template files otherwise get copied into every native fixture.

@@ -10,8 +10,7 @@ def call(project):
     return validate(project, "demo", {"text": "Implement", "source": "message"}, SPEC)
 
 
-@pytest.mark.parametrize("checkpoint_format", ["legacy", "split"])
-def test_approved_and_preserves_dirty(project, checkpoint_format):
+def test_approved_and_preserves_dirty(project):
     # Reuse the existing admission fixture and shared CLI adapter: a valid
     # approval must admit execution without reports or legacy review waivers.
     change = project / "sdd/changes/demo"
@@ -19,15 +18,9 @@ def test_approved_and_preserves_dirty(project, checkpoint_format):
     decisions = docs.read_document(change / "review/decisions.md")
     approvals = [record for record in decisions.records if record["kind"] != "review_waiver"]
     document(change / "review/decisions.md", decisions.meta, approvals)
-    checkpoint = docs.read_document(change / "state.md")
+    checkpoint = docs.read_checkpoint(change)
     checkpoint.meta["approval_refs"] = [record["id"] for record in approvals]
-    document(change / "state.md", checkpoint.meta, checkpoint.records)
-    if checkpoint_format == "split":
-        # Reuse the admission adapter/fixture: the new file selection must reach
-        # execution without attempting to parse Markdown prose as frontmatter.
-        import yaml
-        (change / "state.yaml").write_text(yaml.safe_dump(checkpoint.meta), encoding="utf-8")
-        (change / "state.md").write_text("# Continue the approved plan\n", encoding="utf-8")
+    document(change / "state.yaml", checkpoint.meta)
     approval = next(record for record in approvals if record["kind"] == "plan_approval")
     instruction = {"text": approval["response"], "source": f"review/decisions.md#{approval['id']}"}
     (project / "foreign.txt").write_bytes(b"staged")
@@ -47,7 +40,7 @@ def test_approved_and_preserves_dirty(project, checkpoint_format):
     assert (project / "untracked.txt").read_bytes() == b"keep"
 
 
-@pytest.mark.parametrize("mutation", ["approval", "stale", "question", "missing"])
+@pytest.mark.parametrize("mutation", ["approval", "stale", "question", "missing", "markdown-state"])
 def test_invalid(project, mutation):
     change = project / "sdd/changes/demo"
     if mutation == "approval":
@@ -56,8 +49,14 @@ def test_invalid(project, mutation):
         with (change / "tasks.md").open("a") as stream:
             stream.write("Changed plan\n")
     elif mutation == "question":
-        with (change / "state.md").open("a") as stream:
-            stream.write("\n### Open question\n\n```yaml\nsdd_record: question\nid: Q-open\ntext: Resolve\nblocking: true\nstatus: open\n```\n")
+        document(change / "questions.md", dict(schema_version=1, document_type="questions", change_id="demo", language="en"),
+                 [dict(sdd_record="question", id="Q-open", text="Resolve", blocking=True, status="open")])
+    elif mutation == "markdown-state":
+        # Reuse the admission fixture: rejecting old checkpoint bytes must not
+        # rewrite them or let valid approval records bypass the format check.
+        machine = change / "state.yaml"
+        (change / "state.md").write_text("---\n" + machine.read_text(encoding="utf-8") + "---\n", encoding="utf-8")
+        machine.unlink()
     else:
         (change / "tasks.md").unlink()
     before = {str(p): p.read_bytes() for p in change.rglob("*") if p.is_file()}

@@ -56,7 +56,7 @@ def approved_basis(project, work_kind="refactoring", configure=None):
                                                  **({"lenses": ["consistency" if stage == "documents" else "plan"]} if kind == "review_waiver" else {})),
                                       response="Approved synthetic test fixture", date="2026-10-24T00:00:00Z", inputs=manifest))
         document(root / "review/decisions.md", {**meta, "document_type": "decisions"}, approvals)
-        document(root / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
+        document(root / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
                                     "updated_at": "2026-10-24T00:00:00Z", "document_links": ["tasks.md"],
                                     "review_links": ["review/decisions.md"], "approval_refs": [a["id"] for a in approvals]})
         stage_files(project, ".")
