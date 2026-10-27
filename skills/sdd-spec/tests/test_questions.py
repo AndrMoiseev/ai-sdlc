@@ -2,12 +2,71 @@
 import json
 
 import pytest
+import yaml
 
 from lib.reviews import review_status
 from lib.snapshots import snapshot
 from test_authorizations import decisions, user
-from test_check_command import create_project, run_command
+from test_check_command import create_project
 from test_review_records import project, report, write
+
+
+def split_checkpoint(root):
+    """Reuse the discussion fixture to exercise the real legacy/new file boundary."""
+    from lib.documents import read_document
+    legacy = discussion_file(root, legacy=True, document_type="state")
+    meta = read_document(legacy).meta
+    meta.update(flow="draft", next_question=None,
+                checks={"structure": "passed", "freshness": "current"})
+    (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
+    legacy.write_text("# Continuation\n\nKeep the user's remaining scope.\n", encoding="utf-8")
+    return meta
+
+
+def test_split_checkpoint_keeps_question_gate_and_normative_snapshot(tmp_path):
+    # Real files are necessary here: the risk is selecting the wrong state file
+    # and losing a blocker during migration. Reuse the existing discussion adapter.
+    root = approved_bundle(tmp_path)
+    before = snapshot(tmp_path, "demo", "documents")
+    meta = split_checkpoint(root)
+    assert review_status(tmp_path, root, "documents")["approval_status"]["ready"]
+    discussion_file(root, [question()])
+    meta["next_question"] = "Q-mode"
+    (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
+    result = review_status(tmp_path, root, "documents")
+    assert not result["warnings"]
+    assert result["discussion_status"]["blocking_questions"] == ["Q-mode"]
+    assert not result["approval_status"]["ready"]
+    assert snapshot(tmp_path, "demo", "documents") == before
+
+
+@pytest.mark.parametrize("damage", ["yaml", "version", "frontmatter", "missing-prose", "question", "checks", "identity"])
+def test_incomplete_split_checkpoint_cannot_admit_execution(tmp_path, damage):
+    # The two-file selection/failure contract needs disk inputs; existing fixtures
+    # provide approved evidence so this detects an accidental approval bypass.
+    root = approved_bundle(tmp_path)
+    meta = split_checkpoint(root)
+    machine, prose = root / "state.yaml", root / "state.md"
+    if damage == "yaml":
+        machine.write_text("broken: [", encoding="utf-8")
+    elif damage == "frontmatter":
+        discussion_file(root, legacy=True)
+    elif damage == "missing-prose":
+        prose.unlink()
+    else:
+        if damage == "version":
+            meta["schema_version"] = 99
+        elif damage == "question":
+            meta["next_question"] = "Q-missing"
+        elif damage == "checks":
+            meta["checks"]["structure"] = "invented"
+        else:
+            del meta["language"]
+        machine.write_text(yaml.safe_dump(meta), encoding="utf-8")
+    result = review_status(tmp_path, root, "documents")
+    assert any(item["code"] == "state_recovery" for item in result["warnings"])
+    assert not result["discussion_status"]["complete"]
+    assert not result["approval_status"]["ready"]
 
 
 def question(**extra):
@@ -145,7 +204,7 @@ def test_discussion_files_do_not_change_review_snapshots(tmp_path):
 
 
 @pytest.mark.parametrize("mode,exit_code", [("open", 0), ("invalid", 1), ("corrupt", 1), ("nul-resolution", 1)])
-def test_public_cli_reports_discussion_separately(tmp_path, mode, exit_code):
+def test_command_reports_discussion_separately(tmp_path, mode, exit_code, command_main):
     root = create_project(tmp_path)
     path = discussion_file(root, [question()])
     if mode == "invalid":
@@ -154,7 +213,7 @@ def test_public_cli_reports_discussion_separately(tmp_path, mode, exit_code):
         path.write_bytes(b"\xff")
     elif mode == "nul-resolution":
         discussion_file(root, [{**question(), "status": "resolved", "resolution": "design.md\0"}])
-    result = run_command(tmp_path)
+    result = command_main(tmp_path)
     assert result.returncode == exit_code, result.stdout + result.stderr
     output = json.loads(result.stdout)
     assert output["discussion_status"]["complete"] is False

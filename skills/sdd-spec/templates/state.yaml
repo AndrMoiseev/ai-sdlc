@@ -1,0 +1,15 @@
+schema_version: 1
+document_type: state
+change_id: sample-change
+language: ru
+phase: discovery
+flow: explore
+awaiting: clarification
+updated_at: '2026-01-01T00:00:00Z'
+document_links: []
+review_links: []
+approval_refs: []
+next_question: null
+checks:
+  structure: not_run
+  freshness: not_checked

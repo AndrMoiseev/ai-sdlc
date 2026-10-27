@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from .documents import InputError, ValidationError, read_document, valid_id
+from .documents import InputError, ValidationError, read_checkpoint, read_document, valid_id
 from .paths import contained, change_root as resolve_work
 from .snapshots import snapshot
 
@@ -286,14 +286,14 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
     except (ValidationError, TypeError, KeyError, OSError) as exc:
         discussion_valid = False
         errors.append({"code": "questions_structure", "path": str(questions_path), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
-    state = root / "state.md"
+    state = root / "state.yaml"
     try:
-        state = contained(root, "state.md")
-        if state.exists():
-            checkpoint = read_document(state, work_kind)
+        checkpoint = read_checkpoint(root, work_kind)
+        if checkpoint is not None:
+            state = checkpoint.path
             _questions(checkpoint, root, questions, legacy=True)
             identity(checkpoint.meta, "state", root.name, work_kind)
-            fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language", "work_kind"})
+            fields(checkpoint.meta, {"schema_version", "change_id", "phase", "awaiting", "updated_at", "document_links", "review_links", "approval_refs"}, {"document_type", "language", "work_kind", "flow", "next_question", "checks"})
             require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
             require(checkpoint.meta["phase"] in {"discovery", "drafting", "document_review", "user_review", "planning", "plan_review", "plan_approved"}, "Invalid state phase")
             require(checkpoint.meta["awaiting"] in {"none", "clarification", "review_consent", "planning_command", "final_approval"}, "Invalid awaiting value")
@@ -304,13 +304,23 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
                     contained(root, link, must_exist=True)
             require(strings(checkpoint.meta.get("approval_refs", [])), "approval_refs must be a list")
             require(all(i in users for i in checkpoint.meta.get("approval_refs", [])), "State refers to missing USER decision")
+            if "flow" in checkpoint.meta:
+                require(checkpoint.meta["flow"] in ("explore", "draft", "revise", "explain", "review", "user-review", "plan", "resume"), "Invalid state flow")
+            if checkpoint.meta.get("next_question") is not None:
+                require(isinstance(checkpoint.meta["next_question"], str) and checkpoint.meta["next_question"] in questions, "State refers to missing question")
+                require(questions[checkpoint.meta["next_question"]]["status"] == "open", "Next question must be open")
+            if "checks" in checkpoint.meta:
+                checks = checkpoint.meta["checks"]
+                fields(checks, {"structure", "freshness"})
+                require(checks["structure"] in ("not_run", "passed", "failed"), "Invalid structure check status")
+                require(checks["freshness"] in ("not_checked", "current", "stale", "missing"), "Invalid freshness check status")
         else:
             # Legacy bundles may have valid approval evidence without a checkpoint.
             warnings.append({"code": "state_recovery", "path": str(state), "element_id": None, "message": "State is missing; recover a draft checkpoint without inferring approvals."})
     except (ValidationError, TypeError, KeyError, OSError) as exc:
         discussion_valid = False
         duplicate = getattr(exc, "code", None) == "duplicate_question"
-        (errors if duplicate else warnings).append({"code": "duplicate_question" if duplicate else "state_recovery", "path": str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
+        (errors if duplicate else warnings).append({"code": "duplicate_question" if duplicate else "state_recovery", "path": getattr(exc, "path", "") or str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
     open_questions = sorted(i for i, question in questions.items() if question["status"] == "open")
     blocking_questions = [i for i in open_questions if questions[i]["blocking"]]
     discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not blocking_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}

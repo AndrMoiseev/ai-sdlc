@@ -230,3 +230,31 @@ def read_document(path, work_kind="change"):
     except ValidationError as exc:
         exc.path = exc.path or str(path)
         raise
+
+
+def read_checkpoint(root, work_kind="change"):
+    """Read machine state, or legacy frontmatter when no YAML checkpoint exists."""
+    from .paths import contained
+
+    machine = contained(root, "state.yaml")
+    prose = contained(root, "state.md")
+    if not machine.exists():
+        return read_document(prose, work_kind) if prose.exists() else None
+    try:
+        with machine.open(encoding="utf-8-sig") as stream:
+            meta = safe_yaml(stream.read(MAX_YAML_CHARS + 1))
+        document_schema(meta, work_kind)
+        if meta.get("document_type") != "state":
+            raise ValidationError("document_type", "state.yaml requires document_type: state")
+        if not valid_slug(meta.get("change_id")) or not isinstance(meta.get("language"), str) or not meta["language"].strip():
+            raise ValidationError("document_metadata", "state.yaml requires change_id and language")
+        # Only inspect the header: machine readers do not parse the prose body.
+        with prose.open(encoding="utf-8-sig") as stream:
+            if stream.readline(MAX_DOCUMENT_CHARS + 1).strip() == "---":
+                raise ValidationError("state_conflict", "Move legacy questions to questions.md and remove state.md frontmatter before using state.yaml", prose)
+        return Document(machine, meta, [])
+    except (OSError, UnicodeError) as exc:
+        raise InputError("unreadable_input", str(exc), getattr(exc, "filename", None) or machine) from exc
+    except ValidationError as exc:
+        exc.path = exc.path or str(machine)
+        raise

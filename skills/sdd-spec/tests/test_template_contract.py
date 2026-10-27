@@ -43,10 +43,11 @@ def test_two_capabilities_and_filled_review_templates(tmp_path):
                     date='2026-01-01T01:00:00Z', inputs=inputs)
     write_frontmatter(change / 'review/decisions.md', decision_meta,
                       '\n### Согласование\n\n```yaml\n' + yaml.safe_dump(decision, allow_unicode=True) + '```\n')
-    state = read_document(SKILL / 'templates/state.md').meta
+    state = yaml.safe_load((SKILL / 'templates/state.yaml').read_text(encoding='utf-8'))
     state.update(phase='plan_approved', awaiting='none', document_links=['proposal.md', 'tasks.md'],
                  approval_refs=['USER-approve-plan'], review_links=[f'review/{report["run_id"]}/plan.md'])
-    write_frontmatter(change / 'state.md', state)
+    (change / 'state.yaml').write_text(yaml.safe_dump(state), encoding='utf-8')
+    (change / 'state.md').write_bytes((SKILL / 'templates/state.md').read_bytes())
     result = review_status(tmp_path, change, 'plan')
     assert result['errors'] == []
     assert result['warnings'] == []

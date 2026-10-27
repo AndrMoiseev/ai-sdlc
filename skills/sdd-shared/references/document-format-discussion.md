@@ -6,7 +6,37 @@ checkpoint и resume. При проверке сохранённых отчёт�
 
 ## State и вопросы
 
-Дополнительные поля state: phase, awaiting, updated_at (quoted ISO UTC), document_links, review_links, approval_refs. Phase: discovery/drafting/document_review/user_review/planning/plan_review/plan_approved. Awaiting: none/clarification/review_consent/planning_command/final_approval. Пути относительны изменению, approval_refs содержит USER-ID. Читаемая часть хранит следующий шаг, предложения, решения-ссылки и состояние проверок, без дублирования specs/design.
+Сохраняй checkpoint двумя файлами: `state.yaml` — машинное состояние по
+[шаблону](../../sdd-spec/templates/state.yaml), `state.md` — пояснения по
+[шаблону](../../sdd-spec/templates/state.md), без frontmatter и машинных Q-записей.
+Каждое машинное поле имеет один источник истины в YAML. Проза объясняет следующий
+шаг, выполненную часть поручения, ограничения, основания и выбор пояснения/гуманизации.
+Требования и design остаются в своих документах.
+
+В `state.yaml` сохраняй общие поля schema_version: 1, document_type: state,
+change_id, language; для refactoring добавь work_kind: refactoring.
+Дополнительные поля: phase, awaiting, updated_at (quoted ISO UTC), document_links,
+review_links, approval_refs. Phase: discovery/drafting/document_review/user_review/planning/plan_review/plan_approved.
+Awaiting: none/clarification/review_consent/planning_command/final_approval.
+Пути относительны изменению; approval_refs содержит ссылки USER-ID на согласования
+и поручения, содержание и действительность которых проверяются в review/decisions.md.
+
+Текущий флоу хранится в `flow`: explore/draft/revise/explain/review/user-review/plan/resume.
+`next_question` — ID открытого вопроса из questions.md либо null, если вопросов нет.
+`checks.structure`: not_run/passed/failed; `checks.freshness`: not_checked/current/stale/missing.
+Freshness отражает наличие и актуальность проверяемых оснований: missing при
+недостающих основаниях, иначе stale при устаревших, иначе current после сверки.
+Статусы проверок — сохранённый итог, они не заменяют повторную проверку готовности
+и согласований. Для совместимости flow, next_question и checks необязательны при чтении.
+
+Если `state.yaml` отсутствует, читай старый `state.md` с YAML-frontmatter и Q-записями.
+При следующем checkpoint перенеси вопросы по правилам discussion, сохрани метаданные
+в state.yaml и оставь в state.md прозу. Сначала проверь сохранность ID, ответов,
+поручений и оснований. Не заполняй неизвестные значения догадками.
+При наличии state.yaml старый frontmatter в state.md считается конфликтом даже при
+совпадении полей; повреждённый YAML не разрешает откат к старым метаданным.
+Пара считается сохранённой после записи и проверки обоих файлов. Неполную пару
+восстанавливай по исходным документам; автоматически считать её согласованной нельзя.
 
 Поврежденный state восстанавливается как черновик по документам и доступным проверенным решениям. Phase не подтверждает разрешения. Отмена или замена последним ответом пользователя прекращает старое поручение; наличие tasks не восстанавливает его.
 
@@ -42,7 +72,7 @@ questions.md и state — ошибка, включая совпадающие з
 нового document_type, sdd_record или вида USER. Заголовки находок служат
 якорями; вопросы используют Q-ID в questions.md, а не FIND ревью.
 
-Раздел «Премортем» в state содержит краткий итог: отсутствие находок либо
+Раздел «Премортем» в state.md содержит краткий итог: отсутствие находок либо
 наличие находок со ссылкой на документ. Закрытые находки и ссылка сохраняются.
 Разбор не входит в манифест documents или plan. Выбранные изменения цели,
 поведения и подхода переноси в proposal, specs с AC и design; после нормативной

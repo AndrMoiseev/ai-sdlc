@@ -10,7 +10,8 @@ def call(project):
     return validate(project, "demo", {"text": "Implement", "source": "message"}, SPEC)
 
 
-def test_approved_and_preserves_dirty(project):
+@pytest.mark.parametrize("checkpoint_format", ["legacy", "split"])
+def test_approved_and_preserves_dirty(project, checkpoint_format):
     # Reuse the existing admission fixture and shared CLI adapter: a valid
     # approval must admit execution without reports or legacy review waivers.
     change = project / "sdd/changes/demo"
@@ -21,6 +22,12 @@ def test_approved_and_preserves_dirty(project):
     checkpoint = docs.read_document(change / "state.md")
     checkpoint.meta["approval_refs"] = [record["id"] for record in approvals]
     document(change / "state.md", checkpoint.meta, checkpoint.records)
+    if checkpoint_format == "split":
+        # Reuse the admission adapter/fixture: the new file selection must reach
+        # execution without attempting to parse Markdown prose as frontmatter.
+        import yaml
+        (change / "state.yaml").write_text(yaml.safe_dump(checkpoint.meta), encoding="utf-8")
+        (change / "state.md").write_text("# Continue the approved plan\n", encoding="utf-8")
     approval = next(record for record in approvals if record["kind"] == "plan_approval")
     instruction = {"text": approval["response"], "source": f"review/decisions.md#{approval['id']}"}
     (project / "foreign.txt").write_bytes(b"staged")

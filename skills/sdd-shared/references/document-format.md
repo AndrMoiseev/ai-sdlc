@@ -10,7 +10,7 @@
 
 ## Расположение и разбор
 
-Рабочий корень — `sdd/changes/<change-id>/`: proposal.md, design.md, specs/<capability>/spec.md, tasks.md, state.md, decisions.md, questions.md и review/. Capability может иметь несколько kebab-case сегментов через `/`. Proposal и design общие для изменения; tasks появляется только по разрешенному переходу. Журнал и вопросы создаются при наличии соответствующего содержания по [правилам обсуждения](../../sdd-spec/references/discussion.md).
+Рабочий корень — `sdd/changes/<change-id>/`: proposal.md, design.md, specs/<capability>/spec.md, tasks.md, state.yaml, state.md, decisions.md, questions.md и review/. Capability может иметь несколько kebab-case сегментов через `/`. Proposal и design общие для изменения; tasks появляется только по разрешенному переходу. Журнал и вопросы создаются при наличии соответствующего содержания по [правилам обсуждения](../../sdd-spec/references/discussion.md).
 
 Необязательные производные материалы: explanation.md, дополнительные документы
 в explanation/ и все сохраняемые артефакты диаграмм в archify/. Их размещение,
@@ -19,7 +19,7 @@
 Выбор пояснения, область, исходный манифест и выполненную часть сохраняй
 в читаемой части state.
 
-Frontmatter нормативного документа содержит ровно `schema_version: 1`, `document_type` (proposal/spec/design/tasks), `change_id`, `language`; spec дополнительно содержит `capability`, совпадающую с каталогом. Основной текст следует языку проекта, иначе запросу; служебные поля не переводятся. State/review/decisions/summary имеют те же общие поля и дополнительные метаданные в своих разделах формата. Индекс линз имеет собственный frontmatter.
+Frontmatter нормативного документа содержит ровно `schema_version: 1`, `document_type` (proposal/spec/design/tasks), `change_id`, `language`; spec дополнительно содержит `capability`, совпадающую с каталогом. Основной текст следует языку проекта, иначе запросу; служебные поля не переводятся. Review/decisions/summary имеют те же общие поля и дополнительные метаданные в своих разделах формата. State хранит их в отдельном state.yaml; state.md содержит прозу по формату обсуждения. Индекс линз имеет собственный frontmatter.
 
 Машинная запись: заголовок, пустая строка и fenced-блок `yaml` с `sdd_record` и `id`. Уровень заголовка записи — `###`, кроме иерархии требований и критериев в spec по [нормативному формату](document-format-normative.md).
 
