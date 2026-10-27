@@ -71,7 +71,9 @@ def read(directory, view="full"):
                 "history_corrupt", "History head mismatch")
     else:
         require(state["event_head"] is None and state["event_index"] is None, "history_corrupt", "Unexpected history")
-    require(state["status"] in {"active", "blocked", "completed"} and state["mode"] in {"sequential", "parallel"}, "state_schema", "Unknown execution status or mode")
+    require(state["status"] in {"active", "blocked", "completed"}, "state_schema", "Unknown execution status")
+    require(state.get("mode") == "parallel" and not state.get("pending_mode"), "unsupported_execution_mode",
+            "Only parallel execution is supported; preserve this state and use its original skill version to reconcile it")
     require(all(t["status"] in TASK_STATES for t in state["tasks"].values()), "state_schema", "Unknown task state")
     if view == "compact":
         from .state_view import compact
@@ -111,17 +113,16 @@ def new_task(task):
 
 def initialize(basis, owner, parallel_request=None, isolation=False, mode="parallel"):
     require(isinstance(owner, str) and owner, "owner", "Orchestrator identity required")
-    require(mode in {"parallel", "sequential"}, "mode", "Expected parallel or sequential")
+    require(mode == "parallel", "mode", "Only parallel execution is supported")
     require(not parallel_request or (parallel_request.get("source") and parallel_request.get("text")), "parallel_authorization", "Record the actual execution instruction or mode request")
-    require(isolation, "isolation_required", "Both execution modes require isolated task worktrees")
-    mode_reason = None
-    parallel_request = (parallel_request or basis["instruction"]) if mode == "parallel" else None
+    require(isolation, "isolation_required", "Execution requires isolated task worktrees")
+    parallel_request = parallel_request or basis["instruction"]
     directory = execution_directory(basis)
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
     with lock(directory):
         require(not storage(directory).exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
-        state = {"schema_version": 2, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": mode, "parallel_request": parallel_request, "mode_reason": mode_reason, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
+        state = {"schema_version": 2, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": "parallel", "parallel_request": parallel_request, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
         if basis.get("work_kind", "change") == "refactoring":
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})

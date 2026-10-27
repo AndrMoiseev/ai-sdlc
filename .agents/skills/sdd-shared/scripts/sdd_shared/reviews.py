@@ -314,7 +314,8 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
     open_questions = sorted(i for i, question in questions.items() if question["status"] == "open")
     blocking_questions = [i for i in open_questions if questions[i]["blocking"]]
     discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not blocking_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}
-    return {"errors": errors, "warnings": warnings, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and complete and discussion_status["complete"] and not unresolved and not unfinished and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
+    # Review evidence remains visible independently of the user's authorization.
+    return {"errors": errors, "warnings": warnings, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and discussion_status["complete"] and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
 
 
 def _validate_user(record, root, findings, work_kind="change"):

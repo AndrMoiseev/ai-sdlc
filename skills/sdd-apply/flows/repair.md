@@ -40,4 +40,3 @@ checks within the approved group through the registry API, retaining the origina
 baseline and repair counters. A finding that changes the agreed obligation or
 architecture returns to sdd-spec; a justified structural retirement alone does
 not start a repair cycle.
-

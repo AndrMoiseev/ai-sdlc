@@ -123,9 +123,8 @@ def test_planned_setup_then_missing_runner_remains_blocker(project):
     assert d.task["checks"][0]["setup"]["command"]
 
 
-@pytest.mark.parametrize("parallel", [False, True])
-def test_linked_revision_preserves_counters_not_acceptance(basis, project, parallel):
-    driver = Driver(basis, parallel=parallel)
+def test_linked_revision_preserves_counters_not_acceptance(basis, project):
+    driver = Driver(basis)
     driver.send("budget_extend", {"budget": "review", "limit": 4, "source": "fixture-user", "text": "Extra review"})
     previous = driver.state["run_id"]
     reapprove(project, lambda task: task["verification"][0].update(test_description="Revised criterion detail"))
@@ -134,8 +133,8 @@ def test_linked_revision_preserves_counters_not_acceptance(basis, project, paral
     assert result["run_id"] != previous
     assert driver.task["review_limit"] == 4
     assert driver.task["status"] == "pending"
-    assert driver.state["mode"] == ("parallel" if parallel else "sequential")
-    assert driver.state["parallel_request"] == ({"text": "Execute revised plan", "source": "fixture-user"} if parallel else None)
+    assert driver.state["mode"] == "parallel"
+    assert driver.state["parallel_request"] == {"text": "Execute revised plan", "source": "fixture-user"}
     assert artifacts.exists(driver.directory / "runs" / previous / "superseded-state.json")
 
 

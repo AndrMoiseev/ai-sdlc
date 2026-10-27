@@ -30,7 +30,7 @@ method: static review of upstream source and local skill contracts; no runtime e
 | Сохранить текущий хост, инструменты и его native reviewer; не вводить отдельного LLM-провайдера OCR | Совместимо и с переносом механизмов, и с `ocr delegate` |
 | Весь анализ выполняет тот же автор в том же контексте, без независимого reviewer | Технически delegation это позволяет, но такой результат не соответствует действующему контракту `sdd-apply` |
 
-Второе ограничение потребовало бы отдельного решения об изменении SDD: сейчас роли проверки должны быть независимы от авторов, а отсутствие свежего контекста блокирует зависимые от роли действия. В предлагаемом варианте уже назначенный reviewer вызывает OCR CLI; дополнительный пул OCR-агентов не нужен. [Контракт ролей][roles], [последовательное выполнение][sequential].
+Второе ограничение потребовало бы отдельного решения об изменении SDD: сейчас роли проверки должны быть независимы от авторов, а отсутствие свежего контекста блокирует зависимые от роли действия. В предлагаемом варианте уже назначенный reviewer вызывает OCR CLI; дополнительный пул OCR-агентов не нужен. [Контракт ролей][roles], [выполнение SDD][execution].
 
 ## 2. Из чего складывается качество OCR
 
@@ -185,7 +185,7 @@ README сообщает о более высоких precision/F1 и меньш�
 [go-mod]: https://github.com/alibaba/open-code-review/blob/8eb83340a487b1150af00701b94f01af97e4b4d6/go.mod
 [license]: https://github.com/alibaba/open-code-review/blob/8eb83340a487b1150af00701b94f01af97e4b4d6/LICENSE
 [roles]: ../../../skills/sdd-apply/references/roles.md
-[sequential]: ../../../skills/sdd-apply/flows/execute-sequential.md
+[execution]: ../../../skills/sdd-apply/flows/execute-parallel.md
 [reviewer]: ../../../skills/sdd-apply/agents/reviewer.md
 [review-policy]: ../../../skills/sdd-apply/references/review-policy.md
 [roles-code]: ../../../skills/sdd-apply/scripts/lib/roles.py

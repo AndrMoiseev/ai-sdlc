@@ -20,7 +20,8 @@ OPERATIONS = {
     "initialize": contract("Validate, create execution state and render its initial dashboard.",
                            (*VALIDATION, "owner"), (*SELECTORS, "mode", "parallel_request", "isolation"),
                            defaults={"mode": "parallel", "isolation": False, "work_kind": "change"},
-                           rules=["Both modes require verified worktree isolation; unavailable isolation blocks execution.",
+                           choices={"mode": ["parallel"]},
+                           rules=["Execution requires verified worktree isolation; unavailable isolation blocks execution.",
                                   "Existing executions use resume; initialization never overwrites state.",
                                   "instruction and optional parallel_request contain actual user text and source."]),
     "read": contract("Validate the current manifest and accessed objects; return statuses or the manifest with references.",
@@ -34,7 +35,7 @@ OPERATIONS = {
                               ("parent_effort", "available_agents", "user_agent_dir"),
                               rules=["Preserve the result as agent_selection in role_register.",
                                      "For Claude Code supply the observed available_agents."]),
-    "available": contract("Return task IDs eligible under dependencies and mode; other admission gates still apply.", ("directory",)),
+    "available": contract("Return task IDs eligible under dependencies and conflicts; other admission gates still apply.", ("directory",)),
     "event": contract("Apply one typed event using current revision and owner; render the dashboard.", ("directory", "event")),
     "dashboard": contract("Regenerate views from verified saved state.", ("directory",)),
     "recover_lock": contract("Remove a state lock only after proving its local owner exited.", ("directory",)),
@@ -43,8 +44,10 @@ OPERATIONS = {
 }
 
 EVENTS = {
-    "checks_register": contract("Register once before start; preserve planned checks and inspected project/CI checks.",
+    "checks_register": contract("Register task checks before start, or additional ordinary project checks after task acceptance.",
         ("inventory",), ("additional",), inventory={"instructions": [], "ci": []},
+        rules=["Ordinary task_id=null registers only additional final project checks after all tasks are accepted and integrated.",
+               "Bind each additional command/procedure to approved covers criteria; task final checks remain mandatory."],
         additional={"id": "unique check ID", "source": "requirement source", "criteria": ["AC-ID"],
                     "run": {"command": ["executable", "argument"]}, "cwd": ".", "configuration": {}, "location": "optional project-relative path"}),
     "role_register": contract("Register an actually launched fresh host context; return its packet path.",
@@ -56,18 +59,31 @@ EVENTS = {
                "A lost-role successor names successor_of; resume resolves that specific predecessor."]),
     "role_result": contract("Finish registered role work; this does not accept its task.", ("role_id", "result", "trace")),
     "start": contract("Admit an eligible task with checks, dashboard and active executor.", ("role_id", "paths"),
-        rules=["List canonical project-relative owned files individually; both modes require an isolated worktree."]),
+        rules=["List canonical project-relative owned files individually; each task requires an isolated worktree."]),
     "check_run": contract("Run the complete registered check set and save actual results.", ("role_id", "stage"), ("timeout",),
         choices={"stage": ["baseline", "self", "independent", "integration", "final"]}, defaults={"timeout": 300},
         rules=["Baseline precedes implementation in a clean worktree; self/independent/integration require a frozen local commit.",
-               "Final requires an independent final_verifier and an accepted task at final HEAD."]),
+               "Ordinary changes retain task-scoped final_verifier checks; an optional additional project registry uses task_id=null, only at final.",
+               "Refactoring uses task_id=null and the whole confirmed applicable union."]),
     "check_setup": contract("Resolve planned setup/procedure after baseline while running or repairing.",
         ("check_id", "command", "description"), ("cwd", "configuration"),
         rules=["command is the exact executable argument array; keep existing checks and assertions."]),
     "checks_extend": contract("After more_checks, add mandatory checks without replacing the existing registry.",
         ("review_round", "additional"),
         additional={"id": "unique ID", "source": "review", "criteria": ["scoped AC-ID"], "run": {"command": ["executable", "argument"]}},
-        rules=["review_round names the requesting round; the new candidate requires new checks and review."]),
+        rules=["review_round names the requesting round; the new candidate requires new checks and review.",
+               "Refactoring IDs cannot reuse another task's registered, historical or planned generated check ID."]),
+    "checks_revise": contract("Stage an approved refactoring registry revision; confirm only with task acceptance.",
+        ("registry_revision", "before", "after", "basis", "preserves", "reason", "mapping"),
+        basis={"test_changes": ["local test-change ID"], "transitional_criteria": ["AC-ID ending at this task"]},
+        mapping={"changed-check-ID": "approved group or lifetime basis and actual affected tests"},
+        rules=["before is the exact applicable registry; after contains complete exact check records, including unchanged project checks.",
+               "Use the current task registry_revision; each changed payload needs a new revision and fresh checks/review.",
+               "Capture baseline first; use only running or reserved repair work with its assigned active executor.",
+               "preserves lists exactly the affected preserved criterion IDs. Their identity survives test moves.",
+               "Pending checks apply to this candidate; accepted checks stay confirmed for other tasks until atomic acceptance.",
+               "Failure/unavailability keeps the revision unconfirmed and retains repair/review budgets.",
+               "Changing approved obligations, groups or lifetimes requires spec_conflict/revised_plan."]),
     "procedure_begin": contract("Bind the procedure to the clean Git commit before its assigned role executes it.", ("check_id", "role_id", "stage"),
         choices={"stage": ["baseline", "self", "independent", "integration", "final"]}),
     "procedure_result": contract("Record actual steps/outcome and host trace for the same pending procedure role.",
@@ -85,8 +101,10 @@ EVENTS = {
         rules=["candidate is the complete script-issued reference; legacy source snapshots require explicit rebaseline.",
                "test_integrity covers assertions, skips/xfail and command weakening; only proven violations block."]),
     "repair": contract("Reserve any required repair budget and reopen the assigned executor with evidence.",
-        ("reason",), ("defect_evidence", "executor", "test_failure"),
-        rules=["Supply defect_evidence unless a failure is already recorded; self-check failure needs test_failure:true."]),
+        ("reason",), ("defect_evidence", "executor", "test_failure", "final_checks", "paths"),
+        rules=["Supply defect_evidence unless a failure is already recorded; self-check failure needs test_failure:true.",
+               "Run-level final failures require final_checks IDs, reproducible defect_evidence and owned paths; task_id selects the responsible task.",
+               "Unknown or out-of-scope ownership returns to sdd-spec before edits; established ownership reserves the existing task test-repair budget."]),
     "commit": contract("Confirm the existing integration commit after current independent evidence and passing review."),
     "accept": contract("Accept only the confirmed task commit with current evidence and review."),
     "block": contract("Preserve partial work and record the condition for resuming.", ("reason", "resume_condition")),
@@ -110,17 +128,20 @@ EVENTS = {
                     "role_id": "lost predecessor for lost_role", "successor": "active registered successor for lost_role"},
         rules=["Resolve each lost role separately. A successor must name that predecessor and have the same task/kind.",
                "Legacy resolutions may omit role_id: successor_of supplies the specific predecessor.",
+               "For a lost run-level final verifier with pending procedures, resolution.abandon_procedures must list every unfinished check ID. Resume archives each predecessor attempt as abandoned with its trace; the successor starts a fresh procedure.",
                "Task phase restores only after every task blocker is resolved; review and repair reservations survive.",
-               "Budget, normative, spec-conflict and mode blockers require their dedicated operations."]),
+               "Refactoring returns check_registries with confirmed_revision/confirmed_checks and pending_transition separately; resume never confirms a revision.",
+               "Budget, normative and spec-conflict blockers require their dedicated operations."]),
     "spec_conflict": contract("Save reproduction and conflicting contract, block, and return to sdd-spec.",
         ("reproduction", "criteria", "contract")),
     "revised_plan": contract("Validate a newly approved basis while preserving accepted tasks and lifetime budgets.",
-        ("instruction",), rules=["Stop/reconcile active roles first; completed tasks remain unchanged and new tasks append.",
-                                  "instruction contains actual execution text and source."]),
-    "mode": contract("Record the actual user mode decision and require fresh-context handoff.",
-        ("mode", "source", "text"), ("isolation_available",), choices={"mode": ["sequential", "parallel"]},
-        rules=["Changing to parallel requires isolation_available:true."]),
-    "handoff": contract("Transfer ownership to a distinct actual fresh context, applying any pending mode decision.",
+        ("instruction",), ("completed_followups",),
+        completed_followups=[{"completed_task": "accepted TASK-ID", "followup_task": "new dependent TASK-ID"}],
+        rules=["Stop/reconcile active roles first; completed tasks remain unchanged and new tasks append.",
+               "instruction contains actual execution text and source authorizing the revised plan and any mapped follow-up.",
+               "Each completed_followups mapping replaces only that accepted task's obsolete budget stop with a new approved dependent task; counters and unrelated blockers remain.",
+               "Unfinished tasks and active review/repair reservations cannot use completed_followups. Ordinary final project obligations survive revision; old attempts are archived and current-basis evidence is required."]),
+    "handoff": contract("Transfer ownership to a distinct actual fresh context while preserving the execution.",
         ("new_owner", "fresh", "launch_ref"), rules=["fresh must be true; preserve existing task branches and worktrees."]),
     "finalize": contract("Require accepted commits and fresh independent final-HEAD evidence for every AC.",
         optional=("recommendation_decisions",),
@@ -128,7 +149,8 @@ EVENTS = {
         rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once."]),
 }
 
-RUN_EVENTS = {"resume", "revised_plan", "handoff", "mode", "finalize"}
+RUN_EVENTS = {"resume", "revised_plan", "handoff", "finalize"}
+WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
             "expected_revision": "current integer revision", "owner": "registered owner context",
             "type": "event name", "task_id": "TASK-ID or null for run event", "payload": {}}
@@ -143,7 +165,10 @@ def describe(operation=None, event=None):
     require(isinstance(name, str) and name in records, "help_unknown", "Unknown " + selector + ": " + str(name))
     result = {selector: name, **deepcopy(records[name])}
     if event is not None:
-        result["task_id"] = "null" if event in RUN_EVENTS else "TASK-ID or null" if event == "block" else "TASK-ID"
+        result["task_id"] = "null" if event in RUN_EVENTS else "TASK-ID or null" if event == "block" or event in WHOLE_EVENTS else "TASK-ID"
+        if event in WHOLE_EVENTS:
+            result.setdefault("rules", []).append("For refactoring, task_id=null addresses whole-result checks or the final_verifier; check_setup uses the check's approved setup_task.")
+            result["rules"].append("For ordinary changes, task_id=null addresses an optional additional final project registry and its fresh final_verifier; check_setup is unavailable. Task-scoped final checks still apply.")
         result["envelope"] = {**ENVELOPE, "type": event}
     elif operation == "event":
         result["envelope"] = deepcopy(ENVELOPE)

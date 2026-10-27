@@ -1,6 +1,7 @@
 import json
 import pytest
 from lib.state import initialize, read, apply, lock
+from lib.state_storage import storage
 
 
 @pytest.fixture
@@ -28,12 +29,14 @@ def test_atomic_idempotency(store):
 def test_rejection_keeps_bytes(store, changes):
     from pathlib import Path
     directory, state = store
-    before = (Path(directory) / "state.json").read_bytes()
+    before = storage(directory).read()
     with pytest.raises(ValueError):
         apply(directory, event(state, **changes))
-    assert (Path(directory) / "state.json").read_bytes() == before
+    assert storage(directory).read() == before
 
 
+# Exercise the real lock file; the memory adapter cannot prove filesystem exclusion.
+@pytest.mark.native_state
 def test_lock_and_corrupt_history(store):
     from pathlib import Path
     directory, state = store
@@ -48,6 +51,8 @@ def test_lock_and_corrupt_history(store):
         read(directory)
 
 
+# Separate interpreters must contend for one revision through the real filesystem lock.
+@pytest.mark.native_state
 def test_two_processes_one_revision(store, tmp_path):
     import subprocess
     import sys
@@ -63,16 +68,16 @@ def test_two_processes_one_revision(store, tmp_path):
     assert read(directory)["revision"] == 1
 
 
+# Inject failure at the OS replacement boundary and verify persisted bytes survive.
+@pytest.mark.native_state
 def test_interrupted_replace_preserves_state(store, monkeypatch):
     from lib import common
     from pathlib import Path
     directory, state = store
-    before = (Path(directory) / "state.json").read_bytes()
+    before = storage(directory).read()
     def fail(*args):
         raise OSError("interrupted before atomic replace")
     monkeypatch.setattr(common.os, "replace", fail)
     with pytest.raises(OSError, match="interrupted"):
         apply(directory, event(state))
-    assert (Path(directory) / "state.json").read_bytes() == before
-
-pytestmark = pytest.mark.native_state
+    assert storage(directory).read() == before

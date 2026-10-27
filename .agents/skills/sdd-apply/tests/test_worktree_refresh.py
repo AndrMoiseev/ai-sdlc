@@ -13,7 +13,7 @@ from lib.state import apply
 
 
 def prepare(basis, tmp_path, paths=None):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     old = Path(d.send("worktree_create", {"workspace": str(tmp_path / "trees")})["path"])
     d.start(paths or ["result.txt", "check.py"])
     (old / "result.txt").write_bytes(b"partial\x00binary\xff")
@@ -258,7 +258,7 @@ def test_repeat_refresh_preserves_active_repair_and_reviews(refresh_checkpoint):
 
 
 def test_pending_worktree_can_refresh(basis, tmp_path):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     d.send("worktree_create", {"workspace": str(tmp_path / "trees")})
     head = fix_base(basis)
     result = apply(d.directory, refresh_event(d))
@@ -267,7 +267,7 @@ def test_pending_worktree_can_refresh(basis, tmp_path):
 
 
 def test_refresh_before_any_task_edits(basis, tmp_path):
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     old = Path(d.send("worktree_create", {"workspace": str(tmp_path / "trees")})["path"])
     d.start(["result.txt", "check.py", "planned-but-not-created.txt"])
     d.send("role_result", {"role_id": "author", "result": "Stopped before edits", "trace": "test-host"})

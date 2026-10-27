@@ -6,8 +6,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_package_contract():
-    assert "disable-model-invocation: true" in (ROOT / "SKILL.md").read_text()
-    assert "allow_implicit_invocation: false" in (ROOT / "agents/openai.yaml").read_text()
+    assert "disable-model-invocation: false" in (ROOT / "SKILL.md").read_text()
+    assert "allow_implicit_invocation: true" in (ROOT / "agents/openai.yaml").read_text()
     for entry in ("execute.py", "test.py"):
         content = (ROOT / "scripts" / entry).read_text()
         assert "# /// script" in content and "sys.dont_write_bytecode = True" in content

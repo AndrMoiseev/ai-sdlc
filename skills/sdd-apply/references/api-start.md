@@ -6,7 +6,7 @@ constructing a request.
 `validate` accepts `project_root`, optional `change`,
 `instruction: {text, source}`, and optional `sdd_shared`. Legacy `sdd_spec` locates
 sdd-shared alongside that path; supply only one explicit selector. Preserve the
-returned basis. Validation checks both document and plan approval through shared
+returned basis. Use the actual plan approval text and its message or saved USER-record source as instruction; no additional execution question is needed. Honor explicit user restrictions on starting. Validation checks both document and plan approval through shared
 check/snapshot interfaces. Select an ambiguous change; return missing approval
 or a missing plan to sdd-spec.
 

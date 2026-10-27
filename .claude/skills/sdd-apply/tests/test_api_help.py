@@ -32,6 +32,18 @@ def test_resume_help_explains_specific_loss_and_legacy_resolution():
     assert any("successor_of" in rule for rule in result["rules"])
 
 
+def test_ordinary_project_final_help_preserves_task_finals_and_followup_budgets():
+    registration = describe(event="checks_register")
+    assert registration["task_id"] == "TASK-ID or null"
+    assert any("after all tasks are accepted" in rule for rule in registration["rules"])
+    assert any("Task-scoped final checks still apply" in rule for rule in registration["rules"])
+    revision = describe(event="revised_plan")
+    assert "completed_followups" in revision["optional"]
+    assert set(revision["completed_followups"][0]) == {"completed_task", "followup_task"}
+    assert any("counters and unrelated blockers remain" in rule for rule in revision["rules"])
+    assert any("obligations survive revision" in rule for rule in revision["rules"])
+
+
 @pytest.mark.parametrize("args", [{"operation": "missing"}, {"event": "missing"},
                                   {"operation": "read", "event": "resume"}])
 def test_help_rejects_invalid_selectors(args):
@@ -39,16 +51,25 @@ def test_help_rejects_invalid_selectors(args):
         describe(**args)
 
 
-@pytest.mark.parametrize("args,key,expected", [
-    (["--help-event", "resume"], "event", "resume"),
-    (["--help-operation", "read"], "operation", "read"),
-    (["--help-operation"], "events", None),
+@pytest.mark.parametrize("args,key,expected,native", [
+    # One fresh interpreter proves imports and executable entrypoint wiring.
+    pytest.param(["--help-event", "resume"], "event", "resume", True, marks=pytest.mark.native_process),
+    (["--help-operation", "read"], "operation", "read", False),
+    (["--help-operation"], "events", None, False),
 ])
-def test_cli_help_needs_no_request_or_project(tmp_path, args, key, expected):
-    result = subprocess.run([sys.executable, "-B", str(ROOT / "scripts/execute.py"), *args],
-                            cwd=tmp_path, capture_output=True, shell=False, timeout=30)
-    assert result.returncode == 0, result.stderr
-    payload = json.loads(result.stdout)
+def test_cli_help_needs_no_request_or_project(tmp_path, monkeypatch, capsys, args, key, expected, native):
+    if native:
+        result = subprocess.run([sys.executable, "-B", str(ROOT / "scripts/execute.py"), *args],
+                                cwd=tmp_path, capture_output=True, shell=False, timeout=30)
+        assert result.returncode == 0, result.stderr
+        output = result.stdout
+    else:
+        from execute import main
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(sys, "argv", ["execute.py", *args])
+        assert main() == 0
+        output = capsys.readouterr().out
+    payload = json.loads(output)
     assert payload["ok"] is True
     if expected is None:
         assert "resume" in payload["result"][key]

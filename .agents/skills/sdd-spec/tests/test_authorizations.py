@@ -1,6 +1,7 @@
 from lib.reviews import review_status
 from lib.snapshots import snapshot
 from test_review_records import project, report, write, finding
+import pytest
 
 
 def user(tmp_path, kind, **extra):
@@ -77,19 +78,49 @@ def test_state_never_authorizes_and_broken_state_recovers(tmp_path):
     assert result["warnings"][0]["code"] == "state_recovery"
 
 
-def test_waiver_expiry_and_final_approval_does_not_waive(tmp_path):
+@pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("plan", "plan_approval", "plan")])
+def test_waiver_expiry_and_final_approval_does_not_waive(tmp_path, stage, kind, lens):
+    # Reuse the existing document fixture: applicability depends on real input
+    # manifests; mocking review_status would hide accidental review gating.
     root = project(tmp_path)
-    approval = user(tmp_path, "document_approval")
+    approval = user(tmp_path, kind)
+    approval["scope"]["stage"] = "document_review" if stage == "documents" else "plan_review"
+    approval["inputs"] = snapshot(tmp_path, "demo", stage)
     decisions(root, [approval])
-    assert not review_status(tmp_path, root, "documents")["approval_status"]["ready"]
+    result = review_status(tmp_path, root, stage)
+    assert result["approval_status"]["ready"]
+    assert result["review_status"]["coverage"][lens] == "missing"
+    assert not result["review_status"]["complete"]
+    report(tmp_path, root, lens=lens, stage=stage, result="incomplete")
+    assert review_status(tmp_path, root, stage)["approval_status"]["ready"]
+    report(tmp_path, root, lens=lens, stage=stage, records=[finding()])
+    result = review_status(tmp_path, root, stage)
+    assert result["approval_status"]["ready"]
+    assert result["review_status"]["unresolved_findings"]
+    disposition = user(tmp_path, "finding_disposition", action="fix", completion=[])
+    disposition["scope"] = {"stage": approval["scope"]["stage"], "findings": [f"run-one/{lens}/FIND-example"]}
+    disposition["inputs"] = approval["inputs"]
+    decisions(root, [approval, disposition])
+    result = review_status(tmp_path, root, stage)
+    assert result["approval_status"]["ready"]
+    assert result["review_status"]["unfinished_fixes"]
     waiver = user(tmp_path, "review_waiver")
-    waiver["scope"]["lenses"] = ["consistency"]
+    waiver["scope"] = {"stage": approval["scope"]["stage"], "lenses": [lens]}
+    waiver["inputs"] = approval["inputs"]
     decisions(root, [approval, waiver])
-    assert review_status(tmp_path, root, "documents")["approval_status"]["ready"]
+    assert review_status(tmp_path, root, stage)["approval_status"]["ready"]
     (root / "design.md").write_text("new version")
-    result = review_status(tmp_path, root, "documents")
+    result = review_status(tmp_path, root, stage)
     assert not result["approval_status"]["ready"]
-    assert result["review_status"]["coverage"]["consistency"] == "missing"
+    assert result["review_status"]["coverage"][lens] == "stale"
+    approval["inputs"] = snapshot(tmp_path, "demo", stage)
+    decisions(root, [approval])
+    result = review_status(tmp_path, root, stage)
+    assert result["approval_status"]["ready"]
+    assert result["review_status"]["coverage"][lens] == "stale"
+    approval["status"] = "cancelled"
+    decisions(root, [approval])
+    assert not review_status(tmp_path, root, stage)["approval_status"]["ready"]
 
 
 def test_supersession_preserves_history_without_reactivating_old_work(tmp_path):

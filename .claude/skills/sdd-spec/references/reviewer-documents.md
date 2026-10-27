@@ -1,5 +1,7 @@
 # Задание независимому рецензенту документов
 
+Для refactoring прочитай [формат рефакторинга](../../sdd-shared/references/document-format-refactoring.md) и [предмет ревью](refactoring.md#ревью-и-согласование). Получи proposal/design без specs, для plan также tasks. Проверь отдельно целевую структуру, сохраняемое поведение и достаточность исходных свидетельств; отсутствие REQ у DEC этого вида допустимо.
+
 Прочитай [общую основу](../../sdd-shared/references/document-format.md), [нормативный формат](../../sdd-shared/references/document-format-normative.md)
 и [формат отчётов](../../sdd-shared/references/document-format-review.md). При задании ревью плана
 добавь [задачи и проверки](../../sdd-shared/references/document-format-tasks.md).

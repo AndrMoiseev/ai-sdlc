@@ -6,7 +6,7 @@ constructing a request.
 `validate` accepts `project_root`, optional `change`,
 `instruction: {text, source}`, and optional `sdd_shared`. Legacy `sdd_spec` locates
 sdd-shared alongside that path; supply only one explicit selector. Preserve the
-returned basis. Validation checks both document and plan approval through shared
+returned basis. Use the actual plan approval text and its message or saved USER-record source as instruction; no additional execution question is needed. Honor explicit user restrictions on starting. Validation checks both document and plan approval through shared
 check/snapshot interfaces. Select an ambiguous change; return missing approval
 or a missing plan to sdd-spec.
 
@@ -14,12 +14,11 @@ or a missing plan to sdd-spec.
 `parallel_request` and `isolation`. It validates, records a run and generates the
 initial dashboard. Existing state requires [resume](../flows/resume.md).
 
-The default mode is `parallel`. Set `isolation: true` only after verifying task
-worktrees; both modes require them. An explicit `mode: "sequential"` selects
-one task at a time, with the same worktree and commit checks. Parallel mode
-stores a supplied `{text, source}` request or the execution instruction; it needs
-no separate permission question. Resume and revised plans preserve saved mode;
-a revised parallel run records the new execution instruction.
+The only supported `mode` value is `parallel`; callers may omit it. Set
+`isolation: true` only after verifying task worktrees. Initialization stores a
+supplied `{text, source}` request or the execution instruction; it needs no
+separate permission question. Revised plans record the new execution instruction.
+Unsupported legacy execution states are rejected without rewriting them.
 
 For read/progress operations use installed help: `read`, `available`, `dashboard`,
 `recover_lock`, `serve` and `stop_server` accept `directory`; `serve` also accepts

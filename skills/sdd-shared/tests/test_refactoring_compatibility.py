@@ -1,6 +1,6 @@
 """Ordinary-work contracts across the complete updated SDD bundle.
 
-Saved-state support starts at the user-selected 0529577 schema-2 runtime.
+Saved-state support covers parallel runs from the user-selected 0529577 schema-2 runtime.
 The portable fixture below transcribes that format independently of current
 initialize/seal/history helpers; it is not a captured historical execution.
 Its provenance is source inspection, not a claim of pre-v2 resume support.
@@ -250,8 +250,8 @@ def saved_execution(ordinary, collection):
                 test_repair_cycles_started=0, active_repair=None, repair_cycles=[],
                 budget_decisions=[], checks=[], worktree=None, roles=[], paths=[])
     state = dict(schema_version=2, change_id="demo", run_id="legacy-fixture", revision=1,
-                 status="active", owner="synthetic-owner", basis=basis, mode="sequential",
-                 parallel_request=None, mode_reason=None, tasks={"TASK-one": task}, roles={},
+                 status="active", owner="synthetic-owner", basis=basis, mode="parallel",
+                 parallel_request=deepcopy(INSTRUCTION), tasks={"TASK-one": task}, roles={},
                  blockers=[], updated_at=STAMP, final=None)
     # One existing resume proves preservation of a nonempty chain and its index.
     event = dict(event_id="saved-resume", run_id=state["run_id"], expected_revision=0,

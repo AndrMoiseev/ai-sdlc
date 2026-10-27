@@ -91,6 +91,32 @@ def check_runner(request, monkeypatch):
     monkeypatch.setattr(verification, "run_command", run_command)
 
 
+@pytest.fixture
+def prepare_state(request):
+    """Build native-storage preconditions in memory; test the disk boundary itself."""
+    from contextlib import contextmanager
+    from lib.artifact_storage import use_artifacts
+    from lib.state_storage import FileStateStorage, use_storage
+    from memory_state import MemoryStates
+
+    @contextmanager
+    def prepare():
+        if not request.node.get_closest_marker("native_state"):
+            yield
+            return
+        states = MemoryStates()
+        with use_storage(states), use_artifacts(states.artifacts):
+            yield
+        for directory in states.artifacts.directories:
+            directory.mkdir(parents=True, exist_ok=True)
+        for path, content in states.artifacts.files.items():
+            path.write_bytes(content)
+        for directory, store in states.stores.items():
+            FileStateStorage(directory).replace(store.read())
+
+    return prepare
+
+
 @pytest.fixture(autouse=True)
 def shared_cli(monkeypatch):
     from lib import inputs
@@ -185,11 +211,11 @@ def basis(project, basis_template):
 
 class Driver:
     """Synthetic host attestations for unit tests, never real-host evidence."""
-    def __init__(self, basis, parallel=False):
+    def __init__(self, basis):
         from lib.state import initialize
         self.directory = Path(basis["change_root"]) / "execution"
         self.directory.mkdir(parents=True, exist_ok=True)
-        initialize(basis, "owner", isolation=True, **({} if parallel else {"mode": "sequential"}))
+        initialize(basis, "owner", isolation=True)
         # State-only tests do not exercise HTML; dashboard tests use the renderer.
         from lib.artifact_storage import write
         write(self.directory / "dashboard.html", "test-only dashboard sentinel")

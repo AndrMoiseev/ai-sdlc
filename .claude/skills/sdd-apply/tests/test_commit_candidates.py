@@ -23,10 +23,11 @@ def test_freeze_commits_only_in_task_worktree(driver, project):
 
 
 @pytest.mark.native_git
-def test_execution_snapshot_never_reads_external_file_content(driver, project, monkeypatch):
-    driver.start()
-    change = driver.root / "sdd/changes/demo"
-    state, root = driver.state, driver.root
+def test_execution_snapshot_never_reads_external_file_content(driver, project, tmp_path, monkeypatch):
+    root = tmp_path / "task-tree"
+    repository(project).create_worktree(root, repository(project).head())
+    change = root / "sdd/changes/demo"
+    state = driver.state
     original = Path.read_bytes
 
     def inside_change_only(path):

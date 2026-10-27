@@ -12,6 +12,7 @@ import pytest
 from lib.api import dispatch
 from lib.common import Rejected
 from lib.state import initialize, snapshot, read
+from lib.state_storage import storage
 
 COLLECTION = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("refactoring_bundle_fixture", COLLECTION / "sdd-shared/tests/test_refactoring_work_basis.py")
@@ -25,6 +26,8 @@ def arguments(project, work_kind="refactoring"):
                 sdd_shared=str(COLLECTION / "sdd-shared"), work_kind=work_kind)
 
 
+# Verify actual output paths and dashboard files for both supported bundle layouts.
+@pytest.mark.native_state
 @pytest.mark.parametrize("work_kind", ["change", "refactoring"])
 def test_refactoring_inputs_public_initialize_read_and_dashboard(project, work_kind):
     refactoring, _, records = fixtures.approved_refactoring(project)
@@ -37,7 +40,7 @@ def test_refactoring_inputs_public_initialize_read_and_dashboard(project, work_k
     if work_kind == "refactoring":
         assert basis["acceptance"] == [records[1]] and basis["verification"] == [records[2]]
         assert [r["path"] for r in basis["manifest"]] == ["design.md", "proposal.md", "tasks.md"]
-    state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "isolation": True, "mode": "sequential"}})
+    state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "isolation": True, "mode": "parallel"}})
     directory = expected_root / "execution"
     before = (directory / "state.json").read_bytes()
     assert dispatch({"operation": "read", "args": {"directory": str(directory), "view": "full"}}) == state
@@ -72,7 +75,7 @@ def test_refactoring_inputs_legacy_default_and_ambiguous_selection(project):
     with pytest.raises(ValueError, match="Select work by work_kind and change_id") as error:
         dispatch({"operation": "validate", "args": {**args, "work_kind": None}})
     assert "refactoring" in str(error.value) and "change" in str(error.value)
-    assert not (project / "sdd/refactoring/demo/execution").exists()
+    assert not storage(project / "sdd/refactoring/demo/execution").exists()
 
 
 def test_refactoring_inputs_incomplete_work_still_makes_identity_ambiguous(project):
@@ -84,8 +87,8 @@ def test_refactoring_inputs_incomplete_work_still_makes_identity_ambiguous(proje
     assert "'work_kind': 'change'" in str(error.value)
     assert "'work_kind': 'refactoring'" in str(error.value)
     assert "'has_plan': False" in str(error.value)
-    assert not (root / "execution").exists()
-    assert not (project / "sdd/changes/demo/execution").exists()
+    assert not storage(root / "execution").exists()
+    assert not storage(project / "sdd/changes/demo/execution").exists()
 
 
 @pytest.mark.parametrize("identity,value", [("work_kind", "change"), ("change_id", "another"), ("work_kind", None)])
@@ -106,9 +109,11 @@ def test_refactoring_inputs_reject_foreign_approval_even_with_same_manifest(proj
     expected = "Authorization change identity mismatch" if identity == "change_id" else "Authorization work kind mismatch"
     assert all(item["code"] == "authorization_structure" and item["message"] == expected
                for item in diagnostic["errors"])
-    assert not (root / "execution").exists()
+    assert not storage(root / "execution").exists()
 
 
+# A real copied manifest must be rejected outside its registered execution root.
+@pytest.mark.native_state
 @pytest.mark.native_paths
 def test_refactoring_inputs_reject_wrong_basis_and_copied_state(project):
     root, _, _ = fixtures.approved_refactoring(project)
@@ -117,7 +122,7 @@ def test_refactoring_inputs_reject_wrong_basis_and_copied_state(project):
     wrong["work_kind"] = "change"
     with pytest.raises(ValueError, match="outside its registered execution root"):
         initialize(wrong, "fixture-owner", isolation=True)
-    assert not (root / "execution").exists()
+    assert not storage(root / "execution").exists()
     dispatch({"operation": "initialize", "args": {**arguments(project), "owner": "fixture-owner", "isolation": True}})
     copied = project / "sdd/changes/demo/execution"
     copied.mkdir()
@@ -130,7 +135,7 @@ def test_refactoring_inputs_reject_wrong_basis_and_copied_state(project):
 def test_refactoring_inputs_reject_paths_before_writing(project, change):
     with pytest.raises(ValueError):
         dispatch({"operation": "initialize", "args": {**arguments(project), "change": change, "owner": "fixture-owner", "isolation": True}})
-    assert not (project / "sdd/refactoring/demo/execution").exists()
+    assert not storage(project / "sdd/refactoring/demo/execution").exists()
 
 
 def test_refactoring_inputs_schema_and_root_mismatch(project):
@@ -141,5 +146,3 @@ def test_refactoring_inputs_schema_and_root_mismatch(project):
     with pytest.raises(ValueError, match="work_kind_mismatch"):
         dispatch({"operation": "validate", "args": arguments(project)})
     assert repository(project).inspect()["dirty_paths"] == before
-
-pytestmark = pytest.mark.native_state

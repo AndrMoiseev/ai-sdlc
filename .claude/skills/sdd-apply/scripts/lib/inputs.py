@@ -35,7 +35,7 @@ def spec_call(dependency, project, change, stage, script, work_kind="change"):
 
 def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_shared=None, work_kind="change"):
     project = Path(project_root).resolve(strict=True)
-    require(bool(instruction and instruction.get("text") and instruction.get("source")), "execution_instruction", "Record the user's execution instruction and message source")
+    require(bool(instruction and instruction.get("text") and instruction.get("source")), "execution_instruction", "Record the user's plan approval or execution instruction and its source")
     require(work_kind is None or work_kind in ("change", "refactoring"), "work_kind", "Expected change, refactoring or null for discovery")
     dependency = companion(project, sdd_spec, sdd_shared, work_kind or "change")
     paths = spec_modules(dependency, "paths")

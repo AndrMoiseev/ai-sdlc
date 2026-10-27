@@ -12,10 +12,29 @@ Verify local acceptance and preservation independently. Contributions describe
 intended scope; they do not establish whole-result success. Use the current
 candidate and registry for task review and subsequent integrated-state review.
 
+The refactoring packet's `test_evolution` carries approved groups, complete
+applicable check records, the pending transition including its actual-test mapping,
+and the confirmed revision. Treat this as review input, not a coverage verdict.
+Read the [boundary-test policy](review-policy.md#tests-at-changed-module-boundaries)
+when tests change with module boundaries.
+
 Work only within the assignment. Verifiers and reviewers are independent of all
 authors and do not edit the candidate. Wait for the generated packet; a reviewer
 also waits for a successful `review_start` reservation. Report unavailable inputs,
 permissions or tools rather than simulating a role or a successful check.
+
+A refactoring final verifier has `task_id: null`. Its run-level packet contains
+the whole criteria, original document paths, accepted task scopes and commits,
+the confirmed applicable check union, retired checks with reasons, and the
+current integrated source/manifest/registry basis. This scope grants verification
+authority without granting implementation ownership. Report ambiguous repair
+ownership before any author is reopened.
+
+An ordinary final project verifier also has `task_id: null` when additional project
+checks are registered. Its packet contains those exact additional checks, approved
+covers criteria, accepted tasks and current basis. This scope supplements the
+ordinary task-scoped final verifiers; it cannot replace their evidence. Every final
+verifier is independent of all authors.
 
 Return task/role/context IDs, status, unchanged candidate reference and commit
 SHA, owned/inspected paths, AC-to-evidence mapping, commands and log

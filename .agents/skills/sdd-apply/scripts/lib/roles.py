@@ -1,7 +1,7 @@
 """Host-attested fresh contexts and separate implementation/review results."""
 from .common import digest, now, require, write_json
 from .verification import current, independent, valid_evidence, local_criteria
-from .review_policy import proven
+from .review_policy import proven, test_change_context
 from .candidates import reference, same
 import re
 from . import artifact_storage as artifacts
@@ -13,6 +13,9 @@ def refactoring_context(state, task):
     root = Path(state["basis"]["change_root"])
     design = spec_modules(basis_dependency(state["basis"])).read_document(root / "design.md", "refactoring")
     criteria = local_criteria(state, task) | set(task["plan"]["contributes_to"])
+    for change in task["plan"].get("test_changes", []):
+        criteria.update(change["criteria"])
+        criteria.update(change.get("replacement_criteria", []))
     decisions = {change.get("decision") for change in task["plan"].get("test_changes", [])}
     registry = task.get("check_registry")
     baseline = task.get("baseline_checks")
@@ -22,6 +25,7 @@ def refactoring_context(state, task):
             "preserves": task["plan"]["preserves"], "contributes_to": task["plan"]["contributes_to"],
             "preservation_reason": task["plan"].get("preservation_reason"),
             "test_changes": task["plan"].get("test_changes", []),
+            "test_evolution": test_change_context(state, task),
             "design": [record for record in design.records if record.get("id") in criteria | decisions
                        or record["sdd_record"] == "decision" and criteria & set(record.get("criteria", []))],
             "sources": {name: str(root / name) for name in ("proposal.md", "design.md", "tasks.md")},
@@ -36,11 +40,17 @@ def refactoring_context(state, task):
 
 
 def transition(state, task, event, directory):
-    require(task is not None, "task_required", "Task required")
     p, kind = event["payload"], event["type"]
+    whole = task is None and (state["basis"].get("work_kind") == "refactoring" or bool(state.get("final_checks")))
+    require(task is not None or whole and kind in {"role_register", "role_result"}, "task_required", "Task required")
+    task_id = task["plan"]["id"] if task else None
     if kind == "role_register":
         require(set(p) >= {"role_id", "kind", "context_id", "fresh", "host", "launch_ref", "capabilities"}, "role_schema", "Host context and launch evidence required")
         require(p["kind"] in {"executor", "verifier", "reviewer", "final_verifier"} and p["fresh"] is True, "fresh_role", "A fresh context is mandatory")
+        if whole:
+            require(p["kind"] == "final_verifier", "final_role", "Run-level roles are final verifiers")
+        if state["basis"].get("work_kind") == "refactoring":
+            require((p["kind"] == "final_verifier") == whole, "final_role", "Register refactoring final_verifier with task_id=null")
         require(p["host"] in {"codex", "claude-code"} and p["launch_ref"] and p["context_id"], "host_evidence", "Record actual host launch; do not simulate a role")
         require(p["role_id"] not in state["roles"], "duplicate_role", "Role already registered")
         require(isinstance(p["role_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", p["role_id"]), "role_id", "Use a filesystem-safe role ID")
@@ -58,7 +68,7 @@ def transition(state, task, event, directory):
             require(not any(state["roles"][r]["kind"] == "executor" and state["roles"][r]["status"] == "active" for r in task["roles"]), "writer_active", "Finish or reconcile the previous executor before assigning another")
         for role in state["roles"].values():
             if role["context_id"] == p["context_id"]:
-                require(role["task_id"] == task["plan"]["id"] and role["kind"] in {"reviewer", "verifier"} and p["kind"] in {"reviewer", "verifier"}, "context_reused", "Only verifier/reviewer of the same task may share a fresh context")
+                require(role["task_id"] == task_id and role["kind"] in {"reviewer", "verifier"} and p["kind"] in {"reviewer", "verifier"}, "context_reused", "Only verifier/reviewer of the same task may share a fresh context")
                 previous = role.get("agent_selection")
                 if selection is not None or previous is not None:
                     require(selection is not None and previous is not None
@@ -66,8 +76,21 @@ def transition(state, task, event, directory):
                             and configuration.launch_identity(selection) == configuration.launch_identity(previous),
                             "agent_selection_conflict", "Different agent selections require separate fresh contexts")
         require(p["capabilities"].get("fresh_context") is True, "host_limits", "Fresh context mechanism unavailable; distinguish busy slots from unsupported host")
-        role = {**p, "task_id": task["plan"]["id"], "status": "active", "registered_at": now()}
+        role = {**p, "task_id": task_id, "status": "active", "registered_at": now()}
         state["roles"][p["role_id"]] = role
+        if whole:
+            from .final_checks import applicable, basis, criteria, retired
+            packet = {"task": None, "work_kind": state["basis"].get("work_kind", "change"), "role": role,
+                "project_root": state["basis"]["project_root"], "execution_directory": str(directory),
+                "basis": basis(state), "checks": applicable(state), "criteria": criteria(state),
+                "acceptance": state.get("acceptance", {}), "retired_checks": retired(state),
+                "tasks": {key: {"plan": value["plan"], "status": value["status"], "paths": value["paths"],
+                                "commits": value["commits"]} for key, value in state["tasks"].items()},
+                "sources": {entry["path"]: str(Path(state["basis"]["change_root"]) / entry["path"])
+                            for entry in state["basis"]["manifest"]}}
+            path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
+            write_json(path, packet)
+            return {"role": role, "packet": str(path)}
         task["roles"].append(p["role_id"])
         packet = {"task": task["plan"], "basis": state["basis"]["manifest"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if state["basis"].get("work_kind", "change") == "refactoring":
@@ -91,11 +114,11 @@ def transition(state, task, event, directory):
         return {"role": role, "packet": str(path)}
     if kind == "role_result":
         role = state["roles"].get(p.get("role_id"))
-        require(role and role["task_id"] == task["plan"]["id"] and role["status"] == "active", "role_missing", "Active registered role required")
+        require(role and role["task_id"] == task_id and role["status"] == "active", "role_missing", "Active registered role required")
         require(p.get("result") and p.get("trace"), "role_result", "Result and host trace required")
         role.update(status="finished", result=p["result"], trace=p["trace"])
         # Executor DONE is deliberately only a role result.
-        return {"role_finished": p["role_id"], "task_status": task["status"]}
+        return {"role_finished": p["role_id"], "task_status": task["status"] if task else None}
     if kind == "review_start":
         require(task["status"] in {"verifying", "reviewing", "integrating"}, "review_phase", "Verification precedes review")
         independent(state, task, p.get("role_id"), {"reviewer"})

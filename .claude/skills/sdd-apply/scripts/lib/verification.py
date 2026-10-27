@@ -11,6 +11,7 @@ from .common import contained, digest, now, require, write_json
 from .state import snapshot, clean_source
 from .inputs import spec_modules, basis_dependency
 from .candidates import resolve, same, store
+from .check_registry import selected, evidence_basis, require_new_ids
 from . import artifact_storage as artifacts
 
 
@@ -27,10 +28,12 @@ def record_registry(state, task, event):
     """Append snapshots; callers must authorize each mutation before recording it."""
     if state["basis"].get("work_kind", "change") != "refactoring":
         return
-    registry = task.setdefault("check_registry", {"revision": 0, "history": []})
+    registry = task.setdefault("check_registry", {"revision": 0, "confirmed_revision": 0, "history": []})
     registry["revision"] += 1
     registry["history"].append({"revision": registry["revision"], "event_id": event["event_id"],
                                 "operation": event["type"], "checks": deepcopy(task["checks"])})
+    if registry.get("transition"):
+        registry["history"][-1]["transition"] = deepcopy(registry["transition"])
 
 
 def registry_current(state, task):
@@ -42,6 +45,8 @@ def registry_current(state, task):
             and [item["revision"] for item in history] == list(range(1, len(history) + 1))
             and history[-1]["checks"] == task["checks"], "registry_changed",
             "Verification registry changed without an authorized revision")
+    from .check_registry import validate
+    validate(task)
     allowed = local_criteria(state, task)
     covered = {criterion for check in task["checks"] for criterion in check["criteria"]}
     require(allowed <= covered, "criteria_uncovered", "Local acceptance and preservation checks remain mandatory")
@@ -57,7 +62,7 @@ def candidate_payload(state, task, source=None):
         require(task.get("baseline_checks"), "baseline_missing", "Capture existing checks before freezing a refactoring result")
     checks = task["checks"]
     if state["basis"].get("work_kind", "change") == "refactoring":
-        checks = {"revision": task["check_registry"]["revision"], "checks": checks}
+        checks = evidence_basis(state, task)
     source = snapshot(state, root_for(state, task)) if source is None else source
     clean_source(source)
     return {"source": source, "manifest": digest(state["basis"]["manifest"]), "checks": digest(checks), "root": root_for(state, task)}
@@ -79,6 +84,8 @@ def current(state, task):
 
 def independent(state, task, role_id, kinds):
     role = state["roles"].get(role_id)
+    if state["basis"].get("work_kind") == "refactoring" and role and role["kind"] == "final_verifier":
+        require(False, "final_role", "Refactoring final verification uses task_id=null and the whole applicable registry")
     require(role and role["kind"] in kinds and role["task_id"] == task["plan"]["id"] and role["status"] == "active", "role_unavailable", "Active independent role required")
     authors = [state["roles"][r]["context_id"] for r in task["roles"] if state["roles"][r]["kind"] == "executor"]
     require(role["context_id"] not in authors and role["fresh"] is True, "role_not_independent", "Author context cannot independently verify or review")
@@ -89,6 +96,7 @@ def valid_evidence(state, task, directory, stage=None):
     if stage != "final":
         current(state, task)
     expected = candidate(state, task) if stage == "final" else task["candidate"]
+    checks = selected(state, task, final=stage == "final")
     matches, seen = [], set()
     for item in reversed(task["evidence"]):
         if item["stage"] not in ({stage} if stage else {"independent", "integration"}) or not same(state, item["candidate"], expected):
@@ -110,9 +118,9 @@ def valid_evidence(state, task, directory, stage=None):
                     and log_data.get("role_id") == item["role_id"]
                     and same(state, log_data.get("candidate"), expected)
                     and log_data.get("registry_revision") == task["check_registry"]["revision"]
-                    and log_data.get("registered_checks") == task["checks"],
+                    and log_data.get("registered_checks") == checks,
                     "evidence_basis", "Evidence must name this task, candidate and registry revision")
-            check = next((check for check in task["checks"] if check["id"] == item["check_id"]), None)
+            check = next((check for check in checks if check["id"] == item["check_id"]), None)
             output = next((output for output in log_data.get("outputs", []) if output.get("check_id") == item["check_id"]), None)
             require(check and output and output["outcome"] == item["outcome"], "evidence_basis", "Evidence must contain its registered check")
             run = check["setup"] or check["run"]
@@ -130,7 +138,7 @@ def valid_evidence(state, task, directory, stage=None):
         authors = {r["context_id"] for r in state["roles"].values() if r["kind"] == "executor" and (stage == "final" or r["task_id"] == task["plan"]["id"])}
         require(role["context_id"] not in authors and role["fresh"], "role_not_independent", "Evidence author is not independent")
         matches.append(item)
-    required = {c["id"] for c in task["checks"]}
+    required = {c["id"] for c in checks}
     require(required and required <= {m["check_id"] for m in matches}, "required_checks", "Every required command/procedure must pass at this candidate")
     return matches
 
@@ -175,8 +183,14 @@ def run_command(command, cwd, timeout):
 
 
 def transition(state, task, event, directory):
+    if task is None:
+        from .final_checks import transition as whole
+        return whole(state, event, directory)
     require(task is not None, "task_required", "Task required")
     kind, p = event["type"], event["payload"]
+    if kind == "checks_revise":
+        from .check_registry import revise
+        return revise(state, task, event)
     if kind == "checks_register":
         require(task["status"] == "pending" and not task["checks"], "registry_frozen", "Register once before execution")
         checks = []
@@ -195,6 +209,7 @@ def transition(state, task, event, directory):
                         "check_schema", "Bind checks to local acceptance or preserved criteria")
             if "command" in check["run"]:
                 require_command(check["run"]["command"])
+        require_new_ids(state, task, checks)
         task["checks"], task["inventory"] = checks, p["inventory"]
         record_registry(state, task, event)
         registry_current(state, task)
@@ -204,6 +219,7 @@ def transition(state, task, event, directory):
         current(state, task)
         additions = p.get("additional", [])
         require(additions and p.get("review_round") == task["reviews"][-1]["round_id"], "extension_evidence", "Reference the review requesting additional checks")
+        require_new_ids(state, task, additions)
         for check in additions:
             require(check.get("id") and check.get("source") and check.get("run", {}).get("command") and check.get("criteria") and set(check["criteria"]) <= local_criteria(state, task), "check_schema", "Add exact runnable checks with scoped AC")
             require(check["id"] not in {c["id"] for c in task["checks"]}, "duplicate_check", "Existing checks cannot be replaced")
@@ -237,7 +253,7 @@ def transition(state, task, event, directory):
         registry_current(state, task)
         stage = p.get("stage")
         require(stage in {"baseline", "self", "independent", "integration", "final"}, "procedure_stage", "Unknown stage")
-        check = next((c for c in task["checks"] if c["id"] == p.get("check_id")), None)
+        check = next((c for c in selected(state, task, final=stage == "final") if c["id"] == p.get("check_id")), None)
         require(check and "procedure" in check["run"] and not check["setup"], "procedure_check", "Use the registered procedure without replacing it")
         if stage != "self":
             independent(state, task, p.get("role_id"), {"verifier", "reviewer", "final_verifier"})
@@ -300,7 +316,8 @@ def transition(state, task, event, directory):
         require(not task.get("baseline_checks") and before == task["start_snapshot"], "baseline_changed", "Capture the initial checks before any implementation edits")
     outputs = []
     locations = None
-    for check in task["checks"]:
+    checks = selected(state, task, final=stage == "final")
+    for check in checks:
         run = check["setup"] or check["run"]
         if stage == "baseline" and "setup_required" in run:
             outputs.append({"check_id": check["id"], "outcome": "planned_absence", "description": run["setup_required"]})
@@ -333,7 +350,7 @@ def transition(state, task, event, directory):
     record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], "task_id": task["plan"]["id"], "role_id": role_id, "stage": stage, "candidate": tested_candidate, "before": before, "after": after, "outputs": outputs}
     if state["basis"].get("work_kind", "change") == "refactoring":
         record.update(work_kind="refactoring", registry_revision=task["check_registry"]["revision"],
-                      registered_checks=deepcopy(task["checks"]))
+                      registered_checks=deepcopy(checks))
     relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
     path = artifacts.contained(directory, relative)
     write_json(path, record)

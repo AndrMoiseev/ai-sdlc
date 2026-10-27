@@ -12,7 +12,7 @@ def incompatible(left, right):
 
 
 def planned_waves(state):
-    """Stable for a fixed plan and mode, including across acceptance and retries."""
+    """Stable for a fixed plan, including across acceptance and retries."""
     plans = {key: task["plan"] for key, task in state["tasks"].items()}
     remaining, ordered, seen = set(plans), [], set()
     while remaining:
@@ -20,7 +20,7 @@ def planned_waves(state):
                        key=lambda key: plans[key]["number"])
         if not ready:
             raise ValueError("wave_dependencies: cyclic or missing task dependency")
-        # Pick one at a time: sequential mode follows the scheduler's number priority.
+        # Use task numbers to make the topological ordering deterministic.
         key = ready[0]
         ordered.append(key)
         seen.add(key)
@@ -28,8 +28,7 @@ def planned_waves(state):
     groups = []
     for key in ordered:
         deps = set(plans[key]["depends_on"])
-        group = next((g for g in groups if state["mode"] == "parallel"
-                      and set(g["depends_on"]) == deps
+        group = next((g for g in groups if set(g["depends_on"]) == deps
                       and all(not incompatible(plans[key], plans[other]) for other in g["tasks"])), None)
         if group is None:
             group = {"id": f"wave-{len(groups) + 1}", "number": len(groups) + 1,
@@ -50,11 +49,6 @@ def waiting_reasons(state, key, candidates):
     if deps:
         reasons.append({"kind": "dependencies", "tasks": deps})
     active = {k: t for k, t in tasks.items() if k != key and t["status"] not in {"pending", "accepted"}}
-    if state["mode"] == "sequential":
-        if active:
-            reasons.append({"kind": "sequential", "tasks": list(active)})
-        elif not reasons and key not in candidates:
-            reasons.append({"kind": "sequential", "tasks": candidates})
     conflicts = [k for k, other in active.items() if incompatible(task["plan"], other["plan"])]
     if conflicts:
         reasons.append({"kind": "conflict", "tasks": conflicts})
@@ -72,7 +66,7 @@ def waiting_reasons(state, key, candidates):
 
 def waiting_text(reasons):
     prefixes = {"run": "Execution paused; see blockers", "dependencies": "Waiting for acceptance",
-                "sequential": "Sequential mode; waiting for", "conflict": "Cannot run alongside",
+                "conflict": "Cannot run alongside",
                 "files": "Shared files occupied by", "resources": "Shared resources occupied by"}
     return [prefixes[r["kind"]] + (": " + ", ".join(r["tasks"]) if r["tasks"] else "") for r in reasons]
 

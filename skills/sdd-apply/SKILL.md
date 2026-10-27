@@ -1,12 +1,12 @@
 ---
 name: sdd-apply
-description: Execute an approved sdd-spec plan when the user explicitly invokes sdd-apply. Supports starting, resuming, and accepting implementation work. Not for drafting specifications or OpenSpec workflows.
-disable-model-invocation: true
+description: Execute an approved sdd-spec plan on explicit invocation or after the user approves the current plan in sdd-spec. Supports starting, resuming, and accepting implementation work. Not for drafting specifications or OpenSpec workflows.
+disable-model-invocation: false
 ---
 
 # SDD Apply
 
-Use only on explicit invocation. Keep normative SDD documents unchanged.
+Start on explicit invocation or a verified current plan approval handed off by sdd-spec. Plan approval authorizes execution unless the user explicitly withheld it; follow the [shared approval contract](../sdd-shared/references/document-format-review.md#опциональное-ревью-и-разрешение-на-реализацию). Keep normative SDD documents unchanged.
 
 Before starting or resuming, exclude transient execution files from Git using
 the [runtime setup policy](references/runtime-setup.md#transient-execution-files).

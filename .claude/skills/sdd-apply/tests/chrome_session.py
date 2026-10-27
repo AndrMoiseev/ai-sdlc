@@ -21,11 +21,17 @@ class ChromeSession:
         try:
             deadline = time.monotonic() + 20
             port_file = directory / "profile/DevToolsActivePort"
-            while not port_file.is_file():
+            while True:
                 if self.process.poll() is not None or time.monotonic() > deadline:
                     raise RuntimeError("Chrome did not expose its local debugging port")
+                try:
+                    lines = port_file.read_text().splitlines()
+                except (FileNotFoundError, PermissionError):
+                    lines = []
+                if len(lines) >= 2 and lines[0] and lines[1]:
+                    port, endpoint = lines[:2]
+                    break
                 time.sleep(0.01)
-            port, endpoint = port_file.read_text().splitlines()[:2]
             self.socket = create_connection(f"ws://127.0.0.1:{port}{endpoint}",
                                             origin="http://localhost", timeout=20)
             self.number, self.events = 0, deque()

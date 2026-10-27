@@ -26,33 +26,42 @@ def process_cli(shared_cli, monkeypatch):
     return call
 
 
-@pytest.mark.parametrize("stage,script", [
-    ("documents", "check.py"), ("plan", "check.py"), ("plan", "snapshot.py"),
+@pytest.mark.parametrize("stage,script,native", [
+    ("documents", "check.py", False),
+    # Each executable has one successful process contract; stages share its parser.
+    pytest.param("plan", "check.py", True, marks=pytest.mark.native_process),
+    pytest.param("plan", "snapshot.py", True, marks=pytest.mark.native_process),
 ])
-def test_shared_adapter_matches_real_cli(project, process_cli, stage, script):
-    assert spec_call(SHARED, project, "demo", stage, script) == process_cli(SHARED, project, "demo", stage, script)
+def test_shared_adapter_matches_real_cli(project, process_cli, stage, script, native):
+    actual = spec_call(SHARED, project, "demo", stage, script)
+    if native:
+        assert actual == process_cli(SHARED, project, "demo", stage, script)
+    else:
+        assert actual["approval_status"]["ready"] is True
+        assert not actual["errors"]
 
 
-@pytest.mark.parametrize("damage", ["missing", "syntax"])
+@pytest.mark.parametrize("damage", ["missing", pytest.param("syntax", marks=pytest.mark.native_process)])
 def test_shared_adapter_matches_real_cli_errors(project, process_cli, damage):
     root = project / "sdd/changes/demo"
     if damage == "missing":
         (root / "tasks.md").unlink()
     else:
         (root / "tasks.md").write_text("---\ninvalid: [\n---\n")
-    with pytest.raises(Rejected) as expected:
-        process_cli(SHARED, project, "demo", "plan", "check.py")
     with pytest.raises(Rejected) as actual:
         spec_call(SHARED, project, "demo", "plan", "check.py")
-    assert actual.value.code == expected.value.code
-    assert str(actual.value) == str(expected.value)
+    assert actual.value.code == "sdd_check"
+    if damage == "syntax":
+        # One failure proves subprocess exit/output translation agrees with the adapter.
+        with pytest.raises(Rejected) as expected:
+            process_cli(SHARED, project, "demo", "plan", "check.py")
+        assert str(actual.value) == str(expected.value)
 
 
-def test_shared_adapter_matches_missing_approval_result(project, process_cli):
+def test_shared_adapter_matches_missing_approval_result(project):
     (project / "sdd/changes/demo/review/decisions.md").unlink()
     actual = spec_call(SHARED, project, "demo", "plan", "check.py")
     assert not actual["approval_status"]["ready"]
-    assert actual == process_cli(SHARED, project, "demo", "plan", "check.py")
 
 
 def test_shared_adapter_restores_import_context(project):

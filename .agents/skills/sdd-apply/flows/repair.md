@@ -30,3 +30,13 @@ There are three review rounds per TASK-ID, counting the first and all post-integ
 Before handing work back, confirm the reservation succeeded. Reuse the task's executor while its context is available; otherwise register a fresh successor with partial work, remaining AC, decisions and rejected approaches. End writing with `role_result`, submit `candidate` to commit the repaired result, then obtain current checks and review. Keep previous candidate commits and logs as history. A passing old review cannot accept a changed candidate.
 
 For `review_limit_reached` or `test_repair_limit_reached`, preserve active work and reconcile effects already in flight. Report TASK-ID, limit/usage, remaining errors or findings, changes attempted, raw check evidence and the rest of the plan's state. Request one concrete option: a stated finite extension, return to sdd-spec, or stop with a partial result. Explain that this skill's approved budget contract requires that decision. Only `budget_extend` with the user's recorded source/text and increased finite limit permits additional work; general autonomy and elapsed time do not extend a budget.
+
+## Boundary-test findings
+
+For a finding about tests at changed module boundaries, apply the
+[test evolution policy](../references/review-policy.md#tests-at-changed-module-boundaries).
+Preserve the behavioral guarantee when repairing a mixed test. Restore or add
+checks within the approved group through the registry API, retaining the original
+baseline and repair counters. A finding that changes the agreed obligation or
+architecture returns to sdd-spec; a justified structural retirement alone does
+not start a repair cycle.

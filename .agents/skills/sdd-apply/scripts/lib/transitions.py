@@ -15,11 +15,11 @@ def reduce(state, event, directory):
             task["before_block"] = task["status"]
             task["status"] = "blocked"
             task["blockers"].append(payload)
-        if not task or state["mode"] == "sequential":
+        if not task:
             state["status"] = "blocked"
             state["blockers"].append({**payload, "task_id": event["task_id"]})
         return {"blocked": payload}
-    if kind in {"resume", "spec_conflict", "revised_plan", "handoff", "mode"}:
+    if kind in {"resume", "spec_conflict", "revised_plan", "handoff"}:
         from .resume import transition
         return transition(state, task, event, directory)
     if kind == "budget_extend":
@@ -44,11 +44,11 @@ def reduce(state, event, directory):
     if kind in {"role_register", "role_result", "review_start", "review_result"}:
         from .roles import transition
         return transition(state, task, event, directory)
-    if kind in {"checks_register", "checks_extend", "check_setup", "check_run", "candidate", "procedure_begin", "procedure_result"}:
+    if kind in {"checks_register", "checks_extend", "checks_revise", "check_setup", "check_run", "candidate", "procedure_begin", "procedure_result"}:
         from .verification import transition
         return transition(state, task, event, directory)
     if kind == "start":
-        require(event["task_id"] in available(state), "task_unavailable", "Dependencies or execution mode prevent admission")
+        require(event["task_id"] in available(state), "task_unavailable", "Dependencies or conflicts prevent admission")
         require(artifacts.is_file(directory / "dashboard.html"), "dashboard_missing", "Generate the initial dashboard before starting")
         require(task["checks"], "checks_missing", "Register planned and project checks first")
         role = state["roles"].get(payload.get("role_id"))
@@ -70,6 +70,11 @@ def reduce(state, event, directory):
         clean_source(task["start_snapshot"])
         return {"status": "running"}
     if kind == "repair":
+        if state.get("final_checks", {}).get("failures"):
+            require(payload.get("final_checks"), "repair_owner_required", "Attribute final failures before reopening a task author")
+        if state.get("final_checks") and payload.get("final_checks"):
+            from .final_checks import repair
+            return repair(state, task, payload, directory, event)
         from .budgets import repair
         return repair(state, task, payload)
     if kind in {"commit", "accept"}:

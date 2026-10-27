@@ -75,7 +75,7 @@ The script runs this audit before `resume` and `finalize`. Ordinary reads do not
 claim to detect corruption in unaccessed historical objects. See
 [state storage](state-storage.md) for commit boundaries and recovery.
 
-`available_tasks` reports dependency/mode eligibility, not admission permission.
+`available_tasks` reports dependency/conflict eligibility, not admission permission.
 Active role IDs are not a liveness check. Neither view proves candidate bytes,
 approvals or evidence current; transition handlers enforce their own gates.
 Executor DONE and exit 0 alone establish neither acceptance nor completion.
