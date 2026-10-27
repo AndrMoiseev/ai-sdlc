@@ -67,3 +67,18 @@ def bundle(tmp_path):
     write_doc(change / "specs/feature/spec.md", "spec", records, capability="feature")
     write_doc(change / "tasks.md", "tasks", [task])
     return root, change, deepcopy(records), deepcopy(task)
+
+@pytest.fixture(autouse=True)
+def checkpoint_observation(monkeypatch):
+    """Git transitions are covered by shared adapter tests; vary observations here."""
+    import lib.reviews as reviews
+    observation = {"status": "ready", "head": "a" * 40, "accepted_commit": "a" * 40, "dirty": False}
+    monkeypatch.setattr(reviews, "inspect", lambda *args: dict(observation))
+    class EvidenceGit:
+        def __init__(self, root):
+            pass
+
+        def commit_exists(self, oid):
+            return oid not in observation.get("unavailable", [])
+    monkeypatch.setattr(reviews, "Git", EvidenceGit)
+    return observation

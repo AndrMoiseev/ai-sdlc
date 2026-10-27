@@ -28,15 +28,9 @@ def test_approved_and_preserves_dirty(project):
     (project / "foreign.txt").write_bytes(b"unstaged")
     (project / "untracked.txt").write_bytes(b"keep")
     before = (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
-    result = validate(project, "demo", instruction, SPEC)
-    assert result["tasks"][0]["id"] == "TASK-one"
-    assert result["instruction"] == instruction
-    for stage in ("documents", "plan"):
-        assert result["checks"][stage]["approval_status"]["ready"]
-        assert not result["checks"][stage]["review_status"]["complete"]
-        assert set(result["checks"][stage]["review_status"]["coverage"].values()) == {"missing"}
+    with pytest.raises(ValueError, match="accept a clean checkpoint"):
+        validate(project, "demo", instruction, SPEC)
     assert before == (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
-    assert "working_patch" not in result and "index_patch" not in result
     assert (project / "untracked.txt").read_bytes() == b"keep"
 
 
@@ -74,6 +68,41 @@ def test_incompatible_shared_api_is_actionable(project, tmp_path):
     import json
     root = tmp_path / "incompatible"
     root.mkdir()
-    (root / "api.json").write_text(json.dumps({"api_version": 2}))
+    (root / "api.json").write_text(json.dumps({"api_version": 1}))
     with pytest.raises(ValueError, match="Incompatible sdd-shared API"):
         validate(project, "demo", {"text": "Do", "source": "message"}, sdd_shared=root)
+
+
+def test_checkpoint_acceptance_does_not_approve_tasks(project):
+    from repository_support import commit
+    change = project / "sdd/changes/demo"
+    docs = spec_modules(SPEC)
+    decisions = docs.read_document(change / "review/decisions.md")
+    decision = dict(sdd_record="user", id="USER-accepted", kind="state_acceptance",
+                    work_kind="change", change_id="demo", scope={}, response="Accepted checkpoint",
+                    date="2026-10-27T00:00:00Z", message="synthetic-user-message",
+                    accepted_commit=repository(project).head())
+    document(decisions.path, decisions.meta, [decision])
+    checkpoint = docs.read_checkpoint(change)
+    checkpoint.meta["approval_refs"] = [decision["id"]]
+    document(change / "state.yaml", checkpoint.meta)
+    stage_files(project, "sdd")
+    commit(project, "Accepted state without plan approval")
+    with pytest.raises(ValueError):
+        call(project)
+
+
+def test_admission_requires_matching_checkpoint(project):
+    from repository_support import commit
+    (project / "external.txt").write_text("extra commit")
+    stage_files(project, "external.txt")
+    commit(project, "Unaccepted extra commit")
+    with pytest.raises(ValueError, match="accept a clean checkpoint"):
+        call(project)
+
+
+def test_admitted_criteria_survive_later_document_edits(driver, project):
+    from lib.final_checks import criteria
+    path = project / "sdd/changes/demo/specs/demo/spec.md"
+    path.write_text(path.read_text(encoding="utf-8").replace("expected: Sum", "expected: Unapproved"), encoding="utf-8")
+    assert criteria(driver.state)["AC-one"]["expected"] == "Sum"

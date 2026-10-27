@@ -5,6 +5,12 @@ design, project instructions and exact checks; the packet gives their paths,
 owned files, candidate reference, prior commits, blockers and rejected approaches.
 The author's conversation, grading answers and unrelated task history are not inputs.
 
+Use the packet's `approved_documents` records and `plan_commit` (under `basis`
+for task packets) as the admitted scope. Source paths locate documents; later
+working-file edits do not authorize different criteria. Read prose at that commit
+when required. Return changed scope to the orchestrator for explicit `revised_plan`
+reconciliation while preserving current work.
+
 For refactoring, the packet's `refactoring` context contains scope, original local
 acceptance records, preserves, contributes_to, test_changes, relevant design
 criteria/decisions, original document paths, registry history and baseline.
@@ -26,7 +32,7 @@ permissions or tools rather than simulating a role or a successful check.
 A refactoring final verifier has `task_id: null`. Its run-level packet contains
 the whole criteria, original document paths, accepted task scopes and commits,
 the confirmed applicable check union, retired checks with reasons, and the
-current integrated source/manifest/registry basis. This scope grants verification
+current integrated source/plan-commit/registry basis. This scope grants verification
 authority without granting implementation ownership. Report ambiguous repair
 ownership before any author is reopened.
 

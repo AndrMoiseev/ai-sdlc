@@ -1,16 +1,16 @@
 from lib.reviews import review_status
-from lib.snapshots import snapshot
+
 from test_review_records import checkpoint, project, report, write, finding
 import pytest
 import yaml
 
 
 def user(tmp_path, kind, **extra):
-    return dict(sdd_record="user", id="USER-" + kind.replace("_", "-"), kind=kind, scope={"stage": "document_review"}, response="Explicit instruction", date="2026-01-01T01:00:00Z", inputs=snapshot(tmp_path, "demo", "documents"), **extra)
+    return dict(sdd_record="user", work_kind="change", change_id="demo", id="USER-" + kind.replace("_", "-"), kind=kind, scope={"stage": "document_review"}, response="Explicit instruction", date="2026-01-01T01:00:00Z", basis_commit="a" * 40, **extra)
 
 
 def decisions(root, records):
-    write(root / "review/decisions.md", {"schema_version": 1}, records)
+    write(root / "review/decisions.md", {"schema_version": 2, "work_kind": "change", "change_id": "demo"}, records)
 
 
 def test_version_approval_vs_durable_work(tmp_path):
@@ -21,9 +21,9 @@ def test_version_approval_vs_durable_work(tmp_path):
     decisions(root, [approval, planning])
     (root / "design.md").write_text("expected edit")
     status = review_status(tmp_path, root, "documents")["approval_status"]
-    assert not status["approved"]
+    assert status["approved"]
     assert "USER-planning-command" in status["work_authorizations"]
-    assert not status["ready"]
+    assert status["ready"]
 
 
 def test_historical_plan_without_tasks_does_not_block_documents(tmp_path):
@@ -31,13 +31,13 @@ def test_historical_plan_without_tasks_does_not_block_documents(tmp_path):
     report(tmp_path, root, lens="plan", stage="plan")
     approval = user(tmp_path, "plan_approval")
     approval["scope"]["stage"] = "plan_review"
-    approval["inputs"] = snapshot(tmp_path, "demo", "plan")
+    approval["basis_commit"] = "a" * 40
     decisions(root, [approval])
     (root / "tasks.md").unlink()
     result = review_status(tmp_path, root, "documents")
     assert not result["errors"]
-    assert result["review_status"]["reports"]["run-one/plan"]["freshness"] == "stale"
-    assert result["approval_status"]["applicability"]["USER-plan-approval"] is False
+    assert result["review_status"]["reports"]["run-one/plan"]["evidence"] == "current"
+    assert result["approval_status"]["applicability"]["USER-plan-approval"] is True
     assert not result["approval_status"]["approved"]
 
 
@@ -82,13 +82,12 @@ def test_state_never_authorizes_and_broken_state_recovers(tmp_path):
 
 
 @pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("plan", "plan_approval", "plan")])
-def test_waiver_expiry_and_final_approval_does_not_waive(tmp_path, stage, kind, lens):
-    # Reuse the existing document fixture: applicability depends on real input
-    # manifests; mocking review_status would hide accidental review gating.
+def test_durable_approval_and_review_remain_independent(tmp_path, stage, kind, lens):
+    # Exercise real review and authorization parsing with an injected Git observation.
     root = project(tmp_path)
     approval = user(tmp_path, kind)
     approval["scope"]["stage"] = "document_review" if stage == "documents" else "plan_review"
-    approval["inputs"] = snapshot(tmp_path, "demo", stage)
+    approval["basis_commit"] = "a" * 40
     decisions(root, [approval])
     result = review_status(tmp_path, root, stage)
     assert result["approval_status"]["ready"]
@@ -102,25 +101,25 @@ def test_waiver_expiry_and_final_approval_does_not_waive(tmp_path, stage, kind, 
     assert result["review_status"]["unresolved_findings"]
     disposition = user(tmp_path, "finding_disposition", action="fix", completion=[])
     disposition["scope"] = {"stage": approval["scope"]["stage"], "findings": [f"run-one/{lens}/FIND-example"]}
-    disposition["inputs"] = approval["inputs"]
+    disposition["basis_commit"] = approval["basis_commit"]
     decisions(root, [approval, disposition])
     result = review_status(tmp_path, root, stage)
     assert result["approval_status"]["ready"]
     assert result["review_status"]["unfinished_fixes"]
     waiver = user(tmp_path, "review_waiver")
     waiver["scope"] = {"stage": approval["scope"]["stage"], "lenses": [lens]}
-    waiver["inputs"] = approval["inputs"]
+    waiver["basis_commit"] = approval["basis_commit"]
     decisions(root, [approval, waiver])
     assert review_status(tmp_path, root, stage)["approval_status"]["ready"]
     (root / "design.md").write_text("new version")
     result = review_status(tmp_path, root, stage)
-    assert not result["approval_status"]["ready"]
-    assert result["review_status"]["coverage"][lens] == "stale"
-    approval["inputs"] = snapshot(tmp_path, "demo", stage)
+    assert result["approval_status"]["ready"]
+    assert result["review_status"]["coverage"][lens] == "completed"
+    approval["basis_commit"] = "a" * 40
     decisions(root, [approval])
     result = review_status(tmp_path, root, stage)
     assert result["approval_status"]["ready"]
-    assert result["review_status"]["coverage"][lens] == "stale"
+    assert result["review_status"]["coverage"][lens] == "completed"
     approval["status"] = "cancelled"
     decisions(root, [approval])
     assert not review_status(tmp_path, root, stage)["approval_status"]["ready"]
@@ -137,3 +136,24 @@ def test_supersession_preserves_history_without_reactivating_old_work(tmp_path):
     assert not result["errors"]
     assert not result["approval_status"]["work_authorizations"]
     assert (root / "review/decisions.md").read_bytes() == before
+
+
+def test_state_acceptance_does_not_approve_or_authorize_work(tmp_path):
+    root = project(tmp_path)
+    acceptance = user(tmp_path, "state_acceptance", message="Conversation message 12")
+    acceptance.pop("basis_commit")
+    acceptance.update(scope={}, accepted_commit="a" * 40)
+    decisions(root, [acceptance])
+    result = review_status(tmp_path, root, "plan")
+    assert result["errors"] == []
+    assert result["approval_status"]["approved"] is False
+    assert result["approval_status"]["work_authorizations"] == {}
+
+
+def test_approval_survives_accepted_commit_transition(tmp_path, checkpoint_observation):
+    root = project(tmp_path)
+    decisions(root, [user(tmp_path, "document_approval")])
+    checkpoint_observation.update(head="b" * 40, accepted_commit="b" * 40)
+    result = review_status(tmp_path, root, "documents")
+    assert result["approval_status"]["approved"] is True
+    assert result["approval_status"]["ready"] is True

@@ -15,6 +15,7 @@ def prepared(driver, project, integrate=True):
 
 
 def test_only_owned_paths_with_foreign_index(driver, project):
+    driver.worktree()
     (project / "foreign.txt").write_text("staged\n")
     stage_files(project, "foreign.txt")
     (project / "foreign.txt").write_text("unstaged\n")

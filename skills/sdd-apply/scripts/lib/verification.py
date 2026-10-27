@@ -65,7 +65,7 @@ def candidate_payload(state, task, source=None):
         checks = evidence_basis(state, task)
     source = snapshot(state, root_for(state, task)) if source is None else source
     clean_source(source)
-    return {"source": source, "manifest": digest(state["basis"]["manifest"]), "checks": digest(checks), "root": root_for(state, task)}
+    return {"source": source, "manifest": digest({"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}), "checks": digest(checks), "root": root_for(state, task)}
 
 
 def candidate(state, task, source=None):

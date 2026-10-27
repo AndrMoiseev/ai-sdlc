@@ -52,7 +52,8 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
     checks = {}
     for stage in ("documents", "plan"):
         checks[stage] = spec_call(dependency, project, change, stage, "check.py", work_kind)
-        require(checks[stage].get("schema_version") == 1 and checks[stage].get("approval_status", {}).get("ready") is True, "approval_missing", f"{stage}: {checks[stage]}")
+        require(checks[stage].get("schema_version") == 2 and checks[stage].get("approval_status", {}).get("ready") is True, "approval_missing", f"{stage}: {checks[stage]}")
+        require(checks[stage].get("checkpoint_status", {}).get("status") == "ready", "checkpoint_not_ready", f"{stage}: accept a clean checkpoint before execution: {checks[stage].get('checkpoint_status')}")
         require(not any(w["code"] == "state_recovery" for w in checks[stage].get("warnings", [])), "state_recovery", "Recover sdd-spec checkpoint first")
     docs = spec_modules(dependency)
     docs.read_checkpoint(directory, work_kind)
@@ -62,6 +63,13 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
     if work_kind == "refactoring":
         plan_records = {kind: [record for record in records if record["sdd_record"] == kind]
                         for kind in ("acceptance", "verification")}
-    manifest = spec_call(dependency, project, change, "plan", "snapshot.py", work_kind)
+    document_paths = sorted(["proposal.md", "design.md", "tasks.md"] +
+                            ([path.relative_to(directory).as_posix() for path in (directory / "specs").glob("**/spec.md")] if work_kind == "change" else []))
+    plan_commit = checks["plan"]["checkpoint_status"]["head"]
+    # Retain admitted criteria/decisions just as tasks are retained. Role packets
+    # must not silently take scope from later working-document edits.
+    document_records = {name: docs.read_document(directory / name, work_kind).records for name in document_paths}
     excluded = (directory / "execution").relative_to(project).as_posix()
-    return {"schema_version": 1, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "manifest": manifest, "tasks": tasks, **plan_records, **repository(project).inspect(exclude=[excluded])}
+    source = repository(project).inspect(exclude=[excluded])
+    require(source["head"] == plan_commit and not source["dirty_paths"], "checkpoint_changed", "Checkpoint changed during admission; inspect and retry")
+    return {"schema_version": 2, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "plan_commit": plan_commit, "document_paths": document_paths, "document_records": document_records, "tasks": tasks, **plan_records, **source}

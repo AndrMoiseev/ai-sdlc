@@ -9,9 +9,8 @@ from pathlib import Path
 
 
 def refactoring_context(state, task):
-    from .inputs import basis_dependency, spec_modules
     root = Path(state["basis"]["change_root"])
-    design = spec_modules(basis_dependency(state["basis"])).read_document(root / "design.md", "refactoring")
+    design = state["basis"]["document_records"]["design.md"]
     criteria = local_criteria(state, task) | set(task["plan"]["contributes_to"])
     for change in task["plan"].get("test_changes", []):
         criteria.update(change["criteria"])
@@ -26,7 +25,7 @@ def refactoring_context(state, task):
             "preservation_reason": task["plan"].get("preservation_reason"),
             "test_changes": task["plan"].get("test_changes", []),
             "test_evolution": test_change_context(state, task),
-            "design": [record for record in design.records if record.get("id") in criteria | decisions
+            "design": [record for record in design if record.get("id") in criteria | decisions
                        or record["sdd_record"] == "decision" and criteria & set(record.get("criteria", []))],
             "sources": {name: str(root / name) for name in ("proposal.md", "design.md", "tasks.md")},
             "check_registry": {"revision": registry["revision"], "history": [
@@ -83,19 +82,22 @@ def transition(state, task, event, directory):
             packet = {"task": None, "work_kind": state["basis"].get("work_kind", "change"), "role": role,
                 "project_root": state["basis"]["project_root"], "execution_directory": str(directory),
                 "basis": basis(state), "checks": applicable(state), "criteria": criteria(state),
+                "plan_commit": state["basis"]["plan_commit"],
+                "approved_documents": state["basis"]["document_records"],
                 "acceptance": state.get("acceptance", {}), "retired_checks": retired(state),
                 "tasks": {key: {"plan": value["plan"], "status": value["status"], "paths": value["paths"],
                                 "commits": value["commits"]} for key, value in state["tasks"].items()},
-                "sources": {entry["path"]: str(Path(state["basis"]["change_root"]) / entry["path"])
-                            for entry in state["basis"]["manifest"]}}
+                "sources": {entry: str(Path(state["basis"]["change_root"]) / entry)
+                            for entry in state["basis"]["document_paths"]}}
             path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
             write_json(path, packet)
             return {"role": role, "packet": str(path)}
         task["roles"].append(p["role_id"])
-        packet = {"task": task["plan"], "basis": state["basis"]["manifest"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        packet = {"task": task["plan"], "basis": {"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}, "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if state["basis"].get("work_kind", "change") == "refactoring":
             packet["work_kind"] = "refactoring"
             packet["refactoring"] = refactoring_context(state, task)
+        packet["approved_documents"] = state["basis"]["document_records"]
         if task["worktree"]:
             packet["worktree"] = {key: value for key, value in task["worktree"].items()
                                   if key not in {"snapshot", "inventory"}}

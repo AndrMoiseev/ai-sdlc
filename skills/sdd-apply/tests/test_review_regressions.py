@@ -101,9 +101,9 @@ def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
         driver.review()
 
 def test_ownership_path_alias_rejected(basis, project):
-    (project / 'check.py').write_text('assert 2 + 3 == 5\n# foreign user work\n')
     driver = Driver(basis)
     driver.worktree()
+    (project / 'check.py').write_text('assert 2 + 3 == 5\n# foreign user work\n')
     driver.send('checks_register', {'inventory': {'instructions': [], 'ci': []}})
     driver.role('author', 'executor')
     with pytest.raises(ValueError, match='canonical'):

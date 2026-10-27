@@ -118,8 +118,16 @@ def document_schema(meta, work_kind):
         raise InputError("unsupported_work_kind", f"Unsupported declared work kind: {declared}; install a matching SDD bundle")
     if declared != work_kind:
         raise ValidationError("work_kind_mismatch", f"Document declares {declared}, selected work is {work_kind}; correct the work selection or document placement")
-    if type(meta.get("schema_version")) is not int or meta["schema_version"] != 1:
+    kind = meta.get("document_type", "")
+    if not isinstance(kind, str):
+        raise ValidationError("document_type", "document_type must be a string")
+    expected_version = 2 if kind in {"state", "review", "decisions"} else 1
+    if expected_version == 2 and type(meta.get("schema_version")) is int and meta["schema_version"] == 1:
+        raise InputError("migration_required", "Legacy evidence requires migration: inspect the checkpoint, accept the current clean HEAD, then migrate state and decisions; preserve reports without a reliable commit outside the active review set")
+    if type(meta.get("schema_version")) is not int or meta["schema_version"] != expected_version:
         raise InputError("unsupported_version", f"Unsupported {work_kind} schema version: {meta.get('schema_version')}; install a matching SDD bundle")
+    if expected_version == 2 and (meta.get("work_kind") != work_kind or not valid_slug(meta.get("change_id"))):
+        raise ValidationError("document_identity", "Version 2 documents require explicit work_kind and change_id")
     if work_kind == "refactoring":
         from .refactoring import FIELDS as REFACTORING_FIELDS, KINDS as REFACTORING_KINDS
         return REFACTORING_FIELDS, REFACTORING_KINDS
@@ -252,11 +260,11 @@ def read_checkpoint(root, work_kind="change"):
             raise ValidationError("document_metadata", "state.yaml requires change_id and language")
         if meta["change_id"] != machine.parent.name:
             raise ValidationError("document_identity", "Checkpoint change_id does not match its work root")
-        required = {"schema_version", "document_type", "change_id", "language", "phase", "flow",
+        required = {"schema_version", "work_kind", "document_type", "change_id", "language", "phase", "flow",
                     "awaiting", "updated_at", "document_links", "review_links", "approval_refs",
                     "next_question", "checks"}
-        if not required <= meta.keys() or meta.keys() - required - {"work_kind"}:
-            raise ValidationError("state_fields", "state.yaml requires all checkpoint fields and permits only optional work_kind")
+        if set(meta) != required:
+            raise ValidationError("state_fields", "state.yaml requires exactly the version 2 checkpoint fields")
         with prose.open(encoding="utf-8-sig") as stream:
             body = stream.read(MAX_DOCUMENT_CHARS + 1)
         if body.partition("\n")[0].strip() == "---":

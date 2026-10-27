@@ -19,7 +19,7 @@ For final verification, inspect and run the full required set and overall scenar
 
 For ordinary additional project checks, use the run-level packet (`task: null`),
 null task scope and stage `final`. Execute every registered project command and
-procedure at the packet's current work identity, HEAD, manifest and registry.
+procedure at the packet's current work identity, HEAD, approved plan commit and registry.
 Report project evidence separately from the required task-scoped final checks.
 After a newer procedure attempt, obtain a new aggregate run linking that attempt;
 after a lost role, reconcile unfinished procedures before starting fresh work.
@@ -31,6 +31,6 @@ temporary conversion. Check persistent local obligations and project checks in
 the confirmed applicable union. A retired check needs its recorded transition
 and reason; its historical pass is not a final pass. Report missing consumers,
 remaining bypasses and integration regressions even when all tasks are accepted.
-Bind results to the packet's current integrated source, manifest and registry;
+Bind results to the packet's current integrated source, approved plan commit and registry;
 changed inputs require fresh checks. Establish the repair owner before edits;
 an unplanned area requires returning to sdd-spec.

@@ -1,3 +1,4 @@
+from repository_support import accept_checkpoint
 """Initialize and read both actual approved bundles through public dispatch."""
 from lib.repository import repository
 
@@ -18,6 +19,19 @@ COLLECTION = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("refactoring_bundle_fixture", COLLECTION / "sdd-shared/tests/test_refactoring_work_basis.py")
 fixtures = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(fixtures)
+_approved_refactoring = fixtures.approved_refactoring
+
+
+def approved_refactoring(project):
+    from repository_support import stage, commit
+    result = _approved_refactoring(project)
+    stage(project, "sdd")
+    commit(project, "Approved refactoring checkpoint fixture")
+    accept_checkpoint(project)
+    return result
+
+
+fixtures.approved_refactoring = approved_refactoring
 INSTRUCTION = {"text": "Execute the approved fixture plan", "source": "synthetic-user-message"}
 
 
@@ -39,7 +53,7 @@ def test_refactoring_inputs_public_initialize_read_and_dashboard(project, work_k
     assert all(r["sdd_record"] == "task" for r in basis["tasks"])
     if work_kind == "refactoring":
         assert basis["acceptance"] == [records[1]] and basis["verification"] == [records[2]]
-        assert [r["path"] for r in basis["manifest"]] == ["design.md", "proposal.md", "tasks.md"]
+        assert basis["document_paths"] == ["design.md", "proposal.md", "tasks.md"]
     state = dispatch({"operation": "initialize", "args": {**args, "owner": "fixture-owner", "isolation": True, "mode": "parallel"}})
     directory = expected_root / "execution"
     before = (directory / "state.json").read_bytes()
@@ -107,6 +121,8 @@ def test_refactoring_inputs_reject_foreign_approval_even_with_same_manifest(proj
     assert diagnostic["approval_status"]["ready"] is False
     assert len(diagnostic["errors"]) == len(users)
     expected = "Authorization change identity mismatch" if identity == "change_id" else "Authorization work kind mismatch"
+    if value is None:
+        expected = "Missing fields: ['work_kind']"
     assert all(item["code"] == "authorization_structure" and item["message"] == expected
                for item in diagnostic["errors"])
     assert not storage(root / "execution").exists()

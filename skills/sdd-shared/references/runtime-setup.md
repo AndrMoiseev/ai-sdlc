@@ -11,7 +11,7 @@ Resolve `<shared-root>` from the installed package. Consumers find a sibling
 sdd-shared directory, or accept an explicit root (`--sdd-shared` for setup,
 `sdd_shared` in apply requests). Compatibility commands in sdd-spec use the sibling.
 Resolve reference paths against this same package, including for an explicit root.
-Missing files or API versions other than integer 1 produce an actionable error;
+Missing files or API versions other than integer 2 produce an actionable error;
 install the matching bundle before continuing dependent work.
 
 Check `uv --version`, `uv cache dir`, the selected script and adjacent `.py.lock`.

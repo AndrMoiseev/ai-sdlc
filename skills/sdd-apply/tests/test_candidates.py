@@ -23,6 +23,10 @@ def test_candidate_uses_commit_and_only_change_documents(driver, project):
         (project / f"existing-{number}.txt").write_text(str(number))
     stage(project, ".")
     commit(project, "Unrelated tracked source collection")
+    from lib.repository import repository
+    driver.send("resume", {"host_trace": "synthetic fixture", "live_contexts": [], "resolutions": [
+        {"reason": "execution_head_changed", "head": repository(project).head(), "evidence": "Fixture source collection",
+         "instruction": {"text": "Accept source collection", "source": "synthetic-user"}}]}, task_id=None)
     reference = frozen(driver, project)
     payload = resolve(driver.state, reference)
     assert reference["candidate_id"] == "candidate-" + digest(payload)
@@ -89,7 +93,7 @@ def test_compact_candidate_detects_each_freshness_input(execution_checkpoint, ch
     elif changed == "registry":
         task["checks"][0]["configuration"] = {"changed": True}
     else:
-        state["basis"]["manifest"][0]["sha256"] = "0" * 64
+        state["basis"]["plan_commit"] = "0" * 40
     with pytest.raises(ValueError, match="changed|before verification"):
         current(state, task)
     assert set(artifacts.paths(driver.directory / "candidates")) == artifacts_before

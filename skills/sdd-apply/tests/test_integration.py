@@ -40,6 +40,8 @@ def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, 
     (project / "result.txt").write_text("previous accepted task\n")
     stage(project, "result.txt")
     commit(project, "fixture concurrent accepted task")
+    from repository_support import accept_execution_source
+    accept_execution_source(d)
     with pytest.raises(ValueError):
         d.send("integrate")
     operation = f"event-{d.number}"

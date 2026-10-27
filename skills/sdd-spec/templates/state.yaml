@@ -1,4 +1,5 @@
-schema_version: 1
+schema_version: 2
+work_kind: change
 document_type: state
 change_id: sample-change
 language: ru
@@ -12,4 +13,3 @@ approval_refs: []
 next_question: null
 checks:
   structure: not_run
-  freshness: not_checked

@@ -1,8 +1,10 @@
-# Execution state version 2
+# Execution state version 3
 
-The runtime accepts only schema version 2. Preserve an old execution until an
+The runtime accepts only schema version 3. Preserve an old execution until an
 explicit conversion has verified it and saved a backup; ordinary reads never
-migrate or rewrite state.
+migrate or rewrite state. The input basis uses schema 2 with `plan_commit` and
+`document_paths`. Preserve legacy manifests and execution evidence for explicit
+reconciliation; accepting a checkpoint alone cannot approve extra tasks.
 
 ## Current state and immutable objects
 

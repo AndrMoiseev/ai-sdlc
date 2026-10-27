@@ -10,20 +10,15 @@ from .state import snapshot, clean_source
 
 
 def criteria(state):
-    from .inputs import basis_dependency, spec_modules
     if not refactoring(state):
         allowed = {ident for task in state["tasks"].values() for ident in task["plan"]["covers"]}
-        documents = spec_modules(basis_dependency(state["basis"]))
-        root = Path(state["basis"]["change_root"])
-        records = [record for entry in state["basis"]["manifest"]
-                   if entry["path"].startswith("specs/") and entry["path"].endswith("/spec.md")
-                   for record in documents.read_document(root / entry["path"]).records
+        records = [record for entry in state["basis"]["document_paths"]
+                   if entry.startswith("specs/") and entry.endswith("/spec.md")
+                   for record in state["basis"]["document_records"][entry]
                    if record["sdd_record"] == "acceptance" and record["id"] in allowed]
         require({record["id"] for record in records} == allowed, "criteria_uncovered", "Every covers criterion needs its approved specification")
         return {record["id"]: record for record in records}
-    document = spec_modules(basis_dependency(state["basis"])).read_document(
-        Path(state["basis"]["change_root"]) / "design.md", "refactoring")
-    return {record["id"]: record for record in document.records if record["sdd_record"] == "criterion"}
+    return {record["id"]: record for record in state["basis"]["document_records"]["design.md"] if record["sdd_record"] == "criterion"}
 
 
 def registry(state):
@@ -67,7 +62,7 @@ def basis(state):
     source = snapshot(state)
     clean_source(source)
     result = {"work_kind": state["basis"].get("work_kind", "change"), "change_id": state["change_id"], "run_id": state["run_id"],
-            "source": source, "manifest": digest(state["basis"]["manifest"]),
+            "source": source, "manifest": digest({"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}),
             "registry_revision": registry(state)["revision"], "checks": applicable(state)}
     if refactoring(state):
         result["task_revisions"] = {key: confirmed_revision(task) for key, task in state["tasks"].items()}

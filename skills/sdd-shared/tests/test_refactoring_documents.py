@@ -280,7 +280,10 @@ def test_refactoring_documents_relocated_loader_support_and_no_legacy_fallback(t
     target = collection / "sdd-shared"
     assert loader.locate(explicit=target, work_kind="refactoring") == target.resolve()
     assert loader.load(target, "documents", work_kind="refactoring").WORK_KINDS == {"change", "refactoring"}
-    (target / "api.json").write_text('{"api_version": 1}', encoding="utf-8")
+    ordinary_only = json.loads((ROOT / "api.json").read_text(encoding="utf-8"))
+    ordinary_only["work_kinds"] = ["change"]
+    ordinary_only["document_schemas"].pop("refactoring")
+    (target / "api.json").write_text(json.dumps(ordinary_only), encoding="utf-8")
     assert loader.locate(explicit=target) == target.resolve()
     with pytest.raises(ValueError, match="does not support refactoring"):
         loader.locate(explicit=target, work_kind="refactoring")

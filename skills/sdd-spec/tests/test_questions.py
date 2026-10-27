@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 from lib.reviews import review_status
-from lib.snapshots import snapshot
+
 from test_authorizations import decisions, user
 from test_check_command import create_project
 from test_review_records import checkpoint, project, report, write
@@ -15,7 +15,7 @@ def test_checkpoint_keeps_question_gate_and_normative_snapshot(tmp_path):
     # Real files are necessary here: the risk is selecting the wrong state file
     # and admitting an incomplete checkpoint. Reuse the existing discussion adapter.
     root = approved_bundle(tmp_path)
-    before = snapshot(tmp_path, "demo", "documents")
+    before = (root / "design.md").read_bytes()
     meta = checkpoint(root)
     assert review_status(tmp_path, root, "documents")["approval_status"]["ready"]
     discussion_file(root, [question()])
@@ -25,7 +25,7 @@ def test_checkpoint_keeps_question_gate_and_normative_snapshot(tmp_path):
     assert not result["warnings"]
     assert result["discussion_status"]["blocking_questions"] == ["Q-mode"]
     assert not result["approval_status"]["ready"]
-    assert snapshot(tmp_path, "demo", "documents") == before
+    assert (root / "design.md").read_bytes() == before
 
 
 @pytest.mark.parametrize("damage", ["yaml", "version", "frontmatter", "missing-prose", "missing-yaml", "question", "checks", "identity", "flow", "next_question", "missing-checks", "state-question"])
@@ -191,11 +191,11 @@ def test_missing_checkpoint_blocks_readiness_without_revoking_approval(tmp_path)
 
 def test_discussion_files_do_not_change_review_snapshots(tmp_path):
     root = approved_bundle(tmp_path)
-    before = {stage: snapshot(tmp_path, "demo", stage) for stage in ("documents", "plan")}
+    before = review_status(tmp_path, root, "documents")["review_status"]["reports"]
     discussion_file(root, [question()])
     checkpoint(root)
     (root / "decisions.md").write_text("### Mode\nProposed by agent; awaiting user.\n", encoding="utf-8")
-    assert before == {stage: snapshot(tmp_path, "demo", stage) for stage in before}
+    assert before == review_status(tmp_path, root, "documents")["review_status"]["reports"]
     result = review_status(tmp_path, root, "documents")
     assert result["approval_status"]["approved"]
     assert result["review_status"]["complete"]

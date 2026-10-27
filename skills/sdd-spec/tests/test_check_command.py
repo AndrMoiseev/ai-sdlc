@@ -44,7 +44,7 @@ def test_check_templates_from_other_directory(tmp_path, stage):
     result = run_command(project, stage=stage, cwd=tmp_path)
     assert result.returncode == 0, result.stdout + result.stderr
     output = json.loads(result.stdout)
-    assert output['schema_version'] == 1
+    assert output['schema_version'] == 2
     assert output['stage'] == stage
     assert output['errors'] == []
     assert 'review_status' in output and 'approval_status' in output
@@ -90,13 +90,10 @@ def test_snapshot_manifest_and_no_writes(tmp_path):
     change = create_project(tmp_path)
     before = hashes(tmp_path)
     result = run_command(tmp_path, script='snapshot.py', stage='plan')
-    assert result.returncode == 0, result.stderr
-    manifest = json.loads(result.stdout)
-    assert [x['path'] for x in manifest] == sorted(x['path'] for x in manifest)
-    assert {x['path'] for x in manifest} == {
-        'proposal.md', 'design.md', 'tasks.md', 'specs/sample-capability/spec.md'}
-    for entry in manifest:
-        assert entry['sha256'] == hashlib.sha256((change / entry['path']).read_bytes()).hexdigest()
+    assert result.returncode == 2, result.stderr
+    diagnostic = json.loads(result.stderr)
+    assert diagnostic['code'] == 'migration_required'
+    assert 'checkpoint.py inspect' in diagnostic['message']
     assert hashes(tmp_path) == before
 
 

@@ -21,7 +21,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--work-kind', default='change', choices=('change', 'refactoring'))
     parser.add_argument('--stage', required=True, choices=('documents', 'plan'))
     args = parser.parse_args(argv)
-    result = {'schema_version': 1, 'stage': args.stage, 'errors': [], 'warnings': [],
+    result = {'schema_version': 2, 'stage': args.stage, 'work_kind': args.work_kind,
+              'change_id': args.change, 'errors': [], 'warnings': [],
+              'checkpoint_status': {'status': 'not_checked'},
               'discussion_status': {'status': 'not_checked'},
               'review_status': {'status': 'not_checked'},
               'approval_status': {'status': 'not_checked'}}
@@ -47,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
         review = review_status(project, root, args.stage, args.work_kind)
         for key in ('errors', 'warnings'):
             result[key].extend(review.get(key, []))
-        for key in ('discussion_status', 'review_status', 'approval_status'):
+        for key in ('checkpoint_status', 'discussion_status', 'review_status', 'approval_status'):
             result[key] = review[key]
         if result['errors']:
             result['approval_status']['ready'] = False

@@ -7,8 +7,17 @@ constructing a request.
 `instruction: {text, source}`, and optional `sdd_shared`. Legacy `sdd_spec` locates
 sdd-shared alongside that path; supply only one explicit selector. Preserve the
 returned basis. Use the actual plan approval text and its message or saved USER-record source as instruction; no additional execution question is needed. Honor explicit user restrictions on starting. Validation checks both document and plan approval through shared
-check/snapshot interfaces. Select an ambiguous change; return missing approval
+API v2 check/checkpoint interfaces. Select an ambiguous change; return missing approval
 or a missing plan to sdd-spec.
+
+Admission requires `checkpoint_status.status: ready`. Input schema 2 stores
+`plan_commit` and `document_paths`, without a normative byte manifest. Parsed
+`document_records` preserve the admitted criteria and decisions for role packets.
+Execution
+naturally advances HEAD; ongoing transitions preserve the admitted task scope
+and use independent source/candidate integrity checks. Checkpoint acceptance
+does not authorize new tasks. Use `revised_plan` with an approved plan and an
+explicit execution instruction to reconcile changed scope while preserving work.
 
 `initialize` takes validation arguments plus `owner`, optional `mode`,
 `parallel_request` and `isolation`. It validates, records a run and generates the

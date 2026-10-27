@@ -1,9 +1,9 @@
-"""SDD shared API v1. Import only the domain module needed by the caller."""
+"""SDD shared API v2. Import only the domain module needed by the caller."""
 from importlib import import_module
 
-API_VERSION = 1
+API_VERSION = 2
 WORK_KINDS = frozenset({"change", "refactoring"})
-MODULES = frozenset({"documents", "paths", "validation", "snapshots", "reviews", "subagents"})
+MODULES = frozenset({"documents", "paths", "validation", "snapshots", "reviews", "subagents", "checkpoints"})
 
 def module(name):
     if name not in MODULES:

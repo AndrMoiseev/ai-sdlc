@@ -1,10 +1,10 @@
-"""Reconcile execution against normative bytes, Git and host observations."""
+"""Reconcile admitted execution scope, Git and host observations."""
 from .repository import repository
 from copy import deepcopy
 from pathlib import Path
 from . import artifact_storage as artifacts
 from .common import digest, require, write_json
-from .state import assert_basis, snapshot
+from .state import assert_basis, snapshot, execution_source
 
 
 def completed_followups(state, plans, payload):
@@ -38,7 +38,7 @@ def transition(state, task, event, directory):
     if kind == "spec_conflict":
         require(p.get("reproduction") and p.get("criteria") and p.get("contract"), "conflict_evidence", "Record reproduction, AC and conflicting contract")
         path = artifacts.contained(directory, f"runs/{state['run_id']}/spec-return/{event['event_id']}.json")
-        write_json(path, {"task_id": event["task_id"], "basis": state["basis"]["manifest"], **p})
+        write_json(path, {"task_id": event["task_id"], "basis": {"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}, **p})
         state["blockers"].append({"reason": "spec_conflict", "task_id": event["task_id"], "resume_condition": "Revised approved plan and execution instruction", "material": str(path)})
         state["status"] = "blocked"
         return {"return_to": "sdd-spec", "material": str(path)}
@@ -54,7 +54,7 @@ def transition(state, task, event, directory):
         import uuid
         basis = validate(state["basis"]["project_root"], state["change_id"], p.get("instruction"),
                          sdd_shared=basis_dependency(state["basis"]), work_kind=state["basis"].get("work_kind", "change"))
-        require(basis["manifest"] != state["basis"]["manifest"], "plan_unchanged", "Use resume when the approved basis is unchanged")
+        require(basis["plan_commit"] != state["basis"]["plan_commit"], "plan_unchanged", "Use resume when the approved basis is unchanged")
         plans = {plan["id"]: plan for plan in basis["tasks"]}
         completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]
         for key in completed:
@@ -126,8 +126,16 @@ def transition(state, task, event, directory):
         assert_basis(state)
         state["blockers"] = [b for b in state["blockers"] if b["reason"] != "normative_drift"]
     except ValueError as exc:
-        issues.append({"reason": "normative_drift", "detail": str(exc), "resume_condition": "Restore approved bytes or use revised_plan"})
+        issues.append({"reason": "normative_drift", "detail": str(exc), "resume_condition": "Reconcile the approved plan through revised_plan; preserve current work"})
     root = state["basis"]["project_root"]
+    observed_source = execution_source(state)
+    state["blockers"] = [b for b in state["blockers"] if b["reason"] not in {"execution_dirty", "execution_head_changed"}]
+    if observed_source["dirty_paths"]:
+        issues.append({"reason": "execution_dirty", "paths": observed_source["dirty_paths"],
+                       "resume_condition": "Preserve changes; obtain the user's commit or discard decision and restore a clean main tree"})
+    if observed_source["head"] != state["execution_head"]:
+        issues.append({"reason": "execution_head_changed", "head": observed_source["head"], "expected_head": state["execution_head"],
+                       "resume_condition": "Inspect the new HEAD and record explicit current-state acceptance; new task scope requires revised_plan"})
     if repository(root).branch() != state["basis"]["branch"]:
         issues.append({"reason": "branch_changed", "resume_condition": "Restore execution branch"})
     require(p.get("host_trace") and isinstance(p.get("live_contexts"), list), "host_observation", "Supply actual host role liveness observation")
@@ -164,6 +172,14 @@ def transition(state, task, event, directory):
     for resolution in resolutions:
         require(resolution.get("evidence") and resolution.get("reason") not in {"review_limit_reached", "test_repair_limit_reached", "normative_drift", "spec_conflict"}, "resume_resolution", "Use the dedicated operation for this blocker")
         reason = resolution["reason"]
+        require(reason != "execution_dirty", "resume_resolution", "A dirty main tree must be reconciled before resuming")
+        if reason == "execution_head_changed":
+            instruction = resolution.get("instruction", {})
+            require(not observed_source["dirty_paths"] and resolution.get("head") == observed_source["head"]
+                    and instruction.get("text") and instruction.get("source"),
+                    "resume_acceptance", "Record the actual user response and source for this exact clean HEAD")
+            state["execution_head"] = observed_source["head"]
+            issues = [item for item in issues if item["reason"] != reason]
         lost_role = None
         if reason == "lost_role":
             successor = state["roles"].get(resolution.get("successor"))

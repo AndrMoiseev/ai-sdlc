@@ -29,10 +29,16 @@ def process_cli(shared_cli, monkeypatch):
 @pytest.mark.parametrize("stage,script,native", [
     ("documents", "check.py", False),
     # Each executable has one successful process contract; stages share its parser.
-    pytest.param("plan", "check.py", True, marks=pytest.mark.native_process),
-    pytest.param("plan", "snapshot.py", True, marks=pytest.mark.native_process),
+    pytest.param("plan", "check.py", True, marks=[pytest.mark.native_process, pytest.mark.native_git]),
+    pytest.param("plan", "snapshot.py", True, marks=[pytest.mark.native_process, pytest.mark.native_git]),
 ])
 def test_shared_adapter_matches_real_cli(project, process_cli, stage, script, native):
+    if script == "snapshot.py":
+        with pytest.raises(Rejected, match="migration_required"):
+            spec_call(SHARED, project, "demo", stage, script)
+        with pytest.raises(Rejected, match="migration_required"):
+            process_cli(SHARED, project, "demo", stage, script)
+        return
     actual = spec_call(SHARED, project, "demo", stage, script)
     if native:
         assert actual == process_cli(SHARED, project, "demo", stage, script)
@@ -41,7 +47,7 @@ def test_shared_adapter_matches_real_cli(project, process_cli, stage, script, na
         assert not actual["errors"]
 
 
-@pytest.mark.parametrize("damage", ["missing", pytest.param("syntax", marks=pytest.mark.native_process)])
+@pytest.mark.parametrize("damage", ["missing", pytest.param("syntax", marks=[pytest.mark.native_process, pytest.mark.native_git])])
 def test_shared_adapter_matches_real_cli_errors(project, process_cli, damage):
     root = project / "sdd/changes/demo"
     if damage == "missing":
@@ -68,7 +74,7 @@ def test_shared_adapter_restores_import_context(project):
     before = {name: module for name, module in sys.modules.items()
               if name == "sdd_shared" or name.startswith("sdd_shared.")}
     paths = sys.path[:]
-    spec_call(SHARED, project, "demo", "plan", "snapshot.py")
+    spec_call(SHARED, project, "demo", "plan", "check.py")
     after = {name: module for name, module in sys.modules.items()
              if name == "sdd_shared" or name.startswith("sdd_shared.")}
     assert before == after and sys.path == paths
