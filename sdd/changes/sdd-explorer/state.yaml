@@ -1,0 +1,26 @@
+schema_version: 2
+work_kind: change
+document_type: state
+change_id: sdd-explorer
+language: ru
+phase: planning
+flow: revise
+awaiting: final_approval
+updated_at: '2026-10-28T14:12:06Z'
+document_links:
+  - proposal.md
+  - design.md
+  - specs/sdd-explorer/spec.md
+  - specs/sdd-execution/spec.md
+  - tasks.md
+  - decisions.md
+  - questions.md
+  - premortem.md
+  - simplification-review.md
+review_links:
+  - review/decisions.md
+approval_refs:
+  - USER-explorer-planning
+next_question: Q-design-and-plan
+checks:
+  structure: passed
