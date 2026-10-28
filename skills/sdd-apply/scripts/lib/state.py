@@ -108,7 +108,7 @@ def read_object(directory, reference):
 
 
 def new_task(task):
-    return {"plan": task, "status": "pending", "attempt": 0, "candidate": None, "evidence": [], "reviews": [], "commits": [], "blockers": [], "review_limit": 3, "review_rounds_started": 0, "review_rounds_completed": 0, "active_review": None, "test_repair_limit": 5, "test_repair_cycles_started": 0, "active_repair": None, "repair_cycles": [], "budget_decisions": [], "checks": [], "worktree": None, "roles": [], "paths": []}
+    return {"plan": task, "status": "pending", "attempt": 0, "evidence": [], "reviews": [], "commits": [], "blockers": [], "review_limit": 3, "review_rounds_started": 0, "review_rounds_completed": 0, "active_review": None, "test_repair_limit": 5, "test_repair_cycles_started": 0, "active_repair": None, "repair_cycles": [], "budget_decisions": [], "checks": [], "worktree": None, "roles": [], "paths": []}
 
 
 def initialize(basis, isolation=False):
@@ -179,7 +179,7 @@ def assert_basis(state):
     require(isinstance(basis.get("head"), str) and re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", basis["head"]),
             "basis_commit", "Execution basis needs its admission commit OID")
     # Ongoing execution advances HEAD. Admission checks and explicit plan
-    # replacement govern authorization; source/candidate gates govern integrity.
+    # replacement govern authorization; current Git state gates govern integrity.
 
 def apply(directory, event):
     directory = resolve(directory)

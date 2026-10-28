@@ -58,7 +58,7 @@ stored manifest with references; it does not expand the execution history.
 |---|---|
 | Revision, task status, blockers, budgets, active role IDs | `compact` |
 | Resume, lost response/effect investigation or debugging | `full`, then only relevant referenced objects |
-| Candidate, checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
+| Checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
 
 Compact view version 1 returns run identity/revision/status/time,
 task statuses and complete blockers/budget counters/reservations, active role

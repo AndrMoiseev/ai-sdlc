@@ -295,7 +295,7 @@ class Driver:
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
         self.send("review_start", {"role_id": role})
-        return self.send("review_result", {"role_id": role, "candidate": self.task["candidate"], "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
+        return self.send("review_result", {"role_id": role, "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
 
     def integrate(self, prefix=""):
         self.send("transfer")
@@ -338,7 +338,7 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
         yield "reviewing", driver
-        driver.send("review_result", {"role_id": "reviewer", "candidate": driver.task["candidate"],
+        driver.send("review_result", {"role_id": "reviewer",
             "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
         yield "worktree-reviewed", driver
         driver.integrate()

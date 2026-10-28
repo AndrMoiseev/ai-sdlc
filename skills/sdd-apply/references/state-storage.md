@@ -62,7 +62,7 @@ already tracked execution artifacts.
 ## Source identity
 
 Use the local candidate commit SHA and clean Git state to identify source code.
-Check that identity before and after tests and before accepting their evidence.
+Command logs capture that identity before and after tests; changes during a run make it stale.
 The runtime takes file-content snapshots only inside the current SDD change or
 refactoring directory, excluding its execution directory. It does not create
 per-file source hashes or full working-copy inventories elsewhere. Cleanup uses
@@ -76,7 +76,8 @@ their objects intact and obtain fresh evidence through the supported workflow.
 
 Use `read` with `view: "compact"` for control decisions and `view: "full"` to see
 the manifest's references. Use `read_object` for one descriptor at a time. It
-verifies the requested bytes and leaves nested references encoded. Reports and
-candidate artifacts retain their existing paths; their snapshot data may also
+verifies the requested bytes and leaves nested references encoded. Reports retain their existing paths; their snapshot data may also
 contain object references. Preserve the complete execution directory when moving
 or backing up evidence; copying `state.json` alone is insufficient.
+
+Task candidate artifacts and references are no longer written. Historical candidate files are left untouched and are not consulted by current checks or resume.

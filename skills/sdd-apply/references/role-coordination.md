@@ -22,7 +22,7 @@ API operation. Collect results using the [worker contract](roles.md), including
 separate verification/review results for a shared permitted context.
 
 Packets identify task, original REQ/AC/design/instructions, files/interfaces,
-checks, candidate reference, commits, blockers and rejected approaches. Send paths
+checks, commits, blockers and rejected approaches. Send paths
 and a bounded summary; exclude author conversation, grading answers and unrelated
 task histories. Workers read their contract and task material, not execution algorithms.
 

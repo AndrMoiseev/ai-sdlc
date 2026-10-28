@@ -100,13 +100,6 @@ def selected(state, task, final=False):
     return list(checks.values())
 
 
-def evidence_basis(state, task, final=False):
-    result = {"revision": task["check_registry"]["revision"], "checks": selected(state, task, final)}
-    # Confirmation alone leaves the accepting candidate unchanged. Other tasks'
-    # confirmed revisions still invalidate it when applicability changes.
-    return result
-
-
 def strings(value):
     return isinstance(value, list) and all(isinstance(item, str) and item for item in value) and len(value) == len(set(value))
 
@@ -220,7 +213,6 @@ def revise(state, task, event):
     task["check_registry"]["transition"] = {"event_id": event["event_id"], **deepcopy(payload)}
     record_registry(state, task, event)
     registry_current(state, task)
-    task["candidate"] = None
     state["final"] = None
     return {"registry_revision": task["check_registry"]["revision"], "status": "pending_confirmation",
             "checks": selected(state, task)}

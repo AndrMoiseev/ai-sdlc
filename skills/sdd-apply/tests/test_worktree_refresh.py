@@ -92,7 +92,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     assert repository(new).branch() == result["worktree"]["branch"]
     assert (new / "external.txt").read_text() == "fixed"
     assert (new / "result.txt").read_bytes() == b"partial\x00binary\xff"
-    assert d.task["candidate"] is None and "transfer" not in d.task
+    assert "candidate" not in d.task and "transfer" not in d.task
     assert d.task["status"] == "running"
     assert d.task["evidence"] == evidence and d.task["reviews"] == reviews
     assert d.task["review_rounds_started"] == 1

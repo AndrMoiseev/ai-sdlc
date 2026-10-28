@@ -128,5 +128,5 @@ def test_lost_reviewer_successor_finishes_reserved_round(execution_checkpoint):
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['replacement', 'verifier'], 'resolutions': [{'reason': 'lost_role', 'task_id': 'TASK-one', 'successor': 'replacement', 'evidence': 'registered'}]}, task_id=None)
     with pytest.raises(ValueError, match='existing review'):
         driver.send('review_start', {'role_id': 'replacement'})
-    result = driver.send('review_result', {'role_id': 'replacement', 'candidate': driver.task['candidate'], 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
+    result = driver.send('review_result', {'role_id': 'replacement', 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
     assert result['status'] == 'integrating'

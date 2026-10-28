@@ -7,14 +7,14 @@ or candidate work and [review policy](review-policy.md) before acting on finding
 
 Role registration attests an actual launch; role_result only ends that role's
 work. Review_start reserves a round before review; review_result returns the
-unchanged candidate reference and separate test_integrity assessment. Only current
+separate test_integrity assessment. Only current
 evidence, passing review and a confirmed task commit permit acceptance.
 
 `candidate` commits the stopped executor's owned changes locally before checks
 and review. A candidate commit is an unaccepted result. Execution uses
 task worktrees. After transfer, freeze and verify a new integration commit;
 `commit` confirms that reviewed commit and `accept` records task acceptance.
-Use [candidate identity](api-checks.md#candidate-identity) for freshness and scope.
+Use [candidate identity](api-checks.md#candidate-identity) for the commit transition and its scope.
 
 For an approved refactoring check replacement, use the staged registry contract
 in [checks and evidence](api-checks.md#approved-refactoring-revisions).

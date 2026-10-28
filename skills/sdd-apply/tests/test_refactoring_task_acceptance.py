@@ -8,7 +8,6 @@ import sys
 
 import pytest
 
-from lib.candidates import resolve
 from lib.common import Rejected, digest, write_json
 from refactoring_fixtures import AcceptanceDriver, approved_basis
 
@@ -116,8 +115,8 @@ def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, 
     baseline = deepcopy(driver.task["baseline_checks"])
     driver.implement()
     driver.freeze()
-    reference = driver.task["candidate"]
-    assert artifacts.exists(driver.directory / reference["path"])
+    assert "candidate" not in driver.task
+    assert not artifacts.paths(driver.directory / "candidates", "*.json")
     if work_kind == "refactoring":
         assert not (project / "sdd/changes/demo/execution/candidates").exists()
     assert driver.verify()["outcome"] == "passed"
@@ -220,23 +219,21 @@ def test_refactoring_acceptance_stale_source_blocks_review_and_accept(acceptance
 
 def test_refactoring_acceptance_registry_extension_requires_new_checks_and_review(acceptance_checkpoint):
     driver = acceptance_checkpoint("verified")
-    old_candidate = driver.task["candidate"]
     old_logs = {item["log"]: artifacts.read_bytes(driver.directory / item["log"]) for item in driver.task["evidence"]}
     driver.review(verdict="more_checks")
     driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [
         {"id": "review-local", "source": "review", "criteria": ["AC-local", "AC-preserved"],
          "run": {"command": [sys.executable, "-B", "check.py"]}}]})
-    assert resolve(driver.state, old_candidate)["checks"] != resolve(driver.state, driver.task["candidate"])["checks"]
     driver.role("next-reviewer", "reviewer")
     with pytest.raises(Rejected) as error:
         driver.send("review_start", {"role_id": "next-reviewer"})
-    assert error.value.code == "required_checks"
+    assert error.value.code == "evidence_basis"
     assert driver.verify()["outcome"] == "passed"
     driver.send("review_start", {"role_id": "next-reviewer"})
     with pytest.raises(Rejected) as error:
-        driver.send("review_result", {"role_id": "next-reviewer", "candidate": old_candidate, "verdict": "pass",
+        driver.send("review_result", {"role_id": "next-reviewer", "candidate": {"path": "retired-reference"}, "verdict": "pass",
                                       "findings": [], "test_integrity": "Inspected", "trace": "synthetic-unit-test"})
-    assert error.value.code == "stale_review"
+    assert error.value.code == "review_schema"
     assert driver.task["review_rounds_started"] == 2
     assert driver.task["check_registry"]["revision"] == 3
     assert all(artifacts.read_bytes(driver.directory / name) == content for name, content in old_logs.items())

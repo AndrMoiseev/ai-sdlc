@@ -24,7 +24,7 @@ parser. Role packets provide document paths and that original project root;
 task worktree HEADs and uncommitted edits are not document inputs.
 Execution
 naturally advances HEAD; ongoing transitions preserve the admitted task scope
-and use independent source/candidate integrity checks. Checkpoint acceptance
+and use current Git state checks. Checkpoint acceptance
 does not authorize new tasks. Use `revised_plan` with an approved plan and an
 explicit execution instruction to reconcile changed scope while preserving work.
 

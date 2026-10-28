@@ -146,16 +146,6 @@ def transition(state, task, event, directory):
                 item = {"reason": "lost_role", "task_id": role["task_id"], "role_id": role["role_id"], "resume_condition": "Register a fresh successor with preserved files and task packet"}
                 t["blockers"].append(item)
                 issues.append(item)
-    for key, t in state["tasks"].items():
-        if t["candidate"] and t["status"] not in {"accepted", "pending", "blocked"}:
-            from .verification import candidate
-            from .candidates import same
-            try:
-                unchanged = same(state, t["candidate"], candidate(state, t))
-            except ValueError:
-                unchanged = False
-            if not unchanged:
-                issues.append({"reason": "candidate_drift", "task_id": key, "resume_condition": "Rebaseline legacy evidence or re-freeze and independently verify the changed local commit"})
     for issue in issues:
         if issue not in state["blockers"]:
             state["blockers"].append(issue)

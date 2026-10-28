@@ -21,7 +21,7 @@ def reviewing_driver(execution_checkpoint):
 
 def review(driver, findings, verdict="changes"):
     return driver.send("review_result", {
-        "role_id": "reviewer", "candidate": driver.task["candidate"],
+        "role_id": "reviewer",
         "verdict": verdict, "findings": findings,
         "test_integrity": "Original assertions preserved", "trace": "synthetic-unit-test"})
 

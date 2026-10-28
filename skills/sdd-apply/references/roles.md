@@ -2,7 +2,7 @@
 
 Read your role instructions and generated packet. Use original REQ/AC, approved
 design, project instructions and exact checks; the packet gives their paths,
-owned files, candidate reference, prior commits, blockers and rejected approaches.
+owned files, prior commits, blockers and rejected approaches.
 The author's conversation, grading answers and unrelated task history are not inputs.
 
 Read documents at `HEAD` of the packet's `project_root` repository, using `sources`
@@ -42,7 +42,7 @@ covers criteria, accepted tasks and current basis. This scope supplements the
 ordinary task-scoped final verifiers; it cannot replace their evidence. Every final
 verifier is independent of all authors.
 
-Return task/role/context IDs, status, unchanged candidate reference and commit
+Return task/role/context IDs, status and commit
 SHA, owned/inspected paths, AC-to-evidence mapping, commands and log
 paths, blockers/limitations and actual host trace. Keep full evidence in artifacts;
 the message gives the result and references. A combined verifier/reviewer context
