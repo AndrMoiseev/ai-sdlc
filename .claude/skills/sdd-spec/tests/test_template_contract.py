@@ -35,6 +35,7 @@ def test_two_capabilities_and_filled_review_templates(tmp_path):
     report.update(stage='plan_review', lens_id='plan', result='completed_no_findings',
                   limitations=[], reviewed_commit=reviewed_commit)
     write_frontmatter(change / f'review/{report["run_id"]}/plan.md', report)
+    write_frontmatter(change / f'review/{report["run_id"]}/simplicity.md', {**report, 'lens_id': 'simplicity'})
     summary = read_document(SKILL / 'templates/review-summary.md').meta
     write_frontmatter(change / 'review/summary.md', summary)
     decision_meta = read_document(SKILL / 'templates/decisions.md').meta

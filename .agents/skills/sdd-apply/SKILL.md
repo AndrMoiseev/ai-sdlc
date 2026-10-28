@@ -44,5 +44,3 @@ Authorization to execute includes local task commits; delivery beyond those comm
 
 When refactoring changes module boundaries and their tests, apply the
 [test evolution policy](references/review-policy.md#tests-at-changed-module-boundaries).
-For maintenance of this behavior, use the [paired evaluation procedure](evals/refactoring-tests.md)
-only at final acceptance of the whole plan.

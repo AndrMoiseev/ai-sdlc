@@ -10,8 +10,8 @@ again for permission to use it within authorized work.
 
 | Role | Assignment |
 |---|---|
-| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency |
-| `sdd-spec.plan_reviewer` | Independent plan review |
+| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency and simplicity |
+| `sdd-spec.plan_reviewer` | Separate fresh reviewers for plan and simplicity lenses |
 | `sdd-spec.editor` | Authorized humanizer editing pass |
 | `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
@@ -116,7 +116,3 @@ catalog names alone do not prove that the native definition stayed unchanged.
 Refresh the actual Claude catalog immediately before launch. Re-resolution in scripts
 checks Codex definition precedence and missing-agent recovery; it cannot query a live
 Claude host or prove that an attested catalog is current.
-
-Sources: [Codex custom agents](https://learn.chatgpt.com/docs/agent-configuration/subagents#custom-agents),
-[Claude Code subagents](https://code.claude.com/docs/en/sub-agents).
-Runnable host scenarios: [subagent evaluations](../../sdd-spec/evals/subagents.md).

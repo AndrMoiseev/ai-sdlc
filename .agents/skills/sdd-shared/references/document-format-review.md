@@ -8,9 +8,14 @@
 Машинные виды записей — `sdd_record: finding` для находки и `sdd_record: user`
 для пользовательского решения; их поля описаны ниже.
 
-Индекс `sdd/arch-lenses/index.md`: frontmatter `schema_version: 1`, `lenses: [{id, title, path}]`. Пути относительно каталога индекса. Нет файла или lenses: [] — только consistency; поврежденный существующий индекс ошибочен. consistency и plan зарезервированы. Содержимое линзы: предмет, вопросы, ограничения, источники.
+Индекс `sdd/arch-lenses/index.md`: frontmatter `schema_version: 1`, `lenses: [{id, title, path}]`. Пути относительно каталога индекса. Документы всегда имеют встроенные consistency и simplicity; индекс добавляет проектные линзы только к этой стадии. Нет файла или lenses: [] — обе встроенные линзы; поврежденный существующий индекс ошибочен. consistency, simplicity и plan зарезервированы. План всегда имеет две встроенные линзы: plan и simplicity. Каждую линзу выполняет отдельный независимый рецензент. Содержимое линзы: предмет, вопросы, ограничения, источники.
 
-Отчет: `review/<run-id>/<lens-id>.md`; для плана lens-id=plan. Run-id — UTC-время с уникальным суффиксом. Дополнительный frontmatter: run_id, stage (document_review/plan_review), lens_id, result, started_at, finished_at, reviewed_commit, limitations. Все даты заключайте в кавычки. result: completed_no_findings/completed_with_findings/incomplete; limitations — список строк. Находка имеет source (текст), target: {path, element_id?}, severity: blocker/recommendation, problem/impact/suggestion (непустой текст). target.path относительно изменения.
+Отчет: `review/<run-id>/<lens-id>.md`; для плана отдельные plan.md и simplicity.md. Run-id — UTC-время с уникальным суффиксом для запуска одной стадии. Дополнительный frontmatter: run_id, stage (document_review/plan_review), lens_id, result, started_at, finished_at, reviewed_commit, limitations. simplicity допустима на обеих стадиях, plan — только на plan_review; проектные линзы и consistency — только на document_review. Покрытие simplicity одной стадии не переносится на другую. Все даты заключайте в кавычки. result: completed_no_findings/completed_with_findings/incomplete; limitations — список строк. Находка имеет source (текст), target: {path, element_id?}, severity: blocker/recommendation, problem/impact/suggestion (непустой текст). target.path относительно изменения.
+
+Новые согласованные запуски включают все линзы своей стадии. Прежние отчёты и
+consent/waiver с частью линз остаются историческими свидетельствами; их область
+не расширяется автоматически. Отсутствующая simplicity показывается как missing,
+не требует миграции формата и не отменяет согласования. Повторное ревью опционально.
 
 Отчёт имеет schema_version: 2, явные work_kind и change_id. reviewed_commit — полный OID коммита, неизменяемое дерево которого прочитали все линзы запуска. Авторские правки сначала фиксируются checkpoint; отчёт входит в следующий коммит. При недоказанном соответствии прочитанных файлов коммиту результат incomplete. Старые inputs, inputs_after и freshness в v2 отсутствуют.
 
