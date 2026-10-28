@@ -11,6 +11,16 @@ from lib.state_objects import StateObjects
 from lib.state_storage import storage
 
 
+def test_legacy_execution_requires_explicit_migration(driver):
+    state = driver.state
+    state["schema_version"] = 2
+    save(driver.directory, seal(state))
+    before = storage(driver.directory).read()
+    with pytest.raises(ValueError, match="explicitly reconcile"):
+        read(driver.directory)
+    assert storage(driver.directory).read() == before
+
+
 
 def event(state, ident):
     return {"event_id": ident, "run_id": state["run_id"], "expected_revision": state["revision"],

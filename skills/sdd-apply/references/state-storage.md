@@ -1,5 +1,9 @@
 # Execution state version 3
 
+The executable format contract lives in `scripts/lib/state.py`,
+`state_objects.py` and `state_history.py`; transition handlers enforce
+event-specific invariants. These checks govern persisted execution state.
+
 The runtime accepts only schema version 3. Preserve an old execution until an
 explicit conversion has verified it and saved a backup; ordinary reads never
 migrate or rewrite state. The input basis uses schema 2 with `plan_commit` and

@@ -1,3 +1,4 @@
+from repository_support import accept_checkpoint
 from lib import artifact_storage as artifacts
 from lib.repository import repository
 from repository_support import stage as stage_files, commit
@@ -19,6 +20,8 @@ def test_missing_command_location_blocks_even_when_command_passes(project, stage
         (project / "check.py").unlink()
         stage_files(project, "check.py")
         commit(project, "Baseline has missing verification location")
+        from repository_support import accept_execution_source
+        accept_execution_source(d)
         d.start()
         outputs = d.task["baseline_checks"]["outputs"]
     else:
@@ -93,11 +96,11 @@ def reapprove(project, modify):
     decisions = parser.read_document(change / "review/decisions.md")
     for record in decisions.records:
         if record["scope"]["stage"] == "plan_review":
-            for entry in record["inputs"]:
-                entry["sha256"] = digest((change / entry["path"]).read_bytes())
+            record["basis_commit"] = repository(project).head()
     document(change / "review/decisions.md", decisions.meta, decisions.records)
     stage_files(project, "sdd")
     commit(project, "Approved fixture plan revision")
+    accept_checkpoint(project)
 
 
 def test_planned_setup_then_missing_runner_remains_blocker(project):
@@ -106,6 +109,7 @@ def test_planned_setup_then_missing_runner_remains_blocker(project):
     reapprove(project, modify)
     stage_files(project, "sdd")
     commit(project, "fixture planned setup approval")
+    accept_checkpoint(project)
     basis = validate(project, "demo", {"text": "Do it", "source": "fixture"}, SPEC)
     d = Driver(basis)
     d.start(["result.txt", "new_check.py"])
@@ -143,6 +147,7 @@ def test_procedure_requires_independent_performed_result(project):
     reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}))
     stage_files(project, "sdd", "procedure.md")
     commit(project, "approve fixture procedure")
+    accept_checkpoint(project)
     d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     d.role("author", "executor")

@@ -13,7 +13,7 @@ decisions, review authorization and execution.
 
 1. Resolve the installed package and check API compatibility using the
    [runtime contract](references/runtime-setup.md).
-2. Select the required interface in [API v1](references/api.md).
+2. Select the required interface in [API v2](references/api.md).
 3. For document reads, load the [document format](references/document-format.md)
    and the operation-specific section it names. For agent launches, read
    [subagent selection](references/subagents.md). For worker coordination, read
@@ -21,7 +21,7 @@ decisions, review authorization and execution.
 
 ## Ownership
 
-The package owns parsers, validators, snapshots, settings and role resolution.
+The package owns parsers, validators, Git checkpoints, settings and role resolution.
 Authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
 execution state and Git operations to sdd-apply, and baseline synchronization and
 change archiving to sdd-sync. A successful structural check

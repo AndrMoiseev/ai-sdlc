@@ -28,7 +28,7 @@ def test_help_covers_event_schema_without_accessing_execution_state(monkeypatch)
 def test_resume_help_explains_specific_loss_and_legacy_resolution():
     result = describe(event="resume")
     assert set(result["required"]) == {"host_trace", "live_contexts"}
-    assert {"role_id", "successor", "task_id", "reason", "evidence"} == set(result["resolution"])
+    assert {"role_id", "successor", "task_id", "reason", "evidence", "head", "instruction"} == set(result["resolution"])
     assert any("successor_of" in rule for rule in result["rules"])
 
 

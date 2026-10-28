@@ -1,6 +1,6 @@
 """Ordinary-work contracts across the complete updated SDD bundle.
 
-Saved-state support covers parallel runs from the user-selected 0529577 schema-2 runtime.
+Saved-state migration covers parallel runs from the user-selected 0529577 schema-2 runtime.
 The portable fixture below transcribes that format independently of current
 initialize/seal/history helpers; it is not a captured historical execution.
 Its provenance is source inspection, not a claim of pre-v2 resume support.
@@ -27,6 +27,7 @@ BASELINE_SOURCE = {
 }
 STAMP = "2026-10-08T00:00:00Z"
 INSTRUCTION = {"text": "Implement synthetic fixture", "source": "synthetic-test-user"}
+BASE = "a" * 40
 
 
 def encoded(value):
@@ -39,7 +40,16 @@ def digest(value):
 
 
 def write_document(root, relative, kind, records=(), **extra):
-    meta = dict(schema_version=1, change_id="demo", language="en", document_type=kind, **extra)
+    meta = dict(schema_version=2 if kind in {"state", "review", "decisions"} else 1,
+                change_id="demo", language="en", document_type=kind, **extra)
+    if meta["schema_version"] == 2:
+        meta["work_kind"] = "change"
+    if kind == "state":
+        assert relative == "state.yaml" and not records
+        meta.update(flow="plan", next_question=None, checks={"structure": "passed"})
+        (root / relative).write_text(yaml.safe_dump(meta), encoding="utf-8")
+        (root / "state.md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return
     text = "---\n" + yaml.safe_dump(meta, sort_keys=False) + "---\n# Synthetic legacy fixture\n"
     for record in records:
         text += "\n### Record\n\n```yaml\n" + yaml.safe_dump(record, sort_keys=False) + "```\n"
@@ -78,10 +88,10 @@ def ordinary(tmp_path):
             if kind == "review_waiver":
                 scope["lenses"] = ["consistency" if stage == "documents" else "plan"]
             users.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
-                              kind=kind, scope=scope, response="Synthetic test approval only",
-                              date=STAMP, inputs=manifest(root, stage)))
+                              work_kind="change", change_id="demo", kind=kind, scope=scope,
+                              response="Synthetic test approval only", date=STAMP, basis_commit=BASE))
     write_document(root, "review/decisions.md", "decisions", users)
-    write_document(root, "state.md", "state", phase="plan_approved", awaiting="none",
+    write_document(root, "state.yaml", "state", phase="plan_approved", awaiting="none",
                    updated_at=STAMP, document_links=["tasks.md"],
                    review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     (project / "check.py").write_bytes(b"assert 2 + 3 == 5\n")
@@ -127,7 +137,8 @@ def test_refactoring_compatibility_default_apis_preserve_bytes_and_approvals(ord
     validation = loader.load(shared, "validation")
 
     for stage in ("documents", "plan"):
-        assert snapshots.snapshot(project, "demo", stage) == manifest(root, stage)
+        with pytest.raises(documents.InputError, match="Byte manifests are retired"):
+            snapshots.snapshot(project, "demo", stage)
         assert validation.validate_documents(project, root, stage)["errors"] == []
         approval = reviews.review_status(project, root, stage)["approval_status"]
         assert approval["approved"] is True and approval["ready"] is True
@@ -144,7 +155,7 @@ def test_refactoring_compatibility_default_apis_preserve_bytes_and_approvals(ord
 @pytest.mark.parametrize("changed,stages", [
     ("design.md", ("documents", "plan")), ("tasks.md", ("plan",)),
 ])
-def test_refactoring_compatibility_approval_requires_original_basis(ordinary, changed, stages):
+def test_refactoring_compatibility_approval_survives_normative_edits(ordinary, changed, stages):
     project, root, _, _ = ordinary
     before = inventory(root)
     reviews = bootstrap().load(COLLECTION / "sdd-shared", "reviews")
@@ -153,7 +164,7 @@ def test_refactoring_compatibility_approval_requires_original_basis(ordinary, ch
 
     for stage in stages:
         approval = reviews.review_status(project, root, stage)["approval_status"]
-        assert approval["approved"] is False and approval["ready"] is False
+        assert approval["approved"] is True and approval["ready"] is True
     assert inventory(root) == changed_bytes
     (root / changed).write_bytes(before[Path(changed)])
     for stage in stages:
@@ -187,21 +198,30 @@ def test_refactoring_compatibility_old_cli_and_apply_arguments(ordinary, collect
             legacy = cli(collection, "sdd-spec", script, tmp_path, *args)
             assert (direct.returncode, direct.stdout, direct.stderr) == (
                 legacy.returncode, legacy.stdout, legacy.stderr)
-            assert direct.returncode == 0, direct.stdout + direct.stderr
-            report = json.loads(direct.stdout)
             if script == "snapshot.py":
-                assert report == manifest(root, stage)
+                assert direct.returncode == 2
+                assert json.loads(direct.stderr)["code"] == "migration_required"
             else:
+                assert direct.returncode == 0, direct.stdout + direct.stderr
+                report = json.loads(direct.stdout)
                 assert report["errors"] == []
                 assert report["approval_status"]["ready"] is True
     assert inventory(project) == before
-    git_project(project)
+    head = git_project(project)
+    # Existing installed CLI integration needs a real accepted Git ref: subprocess
+    # consumers cannot share the in-process checkpoint adapter.
+    checkpoints = bootstrap().load(COLLECTION / "sdd-shared", "checkpoints")
+    observed = checkpoints.inspect(project, "change", "demo")
+    accepted = run(["git", "update-ref", observed["checkpoint_ref"], head], project)
+    assert accepted.returncode == 0, accepted.stderr
     before = inventory(root)
     basis = success(request(collection, tmp_path, "validate", project_root=str(project),
                             change="demo", instruction=INSTRUCTION,
                             sdd_spec=str(collection / "sdd-spec")))
     assert basis["work_kind"] == "change" and basis["change_root"] == str(root.resolve())
-    assert basis["tasks"] == [task] and basis["manifest"] == manifest(root, "plan")
+    assert basis["tasks"] == [task] and basis["plan_commit"] == head
+    assert sorted(basis["document_paths"]) == [entry["path"] for entry in manifest(root, "plan")]
+    assert "manifest" not in basis and basis["schema_version"] == 2
     assert basis["sdd_shared"] == str((collection / "sdd-shared").resolve())
     for user in users:
         stage = "plan" if user["scope"]["stage"] == "plan_review" else "documents"
@@ -272,43 +292,22 @@ def saved_execution(ordinary, collection):
     return directory, state
 
 
-def test_refactoring_compatibility_saved_read_resume_and_retry(ordinary, collection, tmp_path):
+def test_refactoring_compatibility_saved_state_requires_explicit_migration(ordinary, collection, tmp_path):
     _, root, _, _ = ordinary
     directory, saved = saved_execution(ordinary, collection)
-    documents = {p: raw for p, raw in inventory(root).items() if p.parts[0] != "execution"}
-    before = inventory(directory)
+    before = inventory(root)
     packages = {name: inventory(collection / name) for name in ("sdd-shared", "sdd-spec", "sdd-apply")}
-
-    full = success(request(collection, tmp_path, "read", directory=str(directory), view="full"))
-    compact = success(request(collection, tmp_path, "read", directory=str(directory)))
-    audited = success(request(collection, tmp_path, "audit", directory=str(directory)))
-
-    assert full == saved
-    assert compact["revision"] == 1 and compact["available_tasks"] == ["TASK-one"]
-    assert "work_kind" not in compact and "whole_result" not in compact
-    assert audited["status"] == "verified" and audited["events"] == 1
-    assert inventory(directory) == before
     event = dict(event_id="updated-resume", run_id=saved["run_id"], expected_revision=1,
                  owner=saved["owner"], type="resume", task_id=None,
                  payload={"host_trace": "synthetic current fixture", "live_contexts": []})
-    resumed = success(request(collection, tmp_path, "event", directory=str(directory), event=event))
-    assert resumed["event_result"] == dict(status="active", issues=[], preserved_roles={}, stale_worktrees=[])
-    assert "view_error" not in resumed
-    current = success(request(collection, tmp_path, "read", directory=str(directory), view="full"))
-    assert current["revision"] == 2
-    for field in ("schema_version", "run_id", "owner", "basis", "tasks", "baseline"):
-        assert current[field] == saved[field], field
-    assert "work_kind" not in current and "work_kind" not in current["basis"]
-    for path, raw in before.items():
-        if path != Path("state.json"):
-            assert (directory / path).read_bytes() == raw
-    after = inventory(directory)
-    assert success(request(collection, tmp_path, "event", directory=str(directory), event=event)) == resumed
-    assert inventory(directory) == after
-    assert success(request(collection, tmp_path, "audit", directory=str(directory)))["events"] == 2
-    assert {p: raw for p, raw in inventory(root).items() if p.parts[0] != "execution"} == documents
+    for operation, arguments in (("read", {"view": "full"}), ("audit", {}), ("event", {"event": event})):
+        result = request(collection, tmp_path, operation, directory=str(directory), **arguments)
+        assert result.returncode == 1, result.stdout + result.stderr
+        report = json.loads(result.stdout)
+        assert report["ok"] is False and report["code"] == "state_version"
+        assert "migration" in report["message"]
+        assert inventory(root) == before
     assert {name: inventory(collection / name) for name in packages} == packages
-
 
 def test_refactoring_compatibility_unsupported_v1_is_not_rewritten(ordinary, tmp_path):
     directory, state = saved_execution(ordinary, COLLECTION)

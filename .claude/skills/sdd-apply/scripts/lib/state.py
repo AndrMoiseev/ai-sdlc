@@ -57,7 +57,7 @@ def read(directory, view="full"):
     require(view in ("full", "compact"), "read_view", "Expected full or compact")
     raw = storage(directory).read()
     packed = json.loads(raw)
-    require(packed.get("schema_version") == 2, "state_version", "Expected execution state schema 2")
+    require(packed.get("schema_version") == 3, "state_version", "Expected execution state schema 3; preserve legacy execution and explicitly reconcile its approved plan before migration")
     require(packed.get("integrity") == digest({k: v for k, v in packed.items() if k != "integrity"}), "state_corrupt", "State integrity mismatch")
     state = StateObjects(directory).open(packed)
     state.manifest_bytes = raw
@@ -122,13 +122,14 @@ def initialize(basis, owner, parallel_request=None, isolation=False, mode="paral
     with lock(directory):
         require(not storage(directory).exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
-        state = {"schema_version": 2, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": "parallel", "parallel_request": parallel_request, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
+        state = {"schema_version": 3, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": "parallel", "parallel_request": parallel_request, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
         if basis.get("work_kind", "change") == "refactoring":
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
         for task in basis["tasks"]:
             state["tasks"][task["id"]] = new_task(task)
         state["baseline"] = snapshot(state, basis["project_root"])
+        state["execution_head"] = basis["head"]
         write_json(directory / "runs" / run / "input.json", StateObjects(directory).pack(basis, root=True))
         save(directory, seal(state))
     return read(directory)
@@ -168,12 +169,23 @@ def clean_source(source):
     require(not source["dirty_paths"], "dirty_candidate", "Commit or preserve changes before verification: " + ", ".join(source["dirty_paths"]))
 
 
-def assert_basis(state):
-    manifest = state["basis"]["manifest"]
-    paths = contained_paths(state["basis"]["change_root"], (entry["path"] for entry in manifest))
-    for entry, path in zip(manifest, paths):
-        require(path.is_file() and digest(path.read_bytes()) == entry["sha256"], "normative_drift", entry["path"])
+def execution_source(state):
+    from .repository import repository
+    basis = state["basis"]
+    excluded = execution_directory(basis).relative_to(Path(basis["project_root"])).as_posix()
+    return repository(basis["project_root"]).status(exclude=[excluded])
 
+
+def assert_basis(state):
+    basis = state["basis"]
+    require(basis.get("schema_version") == 2 and "manifest" not in basis,
+            "basis_migration", "Reconcile legacy document manifests into a commit-based approved plan")
+    require(isinstance(basis.get("plan_commit"), str) and re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", basis["plan_commit"]),
+            "basis_commit", "Approved plan needs a full commit OID")
+    require(isinstance(basis.get("document_paths"), list) and basis["document_paths"], "basis_paths", "Approved document paths required")
+    contained_paths(basis["change_root"], basis["document_paths"])
+    # Ongoing execution advances HEAD. Admission checks and explicit plan
+    # replacement govern authorization; source/candidate gates govern integrity.
 
 def apply(directory, event):
     directory = resolve(directory)
@@ -198,6 +210,11 @@ def apply(directory, event):
             audit(directory)
         from .transitions import reduce
         result = reduce(state, event, directory)
+        task = state["tasks"].get(event["task_id"])
+        main_candidate = event["type"] == "candidate" and task and task.get("worktree", {}).get("integrated")
+        if main_candidate or event["type"] in {"commit", "revised_plan"}:
+            from .repository import repository
+            state["execution_head"] = repository(state["basis"]["project_root"]).head()
         state["revision"] += 1
         state["updated_at"] = now()
         if event["type"] == "check_run" and event["task_id"] and event["payload"].get("stage") == "baseline":

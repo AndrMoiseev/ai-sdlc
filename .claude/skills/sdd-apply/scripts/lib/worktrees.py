@@ -6,7 +6,7 @@ import json
 from . import artifact_storage as artifacts
 from .common import contained, digest, require
 from .effects import intent, observed
-from .state import snapshot
+from .state import snapshot, execution_source
 from .scheduler import available
 
 
@@ -19,6 +19,9 @@ def transition(state, task, event, directory):
     require(task is not None, "task_required", "Task required")
     root = state["basis"]["project_root"]
     if event["type"] == "worktree_create":
+        source = execution_source(state)
+        require(not source["dirty_paths"] and source["head"] == state["execution_head"],
+                "execution_reconciliation", "Resume and reconcile the main tree before starting new task work")
         repairing = task["status"] == "repairing" and not task["worktree"]
         require((task["plan"]["id"] in available(state) or repairing) and not task["worktree"], "worktree_admission", "Task is not available")
         workspace = resolve(event["payload"]["workspace"])

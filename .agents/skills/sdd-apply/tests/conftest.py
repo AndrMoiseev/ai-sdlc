@@ -129,6 +129,13 @@ def shared_cli(monkeypatch):
 
 def document(path, meta, records=()):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if meta.get("document_type") == "state":
+        assert path.name == "state.yaml" and not records
+        meta = dict(meta, schema_version=2, work_kind=meta.get("work_kind", "change"), flow="plan", next_question=None,
+                    checks={"structure": "passed"})
+        path.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        path.with_suffix(".md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return
     path.write_text("---\n" + yaml.safe_dump(meta) + "---\n" + "\n".join("### Record\n\n```yaml\n" + yaml.safe_dump(r) + "```\n\nDescription.\n" for r in records), encoding="utf-8")
 
 
@@ -144,12 +151,10 @@ def project_template(tmp_path_factory):
     document(change / "specs/demo/spec.md", {**meta, "document_type": "spec", "capability": "demo"}, [dict(sdd_record="requirement", id="REQ-one", operation="add"), dict(sdd_record="acceptance", id="AC-one", requirement="REQ-one", conditions="Numbers", expected="Sum")])
     records = []
     for stage, kind in (("document_review", "document_approval"), ("plan_review", "plan_approval")):
-        names = ["design.md", "proposal.md", "specs/demo/spec.md"] + (["tasks.md"] if stage == "plan_review" else [])
-        manifest = [dict(path=n, sha256=digest((change / n).read_bytes())) for n in sorted(names)]
         for decision in (kind, "review_waiver"):
-            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", inputs=manifest))
-    document(change / "review/decisions.md", {"schema_version": 1}, records)
-    document(change / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
+            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, work_kind="change", change_id="demo", scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", basis_commit="a" * 40))
+    document(change / "review/decisions.md", {"schema_version": 2, "document_type": "decisions", "work_kind": "change", "change_id": "demo"}, records)
+    document(change / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
     (root / "check.py").write_text("assert 2 + 3 == 5\n")
     # Contract tests install the hooks they exercise. Git's sample hooks and
     # default template files otherwise get copied into every native fixture.
@@ -163,6 +168,10 @@ def project_template(tmp_path_factory):
     git(root, "config", "core.autocrlf", "false")
     git(root, "add", ".")
     git(root, "commit", "-m", "fixture")
+    from shared_commands import spec_modules
+    checkpoints = spec_modules(SPEC, "checkpoints")
+    observed = checkpoints.inspect(root, "change", "demo")
+    git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
     return root
 
 
@@ -172,7 +181,11 @@ def copy_project(template, destination, backend, omit=()):
         root = shutil.copytree(template, destination, ignore=shutil.ignore_patterns(".git", *omit))
         backend.seed(root, backend.seeds[backend(template).head()])
         return root
-    return shutil.copytree(template, destination)
+    root = shutil.copytree(template, destination)
+    from shared_commands import spec_modules
+    observed = spec_modules(SPEC, "checkpoints").inspect(root, "change", "demo")
+    git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
+    return root
 
 
 @pytest.fixture
@@ -206,6 +219,13 @@ def basis(project, basis_template):
     # Input-validation tests still call validate on their actual modified project.
     result = deepcopy(basis_template)
     result.update(project_root=str(project), change_root=str(project / "sdd/changes/demo"))
+    from lib.repository import repository
+    from lib.git_repository import GitRepository
+    if isinstance(repository(project), GitRepository):
+        from shared_commands import spec_modules
+        checkpoint = spec_modules(SPEC, "checkpoints").inspect(project, "change", "demo")
+        for check in result["checks"].values():
+            check["checkpoint_status"] = deepcopy(checkpoint)
     return result
 
 

@@ -2,7 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["PyYAML==6.0.3", "markdown-it-py==4.0.0"]
 # ///
-"""Print the sorted byte-hash manifest without writing any documents."""
+"""Explain migration from byte manifests to Git checkpoints."""
 from __future__ import annotations
 
 import argparse

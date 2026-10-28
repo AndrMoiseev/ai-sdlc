@@ -1,7 +1,7 @@
 from pathlib import Path
 import yaml
 from lib.reviews import review_status
-from lib.snapshots import snapshot
+
 import pytest
 from lib.documents import InputError
 
@@ -24,7 +24,19 @@ def project(tmp_path):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"normative\n")
+    checkpoint(root)
     return root
+
+
+def checkpoint(root):
+    meta = dict(schema_version=2, work_kind="change", document_type="state", change_id=root.name, language="en",
+                phase="drafting", flow="draft", awaiting="clarification",
+                updated_at="2026-01-01T00:00:00Z", document_links=[], review_links=[],
+                approval_refs=[], next_question=None,
+                checks={"structure": "not_run"})
+    (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
+    (root / "state.md").write_text("# Continuation\nKeep the user's remaining scope.\n", encoding="utf-8")
+    return meta
 
 
 def finding():
@@ -32,8 +44,8 @@ def finding():
 
 
 def report(tmp_path, root, run="run-one", lens="consistency", records=(), result=None, after=None, stage="documents"):
-    inputs = snapshot(tmp_path, "demo", stage)
-    meta = dict(schema_version=1, document_type="review", change_id="demo", language="en", run_id=run, stage="document_review" if stage == "documents" else "plan_review", lens_id=lens, result=result or ("completed_with_findings" if records else "completed_no_findings"), started_at="2026-01-01T00:00:00Z", finished_at="2026-01-01T00:01:00Z", inputs=inputs, inputs_after=inputs if after is None else after, freshness="current", limitations=[])
+
+    meta = dict(schema_version=2, work_kind="change", document_type="review", change_id="demo", language="en", run_id=run, stage="document_review" if stage == "documents" else "plan_review", lens_id=lens, result=result or ("completed_with_findings" if records else "completed_no_findings"), started_at="2026-01-01T00:00:00Z", finished_at="2026-01-01T00:01:00Z", reviewed_commit="a" * 40 if after is None else after, limitations=[])
     write(root / f"review/{run}/{lens}.md", meta, records)
     return meta
 
@@ -57,14 +69,14 @@ def test_duplicate_findings_and_result_contract(tmp_path):
     assert review_status(tmp_path, root, "documents")["errors"]
 
 
-def test_incomplete_and_freshness_independent(tmp_path):
+def test_incomplete_and_commit_evidence_independent(tmp_path, checkpoint_observation):
     root = project(tmp_path)
     report(tmp_path, root, result="incomplete")
     result = review_status(tmp_path, root, "documents")["review_status"]
     assert result["coverage"]["consistency"] == "incomplete"
-    assert result["reports"]["run-one/consistency"]["freshness"] == "current"
-    (root / "design.md").write_text("changed")
-    assert review_status(tmp_path, root, "documents")["review_status"]["coverage"]["consistency"] == "stale"
+    assert result["reports"]["run-one/consistency"]["evidence"] == "current"
+    checkpoint_observation["head"] = "b" * 40
+    assert review_status(tmp_path, root, "documents")["review_status"]["coverage"]["consistency"] == "incomplete"
 
 
 def test_summary_requires_full_resolvable_keys(tmp_path):
@@ -74,7 +86,7 @@ def test_summary_requires_full_resolvable_keys(tmp_path):
     assert review_status(tmp_path, root, "documents")["errors"]
 
 
-@pytest.mark.parametrize("field,value", [("stage", []), ("run_id", []), ("limitations", 3), ("inputs", {}), ("lens_id", None), ("extra", True)])
+@pytest.mark.parametrize("field,value", [("stage", []), ("run_id", []), ("limitations", 3), ("reviewed_commit", {}), ("lens_id", None), ("extra", True)])
 def test_bad_report_shapes_are_diagnostics(tmp_path, field, value):
     root = project(tmp_path)
     meta = report(tmp_path, root)
@@ -86,16 +98,45 @@ def test_bad_report_shapes_are_diagnostics(tmp_path, field, value):
 def test_unsupported_report_version_cannot_be_swallowed(tmp_path):
     root = project(tmp_path)
     meta = report(tmp_path, root)
-    meta["schema_version"] = 2
+    meta["schema_version"] = 99
     write(root / "review/run-one/consistency.md", meta)
     with pytest.raises(InputError):
         review_status(tmp_path, root, "documents")
 
 
-def test_common_change_invalidates_all_lenses(tmp_path):
+def test_common_change_diagnoses_all_lenses(tmp_path, checkpoint_observation):
     root = project(tmp_path)
     report(tmp_path, root)
     report(tmp_path, root, lens="security")
-    (root / "design.md").write_text("new")
+    checkpoint_observation["head"] = "b" * 40
     result = review_status(tmp_path, root, "documents")
-    assert all(r["freshness"] == "stale" for r in result["review_status"]["reports"].values())
+    assert all(r["evidence"] == "changed_since_review" for r in result["review_status"]["reports"].values())
+
+
+def test_missing_historical_commit_is_diagnostic(tmp_path, checkpoint_observation):
+    root = project(tmp_path)
+    report(tmp_path, root)
+    checkpoint_observation.update(head="b" * 40, unavailable=["a" * 40])
+    result = review_status(tmp_path, root, "documents")
+    assert result["errors"] == []
+    assert result["review_status"]["reports"]["run-one/consistency"]["evidence"] == "evidence_unavailable"
+    assert result["warnings"][0]["code"] == "evidence_unavailable"
+
+
+def test_legacy_review_requests_migration_without_inventing_commit(tmp_path):
+    root = project(tmp_path)
+    meta = report(tmp_path, root)
+    meta["schema_version"] = 1
+    write(root / "review/run-one/consistency.md", meta)
+    with pytest.raises(InputError) as raised:
+        review_status(tmp_path, root, "documents")
+    assert raised.value.code == "migration_required"
+
+
+def test_all_lenses_require_one_reviewed_commit(tmp_path):
+    root = project(tmp_path)
+    report(tmp_path, root)
+    report(tmp_path, root, lens="security", after="b" * 40)
+    result = review_status(tmp_path, root, "documents")
+    assert any("different reviewed commits" in error["message"] for error in result["errors"])
+    assert result["review_status"]["complete"] is False

@@ -87,6 +87,8 @@ def test_initial_failing_check_blocks_plan(driver, project):
     (project / "check.py").write_text("assert False\n")
     stage(project, "check.py")
     commit(project, "Existing failing check")
+    from repository_support import accept_execution_source
+    accept_execution_source(driver)
     driver.worktree()
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt"]})

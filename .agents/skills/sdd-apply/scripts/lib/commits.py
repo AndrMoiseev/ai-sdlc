@@ -28,6 +28,8 @@ def freeze(state, task, event, directory):
     tree = repo.tree_for_paths(task["paths"], parent)
     path, journal = intent(directory, state, event, "candidate_commit", {"root": root, "parent": parent, "tree": tree})
     expected = journal["request"]["precondition"]
+    require(not worktree.get("integrated") or expected["parent"] == state["execution_head"],
+            "execution_reconciliation", "Resume and explicitly accept the external HEAD before freezing integrated work")
     marker = f"SDD-Candidate: {state['run_id']}/{event['event_id']}"
     matches = repo.find_commits(marker)
     if journal["phase"] == "observed":

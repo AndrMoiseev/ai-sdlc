@@ -4,9 +4,9 @@
 
 Install the aisdlc-core bundle with its sibling SDD skill folders. For manual
 deployment copy the complete bundle. Follow [shared runtime setup](../../sdd-shared/references/runtime-setup.md)
-for discovery, API v1 compatibility and external cache storage. `sdd_shared` selects
+for discovery, API v2 compatibility and external cache storage. `sdd_shared` selects
 an explicit dependency root. Legacy `sdd_spec` selects its sibling sdd-shared.
-Keep execution directories when updating. Execution state uses schema version 2;
+Keep execution directories when updating. Execution state uses schema version 3;
 older state requires an explicit, backed-up conversion before execution resumes.
 
 ## Preflight and recovery

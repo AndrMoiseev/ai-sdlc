@@ -17,6 +17,8 @@ def transition(state, task, event, directory):
     reviewed(state, task)
     valid_evidence(state, task, directory)
     root = state["basis"]["project_root"]
+    require(repository(root).head() == state["execution_head"], "execution_reconciliation",
+            "Resume and explicitly accept the external HEAD before integration")
     worktree = task["worktree"]
     source_repo = repository(worktree["path"])
     require(source_repo.head() == task["candidate_commit"]["sha"], "commit_candidate", "Transfer the verified local commit")

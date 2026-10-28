@@ -16,7 +16,6 @@ def test_package_contract():
         for target in re.findall(r"\]\(([^)]+)\)", path.read_text(encoding="utf-8")):
             if not target.startswith(("http", "#")):
                 assert (path.parent / target.split("#")[0]).exists(), (path, target)
-    for name in ("event", "state"):
-        assert json.loads((ROOT / f"schemas/{name}.schema.json").read_text())["type"] == "object"
+    assert json.loads((ROOT / "schemas/event.schema.json").read_text())["type"] == "object"
     forbidden = {"__pycache__", ".pytest_cache", ".venv", "node_modules"}
     assert not [p for p in ROOT.rglob("*") if p.name in forbidden or p.suffix == ".pyc"]

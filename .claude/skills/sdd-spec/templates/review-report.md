@@ -1,5 +1,6 @@
 ---
-schema_version: 1
+schema_version: 2
+work_kind: change
 document_type: review
 change_id: sample-change
 language: ru
@@ -9,14 +10,12 @@ lens_id: consistency
 result: incomplete
 started_at: '2026-01-01T00:00:00Z'
 finished_at: '2026-01-01T00:00:00Z'
-inputs: []
-inputs_after: []
-freshness: stale
+reviewed_commit: null
 limitations: ['Шаблон: замените метаданные реальными данными запуска']
 ---
 # Отчет независимого ревью
 
-Сохраните как review/<run-id>/<lens-id>.md, не перезаписывая прежние отчеты. Для плана stage: plan_review, lens_id: plan. Вставьте полные манифесты snapshot до/после. Пустые списки inputs здесь — незаполненные поля шаблона, они не проходят check.
+Сохраните как review/<run-id>/<lens-id>.md, не перезаписывая прежние отчеты. Для плана stage: plan_review, lens_id: plan. Укажите полный OID коммита, неизменяемое дерево которого прочитали рецензенты, в reviewed_commit. Если основание не установлено, оставьте null и result: incomplete; не подставляйте текущий HEAD.
 
 ### Найденная проблема
 

@@ -119,7 +119,7 @@ so its durable intent can recover the result.
 
 Candidates are compact references with `candidate_id`, `sha256`, `path` and checked
 `root`. The payload under `candidates/` records the tested Git commit, current-change
-documents, normative manifest and check registry. Its `sha256` identifies that
+documents, approved plan commit and document paths and check registry. Its `sha256` identifies that
 canonical JSON payload. Pass the returned reference unchanged. The script checks
 the same commit and clean tracked/index/untracked state before and after tests
 and before reusing evidence. A status list alone cannot identify a dirty candidate.
@@ -154,7 +154,7 @@ After every task is accepted and integrated, a fresh run-level final_verifier
 executes the union of whole checks and confirmed applicable task/project checks.
 No synthetic owner task is created. Confirmed retired checks retain history and
 reasons; they are not rerun. Evidence binds work identity, clean integrated HEAD,
-normative manifest and the exact applicable registry. Every command and procedure
+approved plan commit and document paths and the exact applicable registry. Every command and procedure
 must pass at that same basis; unrelated exit zero or historical success is insufficient.
 
 Each whole procedure begins a distinct attempt. A newer pending or nonpassing
@@ -192,8 +192,7 @@ use `check_setup`; planned preparation belongs to the task that implements it.
 Register checks only when their exact executable command or procedure is known.
 
 Once registered, every project check is mandatory alongside task final evidence.
-Evidence binds work kind, change ID, run ID, clean integrated HEAD, normative
-manifest, exact project registry and the task check definitions. Missing, failed,
+Evidence binds work kind, change ID, run ID, clean integrated HEAD, approved plan commit and document paths, exact project registry and the task check definitions. Missing, failed,
 unavailable, foreign or stale evidence prevents `complete`. A successful project
 run cannot replace task-scoped final checks. The latest procedure attempt and
 lost-role recovery follow the run-level procedure contract above; rerun the aggregate

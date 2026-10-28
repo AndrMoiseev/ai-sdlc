@@ -1,3 +1,5 @@
+from repository_support import accept_checkpoint
+from lib.repository import repository
 """Plan revisions preserve accepted work and extend the remaining plan."""
 from lib import artifact_storage as artifacts
 from lib.state_storage import storage
@@ -34,12 +36,12 @@ def revise(project, names, modify=lambda tasks: None):
     ])
     decisions = parser.read_document(change / "review/decisions.md")
     for record in decisions.records:
-        for entry in record["inputs"]:
-            entry["sha256"] = digest((change / entry["path"]).read_bytes())
+        record["basis_commit"] = repository(project).head()
     document(decisions.path, decisions.meta, decisions.records)
     from repository_support import stage, commit
     stage(project, "sdd")
     commit(project, "Approved fixture revision")
+    accept_checkpoint(project)
 
 
 def accepted(driver, project):

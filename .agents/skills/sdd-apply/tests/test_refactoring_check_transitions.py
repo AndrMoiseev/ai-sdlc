@@ -406,15 +406,17 @@ def test_refactoring_check_transitions_acceptance_confirmation_is_atomic_and_rep
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is None
 
 
-def test_refactoring_check_transitions_resume_normative_drift_retains_pending_revision(removal_checkpoint):
+def test_refactoring_check_transitions_resume_document_edit_retains_pending_revision(removal_checkpoint):
     driver = removal_checkpoint()
     driver.send("checks_revise", driver.revision())
     path = Path(driver.state["basis"]["change_root"]) / "design.md"
     original = path.read_bytes()
     path.write_bytes(original + b"\nChanged approved basis\n")
-    assert driver.resume()["issues"][0]["reason"] == "normative_drift"
+    admitted = driver.state["basis"]["document_records"]
+    assert driver.resume()["issues"][0]["reason"] == "execution_dirty"
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
-    assert_rejected(driver, "run_blocked", "candidate", {})
+    assert driver.state["basis"]["document_records"] == admitted
+    assert path.read_bytes() == original + b"\nChanged approved basis\n"
     path.write_bytes(original)
     result = driver.resume()
     assert result["status"] == "active"
