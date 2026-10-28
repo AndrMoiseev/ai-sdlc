@@ -1,10 +1,11 @@
-﻿"""Git status carries source changes; file fingerprints belong to change docs."""
+"""Git status carries source changes; file fingerprints belong to change docs."""
 import pytest
 
 from lib.common import Rejected, git
 from lib.repository import repository
 
 
+@pytest.mark.native_git
 def test_git_status_retains_modes_deleted_and_untracked_paths(project):
     (project / "untracked file.txt").write_bytes(b"new")
     (project / "ignored.txt").write_bytes(b"owned")
@@ -18,6 +19,7 @@ def test_git_status_retains_modes_deleted_and_untracked_paths(project):
     assert state["ignored_paths"] == ["ignored.txt"]
 
 
+@pytest.mark.native_git
 def test_inspect_rejects_unmerged_index(project):
     blob = git(project, "rev-parse", "HEAD:check.py")
     import subprocess
@@ -30,19 +32,17 @@ def test_inspect_rejects_unmerged_index(project):
     assert error.value.code == "unmerged_index"
 
 
-def test_status_parser_preserves_unusual_untracked_name(project, monkeypatch):
+def test_status_parser_preserves_unusual_untracked_name(tmp_path, monkeypatch):
     from types import SimpleNamespace
-    repo = repository(project)
-    original = repo._run
+    from lib.git_repository import GitRepository
+    repo = GitRepository(tmp_path)
     name = "100644 " + "0" * 40 + " 2\tlooks-tracked.txt"
 
     def listing(*args, **kwargs):
         if "status" in args:
-            return SimpleNamespace(stdout=original(*args, **kwargs).stdout + ("? " + name + "\0").encode())
-        return original(*args, **kwargs)
+            return SimpleNamespace(stdout=("# branch.oid " + "1" * 40 + "\0# branch.head main\0? " + name + "\0").encode())
+        assert args == ("ls-files", "-v", "--stage", "-z")
+        return SimpleNamespace(stdout=b"")
 
     monkeypatch.setattr(repo, "_run", listing)
     assert repo.status()["untracked_paths"] == [name]
-
-
-pytestmark = pytest.mark.native_git

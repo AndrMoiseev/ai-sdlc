@@ -1,9 +1,9 @@
 """Use the companion skill's resolver at the execution's original project root."""
-from .inputs import spec_modules, basis_dependency
+from .inputs import spec_modules
 
 
 def resolver(state):
-    return spec_modules(basis_dependency(state["basis"]), "subagents")
+    return spec_modules("subagents")
 
 
 def resolve(state, kind, **kwargs):

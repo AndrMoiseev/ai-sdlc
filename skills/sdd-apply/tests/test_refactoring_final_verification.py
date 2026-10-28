@@ -267,7 +267,7 @@ def test_final_evidence_is_bound_to_current_head_manifest_and_registry(completed
         stage_files(project, 'new-code.txt')
         commit(project, 'Independent integrated change')
     elif drift == 'manifest':
-        state['basis']['manifest'] = [*state['basis']['manifest'], {'path': 'new.md', 'sha256': 'different'}]
+        state['basis']['head'] = '0' * 40
     else:
         state['final_checks']['revision'] += 1
         state['final_checks']['history'].append(dict(revision=state['final_checks']['revision'], event_id='new-registry', checks=deepcopy(state['final_checks']['checks'])))

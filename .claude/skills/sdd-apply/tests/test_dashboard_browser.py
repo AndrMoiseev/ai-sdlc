@@ -44,7 +44,7 @@ def dom(directory, tmp_path, width=1280, screenshot=False, virtual_time=2500):
 def test_file_timer_updates_without_reload(driver, tmp_path):
     render(driver.directory)
     html = (driver.directory / "dashboard.html").read_bytes()
-    driver.send("block", {"reason": "browser-live-update", "resume_condition": "fix"})
+    driver.send("block", {"reason": "browser-live-update", "resume_condition": "fix"}, task_id=None)
     render(driver.directory)
     (driver.directory / "dashboard.html").write_bytes(html)
     result = dom(driver.directory, tmp_path)
@@ -63,6 +63,26 @@ def test_snapshot_and_stale_foreign_data(driver, tmp_path):
     (driver.directory / "dashboard-state.js").unlink()
     result = dom(driver.directory, tmp_path)
     assert "live data unavailable" in result
+
+
+def test_ordinary_final_project_panel_renders_live_criteria(basis, project, tmp_path, prepare_state):
+    from conftest import Driver
+    from test_commits import prepared
+    from test_final_project_checks import register, final_role, run_final
+    with prepare_state():
+        driver = Driver(basis)
+        prepared(driver, project)
+        driver.send("commit")
+        driver.send("accept")
+        register(driver)
+        final_role(driver)
+        assert run_final(driver)["outcome"] == "passed"
+    render(driver.directory)
+    result = dom(driver.directory, tmp_path)
+    assert 'aria-label="Final project checks"' in result
+    assert 'id="whole-result" hidden' not in result
+    assert "1 / 1 criteria confirmed" in result
+    assert "1 / 1 tasks accepted" in result
 
 
 @pytest.mark.parametrize("width", [1280, 540])

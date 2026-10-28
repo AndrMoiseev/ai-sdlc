@@ -54,26 +54,20 @@ def test_refactoring_runtime_isolation_covers_every_actual_scenario():
     assert all(case["expectations"] and case["expected_output"] for case in SCENARIOS)
 
 
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda case: str(case["id"]))
-def test_refactoring_runtime_isolation_actual_oracles_are_not_executor_inputs(
-        tmp_path, frozen_inputs, scenario, variant):
+@pytest.fixture(scope="module", params=VARIANTS)
+def runtime_copy(request, tmp_path_factory, frozen_inputs):
+    # Real copying is needed to catch omitted resources and leaked development
+    # files. Package selection depends on the variant, not the scenario prompt:
+    # exercise that boundary once per variant, then check all prompts in memory.
+    variant = request.param
     frozen, roots, records, before = frozen_inputs
-    workspace = runner.make_workspace(tmp_path, variant)
+    workspace = runner.make_workspace(tmp_path_factory.mktemp("runtime-copy"), variant)
+    scenario = SCENARIOS[0]
     fixture = {"files": {"request.md": scenario["prompt"]}}
     manifest = runner.prepare_fixture(workspace, fixture, roots, roots["candidate"], variant)
     files = file_bytes(workspace)
     assert set(manifest["required_files"]) == set(files)
     assert files["request.md"] == scenario["prompt"].encode("utf-8")
-
-    # Inspect every oracle, not just this prompt or the training subset. Escaped
-    # JSON strings count as leaks too. Prompts are inputs, never grading answers.
-    for case in SCENARIOS:
-        for answer in [case["expected_output"], *case["expectations"]]:
-            representations = (answer.encode("utf-8"),
-                               json.dumps(answer, ensure_ascii=True)[1:-1].encode("ascii"))
-            for relative, content in files.items():
-                assert all(value not in content for value in representations), (case["id"], variant, relative)
 
     installed = workspace / ".agents/skills"
     packages = {"sdd-shared": roots["sdd-shared"], "humanizer-ru": roots["humanizer-ru"]}
@@ -110,6 +104,26 @@ def test_refactoring_runtime_isolation_actual_oracles_are_not_executor_inputs(
         assert runner.verify_package(record) == roots[name]
     assert "evals/evals.json" in records["old_skill"]["files"]
     assert "tests/test_refactoring_runner.py" in records["old_skill"]["files"]
+    yield variant, files
+    # Shared observations are read-only. Detect accidental fixture pollution
+    # without re-reading the same files after every scenario.
+    assert file_bytes(workspace) == files
+    assert file_bytes(frozen) == before
+
+
+@pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda case: str(case["id"]))
+def test_refactoring_runtime_isolation_actual_oracles_are_not_executor_inputs(
+        runtime_copy, scenario):
+    variant, copied = runtime_copy
+    files = {**copied, "request.md": scenario["prompt"].encode("utf-8")}
+    # Inspect every oracle, not just this prompt or the training subset. Escaped
+    # JSON strings count as leaks too. Prompts are inputs, never grading answers.
+    for case in SCENARIOS:
+        for answer in [case["expected_output"], *case["expectations"]]:
+            representations = (answer.encode("utf-8"),
+                               json.dumps(answer, ensure_ascii=True)[1:-1].encode("ascii"))
+            for relative, content in files.items():
+                assert all(value not in content for value in representations), (case["id"], variant, relative)
 
 
 @pytest.mark.parametrize("variant", VARIANTS)

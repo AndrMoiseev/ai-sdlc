@@ -81,6 +81,7 @@ class MemoryRepositories:
                      commits={seed["head"]: dict(tree=tree, parent=None, message="fixture")},
                      worktrees={root}, main_root=root, ignores=[])
         repo = MemoryRepository(self, root, store, seed["head"], seed["branch"])
+        repo.accepted_checkpoint = seed["head"]
         self.repos[root] = repo
         return repo
 

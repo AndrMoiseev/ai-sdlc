@@ -26,40 +26,55 @@ def process_cli(shared_cli, monkeypatch):
     return call
 
 
-@pytest.mark.parametrize("stage,script", [
-    ("documents", "check.py"), ("plan", "check.py"), ("plan", "snapshot.py"),
+@pytest.mark.parametrize("stage,script,native", [
+    ("documents", "check.py", False),
+    # Each executable has one successful process contract; stages share its parser.
+    pytest.param("plan", "check.py", True, marks=[pytest.mark.native_process, pytest.mark.native_git]),
+    pytest.param("plan", "snapshot.py", True, marks=[pytest.mark.native_process, pytest.mark.native_git]),
 ])
-def test_shared_adapter_matches_real_cli(project, process_cli, stage, script):
-    assert spec_call(SHARED, project, "demo", stage, script) == process_cli(SHARED, project, "demo", stage, script)
+def test_shared_adapter_matches_real_cli(project, process_cli, stage, script, native):
+    if script == "snapshot.py":
+        with pytest.raises(Rejected, match="migration_required"):
+            spec_call(SHARED, project, "demo", stage, script)
+        with pytest.raises(Rejected, match="migration_required"):
+            process_cli(SHARED, project, "demo", stage, script)
+        return
+    actual = spec_call(SHARED, project, "demo", stage, script)
+    if native:
+        assert actual == process_cli(SHARED, project, "demo", stage, script)
+    else:
+        assert actual["approval_status"]["ready"] is True
+        assert not actual["errors"]
 
 
-@pytest.mark.parametrize("damage", ["missing", "syntax"])
+@pytest.mark.parametrize("damage", ["missing", pytest.param("syntax", marks=[pytest.mark.native_process, pytest.mark.native_git])])
 def test_shared_adapter_matches_real_cli_errors(project, process_cli, damage):
     root = project / "sdd/changes/demo"
     if damage == "missing":
         (root / "tasks.md").unlink()
     else:
         (root / "tasks.md").write_text("---\ninvalid: [\n---\n")
-    with pytest.raises(Rejected) as expected:
-        process_cli(SHARED, project, "demo", "plan", "check.py")
     with pytest.raises(Rejected) as actual:
         spec_call(SHARED, project, "demo", "plan", "check.py")
-    assert actual.value.code == expected.value.code
-    assert str(actual.value) == str(expected.value)
+    assert actual.value.code == "sdd_check"
+    if damage == "syntax":
+        # One failure proves subprocess exit/output translation agrees with the adapter.
+        with pytest.raises(Rejected) as expected:
+            process_cli(SHARED, project, "demo", "plan", "check.py")
+        assert str(actual.value) == str(expected.value)
 
 
-def test_shared_adapter_matches_missing_approval_result(project, process_cli):
+def test_shared_adapter_matches_missing_approval_result(project):
     (project / "sdd/changes/demo/review/decisions.md").unlink()
     actual = spec_call(SHARED, project, "demo", "plan", "check.py")
     assert not actual["approval_status"]["ready"]
-    assert actual == process_cli(SHARED, project, "demo", "plan", "check.py")
 
 
 def test_shared_adapter_restores_import_context(project):
     before = {name: module for name, module in sys.modules.items()
               if name == "sdd_shared" or name.startswith("sdd_shared.")}
     paths = sys.path[:]
-    spec_call(SHARED, project, "demo", "plan", "snapshot.py")
+    spec_call(SHARED, project, "demo", "plan", "check.py")
     after = {name: module for name, module in sys.modules.items()
              if name == "sdd_shared" or name.startswith("sdd_shared.")}
     assert before == after and sys.path == paths
@@ -72,7 +87,7 @@ def test_shared_adapter_matches_shipped_uv_entrypoint(project, shared_cli):
 
 def test_parsed_documents_are_independent_and_exact_bytes_invalidate_the_cache(project):
     from shared_commands import spec_modules
-    docs = spec_modules(SHARED)
+    docs = spec_modules()
     path = project / "sdd/changes/demo/specs/demo/spec.md"
     first = docs.read_document(path)
     first.records[1]["expected"] = "mutated returned object"

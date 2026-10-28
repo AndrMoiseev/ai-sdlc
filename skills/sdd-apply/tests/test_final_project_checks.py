@@ -59,6 +59,8 @@ def final_project_checkpoints(execution_checkpoints, repository_seeds):
                     (root / "release.md").write_text("Check result.txt equals verified result followed by a newline. Record the command and outcome.\n")
                     stage(root, "release.md")
                     commit(root, "Add project release procedure")
+                    from repository_support import accept_execution_source
+                    accept_execution_source(driver)
                 register(driver, {"procedure": "release.md"} if procedure else None)
                 final_role(driver)
                 yield "registered", driver
@@ -204,7 +206,7 @@ def test_project_evidence_binds_full_current_identity(prepared_project, drift):
         stage(root, "new.txt")
         commit(root, "Change final HEAD")
     elif drift == "manifest":
-        state["basis"]["manifest"] = [*state["basis"]["manifest"], {"path": "new.md", "sha256": "changed"}]
+        state["basis"]["head"] = "0" * 40
     elif drift == "registry":
         registry = state["final_checks"]
         registry["revision"] += 1
@@ -385,7 +387,7 @@ def complete_followup(driver):
     def review(ident):
         role(ident, "reviewer")
         send("review_start", {"role_id": ident})
-        send("review_result", {"role_id": ident, "candidate": driver.state["tasks"]["TASK-two"]["candidate"],
+        send("review_result", {"role_id": ident,
             "verdict": "pass", "findings": [], "test_integrity": "Fixture checks unchanged", "trace": "synthetic-unit-test"})
     project = Path(driver.state["basis"]["project_root"])
     send("worktree_create", {"workspace": str(project.parent / "followup-worktrees")})

@@ -3,7 +3,6 @@ from .common import contained, require
 from .repository import repository
 from .effects import intent, observed
 from .verification import valid_evidence
-from .candidates import same
 
 
 def freeze(state, task, event, directory):
@@ -18,7 +17,7 @@ def freeze(state, task, event, directory):
     require(expected_branch and repo.branch() == expected_branch, "branch_changed", "Restore the registered candidate branch")
     require(not repo.has_conflicts(), "unmerged_index", "Resolve conflicts before freezing")
     source = snapshot(state, root)
-    own_paths(state, task, root)
+    own_paths(task, root)
     require(set(source["dirty_paths"]) <= set(task["paths"]), "candidate_scope",
             "Changes outside task ownership: " + ", ".join(sorted(set(source["dirty_paths"]) - set(task["paths"]))))
     baseline = task.get("freeze_base", task["start_snapshot"])
@@ -28,6 +27,8 @@ def freeze(state, task, event, directory):
     tree = repo.tree_for_paths(task["paths"], parent)
     path, journal = intent(directory, state, event, "candidate_commit", {"root": root, "parent": parent, "tree": tree})
     expected = journal["request"]["precondition"]
+    require(not worktree.get("integrated") or expected["parent"] == state["execution_head"],
+            "execution_reconciliation", "Resume and explicitly accept the external HEAD before freezing integrated work")
     marker = f"SDD-Candidate: {state['run_id']}/{event['event_id']}"
     matches = repo.find_commits(marker)
     if journal["phase"] == "observed":
@@ -55,26 +56,22 @@ def freeze(state, task, event, directory):
     clean_source(source)
     observed(path, journal, result)
     task["candidate_commit"] = result
-    # The caller immediately binds this checked post-hook source to the
-    # candidate; no command or working-file mutation occurs between them.
     return source
 
 
 def reviewed(state, task):
-    require(task["reviews"] and same(state, task["reviews"][-1]["candidate"], task["candidate"]) and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Current independent passing review required")
+    require(task["reviews"] and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Independent passing review required")
 
 
 def index_tree(root, paths, base):
     return repository(root).tree_for_paths(paths, base)
 
 
-def own_paths(state, task, root):
+def own_paths(task, root):
     require(task["paths"], "empty_candidate", "No owned paths")
     for name in task["paths"]:
         contained(root, name)
-        require(name not in state["basis"].get("dirty_paths", []), "ownership_overlap", f"Pre-existing index or working changes in {name}")
         require(not name.startswith(("sdd/changes/", "sdd/refactoring/")), "normative_ownership", "Execution cannot own SDD documents")
-        require("dirty_paths" in state["basis"], "ownership_unknown", "Legacy basis lacks a path inventory; explicitly rebaseline before committing")
 
 
 def confirm(state, task, commit):
@@ -96,16 +93,17 @@ def transition(state, task, event, directory):
     if event["type"] == "accept":
         require(task["commits"], "commit_required", "A commit is mandatory")
         confirm(state, task, task["commits"][-1])
-        require(same(state, task["commits"][-1]["candidate"], task["candidate"]), "commit_candidate", "Commit did not record this candidate")
+        from .check_registry import confirm as confirm_registry
+        confirm_registry(state, task, event)
         task["status"] = "accepted"
         task["integration_active"] = False
         task.pop("repairing_result", None)
         return {"status": "accepted", "sha": task["commits"][-1]["sha"]}
     require(task["worktree"] and task["worktree"].get("integrated"), "integration_required", "Check and review integration before accepting the task")
-    result = {**task["candidate_commit"], "candidate": task["candidate"]}
+    result = dict(task["candidate_commit"])
     require(result["root"] == root and result["sha"] == repo.head(), "commit_candidate", "Integration candidate must name execution HEAD")
     require(result["sha"] != result["parent"], "empty_commit", "Task has no changes to commit")
     confirm(state, task, result)
-    if not any(c["sha"] == result["sha"] and same(state, c["candidate"], result["candidate"]) for c in task["commits"]):
+    if not any(c["sha"] == result["sha"] for c in task["commits"]):
         task["commits"].append(result)
     return result

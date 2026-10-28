@@ -66,10 +66,9 @@ def reuse_parsers(module):
     return module
 
 
-def spec_modules(root, module_name="documents"):
-    from shared import load, locate
-    root = Path(root)
-    module = load(root if (root / "api.json").is_file() else locate(legacy=root), module_name)
+def spec_modules(module_name="documents"):
+    from shared import load
+    module = load(module_name)
     return reuse_parsers(module) if module_name == "documents" else module
 
 
@@ -112,7 +111,27 @@ def spec_call(dependency, project, change, stage, script, work_kind="change"):
         sys.path.insert(0, str(dependency / "scripts"))
         with redirect_stdout(stdout), redirect_stderr(stderr):
             main = entrypoint(dependency, script)
-            code = main(args)
+            from unittest.mock import patch
+            from lib.repository import repository
+            from lib.git_repository import GitRepository
+            repo = repository(project)
+            reviews = importlib.import_module("sdd_shared.reviews")
+            if isinstance(repo, GitRepository):
+                code = main(args)
+            else:
+                # Git checkpoint mechanics have their own native contract suite.
+                # Keep real approval parsing here, with the existing repository adapter.
+                def inspect(*args):
+                    status = repo.status()
+                    head = status["head"]
+                    accepted = repo.accepted_checkpoint
+                    return dict(schema_version=2, head=head, accepted_commit=accepted,
+                                status="dirty" if status["dirty_paths"] else "ready" if head == accepted else "head_mismatch")
+                class EvidenceGit:
+                    def __init__(self, root): pass
+                    def commit_exists(self, oid): return True
+                with patch.object(reviews, "inspect", inspect), patch.object(reviews, "Git", EvidenceGit):
+                    code = main(args)
             # Entry points import their domain modules inside main().
             loaded = {name: module for name, module in sys.modules.copy().items() if shared(name)}
             _entrypoints[str(Path(dependency) / "scripts"), script][1].update(loaded)

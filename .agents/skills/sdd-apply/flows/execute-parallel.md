@@ -1,6 +1,6 @@
 # Parallel execution
 
-Read [task events](../references/api-tasks.md), [checks and evidence](../references/api-checks.md), and [role coordination](../references/role-coordination.md) if not already loaded. Keep the sequential flow unloaded. Require the saved execution instruction, parallel mode and working isolation before admission; the default mode needs no separate parallel request.
+Read [task events](../references/api-tasks.md), [checks and evidence](../references/api-checks.md), and [role coordination](../references/role-coordination.md) if not already loaded. Require the saved execution instruction and working isolation before admission; no separate parallel request is needed.
 
 1. Request `available`; respect accepted dependencies, `cannot_parallel_with`, shared files and mutable resources. Isolate ports, databases, scratch directories and mutable caches per task. A conflict serializes the affected work; free slots alone do not authorize unsafe overlap.
 2. Submit `worktree_create` with `workspace` outside skill collections and the task's `resources`. The script creates a registered worktree and local task branch at the execution branch's current HEAD. Register exact checks and project/CI inventory. Launch/register a fresh [executor](../agents/executor.md), pass the worktree and owned paths, then submit `start`. The script owns task commits; the executor edits only its assigned tree.
@@ -11,4 +11,4 @@ Read [task events](../references/api-tasks.md), [checks and evidence](../referen
 7. After acceptance and all roles stop, call `worktree_remove`. The script verifies ownership, saved transfer, accepted commit and absence of unknown data. Preserve a tree when cleanup is rejected. A cleanup failure cannot revoke a valid commit or justify a duplicate one.
 8. Continue eligible work while honoring blockers. Either exhausted task budget stops new work across the whole run: bring active roles to a saved stop, reconcile already-started effects, and ask for the concrete decision described in [repair](repair.md). After all tasks are accepted, use [finalize](finalize.md).
 
-If the user changes mode after this flow was loaded, use [resume](resume.md) for fresh-owner handoff. Preserve unintegrated worktree candidates; a rejected transition is not permission to integrate after authorization was withdrawn.
+If the user changes execution authorization after this flow was loaded, use [resume](resume.md) to reconcile it. Preserve unintegrated worktree candidates; a rejected transition is not permission to integrate after authorization was withdrawn.

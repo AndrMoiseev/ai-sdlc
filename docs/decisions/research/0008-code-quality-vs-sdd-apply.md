@@ -49,7 +49,7 @@ method: static review of upstream implementation and local skill contracts; no r
 
 Baseline хранит метрики функций, известные циклы, нарушения слоев, неиспользуемый код и находки языковых инструментов. Для последних действует правило «не добавлять новый долг». Если снимка нет, часть долга вычисляется на merge-base во временно распакованном дереве. `--all` игнорирует baseline и показывает весь долг. Однако **измененная старая функция проверяется по абсолютному порогу CC/CRAP**, даже если раньше была сложнее: baseline не освобождает ее от планки. Средний CRAP репозитория и ухудшение неизмененных функций служат диагностикой. [Логика baseline и порогов][baseline].
 
-Здесь два разных значения слова baseline. В Code Quality это сохраненный долг анализаторов. В `sdd-apply` исходная baseline-проверка — реальный запуск обязательных проверок до изменений. Один механизм не заменяет другой. [Последовательное выполнение SDD][sequential].
+Здесь два разных значения слова baseline. В Code Quality это сохраненный долг анализаторов. В `sdd-apply` исходная baseline-проверка — реальный запуск обязательных проверок до изменений. Один механизм не заменяет другой. [Выполнение SDD][execution].
 
 ## 3. Что именно измеряется
 
@@ -159,7 +159,7 @@ Upstream `acceptance` полезен как источник отдельных 
 [acceptance-limits]: https://github.com/smixs/code-quality/blob/0e160eadf7d1bfffb75a14bed88876d6f7bffbc7/skills/acceptance/SKILL.md#L145-L166
 [conductor]: ../../../skills/sdd-skill-conductor/SKILL.md
 [sop]: ../../../skills/sdd-skill-conductor/references/sop-practices.md
-[sequential]: ../../../skills/sdd-apply/flows/execute-sequential.md
+[execution]: ../../../skills/sdd-apply/flows/execute-parallel.md
 [reviewer]: ../../../skills/sdd-apply/agents/reviewer.md
 [verifier]: ../../../skills/sdd-apply/agents/verifier.md
 [review-policy]: ../../../skills/sdd-apply/references/review-policy.md

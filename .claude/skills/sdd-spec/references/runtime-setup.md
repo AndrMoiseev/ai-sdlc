@@ -3,13 +3,13 @@
 Определи абсолютные `<skill-root>` (каталог скилла), `<repo>` (корень проверяемого
 проекта) и безопасный `<id>`. Проверь комплектность flows,
 references, templates, scripts, соседних script lock-файлов и метаданных хоста, доступ
-к источникам и запись в `sdd/changes/`. Существующее изменение сохраняй.
+к источникам и запись в выбранный корень `sdd/changes/` или `sdd/refactoring/`. Существующее изменение сохраняй.
 
 ## Автономные скрипты uv
 
 Установи полный `sdd-shared` рядом с этим скиллом и прочитай
 [общие условия запуска](../../sdd-shared/references/runtime-setup.md).
-Парсер, проверки, снимки и resolver принадлежат API v1 общего пакета;
+Парсер, проверки, Git-чекпойнты и resolver принадлежат API v2 общего пакета;
 команды ниже сохраняют прежний интерфейс. Обновляй комплект скиллов вместе.
 
 ## Команды
@@ -19,8 +19,6 @@ references, templates, scripts, соседних script lock-файлов и м�
 ```text
 uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage documents
 uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage plan
-uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage documents
-uv run --locked --script "<skill-root>/scripts/snapshot.py" --project-root "<repo>" --change <id> --stage plan
 uv run --locked --script "<skill-root>/scripts/test.py" -q
 uv run --locked --script "<skill-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.document_reviewer --host codex --parent-model "<observed-model>"
 ```
@@ -28,16 +26,21 @@ uv run --locked --script "<skill-root>/scripts/resolve_agent.py" --project-root 
 Зависимости последней команды, включая pytest, объявлены в самом тестовом
 скрипте и устанавливаются при запуске.
 
-Check и snapshot только читают проект; JSON идёт в stdout. Snapshot сам
-не сохраняет файлы. Основной агент переносит манифест в отчёт/решение.
-Check разделяет errors/warnings, discussion_status, review_status и approval_status:
+Check только читает проект; JSON идёт в stdout. Для Git-входа и завершения перехода используй inspect/accept/create по [общему API](../../sdd-shared/references/api.md). Записи выполняет основной агент; snapshot сообщает о миграции и не создаёт нормативный манифест.
+Check разделяет errors/warnings, checkpoint_status, discussion_status, review_status и approval_status:
 exit 0 — структура корректна, 1 — структурные ошибки, 2 — проверка
 не выполнена. Ошибка запуска uv также означает, что проверка не выполнена.
 Exit 0 не разрешает переход. Documents не требует tasks;
 plan добавляет покрытие AC, граф и проверки задач.
 
-discussion_status показывает открытые и блокирующие Q-ID из questions.md и legacy
-state. Открытый блокирующий вопрос препятствует approval_status.ready, сохраняя
+`review_status` сохраняет покрытие, актуальность и находки опционального ревью;
+его `complete` не является условием `approval_status.ready`. Для передачи
+согласованного плана в реализацию нужен установленный sdd-apply. Если он
+недоступен, сохрани согласование и сообщи о недостающем скилле; повторного
+разрешения пользователя после восстановления зависимости не требуется.
+
+discussion_status показывает открытые и блокирующие Q-ID только из questions.md.
+Открытый блокирующий вопрос препятствует approval_status.ready, сохраняя
 само свидетельство согласования. Смысловую полноту вопросов и авторство журнала
 агент проверяет по [правилам обсуждения](discussion.md).
 
@@ -65,3 +68,7 @@ openspec-скиллы и LLM-ключи в файлах пакета для пр
 Различай недоступную зависимость, недоступный браузер и ошибку самой проверки.
 Пути сохраняемых артефактов явно задавай внутри archify/ текущего изменения
 по [контракту пояснения](explanation.md).
+
+## Команды рефакторинга
+
+Для check и checkpoint передавай --work-kind refactoring при работе в sdd/refactoring. Для обычного изменения сохраняй прежние команды. Передавай вид явно при совпадающих ID; комплект proposal/design проверяется на documents, tasks добавляется на plan. Разрешение схемы и безопасного корня выполняет shared; сообщение об ошибке не обходи переносом согласования.

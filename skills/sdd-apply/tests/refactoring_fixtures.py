@@ -1,3 +1,4 @@
+from repository_support import accept_checkpoint
 """Reusable synthetic approved work and host events; never real user consent."""
 from lib import artifact_storage as artifacts
 from lib.repository import repository
@@ -11,12 +12,8 @@ from conftest import Driver, document
 from lib.inputs import spec_modules, validate
 from lib.state import seal, save
 
-COLLECTION = Path(__file__).resolve().parents[2]
-
-
 def approved_basis(project, work_kind="refactoring", configure=None):
     """Both routes use the real document validator and synthetic approvals."""
-    shared = COLLECTION / "sdd-shared"
     if work_kind == "refactoring":
         root = project / "sdd/refactoring/demo"
         meta = dict(schema_version=1, work_kind=work_kind, change_id="demo", language="en")
@@ -46,23 +43,24 @@ def approved_basis(project, work_kind="refactoring", configure=None):
         for name, records in documents.items():
             document(root / (name + ".md"), {**meta, "document_type": name}, records)
         approvals = []
-        snapshots = spec_modules(shared, "snapshots")
+
         for stage, approval in (("documents", "document_approval"), ("plan", "plan_approval")):
-            manifest = snapshots.snapshot(project, "demo", stage, work_kind)
+
             for kind in (approval, "review_waiver"):
                 approvals.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
                                       work_kind=work_kind, change_id="demo", kind=kind,
                                       scope=dict(stage="document_review" if stage == "documents" else "plan_review",
                                                  **({"lenses": ["consistency" if stage == "documents" else "plan"]} if kind == "review_waiver" else {})),
-                                      response="Approved synthetic test fixture", date="2026-10-24T00:00:00Z", inputs=manifest))
-        document(root / "review/decisions.md", {**meta, "document_type": "decisions"}, approvals)
-        document(root / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
+                                      response="Approved synthetic test fixture", date="2026-10-24T00:00:00Z", basis_commit=repository(project).head()))
+        document(root / "review/decisions.md", {**meta, "schema_version": 2, "document_type": "decisions"}, approvals)
+        document(root / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
                                     "updated_at": "2026-10-24T00:00:00Z", "document_links": ["tasks.md"],
                                     "review_links": ["review/decisions.md"], "approval_refs": [a["id"] for a in approvals]})
         stage_files(project, ".")
         commit(project, "Synthetic approved refactoring fixture")
+        accept_checkpoint(project)
     return validate(project, "demo", {"text": "Execute the synthetic approved plan", "source": "synthetic-unit-test"},
-                    sdd_shared=shared, work_kind=work_kind)
+                    work_kind=work_kind)
 
 
 class AcceptanceDriver(Driver):

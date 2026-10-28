@@ -2,16 +2,33 @@ from pathlib import Path
 import pytest
 
 
-def test_drift_preserved_then_restored(driver, project):
+def test_resume_requires_clean_main_tree_and_preserves_document_edits(driver, project):
     path = project / "sdd/changes/demo/tasks.md"
     before = path.read_bytes()
     path.write_bytes(before + b"Changed\n")
     result = driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     assert result["status"] == "blocked"
-    assert result["issues"][0]["reason"] == "normative_drift"
+    assert result["issues"][0]["reason"] == "execution_dirty"
     assert path.read_bytes() == before + b"Changed\n"
     path.write_bytes(before)
     assert driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)["status"] == "active"
+
+
+def test_resume_external_head_needs_exact_explicit_acceptance(driver, project):
+    from repository_support import stage, commit
+    from lib.repository import repository
+    admitted = driver.state["basis"]
+    (project / "external.txt").write_text("external change")
+    stage(project, "external.txt")
+    commit(project, "External change")
+    payload = {"host_trace": "unit-observation", "live_contexts": []}
+    assert driver.send("resume", payload, task_id=None)["issues"][0]["reason"] == "execution_head_changed"
+    resolution = dict(reason="execution_head_changed", head=repository(project).head(),
+                      evidence="Inspected external commit", instruction={"text": "Accept this source state", "source": "synthetic-user"})
+    with pytest.raises(ValueError, match="actual user response"):
+        driver.send("resume", {**payload, "resolutions": [{**resolution, "head": "0" * 40}]}, task_id=None)
+    assert driver.send("resume", {**payload, "resolutions": [resolution]}, task_id=None)["status"] == "active"
+    assert driver.state["basis"] == admitted
 
 
 def test_lost_author_successor_preserves_work(execution_checkpoint):
@@ -107,7 +124,7 @@ def test_reviewer_successor_continues_reserved_round_after_two_losses(execution_
             for old, new in [("reviewer", "new-reviewer"), ("verifier", "new-verifier")]]}, task_id=None)
     assert driver.task["status"] == "reviewing"
     assert driver.task["review_rounds_started"] == 1
-    result = driver.send("review_result", {"role_id": "new-reviewer", "candidate": driver.task["candidate"],
+    result = driver.send("review_result", {"role_id": "new-reviewer",
         "verdict": "pass", "findings": [], "test_integrity": "commands and assertions preserved", "trace": "unit-test"})
     assert result["status"] == "integrating"
 

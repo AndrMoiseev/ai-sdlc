@@ -100,13 +100,6 @@ def selected(state, task, final=False):
     return list(checks.values())
 
 
-def evidence_basis(state, task, final=False):
-    result = {"revision": task["check_registry"]["revision"], "checks": selected(state, task, final)}
-    # Confirmation alone leaves the accepting candidate unchanged. Other tasks'
-    # confirmed revisions still invalidate it when applicability changes.
-    return result
-
-
 def strings(value):
     return isinstance(value, list) and all(isinstance(item, str) and item for item in value) and len(value) == len(set(value))
 
@@ -209,8 +202,8 @@ def revise(state, task, event):
         if check["cwd"] != ".":
             contained(root, check["cwd"])
         if "location" in check:
-            from .inputs import spec_modules, basis_dependency
-            spec_modules(basis_dependency(state["basis"]), "paths").verification_location(root, check["location"])
+            from .inputs import spec_modules
+            spec_modules("paths").verification_location(root, check["location"])
     require(len({check["id"] for check in after}) == len(after), "duplicate_check", "Duplicate revised check ID")
     require_new_ids(state, task, [check for check in after if check["id"] not in old])
     require(isinstance(payload.get("reason"), str) and payload["reason"].strip(), "revision_basis", "Record the reason for changed applicability")
@@ -220,7 +213,6 @@ def revise(state, task, event):
     task["check_registry"]["transition"] = {"event_id": event["event_id"], **deepcopy(payload)}
     record_registry(state, task, event)
     registry_current(state, task)
-    task["candidate"] = None
     state["final"] = None
     return {"registry_revision": task["check_registry"]["revision"], "status": "pending_confirmation",
             "checks": selected(state, task)}

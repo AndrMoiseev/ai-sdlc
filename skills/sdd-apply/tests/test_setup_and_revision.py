@@ -1,3 +1,4 @@
+from repository_support import accept_checkpoint
 from lib import artifact_storage as artifacts
 from lib.repository import repository
 from repository_support import stage as stage_files, commit
@@ -5,7 +6,7 @@ import sys
 import json
 from pathlib import Path
 import pytest
-from conftest import document, SPEC, Driver
+from conftest import document, Driver
 from lib.common import digest
 from lib.inputs import spec_modules, validate
 
@@ -14,11 +15,13 @@ from lib.inputs import spec_modules, validate
 def test_missing_command_location_blocks_even_when_command_passes(project, stage):
     # A broad command can succeed after its intended test has disappeared.
     reapprove(project, lambda t: t["verification"][0].update(run={"command": [sys.executable, "-B", "-c", "pass"]}))
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     if stage == "baseline":
         (project / "check.py").unlink()
         stage_files(project, "check.py")
         commit(project, "Baseline has missing verification location")
+        from repository_support import accept_execution_source
+        accept_execution_source(d)
         d.start()
         outputs = d.task["baseline_checks"]["outputs"]
     else:
@@ -55,7 +58,7 @@ def test_directory_location_is_relative_to_project_not_command_cwd(project):
     stage_files(project, "tests")
     commit(project, "Existing verification directory")
     reapprove(project, lambda t: t["verification"][0].update(location="tests", run={"setup_required": "Create and run suite"}))
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     d.worktree()
     d.start()
     assert d.task["baseline_checks"]["outputs"][0]["outcome"] == "planned_absence"
@@ -72,7 +75,7 @@ def test_procedure_result_cannot_hide_missing_location(project):
     stage_files(project, "procedure.md")
     commit(project, "Existing manual procedure")
     reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}))
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     d.worktree()
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     d.role("author", "executor")
@@ -86,18 +89,18 @@ def test_procedure_result_cannot_hide_missing_location(project):
 
 def reapprove(project, modify):
     change = project / "sdd/changes/demo"
-    parser = spec_modules(SPEC)
+    parser = spec_modules()
     doc = parser.read_document(change / "tasks.md")
     modify(doc.records[0])
     document(change / "tasks.md", doc.meta, doc.records)
     decisions = parser.read_document(change / "review/decisions.md")
     for record in decisions.records:
         if record["scope"]["stage"] == "plan_review":
-            for entry in record["inputs"]:
-                entry["sha256"] = digest((change / entry["path"]).read_bytes())
+            record["basis_commit"] = repository(project).head()
     document(change / "review/decisions.md", decisions.meta, decisions.records)
     stage_files(project, "sdd")
     commit(project, "Approved fixture plan revision")
+    accept_checkpoint(project)
 
 
 def test_planned_setup_then_missing_runner_remains_blocker(project):
@@ -106,7 +109,8 @@ def test_planned_setup_then_missing_runner_remains_blocker(project):
     reapprove(project, modify)
     stage_files(project, "sdd")
     commit(project, "fixture planned setup approval")
-    basis = validate(project, "demo", {"text": "Do it", "source": "fixture"}, SPEC)
+    accept_checkpoint(project)
+    basis = validate(project, "demo", {"text": "Do it", "source": "fixture"})
     d = Driver(basis)
     d.start(["result.txt", "new_check.py"])
     original = (project / "sdd/changes/demo/tasks.md").read_bytes()
@@ -133,8 +137,9 @@ def test_linked_revision_preserves_counters_not_acceptance(basis, project):
     assert result["run_id"] != previous
     assert driver.task["review_limit"] == 4
     assert driver.task["status"] == "pending"
-    assert driver.state["mode"] == "parallel"
-    assert driver.state["parallel_request"] == {"text": "Execute revised plan", "source": "fixture-user"}
+    assert "mode" not in driver.state
+    assert driver.state["basis"]["instruction"] == {"text": "Execute revised plan", "source": "fixture-user"}
+    assert "parallel_request" not in driver.state
     assert artifacts.exists(driver.directory / "runs" / previous / "superseded-state.json")
 
 
@@ -143,7 +148,8 @@ def test_procedure_requires_independent_performed_result(project):
     reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}))
     stage_files(project, "sdd", "procedure.md")
     commit(project, "approve fixture procedure")
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    accept_checkpoint(project)
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     d.role("author", "executor")
     d.role("baseline", "verifier")

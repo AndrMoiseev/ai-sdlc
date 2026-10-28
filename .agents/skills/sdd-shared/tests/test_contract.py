@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 COLLECTION = ROOT.parent
 
 
-def bootstrap(root=COLLECTION / 'sdd-apply'):
+def bootstrap(root=COLLECTION / 'sdd-spec'):
     spec = importlib.util.spec_from_file_location('bootstrap_probe', root / 'scripts/shared.py')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -39,8 +39,8 @@ def inventory(root):
 
 def test_bootstraps_are_identical_and_resolve_api():
     copies = [(COLLECTION / name / 'scripts/shared.py').read_bytes()
-              for name in ('sdd-spec', 'sdd-setup', 'sdd-apply')]
-    assert copies[0] == copies[1] == copies[2]
+              for name in ('sdd-spec', 'sdd-setup')]
+    assert copies[0] == copies[1]
     loader = bootstrap()
     assert loader.locate() == ROOT.resolve()
     assert loader.load(ROOT, 'subagents').ROLES
@@ -48,7 +48,7 @@ def test_bootstraps_are_identical_and_resolve_api():
         loader.load(ROOT, 'private')
 
 
-@pytest.mark.parametrize('version', [0, 2, True, '1', None])
+@pytest.mark.parametrize('version', [0, 1, True, '2', None])
 def test_api_version_is_checked_before_import(tmp_path, version):
     (tmp_path / 'api.json').write_text(json.dumps({'api_version': version}))
     with pytest.raises(ValueError, match='Incompatible sdd-shared API'):
@@ -56,7 +56,9 @@ def test_api_version_is_checked_before_import(tmp_path, version):
 
 
 def test_incomplete_explicit_dependency_does_not_fall_back(tmp_path):
-    (tmp_path / 'api.json').write_text('{"api_version": 1}')
+    (tmp_path / 'api.json').write_text(json.dumps({
+        'api_version': 2, 'document_schemas': {
+            'change': {kind: [2] for kind in ('state', 'review', 'decisions')}}}))
     with pytest.raises(ValueError, match='Incomplete sdd-shared'):
         bootstrap().locate(explicit=tmp_path)
     with pytest.raises(ValueError, match='not both'):

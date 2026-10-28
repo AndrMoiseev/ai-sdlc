@@ -2,8 +2,14 @@
 
 Read your role instructions and generated packet. Use original REQ/AC, approved
 design, project instructions and exact checks; the packet gives their paths,
-owned files, candidate reference, prior commits, blockers and rejected approaches.
+owned files, prior commits, blockers and rejected approaches.
 The author's conversation, grading answers and unrelated task history are not inputs.
+
+Read documents at `HEAD` of the packet's `project_root` repository, using `sources`
+to locate them. This is the main working branch, even when your task worktree has
+an older HEAD. Uncommitted edits are not document inputs. The packet's task and
+registered checks retain the admitted scope; return changed scope to the
+orchestrator for explicit `revised_plan` reconciliation while preserving work.
 
 For refactoring, the packet's `refactoring` context contains scope, original local
 acceptance records, preserves, contributes_to, test_changes, relevant design
@@ -26,7 +32,7 @@ permissions or tools rather than simulating a role or a successful check.
 A refactoring final verifier has `task_id: null`. Its run-level packet contains
 the whole criteria, original document paths, accepted task scopes and commits,
 the confirmed applicable check union, retired checks with reasons, and the
-current integrated source/manifest/registry basis. This scope grants verification
+current integrated source/plan-commit/registry basis. This scope grants verification
 authority without granting implementation ownership. Report ambiguous repair
 ownership before any author is reopened.
 
@@ -36,7 +42,7 @@ covers criteria, accepted tasks and current basis. This scope supplements the
 ordinary task-scoped final verifiers; it cannot replace their evidence. Every final
 verifier is independent of all authors.
 
-Return task/role/context IDs, status, unchanged candidate reference and commit
+Return task/role/context IDs, status and commit
 SHA, owned/inspected paths, AC-to-evidence mapping, commands and log
 paths, blockers/limitations and actual host trace. Keep full evidence in artifacts;
 the message gives the result and references. A combined verifier/reviewer context

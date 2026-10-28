@@ -21,7 +21,7 @@ def reviewing_driver(execution_checkpoint):
 
 def review(driver, findings, verdict="changes"):
     return driver.send("review_result", {
-        "role_id": "reviewer", "candidate": driver.task["candidate"],
+        "role_id": "reviewer",
         "verdict": verdict, "findings": findings,
         "test_integrity": "Original assertions preserved", "trace": "synthetic-unit-test"})
 
@@ -122,3 +122,23 @@ def test_finalization_cannot_automatically_fix_debt(reviewing_driver):
             {"finding_id": ident, "action": "fix", "reason": "Easy cleanup"}]}, task_id=None)
     assert storage(driver.directory).read() == original
     assert driver.send("finalize", {}, task_id=None)["result"] == "complete"
+
+
+def test_test_count_objection_does_not_block_authorized_structural_retirement(reviewing_driver):
+    objection = finding()
+    objection.update(path="tests/test_old_call.py", problem="A structural test was deleted; keep the test count",
+                     resolution="Recreate the cancelled internal-call assertion")
+    result = review(reviewing_driver, [objection])
+    assert result["verdict"] == "pass"
+    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "recommendation"
+    assert reviewing_driver.task["test_repair_cycles_started"] == 0
+
+
+def test_mixed_test_loss_has_a_preservation_proof_even_with_green_suite(reviewing_driver):
+    violation = finding({"kind": "acceptance", "source": "design.md#AC-atomic",
+        "violation": "tests/test_transfer.py removed rollback assertion together with the old internal-call assertion; no replacement checks balances on failure"})
+    violation.update(criteria=["AC-atomic"], path="tests/test_transfer.py",
+                     problem="Mixed test lost the preserved atomicity guarantee", resolution="Check both balances after a rejected transfer")
+    result = review(reviewing_driver, [violation])
+    assert result["verdict"] == "changes"
+    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "blocker"

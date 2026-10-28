@@ -39,14 +39,14 @@ def test_every_local_markdown_link_resolves_inside_package():
                 continue
             target = target.split("#", 1)[0].strip("<>")
             resolved = (path.parent / target).resolve()
-            assert any(resolved.is_relative_to(p.resolve()) for p in (ROOT, ROOT.parent / "sdd-shared")), (path, target)
+            assert any(resolved.is_relative_to(p.resolve()) for p in (ROOT, ROOT.parent / "sdd-shared", ROOT.parent / "sdd-apply")), (path, target)
             assert resolved.is_file(), (path, target)
             checked += 1
     assert checked >= 30, "The map must actually link its self-contained resources"
 
 
 def test_required_resources_ship_together():
-    files = ["README.md", "pyproject.toml"]
+    files = ["README.md", "pyproject.toml", "templates/state.yaml"]
     files += [f"scripts/{name}{suffix}" for name in ("check", "snapshot", "test", "resolve_agent", "prepare_subagent_eval")
               for suffix in (".py", ".py.lock")]
     files += [f"flows/{name}.md" for name in

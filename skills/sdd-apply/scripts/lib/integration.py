@@ -17,6 +17,8 @@ def transition(state, task, event, directory):
     reviewed(state, task)
     valid_evidence(state, task, directory)
     root = state["basis"]["project_root"]
+    require(repository(root).head() == state["execution_head"], "execution_reconciliation",
+            "Resume and explicitly accept the external HEAD before integration")
     worktree = task["worktree"]
     source_repo = repository(worktree["path"])
     require(source_repo.head() == task["candidate_commit"]["sha"], "commit_candidate", "Transfer the verified local commit")
@@ -35,7 +37,6 @@ def transition(state, task, event, directory):
         task["integration_active"] = True
         task["freeze_base"] = journal["request"]["precondition"]["before"]
         task["executor"] = p["role_id"]
-        task["candidate"] = None
         return {"resolved": p["intent_id"], "next": "candidate; independent integration checks and review"}
     if event["type"] == "transfer":
         changed = source_repo.changed_paths(worktree["base"])
@@ -80,7 +81,6 @@ def transition(state, task, event, directory):
             "integration_drift", "Integration differs from the recorded Git merge; preserve and resolve explicitly")
     result = observed(effect, journal, {"before": expected["before"], "after": after, "head": repository(root).head()})
     worktree["integrated"] = True
-    task["candidate"] = None
     task["integration_active"] = True
     task["freeze_base"] = expected["before"]
     # New candidate and independent integration checks/review are mandatory,

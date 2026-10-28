@@ -1,8 +1,8 @@
 # Project subagent selection
 
 Before a new executor, verifier, reviewer or final_verifier launch, read
-`references/subagents.md` in sdd-shared at `basis.sdd_shared`. For a legacy basis
-with only `sdd_spec`, resolve sdd-shared alongside that saved package location.
+[the shared subagent contract](../../sdd-shared/references/subagents.md) in the
+sibling `sdd-shared` package. If it is missing, stop with a critical dependency error.
 That shared contract defines `.sdd/settings.json`, all eight roles, host behavior,
 fallbacks and source evidence. Read that reference directly; do not invoke the
 authoring workflow. Update the SDD bundle together.
@@ -38,6 +38,6 @@ new registrations require selection evidence. Interrupted launches with changed 
 hashes require reconciliation, not invented attestations or duplicate writers.
 
 Repair and continuation retain the running executor's selection. Reconfigure only a
-fresh successor through the existing handoff. The orchestrator/mode handoff is not a
-configurable worker role. Record actual model observations separately from requested
+fresh successor through role registration and resume reconciliation.
+Record actual model observations separately from requested
 parameters. These changes leave task budgets, approvals and independent checks intact.

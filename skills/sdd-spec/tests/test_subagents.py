@@ -182,13 +182,9 @@ def test_probe_preparation_is_separate_and_does_not_launch(host, tmp_path):
 
 
 @pytest.mark.parametrize("script", ["resolve_agent.py", "prepare_subagent_eval.py"])
-def test_new_entrypoints_relocate_without_consumer_changes(tmp_path, script):
+def test_new_entrypoints_relocate_without_consumer_changes(tmp_path, script, installed_packages):
     import os
-    import shutil
-    root = Path(__file__).resolve().parents[1]
-    installed = tmp_path / "installed" / "sdd-spec"
-    shutil.copytree(root, installed)
-    shutil.copytree(root.parent / "sdd-shared", installed.parent / "sdd-shared")
+    installed = installed_packages / "sdd-spec"
     consumer = tmp_path / "conflicting consumer"
     consumer.mkdir()
     (consumer / "pyproject.toml").write_text('[project]\nname="conflict"\nversion="1.0"\n'

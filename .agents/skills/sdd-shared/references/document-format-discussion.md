@@ -6,7 +6,33 @@ checkpoint и resume. При проверке сохранённых отчёт�
 
 ## State и вопросы
 
-Дополнительные поля state: phase, awaiting, updated_at (quoted ISO UTC), document_links, review_links, approval_refs. Phase: discovery/drafting/document_review/user_review/planning/plan_review/plan_approved. Awaiting: none/clarification/review_consent/planning_command/final_approval. Пути относительны изменению, approval_refs содержит USER-ID. Читаемая часть хранит следующий шаг, предложения, решения-ссылки и состояние проверок, без дублирования specs/design.
+Сохраняй состояние процесса двумя файлами внутри Git-чекпойнта: `state.yaml` — машинное состояние по
+[шаблону](../../sdd-spec/templates/state.yaml), `state.md` — пояснения по
+[шаблону](../../sdd-spec/templates/state.md), без frontmatter и машинных Q-записей.
+Каждое машинное поле имеет один источник истины в YAML. Проза объясняет следующий
+шаг, выполненную часть поручения, ограничения, основания и выбор пояснения/гуманизации.
+Требования и design остаются в своих документах.
+
+В `state.yaml` сохраняй общие поля schema_version: 2, document_type: state,
+change_id, language и явный work_kind: change|refactoring.
+Дополнительные поля: phase, awaiting, updated_at (quoted ISO UTC), document_links,
+review_links, approval_refs. Phase: discovery/drafting/document_review/user_review/planning/plan_review/plan_approved.
+Awaiting: none/clarification/review_consent/planning_command/final_approval.
+Пути относительны изменению; approval_refs содержит ссылки USER-ID на согласования
+и поручения, содержание и действительность которых проверяются в review/decisions.md.
+
+Текущий флоу хранится в `flow`: explore/draft/revise/explain/review/user-review/plan/resume.
+`next_question` — ID открытого вопроса из questions.md либо null, если вопросов нет.
+`checks.structure`: not_run/passed/failed. Поля checks.freshness в v2 нет.
+Сохранённая проверка не заменяет проверку текущей структуры. Принятая точка
+хранится в Git-ссылке и вычисляется на чтении; ready или собственный OID
+содержащего state коммита в YAML не сохраняй. Все перечисленные поля обязательны.
+
+Поддерживается только пара `state.yaml` и `state.md`. Frontmatter и машинные
+записи в `state.md` запрещены. Для старого формата сообщи migration_required и следуй явной миграции из формата ревью. Отсутствие YAML не разрешает использовать Markdown
+как машинное состояние. Все Q-записи хранятся только в `questions.md`.
+Пара считается сохранённой после записи и проверки обоих файлов. Неполную пару
+восстанавливай по исходным документам; автоматически считать её согласованной нельзя.
 
 Поврежденный state восстанавливается как черновик по документам и доступным проверенным решениям. Phase не подтверждает разрешения. Отмена или замена последним ответом пользователя прекращает старое поручение; наличие tasks не восстанавливает его.
 
@@ -30,9 +56,8 @@ blocking и status; открытая неблокирующая требует r
 Путь остаётся внутри изменения; внешний источник сначала зафиксируй
 в локальном исследовании со ссылкой и результатом проверки. Скрипт проверяет
 файл и форму ссылки; наличие якоря и смысл основания проверяет агент.
-У legacy-вопросов в state resolution необязателен. Дубликат Q-ID между
-questions.md и state — ошибка, включая совпадающие записи.
-Перенос и восстановление выполняй по [discussion](../../sdd-spec/references/discussion.md).
+Каждый Q-ID уникален в `questions.md`; закрытый вопрос всегда требует resolution.
+Восстановление обсуждения выполняй по [discussion](../../sdd-spec/references/discussion.md).
 
 ## Премортем
 
@@ -42,9 +67,9 @@ questions.md и state — ошибка, включая совпадающие з
 нового document_type, sdd_record или вида USER. Заголовки находок служат
 якорями; вопросы используют Q-ID в questions.md, а не FIND ревью.
 
-Раздел «Премортем» в state содержит краткий итог: отсутствие находок либо
+Раздел «Премортем» в state.md содержит краткий итог: отсутствие находок либо
 наличие находок со ссылкой на документ. Закрытые находки и ссылка сохраняются.
-Разбор не входит в манифест documents или plan. Выбранные изменения цели,
+Разбор входит в Git-чекпойнт как состояние обсуждения. Выбранные изменения цели,
 поведения и подхода переноси в proposal, specs с AC и design; после нормативной
-правки действуют обычные правила актуальности ревью и согласований.
+правки действуют обычные правила проверки перехода и области поручения.
 Завершение проверки не заменяет условия перехода к плану.

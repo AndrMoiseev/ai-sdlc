@@ -1,5 +1,4 @@
-"""Migration keeps saved execution integrity and supports spec-free installs."""
-from copy import deepcopy
+"""Only the sibling dependency is used, including when resuming old state."""
 import json
 from pathlib import Path
 import shutil
@@ -7,16 +6,15 @@ import subprocess
 import pytest
 
 from lib.common import write_json
-from lib.inputs import basis_dependency
+from lib.api import dispatch
 from lib.state import read, seal, save
 from lib.subagents import resolve
-from conftest import SPEC
 
 
-def test_legacy_basis_resolution_preserves_saved_bytes(driver):
+def test_legacy_dependency_paths_are_ignored_without_rewriting(driver):
     state = driver.state
-    state['basis'].pop('sdd_shared')
-    state['basis']['sdd_spec'] = str(SPEC)
+    state['basis']['sdd_shared'] = '/missing/old-shared'
+    state['basis']['sdd_spec'] = '/missing/old-spec'
     seal(state)
     path = driver.directory / 'state.json'
     save(driver.directory, state)
@@ -29,10 +27,13 @@ def test_legacy_basis_resolution_preserves_saved_bytes(driver):
     assert driver.state['basis'] == state['basis']
 
 
-def test_new_basis_explicit_root_precedes_old_path(basis):
-    mixed = deepcopy(basis)
-    mixed['sdd_spec'] = '/missing/old-location'
-    assert basis_dependency(mixed) == Path(basis['sdd_shared'])
+@pytest.mark.parametrize('selector', ['sdd_shared', 'sdd_spec'])
+def test_dependency_path_arguments_are_rejected(basis, selector):
+    assert 'sdd_shared' not in basis and 'sdd_spec' not in basis
+    with pytest.raises(TypeError, match=selector):
+        dispatch({'operation': 'validate', 'args': {
+            'project_root': basis['project_root'], 'change': 'demo',
+            'instruction': basis['instruction'], selector: '/unused/custom-path'}})
 
 
 @pytest.mark.installation
@@ -49,8 +50,8 @@ def test_installed_apply_validates_without_spec(project, tmp_path):
                             cwd=tmp_path, capture_output=True, text=True, encoding='utf-8', timeout=120)
     assert result.returncode == 0, result.stdout + result.stderr
     basis = json.loads(result.stdout)['result']
-    assert basis['checks']['plan']['approval_status']['ready']
-    assert basis['sdd_shared'] == str((collection / 'sdd-shared').resolve())
+    assert 'checks' not in basis
+    assert 'sdd_shared' not in basis
     assert 'sdd_spec' not in basis
 
 pytestmark = pytest.mark.native_state

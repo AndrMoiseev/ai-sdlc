@@ -7,23 +7,19 @@ from . import artifact_storage as artifacts
 from .common import contained, digest, now, require, write_json
 from .check_registry import confirmed_tasks, confirmed_revision, selected, refactoring, strings
 from .state import snapshot, clean_source
+from .inputs import read_plan_document, document_paths
 
 
 def criteria(state):
-    from .inputs import basis_dependency, spec_modules
     if not refactoring(state):
         allowed = {ident for task in state["tasks"].values() for ident in task["plan"]["covers"]}
-        documents = spec_modules(basis_dependency(state["basis"]))
-        root = Path(state["basis"]["change_root"])
-        records = [record for entry in state["basis"]["manifest"]
-                   if entry["path"].startswith("specs/") and entry["path"].endswith("/spec.md")
-                   for record in documents.read_document(root / entry["path"]).records
+        records = [record for entry in document_paths(state["basis"])
+                   if entry.startswith("specs/") and entry.endswith("/spec.md")
+                   for record in read_plan_document(state["basis"], entry)
                    if record["sdd_record"] == "acceptance" and record["id"] in allowed]
         require({record["id"] for record in records} == allowed, "criteria_uncovered", "Every covers criterion needs its approved specification")
         return {record["id"]: record for record in records}
-    document = spec_modules(basis_dependency(state["basis"])).read_document(
-        Path(state["basis"]["change_root"]) / "design.md", "refactoring")
-    return {record["id"]: record for record in document.records if record["sdd_record"] == "criterion"}
+    return {record["id"]: record for record in read_plan_document(state["basis"], "design.md") if record["sdd_record"] == "criterion"}
 
 
 def registry(state):
@@ -67,7 +63,7 @@ def basis(state):
     source = snapshot(state)
     clean_source(source)
     result = {"work_kind": state["basis"].get("work_kind", "change"), "change_id": state["change_id"], "run_id": state["run_id"],
-            "source": source, "manifest": digest(state["basis"]["manifest"]),
+            "source": source, "manifest": digest({"head": state["basis"]["head"], "document_paths": document_paths(state["basis"])}),
             "registry_revision": registry(state)["revision"], "checks": applicable(state)}
     if refactoring(state):
         result["task_revisions"] = {key: confirmed_revision(task) for key, task in state["tasks"].items()}
@@ -252,11 +248,11 @@ def reconcile_procedures(state, predecessor, successor, resolution, event, direc
 
 def execute(state, check, directory, current, timeout):
     from . import verification
-    from .inputs import basis_dependency, spec_modules
+    from .inputs import spec_modules
     root = Path(state["basis"]["project_root"])
     run = check["setup"] or check["run"]
     if check.get("location"):
-        location = spec_modules(basis_dependency(state["basis"]), "paths").verification_location(root, check["location"])
+        location = spec_modules("paths").verification_location(root, check["location"])
         if not location.exists():
             return {"outcome": "unavailable", "description": "Required verification location is missing"}
     if "command" in run:

@@ -6,6 +6,14 @@ Inspect all owned changes, including staged, unstaged, new, deleted, binary, tes
 
 For refactoring, assess local acceptance and preservation against the packet's scope, test_changes and architectural decisions. Check the original baseline and current registry revision. Unexplained omission, unavailable replacement or evidence from a previous registry prevents acceptance. Determine whether the local result is usable; contributes_to alone cannot prove the whole transformation. Request a supported registry revision when an approved boundary change needs different checks; preserve original observations and repair/review budgets.
 
-Return `review_result` with the exact candidate, `pass`, `changes`, or `more_checks`, a separate `test_integrity` assessment, and host trace. Each finding contains `severity: blocker|recommendation`, `criteria`, `path`, `problem`, and a concrete `resolution`; contractual defects also require `proof` as defined in the review policy. Use an empty `criteria` list when no AC is implicated. Retain recommendations as technical debt without automatic repair. `pass` requires no unresolved proven violations and sufficient current independent verification; recommendations alone permit `pass`.
+Apply [test evolution](../references/review-policy.md#tests-at-changed-module-boundaries)
+to `test_evolution` and the real diff. Account separately for retired structural
+assertions and preserved behavioral assertions inside mixed tests. Assess new
+boundary contracts and interactions by risk; include actual test and registry
+IDs in `test_integrity`. A justified deletion needs no artificial replacement
+for the cancelled restriction. An unexplained coverage gap needs evidence or a
+proof-backed finding, even when the suite is green.
+
+Return `review_result` with `pass`, `changes`, or `more_checks`, a separate `test_integrity` assessment, and host trace. Each finding contains `severity: blocker|recommendation`, `criteria`, `path`, `problem`, and a concrete `resolution`; contractual defects also require `proof` as defined in the review policy. Use an empty `criteria` list when no AC is implicated. Retain recommendations as technical debt without automatic repair. `pass` requires no unresolved proven violations and sufficient current independent verification; recommendations alone permit `pass`.
 
 Request reproducible additional checks for a specific contractual evidence gap under the review policy. Do not edit the candidate while reviewing. If changed code requires a new review, let the orchestrator reserve the next round; a role rename or context replacement does not reset the budget. The third successful round can pass, but a required fourth round blocks pending explicit finite extension.

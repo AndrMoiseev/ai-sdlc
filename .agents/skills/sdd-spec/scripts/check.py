@@ -14,9 +14,9 @@ if __name__ == "__main__":
         root = locate()
     except ValueError as exc:
         stage = sys.argv[sys.argv.index('--stage') + 1] if '--stage' in sys.argv and sys.argv.index('--stage') + 1 < len(sys.argv) else None
-        print(json.dumps({'schema_version': 1, 'stage': stage,
+        print(json.dumps({'schema_version': 2, 'stage': stage,
                           'errors': [{'code': 'environment', 'path': '', 'element_id': None, 'message': str(exc)}],
-                          'warnings': [], 'discussion_status': {'status': 'not_checked'},
+                          'warnings': [], 'checkpoint_status': {'status': 'not_checked'}, 'discussion_status': {'status': 'not_checked'},
                           'review_status': {'status': 'not_checked'}, 'approval_status': {'status': 'not_checked'}}))
         raise SystemExit(2)
     sys.path.insert(0, str(root / "scripts"))

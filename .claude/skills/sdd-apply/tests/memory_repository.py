@@ -3,7 +3,6 @@
 Models the execution interface, not Git command syntax. Transfer bytes are
 opaque JSON; native patch syntax, hooks and filters are tested with real Git.
 """
-from copy import deepcopy
 from difflib import SequenceMatcher
 from fnmatch import fnmatch
 import hashlib
@@ -78,10 +77,11 @@ class MemoryRepositories:
     def seed(self, root, seed):
         root = Path(root).resolve()
         tree = identifier(seed["files"])
-        store = dict(trees={tree: deepcopy(seed["files"])},
+        store = dict(trees={tree: dict(seed["files"])},
                      commits={seed["head"]: dict(tree=tree, parent=None, message="fixture")},
                      worktrees={root}, main_root=root, ignores=[])
         repo = MemoryRepository(self, root, store, seed["head"], seed["branch"])
+        repo.accepted_checkpoint = seed["head"]
         self.repos[root] = repo
         return repo
 
@@ -90,8 +90,13 @@ class MemoryRepository:
     def __init__(self, factory, root, store, head, branch=None):
         self.factory, self.root, self.store = factory, Path(root), store
         self._head, self._branch = head, branch
-        self.index = deepcopy(store["trees"][store["commits"][head]["tree"]])
+        # Tree entries are immutable (bytes, mode-string) tuples; only the maps
+        # need copying to keep staging and later commits independent.
+        self.index = dict(store["trees"][store["commits"][head]["tree"]])
         self.conflicts = set()
+        # None selects the disk boundary. Logic scenarios supply independent
+        # bytes explicitly; this is their working tree, not a filesystem cache.
+        self.working_files = None
 
     def head(self):
         return self._head
@@ -104,6 +109,9 @@ class MemoryRepository:
 
     def _ignore_patterns(self):
         patterns = list(self.store["ignores"])
+        if self.working_files is not None:
+            patterns.extend(self.working_files.get(".gitignore", (b"", None))[0].decode().splitlines())
+            return [pattern for pattern in patterns if pattern and not pattern.startswith("#")]
         for path in (self.root / ".gitignore", self.store["main_root"] / ".git/info/exclude"):
             if path.is_file():
                 patterns.extend(path.read_text().splitlines())
@@ -112,6 +120,10 @@ class MemoryRepository:
     def _files(self, exclude=(), include_ignored=False):
         result = {}
         patterns = self._ignore_patterns()
+        if self.working_files is not None:
+            return {name: value for name, value in self.working_files.items()
+                    if not any(name == p or name.startswith(p.rstrip("/") + "/") for p in exclude)
+                    and (include_ignored or name in self.index or not any(fnmatch(name, p) for p in patterns))}
         pending = [(self.root, "")]
         while pending:
             directory, prefix = pending.pop()
@@ -142,12 +154,18 @@ class MemoryRepository:
 
     def _save_tree(self, files):
         tree = identifier(files)
-        self.store["trees"][tree] = deepcopy(files)
+        self.store["trees"][tree] = dict(files)
         return tree
 
     def tree_for_paths(self, paths, base):
-        files = deepcopy(self._tree(base))
+        files = dict(self._tree(base))
         for name in paths:
+            if self.working_files is not None:
+                if name in self.working_files:
+                    files[name] = self.working_files[name]
+                else:
+                    files.pop(name, None)
+                continue
             path = contained(self.root, name)
             if path.is_file():
                 mode = self.index.get(name, (None, "100644"))[1] if os.name == "nt" else ("100755" if path.stat().st_mode & 0o111 else "100644")
@@ -188,6 +206,7 @@ class MemoryRepository:
             self.conflicts.discard(path)
 
     def create_worktree(self, path, base, branch=None):
+        assert self.working_files is None, "Worktree creation requires the disk contract fixture"
         path = Path(path).resolve()
         require(not path.exists(), "git_failed", "Worktree already exists")
         path.mkdir(parents=True)
@@ -198,6 +217,7 @@ class MemoryRepository:
         self.factory.repos[path] = repo
 
     def remove_worktree(self, path):
+        assert self.working_files is None, "Worktree removal requires the disk contract fixture"
         path = Path(path).resolve()
         require(path != self.root and path in self.store["worktrees"], "git_failed", "Unregistered task worktree")
         require(not self.factory(path).dirty(), "git_failed", "Worktree contains modified or untracked files")
@@ -256,11 +276,11 @@ class MemoryRepository:
 
     def _merge(self, current, patch):
         if not artifact_bytes(patch):
-            return deepcopy(current), set()
+            return dict(current), set()
         data = json.loads(artifact_bytes(patch))
         decode = lambda files: {n: (bytes.fromhex(v[0]), v[1]) for n, v in files.items()}
         before, after = decode(data["before"]), decode(data["after"])
-        result, conflicts = deepcopy(current), set()
+        result, conflicts = dict(current), set()
         for name in set(before) | set(after):
             old, new, actual = before.get(name), after.get(name), current.get(name)
             if old == new:
@@ -281,6 +301,7 @@ class MemoryRepository:
         return None if conflicts else self._save_tree(merged)
 
     def _write(self, files, previous=()):
+        assert self.working_files is None, "Patch materialization requires the disk contract fixture"
         for name in set(previous) - set(files):
             (self.root / name).unlink(missing_ok=True)
         directories = {self.root}

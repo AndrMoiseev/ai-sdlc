@@ -30,7 +30,6 @@ not permission to transition. Preserve the calling flow's gates.
   "event_id": "unique-operation-id",
   "run_id": "saved-run-id",
   "expected_revision": 0,
-  "owner": "registered-orchestrator-context",
   "type": "event-name",
   "task_id": "TASK-ID-or-null",
   "payload": {}
@@ -38,6 +37,10 @@ not permission to transition. Preserve the calling flow's gates.
 ```
 
 Use JSON null for run-level `task_id`. Read current revision before a new event.
+Initialization and new event envelopes no longer accept `owner`; the `handoff`
+event is removed. Historical state and event records remain readable unchanged.
+Reconcile pending effects and lost responses with their original runtime before
+upgrading: an old envelope containing `owner` cannot be retried through this API.
 Retry a lost response with the identical envelope, including its original
 revision; a changed payload needs a new ID and current revision. Re-read after
 revision conflict. A rejected event authorizes no side effects. Recover a lock
@@ -54,10 +57,10 @@ stored manifest with references; it does not expand the execution history.
 | Needed information | View |
 |---|---|
 | Revision, task status, blockers, budgets, active role IDs | `compact` |
-| Resume, handoff, lost response/effect investigation or debugging | `full`, then only relevant referenced objects |
-| Candidate, checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
+| Resume, lost response/effect investigation or debugging | `full`, then only relevant referenced objects |
+| Checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
 
-Compact view version 1 returns run identity/owner/revision/status/mode/time,
+Compact view version 1 returns run identity/revision/status/time,
 task statuses and complete blockers/budget counters/reservations, active role
 IDs with task/kind/context, `available_tasks`, and artifact paths relative to the
 execution directory. Historical events and large values live in immutable objects.
@@ -75,13 +78,12 @@ The script runs this audit before `resume` and `finalize`. Ordinary reads do not
 claim to detect corruption in unaccessed historical objects. See
 [state storage](state-storage.md) for commit boundaries and recovery.
 
-`available_tasks` reports dependency/mode eligibility, not admission permission.
+`available_tasks` reports dependency/conflict eligibility, not admission permission.
 Active role IDs are not a liveness check. Neither view proves candidate bytes,
 approvals or evidence current; transition handlers enforce their own gates.
 Executor DONE and exit 0 alone establish neither acceptance nor completion.
 
-Only orchestrator-authorized events write state. A launched verifier may use the
-run's owner identity for its assigned `check_run`; otherwise it requests that
-operation from the orchestrator. Keep the actual role request and tool trace.
-The owner string coordinates processes; it is not authentication. Registering a
-role without launching it is not independent verification.
+Only orchestrator-authorized events write state. A launched verifier may submit
+its assigned `check_run`; otherwise it requests that operation from the
+orchestrator. Keep the actual role request and tool trace. Registering a role
+without launching it is not independent verification.

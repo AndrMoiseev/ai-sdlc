@@ -1,9 +1,9 @@
 # order-export (demo)
 Run: demo-parallel · revision 24
-active · parallel · accepted 4/8
+active · accepted 4/8
 Snapshot: 2026-10-22T09:00:00Z
 
-Waves group planned parallel work. Task dependencies require acceptance; execution mode and launch checks still apply. Integration is sequential.
+Waves group planned parallel work. Task dependencies require acceptance; launch checks still apply. Integration is sequential.
 
 - Wave 1: TASK-001, TASK-002; after acceptance: none; Completed; accepted 2/2
 - Wave 2: TASK-003, TASK-004, TASK-005; after acceptance: TASK-001; In progress; accepted 1/3

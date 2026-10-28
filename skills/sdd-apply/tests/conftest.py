@@ -8,9 +8,6 @@ import json
 import os
 from lib.common import digest, git
 
-SPEC = Path(__file__).resolve().parents[2] / "sdd-spec"
-
-
 @pytest.fixture(autouse=True)
 def path_resolver(request, tmp_path_factory, monkeypatch):
     from lib.path_resolution import use_path_resolver
@@ -129,6 +126,13 @@ def shared_cli(monkeypatch):
 
 def document(path, meta, records=()):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if meta.get("document_type") == "state":
+        assert path.name == "state.yaml" and not records
+        meta = dict(meta, schema_version=2, work_kind=meta.get("work_kind", "change"), flow="plan", next_question=None,
+                    checks={"structure": "passed"})
+        path.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        path.with_suffix(".md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return
     path.write_text("---\n" + yaml.safe_dump(meta) + "---\n" + "\n".join("### Record\n\n```yaml\n" + yaml.safe_dump(r) + "```\n\nDescription.\n" for r in records), encoding="utf-8")
 
 
@@ -144,12 +148,10 @@ def project_template(tmp_path_factory):
     document(change / "specs/demo/spec.md", {**meta, "document_type": "spec", "capability": "demo"}, [dict(sdd_record="requirement", id="REQ-one", operation="add"), dict(sdd_record="acceptance", id="AC-one", requirement="REQ-one", conditions="Numbers", expected="Sum")])
     records = []
     for stage, kind in (("document_review", "document_approval"), ("plan_review", "plan_approval")):
-        names = ["design.md", "proposal.md", "specs/demo/spec.md"] + (["tasks.md"] if stage == "plan_review" else [])
-        manifest = [dict(path=n, sha256=digest((change / n).read_bytes())) for n in sorted(names)]
         for decision in (kind, "review_waiver"):
-            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", inputs=manifest))
-    document(change / "review/decisions.md", {"schema_version": 1}, records)
-    document(change / "state.md", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
+            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, work_kind="change", change_id="demo", scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", basis_commit="a" * 40))
+    document(change / "review/decisions.md", {"schema_version": 2, "document_type": "decisions", "work_kind": "change", "change_id": "demo"}, records)
+    document(change / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
     (root / "check.py").write_text("assert 2 + 3 == 5\n")
     # Contract tests install the hooks they exercise. Git's sample hooks and
     # default template files otherwise get copied into every native fixture.
@@ -163,6 +165,10 @@ def project_template(tmp_path_factory):
     git(root, "config", "core.autocrlf", "false")
     git(root, "add", ".")
     git(root, "commit", "-m", "fixture")
+    from shared_commands import spec_modules
+    checkpoints = spec_modules("checkpoints")
+    observed = checkpoints.inspect(root, "change", "demo")
+    git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
     return root
 
 
@@ -172,7 +178,11 @@ def copy_project(template, destination, backend, omit=()):
         root = shutil.copytree(template, destination, ignore=shutil.ignore_patterns(".git", *omit))
         backend.seed(root, backend.seeds[backend(template).head()])
         return root
-    return shutil.copytree(template, destination)
+    root = shutil.copytree(template, destination)
+    from shared_commands import spec_modules
+    observed = spec_modules("checkpoints").inspect(root, "change", "demo")
+    git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
+    return root
 
 
 @pytest.fixture
@@ -197,7 +207,7 @@ def basis_template(project_template, repository_seeds):
     from lib.repository import use_repositories
     from memory_repository import MemoryRepositories
     with use_repositories(MemoryRepositories(repository_seeds)), patch("lib.inputs.spec_call", spec_call):
-        return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
+        return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"})
 
 
 @pytest.fixture
@@ -215,7 +225,7 @@ class Driver:
         from lib.state import initialize
         self.directory = Path(basis["change_root"]) / "execution"
         self.directory.mkdir(parents=True, exist_ok=True)
-        initialize(basis, "owner", isolation=True)
+        initialize(basis, isolation=True)
         # State-only tests do not exercise HTML; dashboard tests use the renderer.
         from lib.artifact_storage import write
         write(self.directory / "dashboard.html", "test-only dashboard sentinel")
@@ -261,7 +271,7 @@ class Driver:
         from lib.state import apply
         self.number += 1
         state = self._view()
-        return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "owner": state["owner"], "type": kind, "task_id": task_id, "payload": payload or {}})
+        return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "type": kind, "task_id": task_id, "payload": payload or {}})
 
     def role(self, ident, kind, context=None):
         return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
@@ -285,7 +295,7 @@ class Driver:
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
         self.send("review_start", {"role_id": role})
-        return self.send("review_result", {"role_id": role, "candidate": self.task["candidate"], "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
+        return self.send("review_result", {"role_id": role, "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
 
     def integrate(self, prefix=""):
         self.send("transfer")
@@ -328,7 +338,7 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
         yield "reviewing", driver
-        driver.send("review_result", {"role_id": "reviewer", "candidate": driver.task["candidate"],
+        driver.send("review_result", {"role_id": "reviewer",
             "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
         yield "worktree-reviewed", driver
         driver.integrate()

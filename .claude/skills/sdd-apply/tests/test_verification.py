@@ -6,12 +6,12 @@ from pathlib import Path
 @pytest.mark.parametrize("target", ["result.txt", "sdd/changes/demo/design.md"])
 def test_successful_command_cannot_hide_changes_during_verification(execution_checkpoint, target):
     import json
-    from lib.candidates import resolve
+    from lib.verification import current
     driver = execution_checkpoint("started")
     (driver.root / "check.py").write_text(
         "from pathlib import Path\n" + f"Path({target!r}).write_text('changed by check')\n")
     driver.freeze()
-    before = resolve(driver.state, driver.task["candidate"])["source"]
+    before = current(driver.state, driver.task)
     result = driver.verify()
     assert result["outcome"] == "failed"
     log = json.loads(artifacts.read_text(driver.directory / result["log"]))
@@ -60,10 +60,8 @@ def test_author_cannot_verify_and_writer_must_stop(execution_checkpoint):
 def test_additional_review_checks_invalidate_previous_pass(execution_checkpoint):
     driver = execution_checkpoint("verified")
     driver.review(verdict="more_checks")
-    old = driver.task["candidate"]
     command = driver.task["checks"][0]["run"]["command"]
     driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [{"id": "extra", "source": "review", "criteria": ["AC-one"], "run": {"command": command}}]})
-    assert driver.task["candidate"] != old
     driver.role("new-reviewer", "reviewer")
     with pytest.raises(ValueError, match="Every required"):
         driver.send("review_start", {"role_id": "new-reviewer"})
@@ -87,6 +85,8 @@ def test_initial_failing_check_blocks_plan(driver, project):
     (project / "check.py").write_text("assert False\n")
     stage(project, "check.py")
     commit(project, "Existing failing check")
+    from repository_support import accept_execution_source
+    accept_execution_source(driver)
     driver.worktree()
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt"]})

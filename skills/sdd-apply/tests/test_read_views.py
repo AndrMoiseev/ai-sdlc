@@ -20,7 +20,7 @@ def compact(driver):
 
 def envelope(view, ident, **changes):
     return {"event_id": ident, "run_id": view["run_id"],
-            "expected_revision": view["revision"], "owner": view["owner"],
+            "expected_revision": view["revision"],
             "type": "block", "task_id": "TASK-one",
             "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
 
@@ -84,7 +84,7 @@ def test_both_views_validate_current_manifest(driver, damage, reseal, error, vie
     driver.send("block", {"reason": "test", "resume_condition": "fixed"})
     data = driver.state
     if damage == "integrity":
-        data["owner"] = "tampered"
+        data["updated_at"] = "tampered"
     elif damage == "version":
         data["schema_version"] = 1
     elif damage == "status":

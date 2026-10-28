@@ -1,13 +1,21 @@
-# Execution state version 2
+# Execution state version 3
 
-The runtime accepts only schema version 2. Preserve an old execution until an
+The executable format contract lives in `scripts/lib/state.py`,
+`state_objects.py` and `state_history.py`; transition handlers enforce
+event-specific invariants. These checks govern persisted execution state.
+
+The runtime accepts only schema version 3. Preserve an old execution until an
 explicit conversion has verified it and saved a backup; ordinary reads never
-migrate or rewrite state.
+migrate or rewrite state. The input basis uses schema 2 with admission `head`.
+Document paths are derived when needed; specification files and document contents
+come from the current `HEAD` of `basis.project_root`.
+Preserve legacy manifests and execution evidence for explicit
+reconciliation; accepting a checkpoint alone cannot approve extra tasks.
 
 ## Current state and immutable objects
 
-`state.json` is the atomic commit point. It holds run identity, revision, owner,
-mode, task control fields, budgets and references. It contains no inline event
+`state.json` is the atomic commit point. It holds run identity, revision,
+task control fields, budgets and references. It contains no inline event
 list. Task histories, current-change document snapshots, task transfer patches
 and large values live under
 `objects/<hash-prefix>/<sha256>.json`. Identical canonical JSON bytes share one
@@ -35,8 +43,8 @@ history head and every object they access. `audit` verifies all current referenc
 objects and the complete event chain/index. It checks event identities, request
 fingerprints, revisions and index membership. `resume` and `finalize` run this
 audit before their transition. Historical corruption can remain undetected by a
-status read; that read is not a complete-history audit. Neither hashes nor owner
-strings authenticate against an actor able to rewrite the entire store.
+status read; that read is not a complete-history audit. Hashes do not authenticate
+against an actor able to rewrite the entire store.
 
 Under the exclusive execution lock, write immutable objects and the new event/index
 first, then atomically replace `state.json`. Only references reachable from the
@@ -54,7 +62,7 @@ already tracked execution artifacts.
 ## Source identity
 
 Use the local candidate commit SHA and clean Git state to identify source code.
-Check that identity before and after tests and before accepting their evidence.
+Command logs capture that identity before and after tests; changes during a run make it stale.
 The runtime takes file-content snapshots only inside the current SDD change or
 refactoring directory, excluding its execution directory. It does not create
 per-file source hashes or full working-copy inventories elsewhere. Cleanup uses
@@ -68,7 +76,8 @@ their objects intact and obtain fresh evidence through the supported workflow.
 
 Use `read` with `view: "compact"` for control decisions and `view: "full"` to see
 the manifest's references. Use `read_object` for one descriptor at a time. It
-verifies the requested bytes and leaves nested references encoded. Reports and
-candidate artifacts retain their existing paths; their snapshot data may also
+verifies the requested bytes and leaves nested references encoded. Reports retain their existing paths; their snapshot data may also
 contain object references. Preserve the complete execution directory when moving
 or backing up evidence; copying `state.json` alone is insufficient.
+
+Task candidate artifacts and references are no longer written. Historical candidate files are left untouched and are not consulted by current checks or resume.

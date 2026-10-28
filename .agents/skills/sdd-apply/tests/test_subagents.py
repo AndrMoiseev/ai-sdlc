@@ -72,11 +72,11 @@ def test_api_uses_saved_project_root_not_worktree(driver, tmp_path, monkeypatch)
     assert result["project_root"] == driver.state["basis"]["project_root"]
 
 
-def test_existing_run_old_dependency_has_actionable_error(driver, tmp_path):
+def test_existing_run_missing_sibling_has_actionable_error(driver, tmp_path, monkeypatch):
+    import shared
     state = driver.state
-    state["basis"].pop("sdd_shared", None)
-    state["basis"]["sdd_spec"] = str(tmp_path / "missing-spec")
-    with pytest.raises(ValueError, match="matching sdd-shared"):
+    monkeypatch.setattr(shared, "__file__", str(tmp_path / "sdd-apply/scripts/shared.py"))
+    with pytest.raises(ValueError, match="Critical dependency sdd-shared is missing"):
         resolve(state, "executor", host="codex", parent_model="parent")
 
 

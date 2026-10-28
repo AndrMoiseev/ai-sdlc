@@ -1,3 +1,5 @@
+from repository_support import accept_checkpoint
+from lib.repository import repository
 """Plan revisions preserve accepted work and extend the remaining plan."""
 from lib import artifact_storage as artifacts
 from lib.state_storage import storage
@@ -6,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import document, SPEC, Driver
+from conftest import document, Driver
 from lib.common import digest, Rejected
 from lib.inputs import spec_modules, validate
 from lib.scheduler import available
@@ -15,7 +17,7 @@ from test_commits import prepared
 
 def revise(project, names, modify=lambda tasks: None):
     change = project / "sdd/changes/demo"
-    parser = spec_modules(SPEC)
+    parser = spec_modules()
     plan = parser.read_document(change / "tasks.md")
     existing = {t["id"]: t for t in plan.records}
     template = plan.records[0]
@@ -34,12 +36,12 @@ def revise(project, names, modify=lambda tasks: None):
     ])
     decisions = parser.read_document(change / "review/decisions.md")
     for record in decisions.records:
-        for entry in record["inputs"]:
-            entry["sha256"] = digest((change / entry["path"]).read_bytes())
+        record["basis_commit"] = repository(project).head()
     document(decisions.path, decisions.meta, decisions.records)
     from repository_support import stage, commit
     stage(project, "sdd")
     commit(project, "Approved fixture revision")
+    accept_checkpoint(project)
 
 
 def accepted(driver, project):
@@ -57,7 +59,7 @@ def revised(driver):
 
 def test_revision_preserves_accepted_and_revises_unfinished(project):
     revise(project, ["one", "two"])
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     accepted(d, project)
     completed = d.task
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, "TASK-two")
@@ -131,7 +133,7 @@ def test_revision_rejects_new_tasks_before_existing(driver, project, placement):
     assert driver.state == before
 
 
-def test_revision_keeps_acceptance_but_requires_fresh_final_checks(execution_checkpoint):
+def test_revision_keeps_acceptance_and_allows_repeated_final_checks(execution_checkpoint):
     driver = execution_checkpoint("accepted")
     project = Path(driver.state["basis"]["project_root"])
     driver.role("old-final", "final_verifier")
@@ -139,16 +141,14 @@ def test_revision_keeps_acceptance_but_requires_fresh_final_checks(execution_che
     driver.send("role_result", {"role_id": "old-final", "result": "DONE", "trace": "unit-test"})
     assert driver.send("finalize", task_id=None)["result"] == "complete"
     completed = driver.task
-    # A changed normative document still requires final verification at the new basis.
+    # The orchestrator repeats final checks; no saved candidate invalidates old logs.
     path = project / "sdd/changes/demo/design.md"
     path.write_bytes(path.read_bytes() + b"\nClarified design.\n")
     revise(project, ["one"])
     revised(driver)
     assert driver.task == completed
     from lib.verification import valid_evidence
-    with pytest.raises(Rejected) as error:
-        valid_evidence(driver.state, driver.task, driver.directory, "final")
-    assert error.value.code == "required_checks"
+    assert valid_evidence(driver.state, driver.task, driver.directory, "final")
     driver.role("new-final", "final_verifier")
     assert driver.send("check_run", {"role_id": "new-final", "stage": "final"})["outcome"] == "passed"
     assert driver.send("finalize", task_id=None)["result"] == "complete"

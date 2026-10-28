@@ -1,4 +1,4 @@
-"""Public route, manifest and approval contracts for both kinds of work."""
+"""Public route, commit evidence and durable approval contracts."""
 import copy
 import importlib.util
 import json
@@ -18,10 +18,18 @@ paths = loader.load(ROOT, "paths")
 documents = loader.load(ROOT, "documents")
 snapshots = loader.load(ROOT, "snapshots")
 reviews = loader.load(ROOT, "reviews")
+BASE = "a" * 40
 
 
 def document(root, relative, kind, records=(), **extra):
-    meta = dict(schema_version=1, work_kind="refactoring", document_type=kind, change_id=root.name, language="en", **extra)
+    meta = dict(schema_version=2 if kind in {"state", "review", "decisions"} else 1, work_kind="refactoring", document_type=kind, change_id=root.name, language="en", **extra)
+    if kind == "state":
+        assert relative == "state.yaml" and not records
+        meta.update(flow="plan", next_question=None, checks={"structure": "passed"})
+        target = root / relative
+        target.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        target.with_suffix(".md").write_text("# Continue the approved plan\n", encoding="utf-8")
+        return target
     text = "---\n" + yaml.safe_dump(meta, sort_keys=False) + "---\n# Document\n"
     for record in records:
         text += "\n### " + record["id"] + "\n\n```yaml\n" + yaml.safe_dump(record, sort_keys=False) + "```\n"
@@ -49,14 +57,13 @@ def approved_refactoring(project):
     document(root, "tasks.md", "tasks", [task, local, whole])
     users = []
     for stage, approval in (("documents", "document_approval"), ("plan", "plan_approval")):
-        manifest = snapshots.snapshot(project, "demo", stage, "refactoring")
         for kind in (approval, "review_waiver"):
             users.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
                               work_kind="refactoring", change_id="demo", kind=kind,
                               scope=dict(stage=reviews.STAGES[stage], **({"lenses": ["plan" if stage == "plan" else "consistency"]} if kind == "review_waiver" else {})),
-                              response="Approved synthetic fixture", date="2026-10-24T00:00:00Z", inputs=manifest))
+                              response="Approved synthetic fixture", date="2026-10-24T00:00:00Z", basis_commit=BASE))
     document(root, "review/decisions.md", "decisions", users)
-    document(root, "state.md", "state", phase="plan_approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
+    document(root, "state.yaml", "state", phase="plan_approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
              document_links=["proposal.md", "design.md", "tasks.md"], review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     document(root, "questions.md", "questions")
     document(root, "review/summary.md", "summary", findings=[])
@@ -79,10 +86,9 @@ def test_refactoring_work_basis_public_commands(tmp_path, package, stage, names)
     result, checked = invoke(tmp_path, "check.py", stage, package)
     assert result.returncode == 0, result.stdout + result.stderr
     assert checked["errors"] == [] and checked["approval_status"]["ready"] is True
-    result, manifest = invoke(tmp_path, "snapshot.py", stage, package)
-    assert result.returncode == 0, result.stderr
-    assert [entry["path"] for entry in manifest] == names
-    assert manifest == snapshots.snapshot(tmp_path, "demo", stage, "refactoring")
+    result, diagnostic = invoke(tmp_path, "snapshot.py", stage, package)
+    assert result.returncode == 2, result.stderr
+    assert diagnostic["code"] == "migration_required"
     assert before == {p: p.read_bytes() for p in root.rglob("*") if p.is_file()}
     assert not (root / "specs").exists()
 
@@ -106,8 +112,8 @@ def test_refactoring_work_basis_copied_authorizations_cannot_transfer(tmp_path, 
             user.pop(identity)
         else:
             user[identity] = value
-    # Byte-identical input lists do not confer authority for another identity.
-    assert copied[0]["inputs"] == users[0]["inputs"]
+    # The same historical commit does not confer authority for another identity.
+    assert copied[0]["basis_commit"] == users[0]["basis_commit"]
     document(root, "review/decisions.md", "decisions", copied)
     status = reviews.review_status(tmp_path, root, "plan", "refactoring")
     assert status["errors"] and status["approval_status"]["ready"] is False
@@ -116,26 +122,36 @@ def test_refactoring_work_basis_copied_authorizations_cannot_transfer(tmp_path, 
 @pytest.mark.parametrize("kind", ["state", "questions", "decisions", "review", "summary"])
 def test_refactoring_work_basis_ancillary_route_identity(tmp_path, kind):
     root, _, _ = approved_refactoring(tmp_path)
-    target = document(root, "aux.md", kind)
-    assert documents.read_document(target, "refactoring").meta["work_kind"] == "refactoring"
+    target = root / "state.yaml" if kind == "state" else document(root, "aux.md", kind)
+    def read():
+        return documents.read_checkpoint(root, "refactoring") if kind == "state" else documents.read_document(target, "refactoring")
+    assert read().meta["work_kind"] == "refactoring"
     target.write_text(target.read_text(encoding="utf-8").replace("change_id: demo", "change_id: other"), encoding="utf-8")
     with pytest.raises(documents.ValidationError, match="change_id"):
-        documents.read_document(target, "refactoring")
+        read()
 
 
-def test_refactoring_work_basis_current_review_and_stale_inputs(tmp_path):
+def test_refactoring_work_basis_review_diagnostics_preserve_approval(tmp_path, monkeypatch):
     root, _, _ = approved_refactoring(tmp_path)
-    manifest = snapshots.snapshot(tmp_path, "demo", "documents", "refactoring")
+    monkeypatch.setattr(reviews, "inspect", lambda *args: {"head": BASE, "status": "accepted"})
     document(root, "review/run/consistency.md", "review", run_id="run", stage="document_review", lens_id="consistency",
              result="completed_no_findings", started_at="2026-10-24T00:00:00Z", finished_at="2026-10-24T00:01:00Z",
-             inputs=manifest, inputs_after=copy.deepcopy(manifest), freshness="current", limitations=[])
+             reviewed_commit=BASE, limitations=[])
     result = reviews.review_status(tmp_path, root, "documents", "refactoring")
-    assert result["errors"] == [] and result["review_status"]["reports"]["run/consistency"]["freshness"] == "current"
+    assert result["errors"] == [] and result["review_status"]["reports"]["run/consistency"]["evidence"] == "current"
     with (root / "design.md").open("a", encoding="utf-8") as stream:
         stream.write("\nUpdated normative design\n")
+    monkeypatch.setattr(reviews, "inspect", lambda *args: {"head": "b" * 40, "status": "accepted"})
+    class EvidenceGit:
+        def __init__(self, project):
+            pass
+
+        def commit_exists(self, oid):
+            return oid == BASE
+    monkeypatch.setattr(reviews, "Git", EvidenceGit)
     result = reviews.review_status(tmp_path, root, "documents", "refactoring")
-    assert result["approval_status"]["ready"] is False
-    assert result["review_status"]["reports"]["run/consistency"]["freshness"] == "stale"
+    assert result["approval_status"]["ready"] is True
+    assert result["review_status"]["reports"]["run/consistency"]["evidence"] == "changed_since_review"
 
 
 @pytest.mark.parametrize("change", ["../demo", "demo/child", "C:/demo", "demo\\child"])

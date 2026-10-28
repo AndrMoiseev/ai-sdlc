@@ -15,7 +15,7 @@ If state succeeded but view generation failed, run `dashboard` again. Preserve t
 For refactoring, show accepted tasks separately from confirmed whole criteria.
 The whole-result panel reports current evidence gaps and retired checks with
 confirmed reasons. Contributions and accepted task counts do not establish the
-whole result. A changed integrated HEAD, manifest or applicable registry removes
+whole result. A changed integrated HEAD, approved plan commit or applicable registry removes
 old confirmation from the current projection; historical logs remain available.
 
 Ordinary executions with an additional final registry show a separate final project

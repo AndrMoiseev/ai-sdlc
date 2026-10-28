@@ -1,7 +1,6 @@
 """Exercise the installed script contract through uv, outside a Python project."""
 
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
@@ -9,15 +8,9 @@ import sys
 import pytest
 
 
-SKILL = Path(__file__).resolve().parents[1]
-
-
 @pytest.fixture
-def installed(tmp_path):
-    package = tmp_path / "installed skills" / "sdd-spec"
-    shutil.copytree(SKILL, package, ignore=shutil.ignore_patterns(
-        "__pycache__", "*.pyc", ".venv", ".pytest_cache", ".cache"))
-    shutil.copytree(SKILL.parent / "sdd-shared", package.parent / "sdd-shared")
+def installed(tmp_path, installed_packages):
+    package = installed_packages / "sdd-spec"
     project = tmp_path / "consumer with spaces"
     project.mkdir()
     return package, project
@@ -60,8 +53,12 @@ def test_relocated_script_ignores_consumer_dependencies(installed, script, confl
     assert {p.relative_to(project): p.read_bytes() for p in project.rglob("*") if p.is_file()} == original
 
 
-def test_stale_script_lock_fails_without_rewriting(installed):
-    package, project = installed
+def test_stale_script_lock_fails_without_rewriting(installed, tmp_path):
+    original, project = installed
+    # This test mutates the script; keep its installation separate from readers.
+    package = tmp_path / "mutable skills" / "sdd-spec"
+    shutil.copytree(original, package)
+    shutil.copytree(original.parent / "sdd-shared", package.parent / "sdd-shared")
     script = package / "scripts/check.py"
     script.write_text(script.read_text(encoding="utf-8").replace(
         '# dependencies = ["PyYAML==6.0.3", "markdown-it-py==4.0.0"]',

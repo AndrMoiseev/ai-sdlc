@@ -1,20 +1,23 @@
 import json
 import pytest
 from lib.state import initialize, read, apply, lock
+from lib.state_storage import storage
 
 
 @pytest.fixture
 def store(basis):
-    state = initialize(basis, "owner", isolation=True)
+    state = initialize(basis, isolation=True)
     return basis["change_root"] + "/execution", state
 
 
 def event(state, kind="block", **changes):
-    return {"event_id": "e1", "run_id": state["run_id"], "expected_revision": state["revision"], "owner": state["owner"], "type": kind, "task_id": "TASK-one", "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
+    return {"event_id": "e1", "run_id": state["run_id"], "expected_revision": state["revision"], "type": kind, "task_id": "TASK-one", "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
 
 
 def test_atomic_idempotency(store):
     directory, state = store
+    assert "checks" not in state["basis"]
+    assert "dirty_paths" not in state["basis"]
     item = event(state)
     result = apply(directory, item)
     assert apply(directory, item) == result
@@ -24,16 +27,18 @@ def test_atomic_idempotency(store):
     assert read(directory)["revision"] == 1
 
 
-@pytest.mark.parametrize("changes", [{"type": "DONE"}, {"expected_revision": 4}, {"owner": "other"}, {"task_id": "TASK-missing"}, {"type": "start", "payload": {}}])
+@pytest.mark.parametrize("changes", [{"type": "DONE"}, {"expected_revision": 4}, {"task_id": "TASK-missing"}, {"type": "start", "payload": {}}])
 def test_rejection_keeps_bytes(store, changes):
     from pathlib import Path
     directory, state = store
-    before = (Path(directory) / "state.json").read_bytes()
+    before = storage(directory).read()
     with pytest.raises(ValueError):
         apply(directory, event(state, **changes))
-    assert (Path(directory) / "state.json").read_bytes() == before
+    assert storage(directory).read() == before
 
 
+# Exercise the real lock file; the memory adapter cannot prove filesystem exclusion.
+@pytest.mark.native_state
 def test_lock_and_corrupt_history(store):
     from pathlib import Path
     directory, state = store
@@ -48,6 +53,8 @@ def test_lock_and_corrupt_history(store):
         read(directory)
 
 
+# Separate interpreters must contend for one revision through the real filesystem lock.
+@pytest.mark.native_state
 def test_two_processes_one_revision(store, tmp_path):
     import subprocess
     import sys
@@ -63,16 +70,16 @@ def test_two_processes_one_revision(store, tmp_path):
     assert read(directory)["revision"] == 1
 
 
+# Inject failure at the OS replacement boundary and verify persisted bytes survive.
+@pytest.mark.native_state
 def test_interrupted_replace_preserves_state(store, monkeypatch):
     from lib import common
     from pathlib import Path
     directory, state = store
-    before = (Path(directory) / "state.json").read_bytes()
+    before = storage(directory).read()
     def fail(*args):
         raise OSError("interrupted before atomic replace")
     monkeypatch.setattr(common.os, "replace", fail)
     with pytest.raises(OSError, match="interrupted"):
         apply(directory, event(state))
-    assert (Path(directory) / "state.json").read_bytes() == before
-
-pytestmark = pytest.mark.native_state
+    assert storage(directory).read() == before

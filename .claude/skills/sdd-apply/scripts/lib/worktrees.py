@@ -6,7 +6,7 @@ import json
 from . import artifact_storage as artifacts
 from .common import contained, digest, require
 from .effects import intent, observed
-from .state import snapshot
+from .state import snapshot, execution_source
 from .scheduler import available
 
 
@@ -19,6 +19,9 @@ def transition(state, task, event, directory):
     require(task is not None, "task_required", "Task required")
     root = state["basis"]["project_root"]
     if event["type"] == "worktree_create":
+        source = execution_source(state)
+        require(not source["dirty_paths"] and source["head"] == state["execution_head"],
+                "execution_reconciliation", "Resume and reconcile the main tree before starting new task work")
         repairing = task["status"] == "repairing" and not task["worktree"]
         require((task["plan"]["id"] in available(state) or repairing) and not task["worktree"], "worktree_admission", "Task is not available")
         workspace = resolve(event["payload"]["workspace"])
@@ -39,7 +42,7 @@ def transition(state, task, event, directory):
             repository(root).create_worktree(path, expected["base"], expected["branch"])
         require(repository(root).worktree(path) is not None, "unregistered_worktree", "Existing path is not this repository's worktree")
         require(repository(path).head() == expected["base"] and repository(path).branch() == expected["branch"], "worktree_changed", "Expected registered task branch at original HEAD")
-        task["worktree"] = {"path": str(path), "workspace": str(workspace), "base": expected["base"], "branch": expected["branch"], "owner": state["owner"], "integrated": False, "resources": event["payload"].get("resources", []), "snapshot": snapshot(state, path)}
+        task["worktree"] = {"path": str(path), "workspace": str(workspace), "base": expected["base"], "branch": expected["branch"], "integrated": False, "resources": event["payload"].get("resources", []), "snapshot": snapshot(state, path)}
         if repairing:
             task["start_snapshot"] = task["worktree"]["snapshot"]
         return observed(effect, journal, task["worktree"])

@@ -13,6 +13,8 @@ from lib.state import apply
 
 
 def prepare(basis, tmp_path, paths=None):
+    basis = deepcopy(basis)
+    basis["head"] = repository(basis["project_root"]).head()
     d = Driver(basis)
     old = Path(d.send("worktree_create", {"workspace": str(tmp_path / "trees")})["path"])
     d.start(paths or ["result.txt", "check.py"])
@@ -31,10 +33,19 @@ def fix_base(basis, name="external.txt", data="fixed"):
     return repository(root).head()
 
 
+def accept_source(d):
+    head = repository(d.state["basis"]["project_root"]).head()
+    if head != d.state["execution_head"]:
+        d.send("resume", {"host_trace": "synthetic fixture", "live_contexts": [r["context_id"] for r in d.state["roles"].values() if r["status"] == "active"],
+            "resolutions": [{"reason": "execution_head_changed", "head": head, "evidence": "Inspected external fix",
+                             "instruction": {"text": "Accept fixed source", "source": "synthetic-user"}}]}, task_id=None)
+
+
 def refresh_event(d):
+    accept_source(d)
     state = d.state
     return {"event_id": "refresh-one", "run_id": state["run_id"], "expected_revision": state["revision"],
-            "owner": state["owner"], "type": "worktree_refresh", "task_id": "TASK-one",
+            "type": "worktree_refresh", "task_id": "TASK-one",
             "payload": {"reason": "Base defect fixed", "evidence": "fix commit and checks"}}
 
 
@@ -68,6 +79,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     d.send("transfer")
     evidence, reviews = deepcopy(d.task["evidence"]), deepcopy(d.task["reviews"])
     head = fix_base(basis)
+    accept_source(d)
     root = Path(basis["project_root"])
     (root / "unrelated.txt").write_text("user staged work")
     stage_files(root, "unrelated.txt")
@@ -80,7 +92,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     assert repository(new).branch() == result["worktree"]["branch"]
     assert (new / "external.txt").read_text() == "fixed"
     assert (new / "result.txt").read_bytes() == b"partial\x00binary\xff"
-    assert d.task["candidate"] is None and "transfer" not in d.task
+    assert "candidate" not in d.task and "transfer" not in d.task
     assert d.task["status"] == "running"
     assert d.task["evidence"] == evidence and d.task["reviews"] == reviews
     assert d.task["review_rounds_started"] == 1
@@ -88,6 +100,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     assert len(d.task["worktree_history"]) == 1
     assert repository(root).index_patch() == index_before
     commit(root, "User work committed before integration")
+    accept_source(d)
     d.send("candidate")  # New external file must not trip candidate_scope.
     d.verify("verifier-new")
     d.send("role_result", {"role_id": "verifier-new", "result": "checked", "trace": "test-host"})
@@ -183,6 +196,7 @@ def test_conflict_preserves_both_trees_then_supported_resolution(refresh_checkpo
 def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
     d, old, basis = refresh_checkpoint
     fix_base(basis)
+    accept_source(d)
     if hazard == "ignored":
         ignore(old, "unknown.cache")
         (old / "unknown.cache").write_text("irreplaceable")
@@ -204,6 +218,13 @@ def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
         foreign.write_bytes(original)
     else:
         Path(basis["change_root"]).joinpath("design.md").write_text("drift")
+    if hazard == "normative":
+        admitted = d.state["basis"]["head"]
+        apply(d.directory, refresh_event(d))
+        assert d.state["basis"]["head"] == admitted
+        assert Path(basis["change_root"]).joinpath("design.md").read_text() == "drift"
+        assert old.exists()
+        return
     with pytest.raises(ValueError):
         apply(d.directory, refresh_event(d))
     assert old.exists() and (old / "result.txt").read_bytes() == b"partial\x00binary\xff"
@@ -216,7 +237,9 @@ def test_baseline_failure_resumes_on_fixed_base_with_same_budget(basis, tmp_path
     assert d.state["status"] == "blocked" and d.task["last_check_failed"]
     fix_base(basis, "check.py", "assert True\n")
     resumed = d.send("resume", {"host_trace": "all roles stopped", "live_contexts": [],
-                     "resolutions": [{"reason": "baseline_failed", "task_id": "TASK-one", "evidence": "Fix SHA; original failure passes"}]}, task_id=None)
+                     "resolutions": [{"reason": "baseline_failed", "task_id": "TASK-one", "evidence": "Fix SHA; original failure passes"},
+                                     {"reason": "execution_head_changed", "head": repository(basis["project_root"]).head(),
+                                      "evidence": "Inspected external fix", "instruction": {"text": "Accept fixed source", "source": "synthetic-user"}}]}, task_id=None)
     assert resumed["stale_worktrees"][0]["task_id"] == "TASK-one"
     assert resumed["stale_worktrees"][0]["next"] == "worktree_refresh"
     apply(d.directory, refresh_event(d))
@@ -250,6 +273,7 @@ def test_repeat_refresh_preserves_active_repair_and_reviews(refresh_checkpoint):
     first_root = Path(first["worktree"]["path"])
     stage_files(first_root, "result.txt")
     commit(first_root, "Rebased task candidate")
+    accept_source(d)
     second = d.send("worktree_refresh", {"reason": "Second base fix", "evidence": "Commit and checks"})
     assert Path(first["worktree"]["path"]).exists()
     assert Path(second["worktree"]["path"]).joinpath("result.txt").read_bytes() == b"partial\x00binary\xff"
@@ -328,6 +352,7 @@ def test_unresolved_integration_is_not_refreshed(refresh_checkpoint):
     d.review()
     d.send("transfer")
     fix_base(basis, "result.txt", "conflicting root result")
+    accept_source(d)
     with pytest.raises(ValueError):
         d.send("integrate")
     with pytest.raises(ValueError, match="pending integration"):

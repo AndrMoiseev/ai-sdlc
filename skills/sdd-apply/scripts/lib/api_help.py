@@ -8,22 +8,21 @@ def contract(summary, required=(), optional=(), **details):
 
 
 VALIDATION = ("project_root", "instruction")
-SELECTORS = ("change", "work_kind", "sdd_shared", "sdd_spec")
+SELECTORS = ("change", "work_kind")
 OPERATIONS = {
     "help": contract("List names, or return one operation/event contract; no state or filesystem access.",
                      optional=("operation", "event")),
     "validate": contract("Validate approved documents and execution instruction; return the basis.",
                          VALIDATION, SELECTORS, instruction={"text": "actual instruction", "source": "message/trace"},
                          defaults={"work_kind": "change"}, choices={"work_kind": ["change", "refactoring", None]},
-                         rules=["Use only one dependency selector: sdd_shared, or legacy sdd_spec.",
+                         rules=["Critical dependency sdd-shared must be installed alongside sdd-apply.",
                                 "work_kind=null discovers both roots; ambiguous identity returns explicit candidates."]),
     "initialize": contract("Validate, create execution state and render its initial dashboard.",
-                           (*VALIDATION, "owner"), (*SELECTORS, "mode", "parallel_request", "isolation"),
-                           defaults={"mode": "parallel", "isolation": False, "work_kind": "change"},
-                           choices={"mode": ["parallel"]},
+                           VALIDATION, (*SELECTORS, "isolation"),
+                           defaults={"isolation": False, "work_kind": "change"},
                            rules=["Execution requires verified worktree isolation; unavailable isolation blocks execution.",
                                   "Existing executions use resume; initialization never overwrites state.",
-                                  "instruction and optional parallel_request contain actual user text and source."]),
+                                  "instruction contains actual user text and source."]),
     "read": contract("Validate the current manifest and accessed objects; return statuses or the manifest with references.",
                      ("directory",), ("view",), defaults={"view": "compact"}, choices={"view": ["compact", "full"]},
                      rules=["Use compact for revision, status, blockers and budgets; full returns stored references without expanding them.",
@@ -36,7 +35,7 @@ OPERATIONS = {
                               rules=["Preserve the result as agent_selection in role_register.",
                                      "For Claude Code supply the observed available_agents."]),
     "available": contract("Return task IDs eligible under dependencies and conflicts; other admission gates still apply.", ("directory",)),
-    "event": contract("Apply one typed event using current revision and owner; render the dashboard.", ("directory", "event")),
+    "event": contract("Apply one typed event using current run and revision; render the dashboard.", ("directory", "event")),
     "dashboard": contract("Regenerate views from verified saved state.", ("directory",)),
     "recover_lock": contract("Remove a state lock only after proving its local owner exited.", ("directory",)),
     "serve": contract("Serve the generated dashboard through a local read-only server.", ("directory",), ("port",), defaults={"port": 0}),
@@ -90,15 +89,14 @@ EVENTS = {
         ("check_id", "role_id", "outcome", "steps", "trace"),
         choices={"outcome": ["passed", "failed", "unavailable", "skipped", "unstable"]},
         rules=["Then check_run reconciles the full registry; edits during a procedure make evidence stale."]),
-    "candidate": contract("Commit owned paths locally and freeze the clean commit, change documents, registry and root after task writers stop.",
-        rules=["Returns candidate_id, sha256, path and root; path is relative to execution directory.",
-               "Only current-change documents have file hashes; source identity is the Git commit and clean worktree."]),
+    "candidate": contract("Commit owned paths locally and enter verification after task writers stop.",
+        rules=["Returns commit metadata; no candidate artifact or reference is stored."]),
     "review_start": contract("Reserve one review round after current independent checks pass.", ("role_id",)),
-    "review_result": contract("Complete the reserved independent review against the exact candidate.",
-        ("role_id", "candidate", "verdict", "findings", "test_integrity", "trace"),
+    "review_result": contract("Complete the reserved independent review.",
+        ("role_id", "verdict", "findings", "test_integrity", "trace"),
         choices={"verdict": ["pass", "changes", "more_checks"]},
         finding={"severity": "blocker|recommendation", "criteria": ["AC-ID"], "path": "affected path", "problem": "finding", "resolution": "required result", "proof": "optional structured proof; see review policy"},
-        rules=["candidate is the complete script-issued reference; legacy source snapshots require explicit rebaseline.",
+        rules=["Candidate references are no longer accepted.",
                "test_integrity covers assertions, skips/xfail and command weakening; only proven violations block."]),
     "repair": contract("Reserve any required repair budget and reopen the assigned executor with evidence.",
         ("reason",), ("defect_evidence", "executor", "test_failure", "final_checks", "paths"),
@@ -122,10 +120,12 @@ EVENTS = {
         rules=["Integrated bytes require a new candidate, independent integration checks and review."]),
     "integration_resolve": contract("Record a finished registered resolver's result for a prepared integration intent.",
         ("intent_id", "role_id", "resolution")),
-    "resume": contract("Reconcile normative bytes, Git and actual host liveness without discarding work.",
+    "resume": contract("Reconcile admitted scope, Git and actual host liveness without discarding work.",
         ("host_trace", "live_contexts"), ("resolutions",),
         resolution={"reason": "blocker reason", "task_id": "TASK-ID or null", "evidence": "recorded resolution",
-                    "role_id": "lost predecessor for lost_role", "successor": "active registered successor for lost_role"},
+                      "role_id": "lost predecessor for lost_role", "successor": "active registered successor for lost_role",
+                      "head": "exact observed clean HEAD for execution_head_changed",
+                      "instruction": {"text": "actual user acceptance", "source": "actual message or decision source"}},
         rules=["Resolve each lost role separately. A successor must name that predecessor and have the same task/kind.",
                "Legacy resolutions may omit role_id: successor_of supplies the specific predecessor.",
                "For a lost run-level final verifier with pending procedures, resolution.abandon_procedures must list every unfinished check ID. Resume archives each predecessor attempt as abandoned with its trace; the successor starts a fresh procedure.",
@@ -141,18 +141,16 @@ EVENTS = {
                "instruction contains actual execution text and source authorizing the revised plan and any mapped follow-up.",
                "Each completed_followups mapping replaces only that accepted task's obsolete budget stop with a new approved dependent task; counters and unrelated blockers remain.",
                "Unfinished tasks and active review/repair reservations cannot use completed_followups. Ordinary final project obligations survive revision; old attempts are archived and current-basis evidence is required."]),
-    "handoff": contract("Transfer ownership to a distinct actual fresh context while preserving the execution.",
-        ("new_owner", "fresh", "launch_ref"), rules=["fresh must be true; preserve existing task branches and worktrees."]),
     "finalize": contract("Require accepted commits and fresh independent final-HEAD evidence for every AC.",
         optional=("recommendation_decisions",),
         decision={"finding_id": "journal finding ID", "action": "defer|reject", "reason": "decision rationale"},
         rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once."]),
 }
 
-RUN_EVENTS = {"resume", "revised_plan", "handoff", "finalize"}
+RUN_EVENTS = {"resume", "revised_plan", "finalize"}
 WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
-            "expected_revision": "current integer revision", "owner": "registered owner context",
+            "expected_revision": "current integer revision",
             "type": "event name", "task_id": "TASK-ID or null for run event", "payload": {}}
 
 

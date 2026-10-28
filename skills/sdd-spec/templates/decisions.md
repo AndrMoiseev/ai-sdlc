@@ -1,6 +1,7 @@
 ---
-schema_version: 1
+schema_version: 2
 document_type: decisions
+work_kind: change
 change_id: sample-change
 language: ru
 ---
@@ -14,15 +15,17 @@ language: ru
 ```yaml
 sdd_record: user
 id: USER-plan-request
+work_kind: change
+change_id: sample-change
 kind: planning_command
 scope:
   stage: document_review
   work: Подготовить план согласованного sample-change
 response: Точный ответ пользователя
 date: '2026-01-01T00:00:00Z'
-inputs: []
+basis_commit: <полный OID существующего коммита>
 status: active
 ```
 ````
 
-Замените inputs реальным манифестом исходного комплекта. Разрешение выполнить работу сохраняется в его объеме; согласование версии и waiver требуют совпадения комплекта. Отмену отразите status: cancelled с пояснением/ссылкой на ответ в тексте записи; при замене добавьте новую USER-запись с supersedes, сохранив прежний ответ и историю.
+Замените basis_commit реальным полным OID исходного коммита. Поручение сохраняется в своей области до выполнения, отмены или замены. Отмену отразите status: cancelled с источником ответа; новая запись при замене содержит supersedes. Для принятия состояния используйте kind: state_acceptance, scope: {}, accepted_commit вместо basis_commit и обязательный message с источником ответа. Принятие не является поручением; запись входит в следующий обычный checkpoint.

@@ -7,7 +7,7 @@ from copy import deepcopy
 
 def accepted_worktree(basis, tmp_path):
     from pathlib import Path
-    d = Driver(basis, parallel=True)
+    d = Driver(basis)
     wt = Path(d.send('worktree_create', {'workspace': str(tmp_path / 'trees')})['path'])
     d.start()
     (wt / 'result.txt').write_text('result')
@@ -101,9 +101,9 @@ def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
         driver.review()
 
 def test_ownership_path_alias_rejected(basis, project):
-    (project / 'check.py').write_text('assert 2 + 3 == 5\n# foreign user work\n')
     driver = Driver(basis)
     driver.worktree()
+    (project / 'check.py').write_text('assert 2 + 3 == 5\n# foreign user work\n')
     driver.send('checks_register', {'inventory': {'instructions': [], 'ci': []}})
     driver.role('author', 'executor')
     with pytest.raises(ValueError, match='canonical'):
@@ -128,5 +128,5 @@ def test_lost_reviewer_successor_finishes_reserved_round(execution_checkpoint):
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['replacement', 'verifier'], 'resolutions': [{'reason': 'lost_role', 'task_id': 'TASK-one', 'successor': 'replacement', 'evidence': 'registered'}]}, task_id=None)
     with pytest.raises(ValueError, match='existing review'):
         driver.send('review_start', {'role_id': 'replacement'})
-    result = driver.send('review_result', {'role_id': 'replacement', 'candidate': driver.task['candidate'], 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
+    result = driver.send('review_result', {'role_id': 'replacement', 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
     assert result['status'] == 'integrating'

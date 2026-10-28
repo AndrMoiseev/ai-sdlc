@@ -11,17 +11,25 @@ from lib.state_objects import StateObjects
 from lib.state_storage import storage
 
 
-pytestmark = pytest.mark.parametrize("implementation", [
-    "memory", pytest.param("file", marks=pytest.mark.native_state),
-])
+def test_legacy_execution_requires_explicit_migration(driver):
+    state = driver.state
+    state["schema_version"] = 2
+    save(driver.directory, seal(state))
+    before = storage(driver.directory).read()
+    with pytest.raises(ValueError, match="explicitly reconcile"):
+        read(driver.directory)
+    assert storage(driver.directory).read() == before
+
 
 
 def event(state, ident):
     return {"event_id": ident, "run_id": state["run_id"], "expected_revision": state["revision"],
-            "owner": state["owner"], "type": "block", "task_id": "TASK-one",
+            "type": "block", "task_id": "TASK-one",
             "payload": {"reason": ident, "resume_condition": "fixed"}}
 
 
+# Native coverage checks that the manifest and external objects round-trip together on disk.
+@pytest.mark.parametrize("implementation", ["memory", pytest.param("file", marks=pytest.mark.native_state)])
 def test_repeated_large_snapshots_are_stored_once_and_loaded_on_demand(driver, implementation, monkeypatch):
     state = driver.state
     files = {f"source-{n}.py": {"sha256": digest(str(n))} for n in range(1000)}
@@ -50,7 +58,7 @@ def test_repeated_large_snapshots_are_stored_once_and_loaded_on_demand(driver, i
     assert audit(driver.directory)["status"] == "verified"
 
 
-def test_old_history_corruption_requires_audit_and_blocks_resume(driver, implementation):
+def test_old_history_corruption_requires_audit_and_blocks_resume(driver):
     first = event(driver.state, "first")
     apply(driver.directory, first)
     reference = read(driver.directory)["event_head"]
@@ -70,7 +78,7 @@ def test_old_history_corruption_requires_audit_and_blocks_resume(driver, impleme
     assert storage(driver.directory).read() == before
 
 
-def test_uncommitted_event_is_not_replayed_after_failed_manifest_replace(driver, implementation, monkeypatch):
+def test_uncommitted_event_is_not_replayed_after_failed_manifest_replace(driver, monkeypatch):
     import lib.state as state_module
     first = event(driver.state, "uncommitted")
     original = state_module.save
@@ -115,7 +123,7 @@ def event_history(basis):
     return driver, requests
 
 
-def test_idempotency_index_does_not_scan_the_event_chain(event_history, implementation, monkeypatch):
+def test_idempotency_index_does_not_scan_the_event_chain(event_history, monkeypatch):
     driver, requests = event_history
     count = 0
     original = artifacts.read_bytes
@@ -129,7 +137,7 @@ def test_idempotency_index_does_not_scan_the_event_chain(event_history, implemen
     assert audit(driver.directory)["events"] == 25
 
 
-def test_sealed_manifest_is_detached_from_later_mutations(driver, implementation):
+def test_sealed_manifest_is_detached_from_later_mutations(driver):
     state = driver.state
     packed = seal(state)
     state["tasks"]["TASK-one"]["blockers"].append({"reason": "later mutation"})
@@ -140,7 +148,7 @@ def test_sealed_manifest_is_detached_from_later_mutations(driver, implementation
     assert read(driver.directory)["baseline"]["commit"]
 
 
-def test_audit_rereads_objects_and_rejects_tampering(driver, implementation):
+def test_audit_rereads_objects_and_rejects_tampering(driver):
     apply(driver.directory, event(driver.state, "first"))
     assert audit(driver.directory)["events"] == 1
     reference = read(driver.directory)["event_head"]
@@ -151,7 +159,7 @@ def test_audit_rereads_objects_and_rejects_tampering(driver, implementation):
 
 
 @pytest.mark.parametrize("damage", ["missing", "bytes", pytest.param("path", marks=pytest.mark.native_paths)])
-def test_accessed_object_is_verified(driver, implementation, damage):
+def test_accessed_object_is_verified(driver, damage):
     state = driver.state
     state["baseline"] = {"files": {"source": "x" * 5000}, "digest": "test"}
     seal(state)
@@ -174,7 +182,7 @@ def test_accessed_object_is_verified(driver, implementation, damage):
     assert failure.value.code == {"missing": "object_missing", "bytes": "object_corrupt", "path": "object_reference"}[damage]
 
 
-def test_lazy_copy_and_nested_mutations_are_independent(driver, implementation):
+def test_lazy_copy_and_nested_mutations_are_independent(driver):
     original = read(driver.directory)
     manifest = original.manifest
     copied = deepcopy(original)
@@ -188,7 +196,7 @@ def test_lazy_copy_and_nested_mutations_are_independent(driver, implementation):
     assert read(driver.directory)["tasks"]["TASK-one"]["evidence"] == [{"outcome": "failed"}]
 
 
-def test_object_size_boundary_counts_json_escapes(driver, implementation):
+def test_object_size_boundary_counts_json_escapes(driver):
     objects = StateObjects(driver.directory)
     for value in ("x" * 4094, "x" * 4095, "\n" * 2047, "\n" * 2048,
                   "\U0001f642" * 341, "\U0001f642" * 342, [0] * 2048,

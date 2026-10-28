@@ -47,6 +47,27 @@ def commit(root, message):
     return repo.commit_staged(message)
 
 
+def accept_checkpoint(root, work_kind="change"):
+    """Arrange explicit synthetic consent separately from making a commit."""
+    repo = repository(root)
+    if isinstance(repo, GitRepository):
+        from shared_commands import spec_modules
+        observed = spec_modules("checkpoints").inspect(root, work_kind, "demo")
+        repo._run("update-ref", observed["checkpoint_ref"], observed["head"])
+    else:
+        repo.accepted_checkpoint = repo.head()
+
+
+def accept_execution_source(driver):
+    """Record synthetic user acceptance for an explicitly arranged external fix."""
+    state = driver.state
+    head = repository(state["basis"]["project_root"]).head()
+    return driver.send("resume", {"host_trace": "synthetic fixture", "live_contexts": [
+        role["context_id"] for role in state["roles"].values() if role["status"] == "active"],
+        "resolutions": [{"reason": "execution_head_changed", "head": head, "evidence": "Inspected fixture source change",
+                         "instruction": {"text": "Accept fixture source", "source": "synthetic-user"}}]}, task_id=None)
+
+
 def set_mode(root, path, executable):
     repo = repository(root)
     if isinstance(repo, GitRepository):

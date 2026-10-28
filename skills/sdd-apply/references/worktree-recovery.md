@@ -2,7 +2,9 @@
 
 Keep the execution blocked while a proven pre-existing defect remains unresolved.
 Once its fix is committed on the execution branch and verified, resolve that
-specific blocker through `resume` with the fix SHA and check evidence. Keep budget,
+specific blocker through `resume` with the fix SHA and check evidence. For an external
+HEAD, first obtain explicit acceptance of the clean main tree using the exact-head
+resolution in [resume](../flows/resume.md#source-reconciliation). Keep budget,
 normative, mode and other unresolved blockers in force.
 
 Inspect `resume.stale_worktrees`. For each unfinished, unintegrated task whose
@@ -13,7 +15,7 @@ registered `worktree.base` differs from the execution branch's current HEAD:
    intents. Preserve task files, prior evidence and lifetime budgets.
 2. Submit `worktree_refresh` with `reason` and `evidence` identifying the fixed
    base and its verification. This existing execution authorization covers local
-   worktree replacement; a stale base alone does not require another user decision.
+   worktree replacement once the main HEAD is reconciled; refresh does not accept an unknown HEAD.
    First preserve unfinished edits in a local task commit and leave the source
    worktree clean, including ignored data. The script creates a new task branch
    and worktree at current HEAD, transfers committed owned changes with a

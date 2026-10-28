@@ -54,7 +54,6 @@ def repair(state, task, p):
         task["worktree"] = None
         task["integration_active"] = False
         task.pop("freeze_base", None)
-    task["candidate"] = None
     task["repairing_result"] = True
     task["status"] = "repairing"
     affected = {task["plan"]["id"]}

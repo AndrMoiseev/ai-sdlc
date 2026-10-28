@@ -36,7 +36,7 @@ are local acceptance records owned by that task or its `preserves` criteria;
 `contributes_to` is separate. Registration, prepared setup and review-requested
 extensions append immutable registry snapshots. Baseline logs retain exact
 initial checks and their revision, including existing preservation commands.
-Candidate and command evidence bind the current registry revision. Removing or
+Command evidence records the current registry revision. Removing or
 rewriting a check directly blocks freezing and acceptance; an authorized registry
 transition requires a supported operation and independent confirmation. Keep
 historical logs.
@@ -90,7 +90,7 @@ Every command is an argument array passed unchanged with `shell=False`. Register
 a required interpreter explicitly. Legacy strings are rejected at registration;
 persisted strings produce `unavailable` with `limitation: command_format`.
 Preserve their evidence and revise the incompatible plan. Changing command
-representation invalidates registry/candidate evidence and needs fresh checks.
+representation needs fresh checks against the updated registry.
 
 ## Running checks
 
@@ -111,24 +111,22 @@ or retries after failure.
 
 ## Candidate identity
 
-`candidate` commits the stopped executor's owned changes on the local task
-branch. After integration, the same event commits the integrated result before
-integration checks. A commit records a candidate; acceptance still requires the
-current checks and review. Reuse the identical event after an interrupted commit
-so its durable intent can recover the result.
+`candidate` is the existing event name for committing the stopped executor's
+owned changes and entering verification. After integration, the same event
+commits the integrated result before integration checks. It returns `commit`
+metadata and records the recoverable Git operation in `candidate_commit`.
+Reuse the identical event after an interrupted commit so its durable intent
+can recover the result.
 
-Candidates are compact references with `candidate_id`, `sha256`, `path` and checked
-`root`. The payload under `candidates/` records the tested Git commit, current-change
-documents, normative manifest and check registry. Its `sha256` identifies that
-canonical JSON payload. Pass the returned reference unchanged. The script checks
-the same commit and clean tracked/index/untracked state before and after tests
-and before reusing evidence. A status list alone cannot identify a dirty candidate.
+No task candidate, candidate reference or `candidates/` artifact is recorded.
+Checks and reviews do not compare a saved candidate with the current tree.
+The orchestrator must run checks and review again after changes, repairs or
+integration. Keep writers stopped throughout checking and review.
 
-File-content snapshots are limited to the current change/refactoring directory,
-excluding `execution/`. Do not enumerate and hash repository sources, installed
-skill copies or unrelated documents. Git already records committed source content.
-Keep old source-snapshot evidence as history; it cannot certify a new commit
-candidate. Resume requires a fresh candidate and checks under this contract.
+Command logs retain before/after Git and current-change document snapshots.
+Changes during a command make that run stale. Snapshot hashing remains limited
+to the current SDD directory, excluding `execution/`; source files are identified
+by Git rather than a repository-wide file inventory.
 
 ## Evidence gates
 
@@ -136,11 +134,11 @@ Retain command, stdout/stderr, exit status, duration, tested commit SHA, Git
 cleanliness observations, current-change document hashes, launch
 trace and log hash. Inspect whether expected tests ran; a later successful
 command cannot repair an earlier failure. Unknown dependency scope needs rechecking.
-Changed bytes, configuration, registry or normative basis invalidate affected
-evidence. A required unavailable check blocks; omission cannot make it green.
+Repeat affected checks after changes to bytes, configuration, registry or normative
+basis. The orchestrator enforces this ordering; task evidence has no saved candidate
+comparison. A required unavailable check blocks; omission cannot make it green.
 
-Final checks use fresh `final_verifier` roles and a clean final-HEAD candidate separate
-from historical task candidates. Earlier logs do not replace that final run.
+Final checks use fresh `final_verifier` roles on the clean final HEAD. Earlier logs do not replace that final run.
 
 ## Refactoring whole-result checks
 
@@ -154,7 +152,7 @@ After every task is accepted and integrated, a fresh run-level final_verifier
 executes the union of whole checks and confirmed applicable task/project checks.
 No synthetic owner task is created. Confirmed retired checks retain history and
 reasons; they are not rerun. Evidence binds work identity, clean integrated HEAD,
-normative manifest and the exact applicable registry. Every command and procedure
+approved plan commit and document paths and the exact applicable registry. Every command and procedure
 must pass at that same basis; unrelated exit zero or historical success is insufficient.
 
 Each whole procedure begins a distinct attempt. A newer pending or nonpassing
@@ -192,8 +190,7 @@ use `check_setup`; planned preparation belongs to the task that implements it.
 Register checks only when their exact executable command or procedure is known.
 
 Once registered, every project check is mandatory alongside task final evidence.
-Evidence binds work kind, change ID, run ID, clean integrated HEAD, normative
-manifest, exact project registry and the task check definitions. Missing, failed,
+Evidence binds work kind, change ID, run ID, clean integrated HEAD, approved plan commit and document paths, exact project registry and the task check definitions. Missing, failed,
 unavailable, foreign or stale evidence prevents `complete`. A successful project
 run cannot replace task-scoped final checks. The latest procedure attempt and
 lost-role recovery follow the run-level procedure contract above; rerun the aggregate

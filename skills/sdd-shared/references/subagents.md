@@ -103,7 +103,7 @@ observations separately as `model_observation` with their source trace.
 
 Keep a running agent's selection fixed, including executor repair and resume. A new
 selection applies to a new launch; changing an existing executor requires a fresh
-successor and handoff. Settings are outside sdd-spec's normative-document manifest.
+successor and handoff. Settings changes are included in the repository-wide Git checkpoint review.
 In sdd-apply, tracked/nonignored configuration files participate in ordinary source
 snapshots: edits can invalidate candidate checks or violate task scope. Change selection
 between tasks or reconcile it through the existing recovery/check procedure; do not

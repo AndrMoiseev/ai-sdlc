@@ -147,7 +147,7 @@ def prepare(workspace, candidate, control, repetitions):
                 "package_inventory": {"candidate_apply": inventory(candidate / "sdd-apply"),
                                       "control": {p: inventory(control / p) for p in PACKAGES}},
                 "dependency_policy": "Only sdd-apply differs; every dependency comes from the same frozen control",
-                "invocation": "explicit; discovery tests skipped for explicit-only skill"}
+                "invocation": "explicit; automatic plan-approval handoff is outside this evaluation"}
     write(workspace / "manifest.json", manifest)
     return manifest
 

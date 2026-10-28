@@ -20,7 +20,7 @@ def compact(driver):
 
 def envelope(view, ident, **changes):
     return {"event_id": ident, "run_id": view["run_id"],
-            "expected_revision": view["revision"], "owner": view["owner"],
+            "expected_revision": view["revision"],
             "type": "block", "task_id": "TASK-one",
             "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
 
@@ -51,7 +51,7 @@ def test_compact_preserves_blockers_budgets_and_active_roles(execution_checkpoin
     assert view["active_roles"] == {
         "author": {"kind": "executor", "task_id": "TASK-one", "context_id": "author"},
     }
-    driver.send("block", {"reason": "needs decision", "resume_condition": "user answers"})
+    driver.send("block", {"reason": "needs decision", "resume_condition": "user answers"}, task_id=None)
     view = compact(driver)
     full = driver.state
     assert view["status"] == "blocked" and view["available_tasks"] == []
@@ -84,7 +84,7 @@ def test_both_views_validate_current_manifest(driver, damage, reseal, error, vie
     driver.send("block", {"reason": "test", "resume_condition": "fixed"})
     data = driver.state
     if damage == "integrity":
-        data["owner"] = "tampered"
+        data["updated_at"] = "tampered"
     elif damage == "version":
         data["schema_version"] = 1
     elif damage == "status":

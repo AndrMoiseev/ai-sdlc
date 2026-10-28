@@ -2,11 +2,10 @@ import pytest
 """Reused preparation must preserve real validation and per-test isolation."""
 from lib.common import git
 from lib.inputs import validate
-from conftest import SPEC
 
 
 def test_copied_basis_matches_fresh_validation(project, basis):
-    assert basis == validate(project, "demo", basis["instruction"], SPEC)
+    assert basis == validate(project, "demo", basis["instruction"])
 
 
 def test_project_and_basis_do_not_mutate_templates(project, basis, project_template, basis_template):

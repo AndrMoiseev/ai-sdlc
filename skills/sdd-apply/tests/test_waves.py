@@ -13,7 +13,7 @@ def wave_state():
     tasks = {key: new_task(dict(id=key, number=i, depends_on=deps, covers=["AC-demo"]))
              for i, (key, deps) in enumerate(dependencies.items(), 1)}
     return dict(schema_version=1, change_id="Execution waves", run_id="demo", revision=0,
-                updated_at="2026-10-15T12:00:00Z", mode="parallel", status="active",
+                updated_at="2026-10-15T12:00:00Z", status="active",
                 tasks=tasks, blockers=[], final=None)
 
 

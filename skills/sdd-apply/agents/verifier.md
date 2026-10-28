@@ -4,7 +4,7 @@ Read [role contract](../references/roles.md), the original acceptance criteria, 
 
 Initiate a real `check_run` for the assigned stage through the orchestrator. Inspect the raw logs, tested commit SHA, clean Git status before/after, and current-change document hashes. Cover every required command and AC, including linters and prepared procedures. Check that intended cases ran and assert the expected behavior; an empty suite or exit 0 from the wrong command is insufficient. Ask for a stronger reproducible check when current checks do not establish a criterion. Keep it within the approved contract and record additions through the supported API; an unavailable amendment operation is a blocker.
 
-Return passed, failed, or unavailable with candidate, command/cwd/configuration, AC mappings, individual exit codes, raw log paths and limitations. Do not edit implementation during verification. A failed run requires the orchestrator's repair reservation before retry, including retries without code changes. A changed candidate needs fresh evidence. Your result is separate from code review even when you also serve as reviewer.
+Return passed, failed, or unavailable with command/cwd/configuration, AC mappings, individual exit codes, raw log paths and limitations. Do not edit implementation during verification. A failed run requires the orchestrator's repair reservation before retry, including retries without code changes. A changed candidate needs fresh evidence. Your result is separate from code review even when you also serve as reviewer.
 
 For refactoring, map evidence to each local acceptance and preserved criterion in the packet. Inspect the baseline and registered revision, including existing mandatory commands and newly prepared checks. Confirm the command proves its declared criterion; a contribution to a design result does not establish that result across all modules. Parallel integration needs fresh evidence from the integrated candidate, followed by its own reserved review.
 
@@ -19,7 +19,7 @@ For final verification, inspect and run the full required set and overall scenar
 
 For ordinary additional project checks, use the run-level packet (`task: null`),
 null task scope and stage `final`. Execute every registered project command and
-procedure at the packet's current work identity, HEAD, manifest and registry.
+procedure at the packet's current work identity, HEAD, approved plan commit and registry.
 Report project evidence separately from the required task-scoped final checks.
 After a newer procedure attempt, obtain a new aggregate run linking that attempt;
 after a lost role, reconcile unfinished procedures before starting fresh work.
@@ -31,6 +31,6 @@ temporary conversion. Check persistent local obligations and project checks in
 the confirmed applicable union. A retired check needs its recorded transition
 and reason; its historical pass is not a final pass. Report missing consumers,
 remaining bypasses and integration regressions even when all tasks are accepted.
-Bind results to the packet's current integrated source, manifest and registry;
+Bind results to the packet's current integrated source, approved plan commit and registry;
 changed inputs require fresh checks. Establish the repair owner before edits;
 an unplanned area requires returning to sdd-spec.

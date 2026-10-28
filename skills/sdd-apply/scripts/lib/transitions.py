@@ -19,7 +19,7 @@ def reduce(state, event, directory):
             state["status"] = "blocked"
             state["blockers"].append({**payload, "task_id": event["task_id"]})
         return {"blocked": payload}
-    if kind in {"resume", "spec_conflict", "revised_plan", "handoff"}:
+    if kind in {"resume", "spec_conflict", "revised_plan"}:
         from .resume import transition
         return transition(state, task, event, directory)
     if kind == "budget_extend":
