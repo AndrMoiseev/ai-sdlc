@@ -86,7 +86,7 @@ def test_summary_requires_full_resolvable_keys(tmp_path):
     assert review_status(tmp_path, root, "documents")["errors"]
 
 
-@pytest.mark.parametrize("field,value", [("stage", []), ("run_id", []), ("limitations", 3), ("reviewed_commit", {}), ("lens_id", None), ("extra", True)])
+@pytest.mark.parametrize("field,value", [("stage", []), ("stage", "plan_review"), ("run_id", []), ("limitations", 3), ("reviewed_commit", {}), ("lens_id", None), ("extra", True)])
 def test_bad_report_shapes_are_diagnostics(tmp_path, field, value):
     root = project(tmp_path)
     meta = report(tmp_path, root)
@@ -133,10 +133,11 @@ def test_legacy_review_requests_migration_without_inventing_commit(tmp_path):
     assert raised.value.code == "migration_required"
 
 
-def test_all_lenses_require_one_reviewed_commit(tmp_path):
+@pytest.mark.parametrize("stage,lens", [("documents", "consistency"), ("plan", "plan")])
+def test_all_lenses_require_one_reviewed_commit(tmp_path, stage, lens):
     root = project(tmp_path)
-    report(tmp_path, root)
-    report(tmp_path, root, lens="security", after="b" * 40)
-    result = review_status(tmp_path, root, "documents")
+    report(tmp_path, root, lens=lens, stage=stage)
+    report(tmp_path, root, lens="simplicity", stage=stage, after="b" * 40)
+    result = review_status(tmp_path, root, stage)
     assert any("different reviewed commits" in error["message"] for error in result["errors"])
     assert result["review_status"]["complete"] is False

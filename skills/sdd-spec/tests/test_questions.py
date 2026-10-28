@@ -191,6 +191,7 @@ def test_missing_checkpoint_blocks_readiness_without_revoking_approval(tmp_path)
 
 def test_discussion_files_do_not_change_review_snapshots(tmp_path):
     root = approved_bundle(tmp_path)
+    report(tmp_path, root, lens="simplicity")
     before = review_status(tmp_path, root, "documents")["review_status"]["reports"]
     discussion_file(root, [question()])
     checkpoint(root)

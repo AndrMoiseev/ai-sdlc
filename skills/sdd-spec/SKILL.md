@@ -19,6 +19,9 @@ disable-model-invocation: true
 Перед запуском рецензента, редактора или слепого проверяющего примени
 [проектный выбор субагентов](../sdd-shared/references/subagents.md): роль выбирает определение
 агента из `.sdd/settings.json`; отсутствие настройки сохраняет модель родителя.
+В согласованном ревью документов обязательны consistency и simplicity плюс проектные
+линзы; в ревью плана — plan и simplicity, каждая в отдельном чистом контексте.
+Для simplicity после выбора модели подготовь [инструкции](references/simplicity-instructions.md).
 
 ## Координация и статусы
 
@@ -53,5 +56,3 @@ disable-model-invocation: true
 Примеры: «`$sdd-spec` поясни решение order-export с диаграммами»;
 «`/sdd-spec` обнови пояснение order-export»; после начала процесса:
 «Продолжи незавершённые превью по сохранённому промпту».
-
-Происхождение и лицензия адаптированных инструкций: [OpenSpec](references/openspec-origin.md). Назначение и сценарии использования: [README](README.md). Проверочные процедуры: [manual](evals/manual.md).
