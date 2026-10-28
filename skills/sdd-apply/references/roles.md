@@ -5,11 +5,11 @@ design, project instructions and exact checks; the packet gives their paths,
 owned files, candidate reference, prior commits, blockers and rejected approaches.
 The author's conversation, grading answers and unrelated task history are not inputs.
 
-Use the packet's `approved_documents` records and `plan_commit` (under `basis`
-for task packets) as the admitted scope. Source paths locate documents; later
-working-file edits do not authorize different criteria. Read prose at that commit
-when required. Return changed scope to the orchestrator for explicit `revised_plan`
-reconciliation while preserving current work.
+Read documents at `HEAD` of the packet's `project_root` repository, using `sources`
+to locate them. This is the main working branch, even when your task worktree has
+an older HEAD. Uncommitted edits are not document inputs. The packet's task and
+registered checks retain the admitted scope; return changed scope to the
+orchestrator for explicit `revised_plan` reconciliation while preserving work.
 
 For refactoring, the packet's `refactoring` context contains scope, original local
 acceptance records, preserves, contributes_to, test_changes, relevant design

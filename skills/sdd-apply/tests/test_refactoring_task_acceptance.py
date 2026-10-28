@@ -63,7 +63,7 @@ def test_acceptance_template_matches_validation_and_is_isolated(project, basis, 
     from lib.inputs import validate
     from lib.repository import repository
     assert basis == validate(project, "demo", basis["instruction"],
-                             sdd_shared=basis["sdd_shared"], work_kind=work_kind)
+                             work_kind=work_kind)
     root, template = acceptance_templates[work_kind]
     original = (root / "check.py").read_bytes()
     (project / "check.py").write_text("raise SystemExit(1)\n")

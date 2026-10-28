@@ -45,7 +45,7 @@ def refresh_event(d):
     accept_source(d)
     state = d.state
     return {"event_id": "refresh-one", "run_id": state["run_id"], "expected_revision": state["revision"],
-            "owner": state["owner"], "type": "worktree_refresh", "task_id": "TASK-one",
+            "type": "worktree_refresh", "task_id": "TASK-one",
             "payload": {"reason": "Base defect fixed", "evidence": "fix commit and checks"}}
 
 
@@ -219,9 +219,9 @@ def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
     else:
         Path(basis["change_root"]).joinpath("design.md").write_text("drift")
     if hazard == "normative":
-        admitted = d.state["basis"]["document_records"]
+        admitted = d.state["basis"]["head"]
         apply(d.directory, refresh_event(d))
-        assert d.state["basis"]["document_records"] == admitted
+        assert d.state["basis"]["head"] == admitted
         assert Path(basis["change_root"]).joinpath("design.md").read_text() == "drift"
         assert old.exists()
         return

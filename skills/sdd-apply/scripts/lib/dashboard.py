@@ -21,7 +21,7 @@ def projection(state):
     elif state.get("final_checks"):
         from .final_checks import progress
         whole = {"final_project_checks": progress(state)}
-    return {**whole, "schema_version": 1, **({"work_kind": state["work_kind"]} if "work_kind" in state else {}), "change_id": state["change_id"], "run_id": state["run_id"], "revision": state["revision"], "updated_at": state["updated_at"], "status": state["status"], "mode": state["mode"], "accepted": sum(t["status"] == "accepted" for t in tasks), "total": len(tasks), "tasks": tasks, "waves": waves, "blockers": state["blockers"], "next": available(state), "final": state["final"], "technical_debt": technical_debt(state)}
+    return {**whole, "schema_version": 1, **({"work_kind": state["work_kind"]} if "work_kind" in state else {}), "change_id": state["change_id"], "run_id": state["run_id"], "revision": state["revision"], "updated_at": state["updated_at"], "status": state["status"], "accepted": sum(t["status"] == "accepted" for t in tasks), "total": len(tasks), "tasks": tasks, "waves": waves, "blockers": state["blockers"], "next": available(state), "final": state["final"], "technical_debt": technical_debt(state)}
 
 
 def static_waves(data):
@@ -46,8 +46,8 @@ def render(directory):
     directory = Path(directory)
     data = projection(read(directory))
     serialized = json.dumps(data, ensure_ascii=True).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    summary = [f"# {data['change_id']}", f"Run: {data['run_id']} · revision {data['revision']}", f"{data['status']} · {data['mode']} · accepted {data['accepted']}/{data['total']}", f"Snapshot: {data['updated_at']}", ""]
-    summary.extend(["Waves group planned parallel work. Task dependencies require acceptance; execution mode and launch checks still apply. Integration is sequential.", ""])
+    summary = [f"# {data['change_id']}", f"Run: {data['run_id']} · revision {data['revision']}", f"{data['status']} · accepted {data['accepted']}/{data['total']}", f"Snapshot: {data['updated_at']}", ""]
+    summary.extend(["Waves group planned parallel work. Task dependencies require acceptance; launch checks still apply. Integration is sequential.", ""])
     for wave in data["waves"]:
         summary.append(f"- Wave {wave['number']}: {', '.join(wave['tasks'])}; after acceptance: {', '.join(wave['depends_on']) or 'none'}; {wave['label']}; accepted {wave['accepted']}/{len(wave['tasks'])}")
     summary.append("")

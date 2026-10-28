@@ -18,7 +18,7 @@ def freeze(state, task, event, directory):
     require(expected_branch and repo.branch() == expected_branch, "branch_changed", "Restore the registered candidate branch")
     require(not repo.has_conflicts(), "unmerged_index", "Resolve conflicts before freezing")
     source = snapshot(state, root)
-    own_paths(state, task, root)
+    own_paths(task, root)
     require(set(source["dirty_paths"]) <= set(task["paths"]), "candidate_scope",
             "Changes outside task ownership: " + ", ".join(sorted(set(source["dirty_paths"]) - set(task["paths"]))))
     baseline = task.get("freeze_base", task["start_snapshot"])
@@ -70,13 +70,11 @@ def index_tree(root, paths, base):
     return repository(root).tree_for_paths(paths, base)
 
 
-def own_paths(state, task, root):
+def own_paths(task, root):
     require(task["paths"], "empty_candidate", "No owned paths")
     for name in task["paths"]:
         contained(root, name)
-        require(name not in state["basis"].get("dirty_paths", []), "ownership_overlap", f"Pre-existing index or working changes in {name}")
         require(not name.startswith(("sdd/changes/", "sdd/refactoring/")), "normative_ownership", "Execution cannot own SDD documents")
-        require("dirty_paths" in state["basis"], "ownership_unknown", "Legacy basis lacks a path inventory; explicitly rebaseline before committing")
 
 
 def confirm(state, task, commit):

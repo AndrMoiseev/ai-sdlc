@@ -206,7 +206,7 @@ def test_project_evidence_binds_full_current_identity(prepared_project, drift):
         stage(root, "new.txt")
         commit(root, "Change final HEAD")
     elif drift == "manifest":
-        state["basis"]["document_paths"] = [*state["basis"]["document_paths"], "new.md"]
+        state["basis"]["head"] = "0" * 40
     elif drift == "registry":
         registry = state["final_checks"]
         registry["revision"] += 1

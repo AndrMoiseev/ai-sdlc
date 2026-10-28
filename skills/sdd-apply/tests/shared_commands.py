@@ -66,10 +66,9 @@ def reuse_parsers(module):
     return module
 
 
-def spec_modules(root, module_name="documents"):
-    from shared import load, locate
-    root = Path(root)
-    module = load(root if (root / "api.json").is_file() else locate(legacy=root), module_name)
+def spec_modules(module_name="documents"):
+    from shared import load
+    module = load(module_name)
     return reuse_parsers(module) if module_name == "documents" else module
 
 

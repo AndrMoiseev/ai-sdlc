@@ -24,7 +24,7 @@ def test_legacy_execution_requires_explicit_migration(driver):
 
 def event(state, ident):
     return {"event_id": ident, "run_id": state["run_id"], "expected_revision": state["revision"],
-            "owner": state["owner"], "type": "block", "task_id": "TASK-one",
+            "type": "block", "task_id": "TASK-one",
             "payload": {"reason": ident, "resume_condition": "fixed"}}
 
 

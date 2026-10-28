@@ -209,8 +209,8 @@ def revise(state, task, event):
         if check["cwd"] != ".":
             contained(root, check["cwd"])
         if "location" in check:
-            from .inputs import spec_modules, basis_dependency
-            spec_modules(basis_dependency(state["basis"]), "paths").verification_location(root, check["location"])
+            from .inputs import spec_modules
+            spec_modules("paths").verification_location(root, check["location"])
     require(len({check["id"] for check in after}) == len(after), "duplicate_check", "Duplicate revised check ID")
     require_new_ids(state, task, [check for check in after if check["id"] not in old])
     require(isinstance(payload.get("reason"), str) and payload["reason"].strip(), "revision_basis", "Record the reason for changed applicability")

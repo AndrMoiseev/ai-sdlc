@@ -1,4 +1,4 @@
-# Resume, revision, and handoff
+# Resume and revision
 
 Use installed `--help-event` for the selected recovery operation's exact payload.
 
@@ -6,7 +6,7 @@ Use installed `--help-event` for the selected recovery operation's exact payload
 2. Inspect drift, worktrees, index, HEAD and pending effect results through supported operations. After a pre-existing defect is fixed on the execution branch, use [worktree recovery](../references/worktree-recovery.md) for unfinished tasks still based on the old revision. Reuse an identical event after a lost response; let its journal establish whether the effect happened. Do not replay transfer or commit under a new ID merely because the response was missing.
 3. For a lost executor, preserve files and hand the successor completed work, remaining AC, findings, decisions and rejected approaches. Register a fresh successor and resolve the lost-role blocker through supported API operations. Resume the saved task phase and active budget reservation; retain prior evidence only where still applicable.
 4. Preserve the admitted plan scope when working documents change. For a substantive conflict, submit `spec_conflict` with `reproduction`, `criteria`, and `contract`, plus affected tasks. Return its material and the completed task IDs to sdd-spec without modifying proposal/specs/design/tasks. Apply the revision contract below. After a revised approved plan and execution instruction, submit `revised_plan` with `instruction: {text, source}`.
-5. Recheck current authorization and task-worktree isolation. Only parallel execution is supported; preserve unsupported legacy states and reconcile them with their original skill version. Preserve legacy source-snapshot evidence as history and obtain fresh commit-bound candidates and checks; do not relabel old passing checks. To transfer coordination, start a genuinely fresh orchestrator, then submit `handoff` from the old owner with `new_owner`, `fresh: true`, and actual `launch_ref`. Transfer saved state, common contracts, and the execution flow. The old owner stops issuing events. If fresh context is unavailable, report the gap.
+5. Recheck current authorization and task-worktree isolation. Only parallel execution is supported; preserve unsupported legacy states and reconcile them with their original skill version. Preserve legacy source-snapshot evidence as history and obtain fresh commit-bound candidates and checks; do not relabel old passing checks.
 6. Regenerate derived views using [progress](../references/progress.md) and show current blockers, budget use, next supported action and dashboard. Read [execute-parallel](execute-parallel.md). When a necessary reconciliation operation is missing, return a partial result with the exact limitation.
 
 ## Source reconciliation

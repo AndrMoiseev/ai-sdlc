@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import document, SPEC, Driver
+from conftest import document, Driver
 from lib.common import digest, Rejected
 from lib.inputs import spec_modules, validate
 from lib.scheduler import available
@@ -17,7 +17,7 @@ from test_commits import prepared
 
 def revise(project, names, modify=lambda tasks: None):
     change = project / "sdd/changes/demo"
-    parser = spec_modules(SPEC)
+    parser = spec_modules()
     plan = parser.read_document(change / "tasks.md")
     existing = {t["id"]: t for t in plan.records}
     template = plan.records[0]
@@ -59,7 +59,7 @@ def revised(driver):
 
 def test_revision_preserves_accepted_and_revises_unfinished(project):
     revise(project, ["one", "two"])
-    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}, SPEC))
+    d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     accepted(d, project)
     completed = d.task
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, "TASK-two")

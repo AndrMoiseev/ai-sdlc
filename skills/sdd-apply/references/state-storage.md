@@ -6,14 +6,16 @@ event-specific invariants. These checks govern persisted execution state.
 
 The runtime accepts only schema version 3. Preserve an old execution until an
 explicit conversion has verified it and saved a backup; ordinary reads never
-migrate or rewrite state. The input basis uses schema 2 with `plan_commit` and
-`document_paths`. Preserve legacy manifests and execution evidence for explicit
+migrate or rewrite state. The input basis uses schema 2 with admission `head`.
+Document paths are derived when needed; specification files and document contents
+come from the current `HEAD` of `basis.project_root`.
+Preserve legacy manifests and execution evidence for explicit
 reconciliation; accepting a checkpoint alone cannot approve extra tasks.
 
 ## Current state and immutable objects
 
-`state.json` is the atomic commit point. It holds run identity, revision, owner,
-mode, task control fields, budgets and references. It contains no inline event
+`state.json` is the atomic commit point. It holds run identity, revision,
+task control fields, budgets and references. It contains no inline event
 list. Task histories, current-change document snapshots, task transfer patches
 and large values live under
 `objects/<hash-prefix>/<sha256>.json`. Identical canonical JSON bytes share one
@@ -41,8 +43,8 @@ history head and every object they access. `audit` verifies all current referenc
 objects and the complete event chain/index. It checks event identities, request
 fingerprints, revisions and index membership. `resume` and `finalize` run this
 audit before their transition. Historical corruption can remain undetected by a
-status read; that read is not a complete-history audit. Neither hashes nor owner
-strings authenticate against an actor able to rewrite the entire store.
+status read; that read is not a complete-history audit. Hashes do not authenticate
+against an actor able to rewrite the entire store.
 
 Under the exclusive execution lock, write immutable objects and the new event/index
 first, then atomically replace `state.json`. Only references reachable from the

@@ -5,17 +5,12 @@ import json
 from pathlib import Path
 import sys
 
-def locate(explicit=None, legacy=None, work_kind="change"):
-    if explicit is not None and legacy is not None:
-        raise ValueError("Choose sdd_shared or legacy sdd_spec, not both")
-    root = (Path(explicit) if explicit is not None else
-            Path(legacy).resolve().parent / "sdd-shared" if legacy is not None else
-            Path(__file__).resolve().parents[2] / "sdd-shared")
-    root = root.resolve()
+def locate(work_kind="change"):
+    root = (Path(__file__).resolve().parents[2] / "sdd-shared").resolve()
     try:
         api = json.loads((root / "api.json").read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        raise ValueError(f"Install matching sdd-shared alongside the consumer or supply sdd_shared: {root}") from exc
+        raise ValueError(f"Critical dependency sdd-shared is missing or unreadable; install it alongside sdd-apply: {root}") from exc
     if type(api) is not dict or type(api.get("api_version")) is not int or api["api_version"] != 2:
         raise ValueError(f"Incompatible sdd-shared API; expected 2: {root}")
     if work_kind not in ("change", "refactoring"):
@@ -37,11 +32,11 @@ def locate(explicit=None, legacy=None, work_kind="change"):
         required += ["scripts/sdd_shared/refactoring.py", "scripts/sdd_shared/refactoring_validation.py",
                      "references/document-format-refactoring.md", "schemas/refactoring.schema.json"]
     if any(not (root / item).is_file() for item in required):
-        raise ValueError(f"Incomplete sdd-shared package: {root}")
+        raise ValueError(f"Critical dependency sdd-shared is incomplete: {root}")
     return root
 
-def load(root, name, work_kind="change"):
-    root = locate(explicit=root, work_kind=work_kind)
+def load(name, work_kind="change"):
+    root = locate(work_kind=work_kind)
     key = "_sdd_shared_" + hashlib.sha256(str(root).encode()).hexdigest()[:16]
     if key not in sys.modules:
         package = root / "scripts/sdd_shared"

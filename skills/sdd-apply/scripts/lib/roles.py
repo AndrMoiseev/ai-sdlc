@@ -3,6 +3,7 @@ from .common import digest, now, require, write_json
 from .verification import current, independent, valid_evidence, local_criteria
 from .review_policy import proven, test_change_context
 from .candidates import reference, same
+from .inputs import read_plan_document, document_paths
 import re
 from . import artifact_storage as artifacts
 from pathlib import Path
@@ -10,7 +11,7 @@ from pathlib import Path
 
 def refactoring_context(state, task):
     root = Path(state["basis"]["change_root"])
-    design = state["basis"]["document_records"]["design.md"]
+    design = read_plan_document(state["basis"], "design.md")
     criteria = local_criteria(state, task) | set(task["plan"]["contributes_to"])
     for change in task["plan"].get("test_changes", []):
         criteria.update(change["criteria"])
@@ -53,7 +54,6 @@ def transition(state, task, event, directory):
         require(p["host"] in {"codex", "claude-code"} and p["launch_ref"] and p["context_id"], "host_evidence", "Record actual host launch; do not simulate a role")
         require(p["role_id"] not in state["roles"], "duplicate_role", "Role already registered")
         require(isinstance(p["role_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", p["role_id"]), "role_id", "Use a filesystem-safe role ID")
-        require(p["context_id"] != state["owner"], "orchestrator_role", "Use a separate context")
         from .subagents import resolver
         selection = p.get("agent_selection")
         configuration = resolver(state)
@@ -82,22 +82,21 @@ def transition(state, task, event, directory):
             packet = {"task": None, "work_kind": state["basis"].get("work_kind", "change"), "role": role,
                 "project_root": state["basis"]["project_root"], "execution_directory": str(directory),
                 "basis": basis(state), "checks": applicable(state), "criteria": criteria(state),
-                "plan_commit": state["basis"]["plan_commit"],
-                "approved_documents": state["basis"]["document_records"],
                 "acceptance": state.get("acceptance", {}), "retired_checks": retired(state),
                 "tasks": {key: {"plan": value["plan"], "status": value["status"], "paths": value["paths"],
                                 "commits": value["commits"]} for key, value in state["tasks"].items()},
                 "sources": {entry: str(Path(state["basis"]["change_root"]) / entry)
-                            for entry in state["basis"]["document_paths"]}}
+                            for entry in document_paths(state["basis"])}}
             path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
             write_json(path, packet)
             return {"role": role, "packet": str(path)}
         task["roles"].append(p["role_id"])
-        packet = {"task": task["plan"], "basis": {"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}, "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        packet = {"task": task["plan"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "candidate": reference(state, task["candidate"]), "checks": task["checks"], "prior_commits": [{**commit, "candidate": reference(state, commit["candidate"])} for commit in task["commits"]], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if state["basis"].get("work_kind", "change") == "refactoring":
             packet["work_kind"] = "refactoring"
             packet["refactoring"] = refactoring_context(state, task)
-        packet["approved_documents"] = state["basis"]["document_records"]
+        packet["sources"] = {entry: str(Path(state["basis"]["change_root"]) / entry)
+                             for entry in document_paths(state["basis"])}
         if task["worktree"]:
             packet["worktree"] = {key: value for key, value in task["worktree"].items()
                                   if key not in {"snapshot", "inventory"}}

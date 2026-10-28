@@ -51,9 +51,8 @@ def accept_checkpoint(root, work_kind="change"):
     """Arrange explicit synthetic consent separately from making a commit."""
     repo = repository(root)
     if isinstance(repo, GitRepository):
-        from conftest import SPEC
         from shared_commands import spec_modules
-        observed = spec_modules(SPEC, "checkpoints").inspect(root, work_kind, "demo")
+        observed = spec_modules("checkpoints").inspect(root, work_kind, "demo")
         repo._run("update-ref", observed["checkpoint_ref"], observed["head"])
     else:
         repo.accepted_checkpoint = repo.head()

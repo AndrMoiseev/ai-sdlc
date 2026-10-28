@@ -12,12 +12,8 @@ from conftest import Driver, document
 from lib.inputs import spec_modules, validate
 from lib.state import seal, save
 
-COLLECTION = Path(__file__).resolve().parents[2]
-
-
 def approved_basis(project, work_kind="refactoring", configure=None):
     """Both routes use the real document validator and synthetic approvals."""
-    shared = COLLECTION / "sdd-shared"
     if work_kind == "refactoring":
         root = project / "sdd/refactoring/demo"
         meta = dict(schema_version=1, work_kind=work_kind, change_id="demo", language="en")
@@ -64,7 +60,7 @@ def approved_basis(project, work_kind="refactoring", configure=None):
         commit(project, "Synthetic approved refactoring fixture")
         accept_checkpoint(project)
     return validate(project, "demo", {"text": "Execute the synthetic approved plan", "source": "synthetic-unit-test"},
-                    sdd_shared=shared, work_kind=work_kind)
+                    work_kind=work_kind)
 
 
 class AcceptanceDriver(Driver):

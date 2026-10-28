@@ -8,22 +8,21 @@ def contract(summary, required=(), optional=(), **details):
 
 
 VALIDATION = ("project_root", "instruction")
-SELECTORS = ("change", "work_kind", "sdd_shared", "sdd_spec")
+SELECTORS = ("change", "work_kind")
 OPERATIONS = {
     "help": contract("List names, or return one operation/event contract; no state or filesystem access.",
                      optional=("operation", "event")),
     "validate": contract("Validate approved documents and execution instruction; return the basis.",
                          VALIDATION, SELECTORS, instruction={"text": "actual instruction", "source": "message/trace"},
                          defaults={"work_kind": "change"}, choices={"work_kind": ["change", "refactoring", None]},
-                         rules=["Use only one dependency selector: sdd_shared, or legacy sdd_spec.",
+                         rules=["Critical dependency sdd-shared must be installed alongside sdd-apply.",
                                 "work_kind=null discovers both roots; ambiguous identity returns explicit candidates."]),
     "initialize": contract("Validate, create execution state and render its initial dashboard.",
-                           (*VALIDATION, "owner"), (*SELECTORS, "mode", "parallel_request", "isolation"),
-                           defaults={"mode": "parallel", "isolation": False, "work_kind": "change"},
-                           choices={"mode": ["parallel"]},
+                           VALIDATION, (*SELECTORS, "isolation"),
+                           defaults={"isolation": False, "work_kind": "change"},
                            rules=["Execution requires verified worktree isolation; unavailable isolation blocks execution.",
                                   "Existing executions use resume; initialization never overwrites state.",
-                                  "instruction and optional parallel_request contain actual user text and source."]),
+                                  "instruction contains actual user text and source."]),
     "read": contract("Validate the current manifest and accessed objects; return statuses or the manifest with references.",
                      ("directory",), ("view",), defaults={"view": "compact"}, choices={"view": ["compact", "full"]},
                      rules=["Use compact for revision, status, blockers and budgets; full returns stored references without expanding them.",
@@ -36,7 +35,7 @@ OPERATIONS = {
                               rules=["Preserve the result as agent_selection in role_register.",
                                      "For Claude Code supply the observed available_agents."]),
     "available": contract("Return task IDs eligible under dependencies and conflicts; other admission gates still apply.", ("directory",)),
-    "event": contract("Apply one typed event using current revision and owner; render the dashboard.", ("directory", "event")),
+    "event": contract("Apply one typed event using current run and revision; render the dashboard.", ("directory", "event")),
     "dashboard": contract("Regenerate views from verified saved state.", ("directory",)),
     "recover_lock": contract("Remove a state lock only after proving its local owner exited.", ("directory",)),
     "serve": contract("Serve the generated dashboard through a local read-only server.", ("directory",), ("port",), defaults={"port": 0}),
@@ -143,18 +142,16 @@ EVENTS = {
                "instruction contains actual execution text and source authorizing the revised plan and any mapped follow-up.",
                "Each completed_followups mapping replaces only that accepted task's obsolete budget stop with a new approved dependent task; counters and unrelated blockers remain.",
                "Unfinished tasks and active review/repair reservations cannot use completed_followups. Ordinary final project obligations survive revision; old attempts are archived and current-basis evidence is required."]),
-    "handoff": contract("Transfer ownership to a distinct actual fresh context while preserving the execution.",
-        ("new_owner", "fresh", "launch_ref"), rules=["fresh must be true; preserve existing task branches and worktrees."]),
     "finalize": contract("Require accepted commits and fresh independent final-HEAD evidence for every AC.",
         optional=("recommendation_decisions",),
         decision={"finding_id": "journal finding ID", "action": "defer|reject", "reason": "decision rationale"},
         rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once."]),
 }
 
-RUN_EVENTS = {"resume", "revised_plan", "handoff", "finalize"}
+RUN_EVENTS = {"resume", "revised_plan", "finalize"}
 WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
-            "expected_revision": "current integer revision", "owner": "registered owner context",
+            "expected_revision": "current integer revision",
             "type": "event name", "task_id": "TASK-ID or null for run event", "payload": {}}
 
 

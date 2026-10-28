@@ -89,7 +89,7 @@ def removal_checkpoint(removal_checkpoints, repository_backend, state_backend):
 def event(driver, kind, payload, ident):
     state = driver.state
     return dict(event_id=ident, run_id=state["run_id"], expected_revision=state["revision"],
-                owner=state["owner"], type=kind, task_id=driver.task_id, payload=payload)
+                type=kind, task_id=driver.task_id, payload=payload)
 
 
 def assert_rejected(driver, code, kind, payload):
@@ -412,10 +412,10 @@ def test_refactoring_check_transitions_resume_document_edit_retains_pending_revi
     path = Path(driver.state["basis"]["change_root"]) / "design.md"
     original = path.read_bytes()
     path.write_bytes(original + b"\nChanged approved basis\n")
-    admitted = driver.state["basis"]["document_records"]
+    admitted = driver.state["basis"]["head"]
     assert driver.resume()["issues"][0]["reason"] == "execution_dirty"
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
-    assert driver.state["basis"]["document_records"] == admitted
+    assert driver.state["basis"]["head"] == admitted
     assert path.read_bytes() == original + b"\nChanged approved basis\n"
     path.write_bytes(original)
     result = driver.resume()

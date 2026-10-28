@@ -93,7 +93,7 @@ def test_compact_candidate_detects_each_freshness_input(execution_checkpoint, ch
     elif changed == "registry":
         task["checks"][0]["configuration"] = {"changed": True}
     else:
-        state["basis"]["plan_commit"] = "0" * 40
+        state["basis"]["head"] = "0" * 40
     with pytest.raises(ValueError, match="changed|before verification"):
         current(state, task)
     assert set(artifacts.paths(driver.directory / "candidates")) == artifacts_before

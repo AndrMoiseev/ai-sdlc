@@ -47,7 +47,7 @@ def finish(state, task, directory, effect, journal, resolution=None):
         "retained": old["path"],
     })
     task["worktree"] = {**old, "path": new, "base": saved["base"], "branch": saved["branch"],
-                        "owner": state["owner"], "snapshot": journal["baseline"], "integrated": False}
+                        "snapshot": journal["baseline"], "integrated": False}
     task["worktree"].pop("inventory", None)
     task["start_snapshot"] = journal["baseline"]
     task["candidate"] = None

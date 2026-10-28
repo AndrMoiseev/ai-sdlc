@@ -13,11 +13,8 @@ def dispatch(request):
         return validate(**args)
     if operation == "initialize":
         args = dict(args)
-        owner = args.pop("owner")
-        parallel_request = args.pop("parallel_request", None)
         isolation = args.pop("isolation", False)
-        mode = args.pop("mode", "parallel")
-        result = state.initialize(validate(**args), owner, parallel_request, isolation, mode)
+        result = state.initialize(validate(**args), isolation=isolation)
         directory = result["basis"]["change_root"] + "/execution"
         dashboard.render(directory)
         return state.inspect(directory, view="full")

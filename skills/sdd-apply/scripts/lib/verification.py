@@ -9,7 +9,7 @@ import signal
 from copy import deepcopy
 from .common import contained, digest, now, require, write_json
 from .state import snapshot, clean_source
-from .inputs import spec_modules, basis_dependency
+from .inputs import spec_modules, document_paths
 from .candidates import resolve, same, store
 from .check_registry import selected, evidence_basis, require_new_ids
 from . import artifact_storage as artifacts
@@ -65,7 +65,7 @@ def candidate_payload(state, task, source=None):
         checks = evidence_basis(state, task)
     source = snapshot(state, root_for(state, task)) if source is None else source
     clean_source(source)
-    return {"source": source, "manifest": digest({"plan_commit": state["basis"]["plan_commit"], "document_paths": state["basis"]["document_paths"]}), "checks": digest(checks), "root": root_for(state, task)}
+    return {"source": source, "manifest": digest({"head": state["basis"]["head"], "document_paths": document_paths(state["basis"])}), "checks": digest(checks), "root": root_for(state, task)}
 
 
 def candidate(state, task, source=None):
@@ -324,7 +324,7 @@ def transition(state, task, event, directory):
             continue
         if "location" in check:
             if locations is None:
-                locations = spec_modules(basis_dependency(state["basis"]), "paths")
+                locations = spec_modules("paths")
             location = locations.verification_location(root, check["location"])
             if not (location.is_file() or location.is_dir()):
                 outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Required verification location is missing", "location": check["location"]})

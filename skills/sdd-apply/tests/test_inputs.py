@@ -3,18 +3,18 @@ from repository_support import stage as stage_files
 import pytest
 from lib.inputs import validate, spec_modules
 
-from conftest import SPEC, document
+from conftest import document
 
 
 def call(project):
-    return validate(project, "demo", {"text": "Implement", "source": "message"}, SPEC)
+    return validate(project, "demo", {"text": "Implement", "source": "message"})
 
 
 def test_approved_and_preserves_dirty(project):
     # Reuse the existing admission fixture and shared CLI adapter: a valid
     # approval must admit execution without reports or legacy review waivers.
     change = project / "sdd/changes/demo"
-    docs = spec_modules(SPEC)
+    docs = spec_modules()
     decisions = docs.read_document(change / "review/decisions.md")
     approvals = [record for record in decisions.records if record["kind"] != "review_waiver"]
     document(change / "review/decisions.md", decisions.meta, approvals)
@@ -29,7 +29,7 @@ def test_approved_and_preserves_dirty(project):
     (project / "untracked.txt").write_bytes(b"keep")
     before = (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
     with pytest.raises(ValueError, match="accept a clean checkpoint"):
-        validate(project, "demo", instruction, SPEC)
+        validate(project, "demo", instruction)
     assert before == (repository(project).head(), repository(project).index_patch(), (project / "foreign.txt").read_bytes())
     assert (project / "untracked.txt").read_bytes() == b"keep"
 
@@ -59,24 +59,28 @@ def test_invalid(project, mutation):
     assert before == {str(p): p.read_bytes() for p in change.rglob("*") if p.is_file()}
 
 
-def test_missing_dependency(project):
-    with pytest.raises(ValueError, match="sdd-shared"):
-        validate(project, "demo", {"text": "Do", "source": "message"}, project / "missing")
+def test_missing_dependency(project, tmp_path, monkeypatch):
+    import shared
+    monkeypatch.setattr(shared, "__file__", str(tmp_path / "sdd-apply/scripts/shared.py"))
+    with pytest.raises(ValueError, match="Critical dependency sdd-shared is missing"):
+        validate(project, "demo", {"text": "Do", "source": "message"})
 
 
-def test_incompatible_shared_api_is_actionable(project, tmp_path):
+def test_incompatible_shared_api_is_actionable(project, tmp_path, monkeypatch):
     import json
-    root = tmp_path / "incompatible"
+    import shared
+    monkeypatch.setattr(shared, "__file__", str(tmp_path / "sdd-apply/scripts/shared.py"))
+    root = tmp_path / "sdd-shared"
     root.mkdir()
     (root / "api.json").write_text(json.dumps({"api_version": 1}))
     with pytest.raises(ValueError, match="Incompatible sdd-shared API"):
-        validate(project, "demo", {"text": "Do", "source": "message"}, sdd_shared=root)
+        validate(project, "demo", {"text": "Do", "source": "message"})
 
 
 def test_checkpoint_acceptance_does_not_approve_tasks(project):
     from repository_support import commit
     change = project / "sdd/changes/demo"
-    docs = spec_modules(SPEC)
+    docs = spec_modules()
     decisions = docs.read_document(change / "review/decisions.md")
     decision = dict(sdd_record="user", id="USER-accepted", kind="state_acceptance",
                     work_kind="change", change_id="demo", scope={}, response="Accepted checkpoint",
@@ -101,8 +105,32 @@ def test_admission_requires_matching_checkpoint(project):
         call(project)
 
 
-def test_admitted_criteria_survive_later_document_edits(driver, project):
+def test_criteria_read_main_head_without_uncommitted_edits(driver, project, monkeypatch, tmp_path):
     from lib.final_checks import criteria
+    from lib.inputs import document_paths, read_plan_document
+    from repository_support import commit
+    assert "plan_commit" not in driver.state["basis"]
+    assert "document_paths" not in driver.state["basis"]
+    admitted = driver.state["basis"]["head"]
     path = project / "sdd/changes/demo/specs/demo/spec.md"
-    path.write_text(path.read_text(encoding="utf-8").replace("expected: Sum", "expected: Unapproved"), encoding="utf-8")
+    path.write_text(path.read_text(encoding="utf-8").replace("expected: Sum", "expected: Updated"), encoding="utf-8")
     assert criteria(driver.state)["AC-one"]["expected"] == "Sum"
+    moved = path.parents[1] / "renamed/spec.md"
+    moved.parent.mkdir()
+    path.rename(moved)
+    assert "specs/demo/spec.md" in document_paths(driver.state["basis"])
+    assert "specs/renamed/spec.md" not in document_paths(driver.state["basis"])
+    stage_files(project, "sdd")
+    commit(project, "Update specification in main working branch")
+    path.write_text(moved.read_text(encoding="utf-8"), encoding="utf-8")
+    path = moved
+    path.write_text(path.read_text(encoding="utf-8").replace("expected: Updated", "expected: Uncommitted"), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert document_paths(driver.state["basis"]) == ["design.md", "proposal.md", "specs/renamed/spec.md", "tasks.md"]
+    with pytest.raises(ValueError, match="outside the plan"):
+        read_plan_document(driver.state["basis"], "specs/demo/spec.md")
+    assert criteria(driver.state)["AC-one"]["expected"] == "Updated"
+    assert driver.state["basis"]["head"] == admitted
+    monkeypatch.setattr(repository(project), "content", lambda *args: b"")
+    with pytest.raises(ValueError, match="Plan document unavailable at project HEAD"):
+        criteria(driver.state)
