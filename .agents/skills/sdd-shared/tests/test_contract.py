@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 COLLECTION = ROOT.parent
 
 
-def bootstrap(root=COLLECTION / 'sdd-apply'):
+def bootstrap(root=COLLECTION / 'sdd-spec'):
     spec = importlib.util.spec_from_file_location('bootstrap_probe', root / 'scripts/shared.py')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -39,8 +39,8 @@ def inventory(root):
 
 def test_bootstraps_are_identical_and_resolve_api():
     copies = [(COLLECTION / name / 'scripts/shared.py').read_bytes()
-              for name in ('sdd-spec', 'sdd-setup', 'sdd-apply')]
-    assert copies[0] == copies[1] == copies[2]
+              for name in ('sdd-spec', 'sdd-setup')]
+    assert copies[0] == copies[1]
     loader = bootstrap()
     assert loader.locate() == ROOT.resolve()
     assert loader.load(ROOT, 'subagents').ROLES

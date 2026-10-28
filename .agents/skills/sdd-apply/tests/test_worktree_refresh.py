@@ -45,7 +45,7 @@ def refresh_event(d):
     accept_source(d)
     state = d.state
     return {"event_id": "refresh-one", "run_id": state["run_id"], "expected_revision": state["revision"],
-            "owner": state["owner"], "type": "worktree_refresh", "task_id": "TASK-one",
+            "type": "worktree_refresh", "task_id": "TASK-one",
             "payload": {"reason": "Base defect fixed", "evidence": "fix commit and checks"}}
 
 
@@ -92,7 +92,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     assert repository(new).branch() == result["worktree"]["branch"]
     assert (new / "external.txt").read_text() == "fixed"
     assert (new / "result.txt").read_bytes() == b"partial\x00binary\xff"
-    assert d.task["candidate"] is None and "transfer" not in d.task
+    assert "candidate" not in d.task and "transfer" not in d.task
     assert d.task["status"] == "running"
     assert d.task["evidence"] == evidence and d.task["reviews"] == reviews
     assert d.task["review_rounds_started"] == 1
@@ -219,9 +219,9 @@ def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
     else:
         Path(basis["change_root"]).joinpath("design.md").write_text("drift")
     if hazard == "normative":
-        admitted = d.state["basis"]["document_records"]
+        admitted = d.state["basis"]["head"]
         apply(d.directory, refresh_event(d))
-        assert d.state["basis"]["document_records"] == admitted
+        assert d.state["basis"]["head"] == admitted
         assert Path(basis["change_root"]).joinpath("design.md").read_text() == "drift"
         assert old.exists()
         return

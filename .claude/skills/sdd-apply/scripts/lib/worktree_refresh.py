@@ -41,16 +41,15 @@ def finish(state, task, directory, effect, journal, resolution=None):
     source_unchanged(saved)
     task.setdefault("worktree_history", []).append({
         "worktree": deepcopy(old), "refresh_event": journal["request"]["event"]["event_id"],
-        "candidate": task["candidate"], "transfer": task.get("transfer"),
+        "transfer": task.get("transfer"),
         "baseline_checks": task.get("baseline_checks"), "start_snapshot": task.get("start_snapshot"),
         "active_review": task["active_review"], "active_reviewer": task.get("active_reviewer"),
         "retained": old["path"],
     })
     task["worktree"] = {**old, "path": new, "base": saved["base"], "branch": saved["branch"],
-                        "owner": state["owner"], "snapshot": journal["baseline"], "integrated": False}
+                        "snapshot": journal["baseline"], "integrated": False}
     task["worktree"].pop("inventory", None)
     task["start_snapshot"] = journal["baseline"]
-    task["candidate"] = None
     for field in ("transfer", "freeze_base", "active_reviewer", "candidate_commit"):
         task.pop(field, None)
     task["active_review"] = None

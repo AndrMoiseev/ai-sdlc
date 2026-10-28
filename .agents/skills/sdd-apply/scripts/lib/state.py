@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import uuid
 import re
-from .common import contained, contained_paths, digest, now, require, write_json
+from .common import contained, digest, now, require, write_json
 
 from .state_storage import storage
 from .path_resolution import resolve
@@ -72,7 +72,7 @@ def read(directory, view="full"):
     else:
         require(state["event_head"] is None and state["event_index"] is None, "history_corrupt", "Unexpected history")
     require(state["status"] in {"active", "blocked", "completed"}, "state_schema", "Unknown execution status")
-    require(state.get("mode") == "parallel" and not state.get("pending_mode"), "unsupported_execution_mode",
+    require(state.get("mode", "parallel") == "parallel" and not state.get("pending_mode"), "unsupported_execution_mode",
             "Only parallel execution is supported; preserve this state and use its original skill version to reconcile it")
     require(all(t["status"] in TASK_STATES for t in state["tasks"].values()), "state_schema", "Unknown task state")
     if view == "compact":
@@ -108,21 +108,17 @@ def read_object(directory, reference):
 
 
 def new_task(task):
-    return {"plan": task, "status": "pending", "attempt": 0, "candidate": None, "evidence": [], "reviews": [], "commits": [], "blockers": [], "review_limit": 3, "review_rounds_started": 0, "review_rounds_completed": 0, "active_review": None, "test_repair_limit": 5, "test_repair_cycles_started": 0, "active_repair": None, "repair_cycles": [], "budget_decisions": [], "checks": [], "worktree": None, "roles": [], "paths": []}
+    return {"plan": task, "status": "pending", "attempt": 0, "evidence": [], "reviews": [], "commits": [], "blockers": [], "review_limit": 3, "review_rounds_started": 0, "review_rounds_completed": 0, "active_review": None, "test_repair_limit": 5, "test_repair_cycles_started": 0, "active_repair": None, "repair_cycles": [], "budget_decisions": [], "checks": [], "worktree": None, "roles": [], "paths": []}
 
 
-def initialize(basis, owner, parallel_request=None, isolation=False, mode="parallel"):
-    require(isinstance(owner, str) and owner, "owner", "Orchestrator identity required")
-    require(mode == "parallel", "mode", "Only parallel execution is supported")
-    require(not parallel_request or (parallel_request.get("source") and parallel_request.get("text")), "parallel_authorization", "Record the actual execution instruction or mode request")
+def initialize(basis, isolation=False):
     require(isolation, "isolation_required", "Execution requires isolated task worktrees")
-    parallel_request = parallel_request or basis["instruction"]
     directory = execution_directory(basis)
     require(str(directory.parent) == basis["change_root"], "change_root", "Input root mismatch")
     with lock(directory):
         require(not storage(directory).exists(), "already_started", "Use resume for existing execution")
         run = uuid.uuid4().hex
-        state = {"schema_version": 3, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "owner": owner, "basis": basis, "mode": "parallel", "parallel_request": parallel_request, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
+        state = {"schema_version": 3, "change_id": basis["change_id"], "run_id": run, "revision": 0, "status": "active", "basis": basis, "tasks": {}, "roles": {}, "event_head": None, "event_index": None, "blockers": [], "updated_at": now(), "final": None}
         if basis.get("work_kind", "change") == "refactoring":
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
@@ -179,19 +175,17 @@ def execution_source(state):
 def assert_basis(state):
     basis = state["basis"]
     require(basis.get("schema_version") == 2 and "manifest" not in basis,
-            "basis_migration", "Reconcile legacy document manifests into a commit-based approved plan")
-    require(isinstance(basis.get("plan_commit"), str) and re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", basis["plan_commit"]),
-            "basis_commit", "Approved plan needs a full commit OID")
-    require(isinstance(basis.get("document_paths"), list) and basis["document_paths"], "basis_paths", "Approved document paths required")
-    contained_paths(basis["change_root"], basis["document_paths"])
+            "basis_migration", "Reconcile legacy document manifests into the current execution basis")
+    require(isinstance(basis.get("head"), str) and re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", basis["head"]),
+            "basis_commit", "Execution basis needs its admission commit OID")
     # Ongoing execution advances HEAD. Admission checks and explicit plan
-    # replacement govern authorization; source/candidate gates govern integrity.
+    # replacement govern authorization; current Git state gates govern integrity.
 
 def apply(directory, event):
     directory = resolve(directory)
     with lock(directory):
         original = read(directory)
-        require(set(event) == {"event_id", "run_id", "expected_revision", "owner", "type", "task_id", "payload"}, "event_schema", "Expected the complete typed event envelope")
+        require(set(event) == {"event_id", "run_id", "expected_revision", "type", "task_id", "payload"}, "event_schema", "Expected the complete typed event envelope")
         require(isinstance(event["event_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", event["event_id"]), "event_id", "Use a filesystem-safe event ID")
         fingerprint = digest(event)
         entry = state_history.lookup(original.objects, original["event_index"], event["event_id"])
@@ -200,7 +194,6 @@ def apply(directory, event):
             require(entry["revision"] <= original["revision"], "history_corrupt", "Event is not committed")
             return entry["result"]
         require(event["run_id"] == original["run_id"], "run_mismatch", "Wrong execution run")
-        require(event["owner"] == original["owner"], "owner_mismatch", "Another orchestrator owns this run")
         require(type(event["expected_revision"]) is int and event["expected_revision"] == original["revision"], "revision_conflict", "Re-read current state")
         require(event["task_id"] is None or event["task_id"] in original["tasks"], "unknown_task", "Unknown TASK-ID")
         # read() decoded private bytes for this operation. Reducer mutations

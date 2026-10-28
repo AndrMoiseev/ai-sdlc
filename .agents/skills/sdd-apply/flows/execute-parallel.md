@@ -11,4 +11,4 @@ Read [task events](../references/api-tasks.md), [checks and evidence](../referen
 7. After acceptance and all roles stop, call `worktree_remove`. The script verifies ownership, saved transfer, accepted commit and absence of unknown data. Preserve a tree when cleanup is rejected. A cleanup failure cannot revoke a valid commit or justify a duplicate one.
 8. Continue eligible work while honoring blockers. Either exhausted task budget stops new work across the whole run: bring active roles to a saved stop, reconcile already-started effects, and ask for the concrete decision described in [repair](repair.md). After all tasks are accepted, use [finalize](finalize.md).
 
-If the user changes mode after this flow was loaded, use [resume](resume.md) for fresh-owner handoff. Preserve unintegrated worktree candidates; a rejected transition is not permission to integrate after authorization was withdrawn.
+If the user changes execution authorization after this flow was loaded, use [resume](resume.md) to reconcile it. Preserve unintegrated worktree candidates; a rejected transition is not permission to integrate after authorization was withdrawn.

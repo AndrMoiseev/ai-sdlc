@@ -18,7 +18,7 @@ def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, pr
     assert artifacts.read_bytes(d.directory / package["path"])
     d.send("integrate")
     assert (project / "result.txt").read_bytes() == b"\x00\xffbinary\n"
-    assert d.task["candidate"] is None
+    assert "candidate" not in d.task
     d.send("candidate")
     d.role("integration-verifier", "verifier")
     assert d.send("check_run", {"role_id": "integration-verifier", "stage": "integration"})["outcome"] == "passed"

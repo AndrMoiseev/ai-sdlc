@@ -6,14 +6,13 @@ import sys
 import pytest
 
 from lib.check_registry import selected
-from lib.candidates import resolve
 from lib.common import Rejected
 from lib.repository import repository
 from lib.state import apply
 from lib.state_storage import storage
 from lib import artifact_storage as artifacts
 from lib.state_history import lookup
-from lib.verification import candidate, valid_evidence
+from lib.verification import current, valid_evidence
 from refactoring_fixtures import AcceptanceDriver, RegistryDriver, approved_basis, transition_basis
 
 
@@ -29,9 +28,9 @@ def finish(driver):
     driver.review()
     driver.integrate(prefix=driver.task_id + "-")
     driver.send("commit")
-    assert candidate(driver.state, driver.task) == driver.task["candidate"]
+    assert "candidate" not in driver.task
     if driver.task_id == "TASK-two":
-        source = resolve(driver.state, driver.task["candidate"])["source"]
+        source = current(driver.state, driver.task)
         repo = repository(driver.root)
         assert source["commit"] == repo.head() == driver.task["commits"][-1]["sha"]
         assert source["dirty_paths"] == []
@@ -89,7 +88,7 @@ def removal_checkpoint(removal_checkpoints, repository_backend, state_backend):
 def event(driver, kind, payload, ident):
     state = driver.state
     return dict(event_id=ident, run_id=state["run_id"], expected_revision=state["revision"],
-                owner=state["owner"], type=kind, task_id=driver.task_id, payload=payload)
+                type=kind, task_id=driver.task_id, payload=payload)
 
 
 def assert_rejected(driver, code, kind, payload):
@@ -283,7 +282,6 @@ def test_refactoring_check_transitions_event_repeat_conflicts_and_new_revision(r
     driver.freeze()
     checked = driver.verify()
     assert checked["outcome"] == "passed"
-    old_candidate = deepcopy(driver.task["candidate"])
     old_log = artifacts.read_bytes(driver.directory / checked["log"])
     driver.send("repair", {"reason": "Change the approved API runner detail", "defect_evidence": "The moved API runner needs explicit UTF-8 mode"})
     revised = driver.revision()
@@ -297,9 +295,8 @@ def test_refactoring_check_transitions_event_repeat_conflicts_and_new_revision(r
     next_result = driver.send("checks_revise", revised)
     assert next_result["registry_revision"] == result["registry_revision"] + 1
     driver.freeze()
-    assert driver.task["candidate"] != old_candidate
     driver.role("new-reviewer", "reviewer")
-    assert_rejected(driver, "required_checks", "review_start", {"role_id": "new-reviewer"})
+    assert_rejected(driver, "evidence_basis", "review_start", {"role_id": "new-reviewer"})
     assert driver.verify()["outcome"] == "passed"
     assert artifacts.read_bytes(driver.directory / checked["log"]) == old_log
     assert driver.task["test_repair_cycles_started"] == 0
@@ -412,10 +409,10 @@ def test_refactoring_check_transitions_resume_document_edit_retains_pending_revi
     path = Path(driver.state["basis"]["change_root"]) / "design.md"
     original = path.read_bytes()
     path.write_bytes(original + b"\nChanged approved basis\n")
-    admitted = driver.state["basis"]["document_records"]
+    admitted = driver.state["basis"]["head"]
     assert driver.resume()["issues"][0]["reason"] == "execution_dirty"
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
-    assert driver.state["basis"]["document_records"] == admitted
+    assert driver.state["basis"]["head"] == admitted
     assert path.read_bytes() == original + b"\nChanged approved basis\n"
     path.write_bytes(original)
     result = driver.resume()

@@ -5,32 +5,25 @@ from lib.state import initialize, read, save, seal
 from lib.api import dispatch
 from lib.common import Rejected
 from lib.state_storage import storage
-from conftest import Driver, SPEC
-
-
-def test_handoff_requires_fresh_owner_and_preserves_execution(driver):
-    before = driver.state
-    with pytest.raises(ValueError):
-        driver.send("handoff", {"new_owner": "owner", "fresh": True, "launch_ref": "test"}, task_id=None)
-    driver.send("handoff", {"new_owner": "new-owner", "fresh": True, "launch_ref": "synthetic-host"}, task_id=None)
-    assert driver.state["owner"] == "new-owner"
-    assert driver.state["mode"] == "parallel"
-    assert driver.state["tasks"] == before["tasks"]
+from conftest import Driver
 
 
 @pytest.mark.parametrize("isolation", [False, True])
 def test_initialize_requires_isolation(project, isolation):
     instruction = {"source": "user", "text": "Execute the approved plan"}
     args = {"project_root": str(project), "change": "demo", "instruction": instruction,
-            "sdd_spec": str(SPEC), "owner": "owner", "isolation": isolation}
+            "isolation": isolation}
     if not isolation:
         with pytest.raises(Rejected) as failure:
             dispatch({"operation": "initialize", "args": args})
         assert failure.value.code == "isolation_required"
         return
     state = dispatch({"operation": "initialize", "args": args})
-    assert state["mode"] == "parallel"
-    assert state["parallel_request"] == instruction
+    assert "mode" not in state
+    assert state["basis"]["instruction"] == instruction
+    assert "parallel_request" not in state
+    assert "owner" not in state
+    assert "document_records" not in state["basis"]
 
 
 def test_parallel_admits_worktree_and_survives_resume(basis, tmp_path):
@@ -38,20 +31,14 @@ def test_parallel_admits_worktree_and_survives_resume(basis, tmp_path):
     driver.send("worktree_create", {"workspace": str(tmp_path / "worktrees")})
     assert driver.task["worktree"]
     driver.send("resume", {"host_trace": "synthetic-host", "live_contexts": []}, task_id=None)
-    assert driver.state["mode"] == "parallel"
-    assert driver.state["parallel_request"] == basis["instruction"]
+    assert "mode" not in driver.state
+    assert driver.state["basis"]["instruction"] == basis["instruction"]
 
 
-def test_explicit_parallel_request_is_preserved(basis):
-    request = {"source": "user", "text": "Run tasks in parallel"}
-    state = initialize(basis, "owner", request, isolation=True, mode="parallel")
-    assert state["mode"] == "parallel" and state["parallel_request"] == request
-
-
-@pytest.mark.parametrize("mode", ["sequential", "automatic"])
+@pytest.mark.parametrize("mode", ["parallel", "sequential", "automatic"])
 def test_unsupported_mode_leaves_no_state(basis, mode):
-    with pytest.raises(ValueError, match="Only parallel execution"):
-        initialize(basis, "owner", isolation=True, mode=mode)
+    with pytest.raises(TypeError, match="mode"):
+        initialize(basis, isolation=True, mode=mode)
     assert not storage(Path(basis["change_root"]) / "execution").exists()
 
 
@@ -67,8 +54,9 @@ def test_legacy_execution_is_rejected_without_rewriting(driver, legacy):
     assert storage(driver.directory).read() == before
 
 
-def test_mode_event_is_not_supported(driver):
+@pytest.mark.parametrize("kind", ["mode", "handoff"])
+def test_removed_event_is_not_supported(driver, kind):
     before = storage(driver.directory).read()
     with pytest.raises(ValueError, match="unknown_event"):
-        driver.send("mode", {"mode": "sequential"}, task_id=None)
+        driver.send(kind, {}, task_id=None)
     assert storage(driver.directory).read() == before

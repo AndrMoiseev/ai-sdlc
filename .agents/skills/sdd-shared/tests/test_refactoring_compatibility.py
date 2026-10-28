@@ -114,13 +114,6 @@ def request(collection, workspace, operation, **args):
     return cli(collection, "sdd-apply", "execute.py", workspace, "--request", path)
 
 
-def success(result):
-    assert result.returncode == 0, result.stdout + result.stderr
-    report = json.loads(result.stdout)
-    assert report["ok"] is True, report
-    return report["result"]
-
-
 @pytest.fixture(params=["source", "relocated"])
 def collection(request, tmp_path):
     return COLLECTION if request.param == "source" else install(tmp_path, ("sdd-spec", "sdd-apply"))
@@ -186,49 +179,6 @@ def test_refactoring_compatibility_covers_keeps_one_owner(ordinary):
     assert inventory(root) == before
     write_document(root, "tasks.md", "tasks", [task])
     assert validation.validate_documents(project, root, "plan")["errors"] == []
-
-
-def test_refactoring_compatibility_old_cli_and_apply_arguments(ordinary, collection, tmp_path):
-    project, root, task, users = ordinary
-    before, packages = inventory(project), inventory(collection / "sdd-shared")
-    for stage in ("documents", "plan"):
-        args = ["--project-root", project, "--change", "demo", "--stage", stage]
-        for script in ("check.py", "snapshot.py"):
-            direct = cli(collection, "sdd-shared", script, tmp_path, *args)
-            legacy = cli(collection, "sdd-spec", script, tmp_path, *args)
-            assert (direct.returncode, direct.stdout, direct.stderr) == (
-                legacy.returncode, legacy.stdout, legacy.stderr)
-            if script == "snapshot.py":
-                assert direct.returncode == 2
-                assert json.loads(direct.stderr)["code"] == "migration_required"
-            else:
-                assert direct.returncode == 0, direct.stdout + direct.stderr
-                report = json.loads(direct.stdout)
-                assert report["errors"] == []
-                assert report["approval_status"]["ready"] is True
-    assert inventory(project) == before
-    head = git_project(project)
-    # Existing installed CLI integration needs a real accepted Git ref: subprocess
-    # consumers cannot share the in-process checkpoint adapter.
-    checkpoints = bootstrap().load(COLLECTION / "sdd-shared", "checkpoints")
-    observed = checkpoints.inspect(project, "change", "demo")
-    accepted = run(["git", "update-ref", observed["checkpoint_ref"], head], project)
-    assert accepted.returncode == 0, accepted.stderr
-    before = inventory(root)
-    basis = success(request(collection, tmp_path, "validate", project_root=str(project),
-                            change="demo", instruction=INSTRUCTION,
-                            sdd_spec=str(collection / "sdd-spec")))
-    assert basis["work_kind"] == "change" and basis["change_root"] == str(root.resolve())
-    assert basis["tasks"] == [task] and basis["plan_commit"] == head
-    assert sorted(basis["document_paths"]) == [entry["path"] for entry in manifest(root, "plan")]
-    assert "manifest" not in basis and basis["schema_version"] == 2
-    assert basis["sdd_shared"] == str((collection / "sdd-shared").resolve())
-    for user in users:
-        stage = "plan" if user["scope"]["stage"] == "plan_review" else "documents"
-        assert basis["checks"][stage]["approval_status"]["applicability"][user["id"]] is True
-    assert inventory(root) == before
-    assert inventory(collection / "sdd-shared") == packages
-    assert not (project / "sdd/refactoring").exists()
 
 
 def git_project(project):

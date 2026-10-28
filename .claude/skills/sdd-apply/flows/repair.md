@@ -2,7 +2,7 @@
 
 Load [task events](../references/api-tasks.md) and [checks and evidence](../references/api-checks.md) if not already loaded; use installed event help for payload fields.
 
-Read the recorded failure, its exact candidate, AC, logs, and remaining task budgets before changing code. For a code-review finding, apply the [review policy](../references/review-policy.md) before accepting it for repair. Repair only proven violations; retain all other findings in the technical debt journal and continue the plan. Attribute an accepted defect to a task. Unknown ownership or a proven defect outside the approved scope blocks pending resolution. A contract contradiction uses `spec_conflict` through [resume](resume.md).
+Read the recorded failure, its tested commit, AC, logs, and remaining task budgets before changing code. For a code-review finding, apply the [review policy](../references/review-policy.md) before accepting it for repair. Repair only proven violations; retain all other findings in the technical debt journal and continue the plan. Attribute an accepted defect to a task. Unknown ownership or a proven defect outside the approved scope blocks pending resolution. A contract contradiction uses `spec_conflict` through [resume](resume.md).
 
 For `more_checks`, submit `checks_extend` with the requesting `review_round` ID
 and additional commands, sources and AC. Keep existing checks. Run the expanded

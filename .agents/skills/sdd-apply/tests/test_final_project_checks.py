@@ -206,7 +206,7 @@ def test_project_evidence_binds_full_current_identity(prepared_project, drift):
         stage(root, "new.txt")
         commit(root, "Change final HEAD")
     elif drift == "manifest":
-        state["basis"]["document_paths"] = [*state["basis"]["document_paths"], "new.md"]
+        state["basis"]["head"] = "0" * 40
     elif drift == "registry":
         registry = state["final_checks"]
         registry["revision"] += 1
@@ -387,7 +387,7 @@ def complete_followup(driver):
     def review(ident):
         role(ident, "reviewer")
         send("review_start", {"role_id": ident})
-        send("review_result", {"role_id": ident, "candidate": driver.state["tasks"]["TASK-two"]["candidate"],
+        send("review_result", {"role_id": ident,
             "verdict": "pass", "findings": [], "test_integrity": "Fixture checks unchanged", "trace": "synthetic-unit-test"})
     project = Path(driver.state["basis"]["project_root"])
     send("worktree_create", {"workspace": str(project.parent / "followup-worktrees")})

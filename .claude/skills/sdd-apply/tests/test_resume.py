@@ -124,7 +124,7 @@ def test_reviewer_successor_continues_reserved_round_after_two_losses(execution_
             for old, new in [("reviewer", "new-reviewer"), ("verifier", "new-verifier")]]}, task_id=None)
     assert driver.task["status"] == "reviewing"
     assert driver.task["review_rounds_started"] == 1
-    result = driver.send("review_result", {"role_id": "new-reviewer", "candidate": driver.task["candidate"],
+    result = driver.send("review_result", {"role_id": "new-reviewer",
         "verdict": "pass", "findings": [], "test_integrity": "commands and assertions preserved", "trace": "unit-test"})
     assert result["status"] == "integrating"
 

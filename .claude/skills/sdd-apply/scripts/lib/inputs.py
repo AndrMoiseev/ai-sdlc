@@ -8,20 +8,42 @@ import sys
 from .common import require
 
 
-def companion(project, explicit=None, sdd_shared=None, work_kind="change"):
-    """Legacy explicit is an sdd-spec root; shared is the runtime dependency."""
-    return locate(explicit=sdd_shared, legacy=explicit, work_kind=work_kind)
+def spec_modules(module_name="documents"):
+    return load(module_name)
 
 
-def spec_modules(root, module_name="documents"):
-    """Compatibility helper for callers passing an old sdd-spec root."""
-    root = Path(root)
-    return load(root if (root / "api.json").is_file() else locate(legacy=root), module_name)
+def document_paths(basis):
+    """List plan documents from the main working branch, without saved inventory."""
+    paths = ["proposal.md", "design.md", "tasks.md"]
+    if basis.get("work_kind", "change") == "change":
+        relative = Path(basis["change_root"]).relative_to(Path(basis["project_root"]))
+        prefix = relative.as_posix() + "/"
+        paths.extend(name[len(prefix):] for name in repository(basis["project_root"]).tracked("HEAD")
+                     if name.startswith(prefix + "specs/") and name.endswith("/spec.md"))
+    return sorted(paths)
 
 
-def basis_dependency(basis):
-    return locate(explicit=basis.get("sdd_shared"),
-                  legacy=basis.get("sdd_spec") if not basis.get("sdd_shared") else None)
+def read_plan_document(basis, name):
+    """Extract document records from HEAD of the original project repository."""
+    from .common import contained
+    require(name in document_paths(basis), "basis_paths", "Document is outside the plan at project HEAD")
+    docs = spec_modules()
+    path = contained(basis["change_root"], name).relative_to(Path(basis["project_root"]))
+    text = repository(basis["project_root"]).content("HEAD", path.as_posix()).decode("utf-8-sig")
+    require(text.strip(), "basis_document_missing", f"Plan document unavailable at project HEAD: {name}")
+    records = []
+    for token in docs.parse_markdown(text):
+        if token.type != "fence" or token.info.strip() != "yaml":
+            continue
+        try:
+            record = docs.safe_yaml(token.content)
+        except docs.ValidationError as exc:
+            if exc.code == "yaml_mapping":
+                continue
+            raise
+        if "sdd_record" in record:
+            records.append(record)
+    return records
 
 
 def spec_call(dependency, project, change, stage, script, work_kind="change"):
@@ -33,12 +55,12 @@ def spec_call(dependency, project, change, stage, script, work_kind="change"):
     return json.loads(result.stdout)
 
 
-def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_shared=None, work_kind="change"):
+def validate(project_root, change=None, instruction=None, work_kind="change"):
     project = Path(project_root).resolve(strict=True)
     require(bool(instruction and instruction.get("text") and instruction.get("source")), "execution_instruction", "Record the user's plan approval or execution instruction and its source")
     require(work_kind is None or work_kind in ("change", "refactoring"), "work_kind", "Expected change, refactoring or null for discovery")
-    dependency = companion(project, sdd_spec, sdd_shared, work_kind or "change")
-    paths = spec_modules(dependency, "paths")
+    dependency = locate(work_kind=work_kind or "change")
+    paths = spec_modules("paths")
     if work_kind is None or change is None:
         candidates = [entry for entry in paths.list_work(project, change)
                       if work_kind is None or entry["work_kind"] == work_kind]
@@ -46,7 +68,7 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
             candidates = [entry for entry in candidates if entry["has_plan"]]
         require(len(candidates) == 1, "ambiguous_change", f"Select work by work_kind and change_id: {candidates}")
         work_kind, change = candidates[0]["work_kind"], candidates[0]["change_id"]
-        dependency = companion(project, sdd_spec, sdd_shared, work_kind)
+        dependency = locate(work_kind=work_kind)
     directory = paths.change_root(project, change, work_kind)
     require((directory / "tasks.md").is_file(), "missing_plan", "Return to sdd-spec for an approved plan")
     checks = {}
@@ -55,7 +77,7 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
         require(checks[stage].get("schema_version") == 2 and checks[stage].get("approval_status", {}).get("ready") is True, "approval_missing", f"{stage}: {checks[stage]}")
         require(checks[stage].get("checkpoint_status", {}).get("status") == "ready", "checkpoint_not_ready", f"{stage}: accept a clean checkpoint before execution: {checks[stage].get('checkpoint_status')}")
         require(not any(w["code"] == "state_recovery" for w in checks[stage].get("warnings", [])), "state_recovery", "Recover sdd-spec checkpoint first")
-    docs = spec_modules(dependency)
+    docs = spec_modules()
     docs.read_checkpoint(directory, work_kind)
     records = docs.read_document(directory / "tasks.md", work_kind).records
     tasks = [record for record in records if record["sdd_record"] == "task"]
@@ -63,13 +85,7 @@ def validate(project_root, change=None, instruction=None, sdd_spec=None, sdd_sha
     if work_kind == "refactoring":
         plan_records = {kind: [record for record in records if record["sdd_record"] == kind]
                         for kind in ("acceptance", "verification")}
-    document_paths = sorted(["proposal.md", "design.md", "tasks.md"] +
-                            ([path.relative_to(directory).as_posix() for path in (directory / "specs").glob("**/spec.md")] if work_kind == "change" else []))
-    plan_commit = checks["plan"]["checkpoint_status"]["head"]
-    # Retain admitted criteria/decisions just as tasks are retained. Role packets
-    # must not silently take scope from later working-document edits.
-    document_records = {name: docs.read_document(directory / name, work_kind).records for name in document_paths}
     excluded = (directory / "execution").relative_to(project).as_posix()
     source = repository(project).inspect(exclude=[excluded])
-    require(source["head"] == plan_commit and not source["dirty_paths"], "checkpoint_changed", "Checkpoint changed during admission; inspect and retry")
-    return {"schema_version": 2, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "sdd_shared": str(dependency), "checks": checks, "plan_commit": plan_commit, "document_paths": document_paths, "document_records": document_records, "tasks": tasks, **plan_records, **source}
+    require(source["head"] == checks["plan"]["checkpoint_status"]["head"] and not source["dirty_paths"], "checkpoint_changed", "Checkpoint changed during admission; inspect and retry")
+    return {"schema_version": 2, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "tasks": tasks, **plan_records, "head": source["head"], "branch": source["branch"]}

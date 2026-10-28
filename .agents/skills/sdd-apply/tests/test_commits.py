@@ -21,9 +21,9 @@ def test_only_owned_paths_with_foreign_index(driver, project):
     (project / "foreign.txt").write_text("unstaged\n")
     staged = repository(project).content("", "foreign.txt")
     prepared(driver, project, integrate=False)
-    from lib.candidates import resolve
-    candidate = resolve(driver.state, driver.task["candidate"])
-    assert repository(driver.root).content(candidate["source"]["commit"], "result.txt") == b"verified result\n"
+    from lib.verification import current
+    source = current(driver.state, driver.task)
+    assert repository(driver.root).content(source["commit"], "result.txt") == b"verified result\n"
     driver.send("transfer")
     with pytest.raises(ValueError, match="clean|dirty|before verification"):
         driver.send("integrate")

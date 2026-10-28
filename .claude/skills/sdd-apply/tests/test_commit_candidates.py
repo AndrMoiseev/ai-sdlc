@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from lib.candidates import resolve
 from lib.repository import repository
 from lib.state import snapshot
+from lib.verification import current
 
 
 def test_freeze_commits_only_in_task_worktree(driver, project):
@@ -13,7 +13,7 @@ def test_freeze_commits_only_in_task_worktree(driver, project):
     driver.start()
     (driver.root / "result.txt").write_bytes(b"candidate")
     driver.freeze()
-    source = resolve(driver.state, driver.task["candidate"])["source"]
+    source = current(driver.state, driver.task)
     assert source["commit"] == repository(driver.root).head()
     assert source["commit"] != main_head
     assert not source["dirty_paths"]
@@ -42,7 +42,7 @@ def test_execution_snapshot_never_reads_external_file_content(driver, project, t
 
 
 @pytest.mark.parametrize("mutation", ["tracked", "untracked", "head", "index-only"])
-def test_each_git_mutation_invalidates_verified_candidate(execution_checkpoint, mutation):
+def test_verification_checks_clean_git_without_saved_candidate(execution_checkpoint, mutation):
     from repository_support import stage, commit
     driver = execution_checkpoint("verified")
     root = driver.root
@@ -57,8 +57,11 @@ def test_each_git_mutation_invalidates_verified_candidate(execution_checkpoint, 
             commit(root, "Different candidate")
         elif mutation == "index-only":
             (root / "result.txt").write_bytes(original)
-    with pytest.raises(ValueError, match="changed|before verification"):
-        driver.verify()
+    if mutation == "head":
+        assert driver.verify()["outcome"] == "passed"
+    else:
+        with pytest.raises(ValueError, match="changed|before verification"):
+            driver.verify()
 
 
 def test_candidate_commit_recovers_after_state_write_crash(execution_checkpoint, monkeypatch):
@@ -75,25 +78,8 @@ def test_candidate_commit_recovers_after_state_write_crash(execution_checkpoint,
     sha = repository(driver.root).head()
     driver.number -= 1
     driver.send("candidate")
-    assert resolve(driver.state, driver.task["candidate"])["source"]["commit"] == sha
+    assert current(driver.state, driver.task)["commit"] == sha
     assert repository(driver.root).head() == sha
-
-
-def test_legacy_file_snapshot_cannot_acquire_new_evidence(execution_checkpoint):
-    from copy import deepcopy
-    from lib.common import Rejected
-    from lib.state import seal, save
-    driver = execution_checkpoint("verified")
-    state = driver.state
-    legacy = deepcopy(resolve(state, driver.task["candidate"]))
-    for field in ("commit", "branch", "dirty_paths"):
-        legacy["source"].pop(field)
-    state["tasks"]["TASK-one"]["candidate"] = legacy
-    seal(state)
-    save(driver.directory, state)
-    with pytest.raises(Rejected) as error:
-        driver.verify()
-    assert error.value.code == "legacy_candidate"
 
 
 def test_accepted_task_repair_returns_to_fresh_isolated_worktree(execution_checkpoint):

@@ -42,7 +42,7 @@ def transition(state, task, event, directory):
             repository(root).create_worktree(path, expected["base"], expected["branch"])
         require(repository(root).worktree(path) is not None, "unregistered_worktree", "Existing path is not this repository's worktree")
         require(repository(path).head() == expected["base"] and repository(path).branch() == expected["branch"], "worktree_changed", "Expected registered task branch at original HEAD")
-        task["worktree"] = {"path": str(path), "workspace": str(workspace), "base": expected["base"], "branch": expected["branch"], "owner": state["owner"], "integrated": False, "resources": event["payload"].get("resources", []), "snapshot": snapshot(state, path)}
+        task["worktree"] = {"path": str(path), "workspace": str(workspace), "base": expected["base"], "branch": expected["branch"], "integrated": False, "resources": event["payload"].get("resources", []), "snapshot": snapshot(state, path)}
         if repairing:
             task["start_snapshot"] = task["worktree"]["snapshot"]
         return observed(effect, journal, task["worktree"])

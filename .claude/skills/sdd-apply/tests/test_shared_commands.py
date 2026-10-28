@@ -87,7 +87,7 @@ def test_shared_adapter_matches_shipped_uv_entrypoint(project, shared_cli):
 
 def test_parsed_documents_are_independent_and_exact_bytes_invalidate_the_cache(project):
     from shared_commands import spec_modules
-    docs = spec_modules(SHARED)
+    docs = spec_modules()
     path = project / "sdd/changes/demo/specs/demo/spec.md"
     first = docs.read_document(path)
     first.records[1]["expected"] = "mutated returned object"

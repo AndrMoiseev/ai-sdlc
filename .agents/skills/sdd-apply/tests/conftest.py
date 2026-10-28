@@ -8,9 +8,6 @@ import json
 import os
 from lib.common import digest, git
 
-SPEC = Path(__file__).resolve().parents[2] / "sdd-spec"
-
-
 @pytest.fixture(autouse=True)
 def path_resolver(request, tmp_path_factory, monkeypatch):
     from lib.path_resolution import use_path_resolver
@@ -169,7 +166,7 @@ def project_template(tmp_path_factory):
     git(root, "add", ".")
     git(root, "commit", "-m", "fixture")
     from shared_commands import spec_modules
-    checkpoints = spec_modules(SPEC, "checkpoints")
+    checkpoints = spec_modules("checkpoints")
     observed = checkpoints.inspect(root, "change", "demo")
     git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
     return root
@@ -183,7 +180,7 @@ def copy_project(template, destination, backend, omit=()):
         return root
     root = shutil.copytree(template, destination)
     from shared_commands import spec_modules
-    observed = spec_modules(SPEC, "checkpoints").inspect(root, "change", "demo")
+    observed = spec_modules("checkpoints").inspect(root, "change", "demo")
     git(root, "update-ref", observed["checkpoint_ref"], observed["head"])
     return root
 
@@ -210,7 +207,7 @@ def basis_template(project_template, repository_seeds):
     from lib.repository import use_repositories
     from memory_repository import MemoryRepositories
     with use_repositories(MemoryRepositories(repository_seeds)), patch("lib.inputs.spec_call", spec_call):
-        return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"}, SPEC)
+        return validate(project_template, "demo", {"text": "Implement plan", "source": "test-user-message"})
 
 
 @pytest.fixture
@@ -219,13 +216,6 @@ def basis(project, basis_template):
     # Input-validation tests still call validate on their actual modified project.
     result = deepcopy(basis_template)
     result.update(project_root=str(project), change_root=str(project / "sdd/changes/demo"))
-    from lib.repository import repository
-    from lib.git_repository import GitRepository
-    if isinstance(repository(project), GitRepository):
-        from shared_commands import spec_modules
-        checkpoint = spec_modules(SPEC, "checkpoints").inspect(project, "change", "demo")
-        for check in result["checks"].values():
-            check["checkpoint_status"] = deepcopy(checkpoint)
     return result
 
 
@@ -235,7 +225,7 @@ class Driver:
         from lib.state import initialize
         self.directory = Path(basis["change_root"]) / "execution"
         self.directory.mkdir(parents=True, exist_ok=True)
-        initialize(basis, "owner", isolation=True)
+        initialize(basis, isolation=True)
         # State-only tests do not exercise HTML; dashboard tests use the renderer.
         from lib.artifact_storage import write
         write(self.directory / "dashboard.html", "test-only dashboard sentinel")
@@ -281,7 +271,7 @@ class Driver:
         from lib.state import apply
         self.number += 1
         state = self._view()
-        return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "owner": state["owner"], "type": kind, "task_id": task_id, "payload": payload or {}})
+        return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "type": kind, "task_id": task_id, "payload": payload or {}})
 
     def role(self, ident, kind, context=None):
         return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
@@ -305,7 +295,7 @@ class Driver:
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
         self.send("review_start", {"role_id": role})
-        return self.send("review_result", {"role_id": role, "candidate": self.task["candidate"], "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
+        return self.send("review_result", {"role_id": role, "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
 
     def integrate(self, prefix=""):
         self.send("transfer")
@@ -348,7 +338,7 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
         yield "reviewing", driver
-        driver.send("review_result", {"role_id": "reviewer", "candidate": driver.task["candidate"],
+        driver.send("review_result", {"role_id": "reviewer",
             "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
         yield "worktree-reviewed", driver
         driver.integrate()

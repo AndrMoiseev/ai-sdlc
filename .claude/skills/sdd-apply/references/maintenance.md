@@ -53,7 +53,7 @@ the real implementations; injected factories must be scoped and restored.
 Unexpected Git, unsupported commands or unsupported filesystem operations in
 fast scenarios must fail rather than silently execute a slower fallback.
 
-Keep state schemas, integrity hashes, event chains, candidate freshness,
+Keep state schemas, integrity hashes, event chains, Git cleanliness,
 evidence validation, ownership and acceptance checks active in scenario tests.
 For state storage changes, verify bounded manifest growth, deduplication, lazy
 reads, full-history audit, idempotent lookup and interruption before manifest

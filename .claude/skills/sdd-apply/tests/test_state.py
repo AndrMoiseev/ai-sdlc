@@ -6,16 +6,18 @@ from lib.state_storage import storage
 
 @pytest.fixture
 def store(basis):
-    state = initialize(basis, "owner", isolation=True)
+    state = initialize(basis, isolation=True)
     return basis["change_root"] + "/execution", state
 
 
 def event(state, kind="block", **changes):
-    return {"event_id": "e1", "run_id": state["run_id"], "expected_revision": state["revision"], "owner": state["owner"], "type": kind, "task_id": "TASK-one", "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
+    return {"event_id": "e1", "run_id": state["run_id"], "expected_revision": state["revision"], "type": kind, "task_id": "TASK-one", "payload": {"reason": "test", "resume_condition": "fixed"}, **changes}
 
 
 def test_atomic_idempotency(store):
     directory, state = store
+    assert "checks" not in state["basis"]
+    assert "dirty_paths" not in state["basis"]
     item = event(state)
     result = apply(directory, item)
     assert apply(directory, item) == result
@@ -25,7 +27,7 @@ def test_atomic_idempotency(store):
     assert read(directory)["revision"] == 1
 
 
-@pytest.mark.parametrize("changes", [{"type": "DONE"}, {"expected_revision": 4}, {"owner": "other"}, {"task_id": "TASK-missing"}, {"type": "start", "payload": {}}])
+@pytest.mark.parametrize("changes", [{"type": "DONE"}, {"expected_revision": 4}, {"task_id": "TASK-missing"}, {"type": "start", "payload": {}}])
 def test_rejection_keeps_bytes(store, changes):
     from pathlib import Path
     directory, state = store
