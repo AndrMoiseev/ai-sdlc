@@ -25,6 +25,11 @@ disable-model-invocation: true
 
 ## Координация и статусы
 
+Перед исследовательским поручением и каждой детерминированной проверкой документов
+примени [передачу explorer](references/explorer.md). Research делегируется по
+необходимости; documents/plan check выполняет explorer. Сохраняй внешние request/result
+и фактический launch, затем ссылки и digest в checkpoint.
+
 Перед работой с субагентами прочитай [общие правила координации](../sdd-shared/references/coordination.md).
 
 ## Выбор флоу
