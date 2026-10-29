@@ -10,6 +10,8 @@ again for permission to use it within authorized work.
 
 | Role | Assignment |
 |---|---|
+| `sdd-spec.explorer` | Bounded source research and document/plan check execution |
+| `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
 | `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency and simplicity |
 | `sdd-spec.plan_reviewer` | Separate fresh reviewers for plan and simplicity lenses |
 | `sdd-spec.editor` | Authorized humanizer editing pass |
@@ -24,6 +26,11 @@ Version 1 maps role IDs to nonempty agent names under `subagents.roles`. Omit ro
 that need no override. Multiple roles may select the same definition; this does not
 authorize sharing their contexts. Version 1 has no lens-specific or per-task overrides.
 Model IDs remain in native agent definitions, not settings.json.
+
+Both explorer presets select one `sdd-explorer` profile with inherited model and
+effort. Projects may select separate profiles for the two roles. Before dependent
+work, follow the [explorer assignment and capability contract](explorer.md);
+selection alone proves neither available tools nor an actual successful launch.
 
 Missing settings, an unmapped role, or a missing selected agent uses the parent's
 model. Report a missing named agent once per affected selection. Malformed settings,

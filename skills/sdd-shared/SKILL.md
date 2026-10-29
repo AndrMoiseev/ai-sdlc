@@ -18,6 +18,9 @@ decisions, review authorization and execution.
    and the operation-specific section it names. For agent launches, read
    [subagent selection](references/subagents.md). For worker coordination, read
    [coordination](references/coordination.md).
+4. For bounded research or check delegation, read the
+   [explorer assignment contract](references/explorer.md) and pass the
+   [explorer instructions](agents/explorer.md) to the worker.
 
 ## Ownership
 

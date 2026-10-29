@@ -29,7 +29,10 @@ def defaults(view):
 
 def keep(view):
     return {"inspection": view, "roles": {r["role"]: {"action": "keep"} if r["present"] else {"action": "set", "value": None} for r in view["roles"]},
-            "agents": {r["current"]: {"model": {"action": "keep"}, "effort": {"action": "keep"}}
+            "agents": {r["current"]: {field: {"action": "set", "value": None}
+                                      if view["agents"][r["current"]][field] is None
+                                      and view["agents"][r["current"]]["scope"] != "native"
+                                      else {"action": "keep"} for field in ("model", "effort")}
                        for r in view["roles"] if r["current"]}}
 
 
@@ -39,22 +42,26 @@ def test_fresh_defaults_apply_and_repeat_keep(tmp_path, host):
     plan = core.make_plan(defaults(view))
     project = Path(view["project_root"])
     assert not list(project.iterdir()), "Inspect and plan must be read-only"
-    assert len(plan["operations"]) == 9
+    assert len(plan["operations"]) == 10
+    explorer_operations = [op for op in plan["operations"] if "agents/sdd-explorer." in op["path"]]
+    assert len(explorer_operations) == 1
     assert plan["operations"][-1]["path"] == ".sdd/settings.json"
     result = core.apply_plan(plan)
-    assert len(result["changed"]) == 9
+    assert len(result["changed"]) == 10
     shared, _ = core.shared_contract()
     roles, _, _ = shared.settings(project)
     assert set(roles) == set(shared.ROLES)
     for row in view["roles"]:
         suffix = ".codex/agents/" + row["default"] + ".toml" if host == "codex" else ".claude/agents/" + row["default"] + ".md"
         data, body = core.parse_agent((project / suffix).read_bytes(), host, suffix)
-        assert data["model"] == row["profile_default"]["model"]
-        assert data["model_reasoning_effort" if host == "codex" else "effort"] == row["profile_default"]["effort"]
+        expected_model = row["profile_default"]["model"]
+        assert data.get("model") == ("inherit" if host == "claude-code" and expected_model is None else expected_model)
+        assert data.get("model_reasoning_effort" if host == "codex" else "effort") == row["profile_default"]["effort"]
         assert data["name"] == row["default"]
         if host == "codex":
             selection = shared.resolve(project, row["role"], host, "parent", "low", user_agent_dir=tmp_path / "user")
-            assert selection["launch"]["model"] == data["model"]
+            assert selection["launch"]["model"] == (expected_model or "parent")
+            assert selection["launch"]["reasoning_effort"] == (row["profile_default"]["effort"] or "low")
         else:
             assert body.strip() == core.INSTRUCTIONS
     no_change = core.make_plan(keep(inspect(tmp_path, host)))
@@ -84,6 +91,29 @@ def test_settings_extras_preserved_and_named_missing_created(tmp_path):
     core.apply_plan(core.make_plan(request))
     assert core.read_json(project / ".sdd/settings.json")["team"] == {"name": "core"}
     assert (project / ".codex/agents/team-coder.toml").is_file()
+    # Extend the existing setup fixture: split explorer selections and preserve
+    # the shared profile and unrelated configuration without another real scenario.
+    before = (project / ".codex/agents/sdd-explorer.toml").read_bytes()
+    request = keep(inspect(tmp_path, names=["researcher", "checker"]))
+    request["roles"]["sdd-spec.explorer"] = {"action": "set", "value": "researcher"}
+    request["roles"]["sdd-apply.explorer"] = {"action": "set", "value": "checker"}
+    request["agents"].pop("sdd-explorer")
+    for name, model in (("researcher", "research-model"), ("checker", "check-model")):
+        request["agents"][name] = {"model": {"action": "set", "value": model},
+                                   "effort": {"action": "set", "value": "medium"}}
+    snapshot = {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
+    plan = core.make_plan(request)
+    assert snapshot == {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
+    core.apply_plan(plan)
+    settings = core.read_json(project / ".sdd/settings.json")
+    assert settings["subagents"]["roles"]["sdd-spec.explorer"] == "researcher"
+    assert settings["subagents"]["roles"]["sdd-apply.explorer"] == "checker"
+    assert settings["team"] == {"name": "core"}
+    assert (project / ".codex/agents/sdd-explorer.toml").read_bytes() == before
+    shared, _ = core.shared_contract()
+    for role, model in (("sdd-spec.explorer", "research-model"), ("sdd-apply.explorer", "check-model")):
+        selected = shared.resolve(project, role, "codex", "parent", "low", user_agent_dir=tmp_path / "user")
+        assert selected["launch"] == {"fork_turns": "none", "model": model, "reasoning_effort": "medium"}
 
 
 @pytest.mark.parametrize("host", ["codex", "claude-code"])
@@ -266,7 +296,7 @@ def test_cli_inspect_does_not_write_consumer(tmp_path):
                              "--host", "codex", "--user-agent-dir", str(tmp_path / "user")],
                             capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(json.loads(result.stdout)["result"]["roles"]) == 8
+    assert len(json.loads(result.stdout)["result"]["roles"]) == 10
     assert not list(project.iterdir())
 
 
@@ -282,7 +312,7 @@ def test_switch_host_keeps_role_names_and_codex_bytes(tmp_path):
     core.apply_plan(core.make_plan(request))
     assert before == {p: p.read_bytes() for p in (project / ".codex").rglob("*") if p.is_file()}
     assert (project / ".sdd/settings.json").read_bytes() == settings_before
-    assert len(list((project / ".claude/agents").glob("*.md"))) == 8
+    assert len(list((project / ".claude/agents").glob("*.md"))) == 9
 
 
 def test_unset_roles_cannot_silently_keep_inheritance(tmp_path):

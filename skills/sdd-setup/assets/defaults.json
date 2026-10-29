@@ -1,6 +1,8 @@
 {
   "schema_version": 1,
   "roles": {
+    "sdd-spec.explorer": {"agent": "sdd-explorer", "codex": {"model": null, "effort": null}, "claude-code": {"model": null, "effort": null}},
+    "sdd-apply.explorer": {"agent": "sdd-explorer", "codex": {"model": null, "effort": null}, "claude-code": {"model": null, "effort": null}},
     "sdd-spec.document_reviewer": {"agent": "sdd-document-reviewer", "codex": {"model": "gpt-6.1-sol", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}},
     "sdd-spec.plan_reviewer": {"agent": "sdd-plan-reviewer", "codex": {"model": "gpt-6-astra", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}},
     "sdd-spec.editor": {"agent": "sdd-editor", "codex": {"model": "gpt-6-luna", "effort": "high"}, "claude-code": {"model": "sonnet", "effort": "medium"}},

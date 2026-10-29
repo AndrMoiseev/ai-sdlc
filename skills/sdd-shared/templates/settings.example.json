@@ -2,6 +2,8 @@
   "schema_version": 1,
   "subagents": {
     "roles": {
+      "sdd-spec.explorer": "sdd-explorer",
+      "sdd-apply.explorer": "sdd-explorer",
       "sdd-spec.document_reviewer": "sdd-reviewer",
       "sdd-spec.plan_reviewer": "sdd-reviewer",
       "sdd-spec.editor": "sdd-editor",

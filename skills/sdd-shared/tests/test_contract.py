@@ -69,6 +69,72 @@ def test_settings_schema_roles_match_runtime():
     schema = json.loads((ROOT / 'schemas/settings.schema.json').read_text())
     roles = schema['properties']['subagents']['properties']['roles']['propertyNames']['enum']
     assert set(roles) == set(bootstrap().load(ROOT, 'subagents').ROLES)
+    example = json.loads((ROOT / 'templates/settings.example.json').read_text())
+    assert example['subagents']['roles']['sdd-spec.explorer'] == 'sdd-explorer'
+    assert example['subagents']['roles']['sdd-apply.explorer'] == 'sdd-explorer'
+
+
+@pytest.mark.parametrize('role', ['sdd-spec.explorer', 'sdd-apply.explorer'])
+def test_explorer_resolver_preserves_lookup_fallback_and_errors(monkeypatch, role):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    project = ROOT.resolve()
+    user = project / 'memory-user-agents'
+    settings_path = project / '.sdd/settings.json'
+    files = {}
+
+    def read_bytes(path):
+        if path not in files:
+            raise FileNotFoundError(path)
+        return files[path]
+
+    monkeypatch.setattr(Path, 'read_bytes', read_bytes)
+    monkeypatch.setattr(Path, 'iterdir', lambda path: iter(p for p in files if p.parent == path))
+
+    def resolve():
+        return resolver.resolve(project, role, 'codex', 'parent-model', 'high', user_agent_dir=user)
+
+    expected = {'fork_turns': 'none', 'model': 'parent-model', 'reasoning_effort': 'high'}
+    assert resolve()['reason'] == 'settings_missing'
+    assert resolve()['launch'] == expected
+    files[settings_path] = b'{"schema_version":1,"team":"preserved"}'
+    assert resolve()['reason'] == 'role_unmapped'
+    files[settings_path] = json.dumps({'schema_version': 1, 'team': 'preserved',
+                                      'subagents': {'roles': {role: 'sdd-explorer'}}}).encode()
+    assert resolve()['reason'] == 'agent_missing'
+    assert resolve()['launch'] == expected
+    definition = b'name="sdd-explorer"\ndescription="Explorer"\ndeveloper_instructions="role contract"\n'
+    files[user / 'personal.toml'] = definition + b'model="user-model"\n'
+    assert resolve()['launch'] == {'fork_turns': 'none', 'model': 'user-model'}
+    project_agent = project / '.codex/agents/project.toml'
+    files[project_agent] = definition
+    before = files.copy()
+    selection = resolve()
+    assert selection['launch'] == expected
+    assert selection['definition']['path'] == str(project_agent)
+    assert selection['definition']['ignored_fields'] == ['developer_instructions']
+    assert files == before
+    files[project_agent.with_name('duplicate.toml')] = definition
+    with pytest.raises(resolver.ConfigurationError, match='Duplicate agent name'):
+        resolve()
+    del files[project_agent.with_name('duplicate.toml')]
+    files[project_agent] = b'not valid toml'
+    with pytest.raises(resolver.ConfigurationError, match='Invalid agent TOML'):
+        resolve()
+
+
+@pytest.mark.parametrize('role', ['sdd-spec.explorer', 'sdd-apply.explorer'])
+def test_explorer_claude_selection_uses_live_catalog(monkeypatch, role):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    monkeypatch.setattr(resolver, 'settings', lambda project: ({role: 'sdd-explorer'}, None, 'role_unmapped'))
+    selected = resolver.resolve(ROOT, role, 'claude-code', 'parent-model',
+                                available_agents=['general-purpose', 'sdd-explorer'])
+    assert selected['launch'] == {'subagent_type': 'sdd-explorer'}
+    fallback = resolver.resolve(ROOT, role, 'claude-code', 'parent-model',
+                                available_agents=['general-purpose'])
+    assert fallback['reason'] == 'agent_missing'
+    assert fallback['launch'] == {'subagent_type': 'general-purpose', 'model': 'parent-model'}
+    with pytest.raises(resolver.ConfigurationError, match='No selected agent'):
+        resolver.resolve(ROOT, role, 'claude-code', 'parent-model', available_agents=[])
 
 
 def test_setup_runs_without_spec_from_relocated_install(tmp_path):
@@ -82,7 +148,7 @@ def test_setup_runs_without_spec_from_relocated_install(tmp_path):
                         '--host', 'codex', '--user-agent-dir', tmp_path / 'empty-agents', cwd=consumer)
         assert result.returncode == 0, result.stderr + result.stdout
         inspection = json.loads(result.stdout)['result']
-        assert len(inspection['roles']) == 8
+        assert len(inspection['roles']) == 10
         assert inspection['inputs']['sdd_shared'] == str((collection / 'sdd-shared').resolve())
     assert inventory(consumer) == before
     assert inventory(collection) == packages
