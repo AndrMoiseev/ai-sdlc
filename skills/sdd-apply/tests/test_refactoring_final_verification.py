@@ -97,7 +97,7 @@ def typed_basis(project, whole_setup=True, defect=None, procedure=False):
             whole['run'] = {'command': [sys.executable, '-B', 'check_whole.py']}
         if procedure:
             whole.pop('setup_task', None)
-            whole.update(location='whole-procedure.md', run={'procedure': 'whole-procedure.md'})
+            whole.update(location='whole-procedure.md', run={'procedure': 'whole-procedure.md'}, execution_kind='manual')
             (project / 'whole-procedure.md').write_text(
                 'Run check_whole.py to traverse both consumers, check ProductId calls, adapter absence and API errors. '
                 'Record the executed command and outcome; if interrupted or unavailable, report that outcome.\n', encoding='utf-8')
@@ -152,11 +152,16 @@ class FinalDriver(RegistryDriver):
         assert self.send('accept')['status'] == 'accepted'
 
     def final_role(self, ident='final', context=None, successor_of=None):
+        if all(check.get('execution_kind', 'deterministic') == 'deterministic' for check in self.state['final_checks']['checks']):
+            return self.explorer(ident, 'final', task_id=None, context=context, **({'successor_of': successor_of} if successor_of else {}))
         return self.send('role_register', dict(role_id=ident, kind='final_verifier', context_id=context or ident,
             fresh=True, host='codex', launch_ref='synthetic-unit-test', capabilities={'fresh_context': True},
             **({'successor_of': successor_of} if successor_of else {})), task_id=None)
 
     def run_final(self, role='final'):
+        registered = self.state['roles'].get(role, {})
+        if registered.get('kind') == 'final_verifier' and registered.get('task_id') is None:
+            return self.run_checks('final', task_id=None)
         return self.send('check_run', {'role_id': role, 'stage': 'final'}, task_id=None)
 
 
@@ -354,7 +359,18 @@ def test_post_integration_regression_invalidates_success_and_is_detected(complet
     stage_files(project, 'consumer_b.py')
     commit(project, 'Integration regression')
     assert projection(driver.state)['whole_result']['confirmed_criteria'] == []
-    assert driver.run_final()['outcome'] == 'failed'
+    with pytest.raises(Rejected) as error:
+        driver.run_final()
+    assert error.value.code == 'assignment_basis'
+    driver.final_role('regression-final')
+    driver.send('role_register', dict(role_id='regression-verifier', kind='final_verifier',
+        context_id='regression-verifier', fresh=True, host='codex', launch_ref='synthetic-unit-test',
+        capabilities={'fresh_context': True}), task_id=None)
+    roles = driver.state['roles']
+    assert roles['regression-final']['context_id'] != roles['regression-verifier']['context_id']
+    assert roles['regression-final']['fresh'] is True
+    assert roles['regression-verifier']['fresh'] is True
+    assert driver.run_final('regression-final')['outcome'] == 'failed'
     assert 'TASK-one/api' in driver.state['final_checks']['failures']
     assert driver.send('finalize', task_id=None)['result'] == 'partial'
 
@@ -441,8 +457,9 @@ def test_newer_same_basis_procedure_supersedes_aggregate_pass(passed_procedure, 
         result = finish_procedure(driver, outcome=outcome)
         assert result['basis'] == before_basis and result['outcome'] == outcome
         assert driver.state['final_checks']['failures']['CHECK-whole']['attempt_id'] == next_attempt['attempt_id']
+        driver.explorer('retry-final', 'final', task_id=None)
         before = storage(driver.directory).read()
-        for operation in (lambda: driver.run_final(), lambda: begin_procedure(driver)):
+        for operation in (lambda: driver.run_final('retry-final'), lambda: begin_procedure(driver)):
             with pytest.raises(Rejected) as error:
                 operation()
             assert error.value.code == 'repair_owner_required'
@@ -486,9 +503,10 @@ def test_procedure_result_becomes_stale_when_integrated_head_changes(passed_proc
     assert latest['outcome'] == 'stale'
     assert latest['basis'] == previous['basis']
     assert projection(driver.state)['whole_result']['confirmed_criteria'] == []
+    driver.explorer('stale-final', 'final', task_id=None)
     before = storage(driver.directory).read()
     with pytest.raises(Rejected) as error:
-        driver.run_final()
+        driver.run_final('stale-final')
     assert error.value.code == 'repair_owner_required'
     assert storage(driver.directory).read() == before
     assert driver.send('finalize', task_id=None)['result'] == 'partial'

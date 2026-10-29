@@ -21,7 +21,7 @@ def test_binary_untracked_transfer_requires_new_verification(basis, tmp_path, pr
     assert "candidate" not in d.task
     d.send("candidate")
     d.role("integration-verifier", "verifier")
-    assert d.send("check_run", {"role_id": "integration-verifier", "stage": "integration"})["outcome"] == "passed"
+    assert d.run_checks("integration")["outcome"] == "passed"
     assert d.review("integration-reviewer")["status"] == "committing"
     d.send("commit")
     assert d.send("accept")["status"] == "accepted"
@@ -53,7 +53,7 @@ def test_conflict_resolution_requires_new_main_branch_evidence(basis, tmp_path, 
     d.send("integration_resolve", {"intent_id": operation, "role_id": "resolver", "resolution": "Retained both task contributions"})
     d.send("candidate")
     d.role("integration-verifier", "verifier")
-    assert d.send("check_run", {"role_id": "integration-verifier", "stage": "integration"})["outcome"] == "passed"
+    assert d.run_checks("integration")["outcome"] == "passed"
     d.review("integration-reviewer")
     d.send("commit")
     assert d.send("accept")["status"] == "accepted"

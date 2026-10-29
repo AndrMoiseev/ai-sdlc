@@ -109,7 +109,7 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     d.send("integrate")
     d.send("candidate")
     d.role("integration-checker", "verifier")
-    d.send("check_run", {"stage": "integration", "role_id": "integration-checker"})
+    d.run_checks("integration")
     d.send("role_result", {"role_id": "integration-checker", "result": "checked", "trace": "test-host"})
     d.review("integration-reviewer")
     d.send("commit")

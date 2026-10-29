@@ -3,7 +3,7 @@ from importlib import import_module
 
 API_VERSION = 2
 WORK_KINDS = frozenset({"change", "refactoring"})
-MODULES = frozenset({"documents", "paths", "validation", "snapshots", "reviews", "subagents", "checkpoints", "explorer", "check_runner", "check_summary"})
+MODULES = frozenset({"documents", "paths", "validation", "snapshots", "reviews", "subagents", "checkpoints", "explorer", "check_runner", "check_summary", "check_kinds"})
 
 def module(name):
     if name not in MODULES:

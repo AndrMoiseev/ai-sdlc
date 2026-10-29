@@ -18,7 +18,7 @@ def accepted_worktree(basis, tmp_path):
     d.send('integrate')
     d.send('candidate')
     d.role('integration-verifier', 'verifier')
-    d.send('check_run', {'role_id': 'integration-verifier', 'stage': 'integration'})
+    d.run_checks("integration")
     d.review('integration-reviewer')
     d.send('commit')
     d.send('accept')
@@ -116,7 +116,7 @@ def test_final_checks_cannot_accept_uncommitted_implementation(execution_checkpo
     (project / 'result.txt').write_text('different uncommitted implementation')
     driver.role('final', 'final_verifier')
     with pytest.raises(ValueError, match='before verification|changed'):
-        driver.send('check_run', {'role_id': 'final', 'stage': 'final'})
+        driver.run_checks("final")
     assert repository(project).content('HEAD', 'result.txt') == committed
     assert committed.decode().splitlines() == ['verified result']
 

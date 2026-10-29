@@ -276,12 +276,42 @@ class Driver:
     def role(self, ident, kind, context=None):
         return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
 
+    def explorer(self, ident, stage=None, task_id="current", context=None, **fields):
+        from lib.explorer_assignments import basis
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        state = self._view()
+        task = state["tasks"].get(selected_task)
+        kind = "checks" if stage else "research"
+        current = basis(state, task, kind, stage)
+        assignment = {"id": ident, "kind": kind,
+            "scope": {"project": state["basis"]["project_root"], "work": state["change_id"], "task": selected_task},
+            "basis": current, "read_scope": ["project"], "outputs": [str(self.directory)], "limits": {"timeout": 300}}
+        if stage:
+            assignment.update(stage=stage, check_ids=[check["id"] for check in current["checks"]],
+                              registry_revision=current["registry_revision"])
+        else:
+            assignment["question"] = "Inspect the synthetic fixture"
+        payload = {"role_id": ident, "kind": "explorer", "context_id": context or ident, "fresh": True,
+            "host": "codex", "launch_ref": "synthetic-unit-test", "assignment": assignment,
+            "capabilities": {"fresh_context": True, "observations": {
+                name: {"available": True, "trace": "synthetic adapter observation"}
+                for name in ("launch", "read", "write_artifacts", "run_command")}}, **fields}
+        return self.send("role_register", payload, task_id=selected_task)
+
+    def run_checks(self, stage, ident=None, task_id="current"):
+        ident = ident or f"{getattr(self, 'task_id', 'TASK-one')}-{stage}-explorer-{self.number + 1}"
+        self.explorer(ident, stage, task_id=task_id)
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        result = self.send("check_run", {"role_id": ident, "stage": stage}, task_id=selected_task)
+        self.send("role_result", {"role_id": ident, "result": "DONE", "trace": "synthetic adapter check completed"}, task_id=selected_task)
+        return result
+
     def start(self, paths=None):
         self.worktree()
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
         self.role("author", "executor")
         self.send("start", {"role_id": "author", "paths": paths or ["result.txt", "check.py"]})
-        self.send("check_run", {"role_id": "author", "stage": "baseline"})
+        self.run_checks("baseline")
 
     def freeze(self):
         self.send("role_result", {"role_id": "author", "result": "DONE", "trace": "unit-test"})
@@ -290,7 +320,7 @@ class Driver:
     def verify(self, role="verifier"):
         if role not in self.state["roles"]:
             self.role(role, "verifier")
-        return self.send("check_run", {"role_id": role, "stage": "independent"})
+        return self.run_checks("independent")
 
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
@@ -303,7 +333,7 @@ class Driver:
         self.send("candidate")
         verifier = prefix + "integration-verifier"
         self.role(verifier, "verifier")
-        result = self.send("check_run", {"role_id": verifier, "stage": "integration"})
+        result = self.run_checks("integration")
         assert result["outcome"] == "passed"
         self.review(prefix + "integration-reviewer")
         self.send("role_result", {"role_id": verifier, "result": "DONE", "trace": "unit-test"})

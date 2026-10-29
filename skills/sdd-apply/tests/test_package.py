@@ -19,3 +19,18 @@ def test_package_contract():
     assert json.loads((ROOT / "schemas/event.schema.json").read_text())["type"] == "object"
     forbidden = {"__pycache__", ".pytest_cache", ".venv", "node_modules"}
     assert not [p for p in ROOT.rglob("*") if p.name in forbidden or p.suffix == ".pyc"]
+
+
+def test_explorer_execution_instructions_match_role_api():
+    from lib.api_help import describe
+    registration = describe(event="role_register")
+    # Existing API help is the machine contract; linked instructions name the
+    # same execution owner and separate evidence consumer.
+    serialized = json.dumps(registration)
+    assert "explorer" in serialized and "assignment" in serialized
+    flow = (ROOT / "flows/execute-parallel.md").read_text()
+    verifier = (ROOT / "agents/verifier.md").read_text()
+    assert "task explorer" in flow and "raw evidence references" in flow
+    assert "machine summary and raw evidence references" in verifier
+    assert "procedure_begin/result" in verifier
+    assert (ROOT.parent / "sdd-shared/agents/explorer.md").is_file()

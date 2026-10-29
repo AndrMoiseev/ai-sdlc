@@ -138,7 +138,7 @@ Repeat affected checks after changes to bytes, configuration, registry or normat
 basis. The orchestrator enforces this ordering; task evidence has no saved candidate
 comparison. A required unavailable check blocks; omission cannot make it green.
 
-Final checks use fresh `final_verifier` roles on the clean final HEAD. Earlier logs do not replace that final run.
+Final checks use fresh explorer roles with separate final_verifier assessment on the clean final HEAD. Earlier logs do not replace that final run.
 
 ## Refactoring whole-result checks
 
@@ -148,7 +148,7 @@ and inspected project/CI checks. Prepare an unresolved whole check while its
 approved `setup_task` is running or repairing after baseline. Register the exact
 command and preparation description; an unavailable check blocks completion.
 
-After every task is accepted and integrated, a fresh run-level final_verifier
+After every task is accepted and integrated, a fresh run-level explorer
 executes the union of whole checks and confirmed applicable task/project checks.
 No synthetic owner task is created. Confirmed retired checks retain history and
 reasons; they are not rerun. Evidence binds work identity, clean integrated HEAD,
@@ -183,9 +183,7 @@ contains only these additional checks. Task registries and task-scoped final che
 retain their existing meaning. Ordinary executions without this registry keep the
 original final acceptance contract.
 
-Launch a fresh `final_verifier` independent of every executor and register it with
-`task_id: null`. Use that role for `check_run` and procedure events with null task
-scope, only at stage `final`. Ordinary project checks have no `setup_task` and cannot
+Launch a fresh explorer independent of every executor and register its final checks assignment with `task_id: null`. Use it for `check_run` and deterministic procedures; launch a separate fresh final_verifier for semantic assessment and behavioral/manual procedures. Both use null task scope and stage `final`. Ordinary project checks have no `setup_task` and cannot
 use `check_setup`; planned preparation belongs to the task that implements it.
 Register checks only when their exact executable command or procedure is known.
 
@@ -200,3 +198,41 @@ On `revised_plan`, these registered obligations and their inventory remain requi
 The superseded run archives interrupted attempts and failures; retained logs are
 historical. The new run requires fresh evidence at its new basis after all appended
 tasks are accepted. Appending a task never silently removes a project check.
+
+## Execution ownership and one batch deadline
+
+Only a registered explorer checks assignment for the exact stage, scope, current
+basis, full check IDs and registry revision can call `check_run`. Baseline runs
+before edits; self, independent and integration require stopped authors and a
+frozen commit; integration requires the integrated commit. Final requires a fresh
+explorer and accepted task or the applicable run-level registry. Self evidence
+never replaces independent evidence.
+
+Set `execution_kind` on the verification/check record, outside `run`.
+Commands default to `deterministic`; procedures require an explicit
+`deterministic`, `behavioral` or `manual`. The filename never selects a type.
+Deterministic procedures use explorer `procedure_begin/result`. Behavioral/manual
+procedures, including explicitly typed commands, use verifier at task stages or
+final_verifier at final. Their actual steps, exact command where present, raw
+references and trace form the primary attestation. Explorer aggregates that
+attestation and does not launch the semantic command. A newer or pending procedure
+invalidates an older aggregate. Before retrying a failed procedure, reserve repair;
+if it has not yet been aggregated, supply its defect evidence and `test_failure: true`. Semantic checks cannot be converted to a
+command with `check_setup`. Behavioral checks of assigned skill packages run
+only at final; ordinary non-skill work retains its verifier procedure stages.
+
+`timeout` is a positive finite budget for the entire assigned attempt, starting at
+the first deterministic `procedure_begin` or `check_run`, including procedure
+elapsed time, command setup and report capture. Deterministic `procedure_begin`
+returns `remaining_timeout` and `check_deadline`; the host must stop its work
+within that allowance. An expired begin is rejected. An over-budget result keeps
+actual steps and `reported_outcome` but records unavailable with `check_deadline`
+in the raw evidence. A later aggregate or replacement explorer continues the
+same deadline for that source, registry, stage and repair generation. Each command
+receives only the remaining budget. `assignment.limits.timeout` may cap it;
+`assignment.limits.deadline`, when explicitly supplied, is an absolute ISO-8601
+timezone-aware deadline that also caps it. Expiry retains completed evidence,
+marks unstarted checks unavailable and blocks further work through the existing
+failure path. Event replay returns the saved result without another process.
+Changing explorer does not bypass failed-run repair reservations or reset lifetime
+counters; a genuinely new authorized repair retry may execute a new full batch.

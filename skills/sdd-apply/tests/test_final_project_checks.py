@@ -20,6 +20,8 @@ COMMAND = [sys.executable, "-B", "-c",
 
 
 def register(driver, run=None, **fields):
+    if run and "procedure" in run:
+        fields.setdefault("execution_kind", "manual")
     check = {"id": "project-result", "criteria": ["AC-one"], "source": "Project release instructions",
              "run": run or {"command": COMMAND}, **fields}
     return driver.send("checks_register", {"inventory": {"instructions": ["release instructions"], "ci": []},
@@ -27,17 +29,22 @@ def register(driver, run=None, **fields):
 
 
 def final_role(driver, ident="project-final", **fields):
+    if all(check.get("execution_kind", "deterministic") == "deterministic" for check in driver.state["final_checks"]["checks"]):
+        return driver.explorer(ident, "final", task_id=None, **fields)
     return driver.send("role_register", {"role_id": ident, "kind": "final_verifier", "context_id": ident,
         "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test",
         "capabilities": {"fresh_context": True}, **fields}, task_id=None)
 
 
 def run_final(driver, role="project-final", stage="final"):
+    registered = driver.state["roles"].get(role, {})
+    if registered.get("kind") == "final_verifier" and registered.get("task_id") is None:
+        return driver.run_checks(stage, task_id=None)
     return driver.send("check_run", {"role_id": role, "stage": stage}, task_id=None)
 
 
 def task_final(driver):
-    driver.role("task-final", "final_verifier")
+    driver.explorer("task-final", "final")
     assert driver.send("check_run", {"role_id": "task-final", "stage": "final"})["outcome"] == "passed"
 
 
@@ -369,7 +376,11 @@ def test_lost_verifier_completed_proof_requires_successor_execution(prepared_pro
     result = run_final(driver, "successor")
     assert result["outcome"] == "passed"
     record = log(driver, result)
-    assert record["role_id"] == "successor"
+    assert driver.state["roles"][record["role_id"]]["kind"] == "explorer"
+    if procedure:
+        assert record["role_id"] != "successor"  # Separate explorer aggregates the verifier attestation.
+    else:
+        assert record["role_id"] == "successor"
     if procedure:
         assert record["outputs"][0]["procedure_attempt"] == fresh_procedure["attempt_id"]
     else:
@@ -413,24 +424,24 @@ def complete_followup(driver):
     send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     role("followup-author", "executor")
     send("start", {"role_id": "followup-author", "paths": ["followup.txt"]})
-    send("check_run", {"role_id": "followup-author", "stage": "baseline"})
+    driver.run_checks("baseline", task_id="TASK-two")
     root = Path(driver.state["tasks"]["TASK-two"]["worktree"]["path"])
     (root / "followup.txt").write_text("Approved follow-up\n")
     send("role_result", {"role_id": "followup-author", "result": "DONE", "trace": "synthetic-unit-test"})
     send("candidate")
     role("followup-verifier", "verifier")
-    assert send("check_run", {"role_id": "followup-verifier", "stage": "independent"})["outcome"] == "passed"
+    assert driver.run_checks("independent", task_id="TASK-two")["outcome"] == "passed"
     review("followup-reviewer")
     send("transfer")
     send("integrate")
     send("candidate")
     role("followup-integration", "verifier")
-    assert send("check_run", {"role_id": "followup-integration", "stage": "integration"})["outcome"] == "passed"
+    assert driver.run_checks("integration", task_id="TASK-two")["outcome"] == "passed"
     review("followup-integration-reviewer")
     send("commit")
     assert send("accept")["status"] == "accepted"
     role("followup-final", "final_verifier")
-    assert send("check_run", {"role_id": "followup-final", "stage": "final"})["outcome"] == "passed"
+    assert driver.run_checks("final", task_id="TASK-two")["outcome"] == "passed"
 
 
 def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(prepared_project):
@@ -447,7 +458,7 @@ def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(pre
     assert driver.state["final_checks"]["checks"] == original["checks"]
     assert driver.state["final_checks"]["evidence"] == original["evidence"]
     complete_followup(driver)
-    driver.role("new-task-final", "final_verifier")
+    driver.explorer("new-task-final", "final")
     assert driver.send("check_run", {"role_id": "new-task-final", "stage": "final"})["outcome"] == "passed"
     assert evidence(driver.state, driver.directory)[2][0]["reason"] == "final_evidence_missing"
     assert driver.send("finalize", task_id=None)["result"] == "partial"

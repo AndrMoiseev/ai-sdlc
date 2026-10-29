@@ -30,3 +30,11 @@ after all tasks are accepted. Preserve lifetime budgets across all transitions.
 
 Task states: pending, running, verifying, reviewing, integrating, repairing,
 committing, blocked, accepted. Run states: active, blocked, completed.
+
+Explorer registration adds `assignment` to `role_register`; its ID equals the
+role ID. Scope, basis and full check set are validated before execution. Research
+accepts task or null scope and finishes with a typed `role_result.result` containing
+`kind: research`, nonempty `answer`, and lists `references`, `inspected_scope`,
+`limitations`, `assumptions`, `questions`. Preserve the actual host `trace`.
+The saved role supplies the assignment identity, scope, basis and launch evidence;
+research does not create a second event journal or accept a task.

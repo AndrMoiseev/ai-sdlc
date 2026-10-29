@@ -219,3 +219,20 @@ def test_fresh_cached_offline_and_stale_lock(tmp_path):
     stale = invoke(script, '--help', cwd=consumer, env=env)
     assert stale.returncode != 0 and 'lock' in stale.stderr.lower()
     assert script.with_suffix('.py.lock').read_bytes() == before[Path('scripts/check.py.lock')]
+
+
+@pytest.mark.parametrize("kind", ["deterministic", "manual", "behavioral"])
+def test_execution_kind_public_contract_and_schema(kind):
+    module = bootstrap().load(ROOT, "check_kinds")
+    assert module.execution_kind({"run": {"command": ["python", "check.py"]}}) == "deterministic"
+    assert module.execution_kind({"run": {"procedure": "checks.md"}, "execution_kind": kind}) == kind
+    assert module.execution_kind({"run": {"command": ["agent", "evaluate"]}, "execution_kind": kind}) == kind
+    with pytest.raises(ValueError, match="explicit type"):
+        module.execution_kind({"run": {"procedure": "deterministic-looking-name.md"}})
+    with pytest.raises(ValueError):
+        module.execution_kind({"run": {"command": ["python"]}, "execution_kind": "unknown"})
+    schema = json.loads((ROOT / "schemas/refactoring.schema.json").read_text())
+    for name in ("taskCheck", "verification"):
+        assert set(schema["$defs"][name]["properties"]["execution_kind"]["enum"]) == module.KINDS
+        assert {"$ref": "#/$defs/executionKind"} in schema["$defs"][name]["allOf"]
+    assert schema["$defs"]["executionKind"]["then"] == {"required": ["execution_kind"]}

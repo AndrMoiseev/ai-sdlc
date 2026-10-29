@@ -137,7 +137,7 @@ def test_revision_keeps_acceptance_and_allows_repeated_final_checks(execution_ch
     driver = execution_checkpoint("accepted")
     project = Path(driver.state["basis"]["project_root"])
     driver.role("old-final", "final_verifier")
-    driver.send("check_run", {"role_id": "old-final", "stage": "final"})
+    driver.run_checks("final")
     driver.send("role_result", {"role_id": "old-final", "result": "DONE", "trace": "unit-test"})
     assert driver.send("finalize", task_id=None)["result"] == "complete"
     completed = driver.task
@@ -150,7 +150,7 @@ def test_revision_keeps_acceptance_and_allows_repeated_final_checks(execution_ch
     from lib.verification import valid_evidence
     assert valid_evidence(driver.state, driver.task, driver.directory, "final")
     driver.role("new-final", "final_verifier")
-    assert driver.send("check_run", {"role_id": "new-final", "stage": "final"})["outcome"] == "passed"
+    assert driver.run_checks("final")["outcome"] == "passed"
     assert driver.send("finalize", task_id=None)["result"] == "complete"
 
 

@@ -9,6 +9,7 @@ from .common import contained, digest, now, require, write_json
 from .check_registry import confirmed_tasks, confirmed_revision, selected, refactoring, strings
 from .state import snapshot, clean_source
 from .inputs import read_plan_document, document_paths
+from . import explorer_assignments as explorer
 
 
 def criteria(state):
@@ -75,12 +76,10 @@ def basis(state):
 
 def independent(state, role_id, active=True):
     role = state["roles"].get(role_id)
-    require(role and role["kind"] == "final_verifier" and role["task_id"] is None
+    require(role and role["kind"] == "explorer" and role["task_id"] is None
             and role["status"] in ({"active"} if active else {"active", "finished"}),
-            "final_role", "Use a run-level fresh final verifier; lost-role proof requires fresh execution")
-    authors = {role["context_id"] for role in state["roles"].values() if role["kind"] == "executor"}
-    require(role["fresh"] and role["context_id"] not in authors, "role_not_independent", "Final evidence is independent of every author")
-    return role
+            "final_role", "Use a run-level fresh final explorer; lost-role proof requires fresh execution")
+    return explorer.authorize(state, None, role_id, "final", active=active, current_basis=active)
 
 
 def record_revision(result, event):
@@ -99,7 +98,9 @@ def register(state, event):
         ready(state)
     checks = [{"id": item["id"], "criteria": item["criteria"], "source": "tasks.md",
                "location": item["location"], "run": item["run"], "setup_task": item.get("setup_task"),
-               "setup": None, "cwd": ".", "configuration": {}} for item in state.get("verification", {}).values()]
+               "setup": None, "cwd": ".", "configuration": {},
+               **({"execution_kind": item["execution_kind"]} if "execution_kind" in item else {})}
+              for item in state.get("verification", {}).values()]
     allowed = set(criteria(state)) | {key for key, item in state.get("acceptance", {}).items() if item["lifetime"] == "persistent"}
     require(isinstance(payload.get("additional", []), list), "check_schema", "Additional checks must be a list")
     for item in payload.get("additional", []):
@@ -120,6 +121,7 @@ def register(state, event):
         checks.append({**item, "setup": None, "cwd": item.get("cwd", "."), "configuration": item.get("configuration", {})})
     require(checks and len({item["id"] for item in checks}) == len(checks), "duplicate_check", "Distinct whole-result checks required")
     for check in checks:
+        explorer.execution_kind(check)
         if "command" in check["run"]:
             require_command(check["run"]["command"])
     result = {"checks": checks, "revision": 0, "history": [], "evidence": [], "procedures": {},
@@ -167,29 +169,36 @@ def ready(state):
 
 def procedure(state, event, directory):
     payload, result = event["payload"], registry(state)
-    independent(state, payload.get("role_id"))
     ready(state)
     current = basis(state)
     check = next((check for check in current["checks"] if check["id"] == payload.get("check_id")), None)
-    require(check and "procedure" in check["run"] and not check["setup"], "procedure_check", "Use the exact applicable procedure")
+    require(check and ("procedure" in check["run"] and not check["setup"]
+                      or explorer.execution_kind(check) != "deterministic"),
+            "procedure_check", "Use the exact applicable procedure")
+    role = explorer.procedure_role(state, None, payload.get("role_id"), "final", check,
+                            current_basis=event["type"] == "procedure_begin")
     if event["type"] == "procedure_begin":
         require(not result["failures"], "repair_owner_required", "Reserve an owned repair before a failed final procedure retry")
         require(payload.get("stage") == "final" and check["id"] not in result["procedures"],
                 "procedure_stage", "Begin a new final procedure")
-        path = contained(state["basis"]["project_root"], check["run"]["procedure"])
-        require(path.is_file(), "procedure_unavailable", str(path))
+        path = contained(state["basis"]["project_root"], check["run"]["procedure"]) if "procedure" in check["run"] else None
+        require(path is None or path.is_file(), "procedure_unavailable", str(path))
+        budget = explorer.procedure_budget(state, None, role, check, payload.get("timeout", 300))
         result["procedures"][check["id"]] = {"basis": current, "role_id": payload["role_id"],
-                                              "started_at": now(), "attempt_id": event["event_id"]}
+                                              "started_at": now(), "attempt_id": event["event_id"], **budget}
         state["final"] = None
-        return {"procedure": str(path), "basis": current, "attempt_id": event["event_id"]}
+        return {"procedure": str(path) if path else None, "run": check["setup"] or check["run"], "basis": current, "attempt_id": event["event_id"], **budget}
     pending = result["procedures"].get(check["id"])
     require(pending and pending["role_id"] == payload["role_id"], "procedure_owner", "Match the registered attempt")
     require(payload.get("outcome") in {"passed", "failed", "unavailable", "skipped", "unstable"}
             and payload.get("steps") and payload.get("trace"), "procedure_evidence", "Actual steps, trace and outcome required")
-    outcome = payload["outcome"] if pending["basis"] == current else "stale"
+    outcome = explorer.procedure_outcome(pending, payload["outcome"], pending["basis"] == current)
     relative = f"runs/{state['run_id']}/final/{event['event_id']}.json"
     path = artifacts.contained(directory, relative)
-    write_json(path, {**payload, **pending, "outcome": outcome})
+    record = {**payload, **pending, "outcome": outcome, "reported_outcome": payload["outcome"]}
+    if pending.get("check_deadline", {}).get("expires", float("inf")) <= explorer.time.time():
+        record["limitation"] = "check_deadline"
+    write_json(path, record)
     item = {"check_id": check["id"], "criteria": check["criteria"], "basis": pending["basis"], "role_id": payload["role_id"],
             "outcome": outcome, "attempt_id": pending.get("attempt_id"),
             "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "procedure": True}
@@ -212,7 +221,7 @@ def procedure_evidence(state, check, directory, current):
         return {"outcome": "unavailable", "description": "procedure_missing"}
     if state["roles"].get(item["role_id"], {}).get("status") == "lost":
         return {"outcome": "unavailable", "description": "final_role_lost"}
-    independent(state, item["role_id"], active=False)
+    explorer.procedure_role(state, None, item["role_id"], "final", check, active=False, current_basis=False)
     path = artifacts.contained(directory, item["log"])
     require(artifacts.is_file(path) and digest(artifacts.read_bytes(path)) == item["log_hash"],
             "evidence_corrupt", item["log"])
@@ -256,13 +265,13 @@ def execute(state, check, directory, current, timeout):
         location = spec_modules("paths").verification_location(root, check["location"])
         if not location.exists():
             return {"outcome": "unavailable", "description": "Required verification location is missing"}
-    if "command" in run:
+    if "command" in run and explorer.execution_kind(check) == "deterministic":
         cwd = run.get("cwd", check["cwd"])
         output = verification.check_runner.run_command(run["command"], root if cwd == "." else contained(root, cwd), timeout)
         output["configuration"] = run.get("configuration", check["configuration"])
         output["_report_capture"] = check_evidence.capture_reports(output)
         return output
-    if "procedure" in run:
+    if "procedure" in run or explorer.execution_kind(check) != "deterministic":
         return procedure_evidence(state, check, directory, current)
     return {"outcome": "unavailable", "description": "Required whole-result setup or procedure is unavailable"}
 
@@ -270,13 +279,17 @@ def execute(state, check, directory, current, timeout):
 def run(state, event, directory):
     payload, result = event["payload"], registry(state)
     require(payload.get("stage") == "final", "check_stage", "Run-level checks require final stage")
-    independent(state, payload.get("role_id"))
+    role = independent(state, payload.get("role_id"))
     ready(state)
     require(not result["failures"], "repair_owner_required", "Assign failed final checks to an authorized repair task before retry")
     before = basis(state)
+    deadline = explorer.attempt_deadline(state, None, role, payload.get("timeout", 300))
     outputs = []
     for check in before["checks"]:
-        output = execute(state, check, directory, before, payload.get("timeout", 300))
+        output = (execute(state, check, directory, before, deadline.remaining())
+                  if deadline.remaining() > 0 else explorer.expired(check))
+        if deadline.remaining() <= 0 and output["outcome"] == "passed":
+            output.update(outcome="unavailable", limitation="check_deadline")
         outputs.append({**output, "check_id": check["id"], "criteria": check["criteria"]})
     after = snapshot(state)
     unchanged = before["source"] == after
@@ -304,7 +317,7 @@ def evidence(state, directory):
     validated = set()
     for check in current["checks"]:
         latest_procedure = None
-        if "procedure" in (check["setup"] or check["run"]):
+        if "procedure" in (check["setup"] or check["run"]) or explorer.execution_kind(check) != "deterministic":
             latest_procedure = procedure_evidence(state, check, directory, current)
             if latest_procedure["outcome"] != "passed":
                 gaps.append({"check_id": check["id"], "criteria": check["criteria"], "location": check.get("location"),
@@ -329,7 +342,7 @@ def evidence(state, directory):
         output = next((value for value in record["outputs"] if value["check_id"] == check["id"]), None)
         require(output and output["outcome"] == "passed" and output["criteria"] == check["criteria"], "evidence_basis", "Registered final check missing from log")
         command = (check["setup"] or check["run"]).get("command")
-        if command:
+        if command and explorer.execution_kind(check) == "deterministic":
             require(output.get("command") == command and output.get("exit_code") == 0, "evidence_command", "Exact registered command must pass")
             if not refactoring(state):
                 run = check["setup"] or check["run"]

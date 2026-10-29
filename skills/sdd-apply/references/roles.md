@@ -51,3 +51,18 @@ ending the role; DONE is an implementation claim, not acceptance.
 
 The orchestrator handles launch, registration, replacement and state transitions
 under [role coordination](role-coordination.md); workers need not load that procedure.
+
+Explorer receives a bounded research or checks assignment in its role packet.
+Research may have null task scope before any final registry exists. It returns
+an answer, references, inspected scope, limitations, assumptions and questions
+through `role_result`; the enclosing saved role supplies identity, basis and
+launch evidence. Checks use `check_run` and deterministic `procedure_begin/result`.
+Source files, normative documents, registries and settings remain outside the
+explorer's write authority. Pass evidence references to the orchestrator.
+
+A completed task explorer context can continue research, baseline, self,
+independent and integration with a new role ID, current assignment and unchanged
+launch profile. Another task and final require a separate new context. Keep every
+explorer separate from executor, verifier, reviewer and final_verifier. Final has
+a fresh explorer plus a separate fresh final_verifier. A completed check run or
+role result does not itself establish acceptance criteria.

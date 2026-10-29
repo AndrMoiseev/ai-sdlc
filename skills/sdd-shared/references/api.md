@@ -188,3 +188,9 @@ check reports checkpoint_status separately from review_status, approval_status
 and discussion_status. Changed historical review evidence is diagnostic; ordinary
 continuation checks the accepted point and next transition, not all past documents.
 State acceptance never substitutes for a planning or implementation instruction.
+
+`module("check_kinds").execution_kind(check)` validates the explicit execution
+kind on a verification record. It returns deterministic for an unmarked command;
+a procedure requires `execution_kind: deterministic|behavioral|manual` outside
+its single-key `run`. Unknown types raise `ValueError`. Both document parsers and
+apply registration consume this contract; API and document versions are unchanged.

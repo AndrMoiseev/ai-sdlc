@@ -91,7 +91,7 @@ def test_initial_failing_check_blocks_plan(driver, project):
     driver.worktree()
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt"]})
-    assert driver.send("check_run", {"role_id": "author", "stage": "baseline"})["outcome"] == "failed"
+    assert driver.run_checks("baseline")["outcome"] == "failed"
     assert driver.state["status"] == "blocked"
     assert driver.state["blockers"][0]["reason"] == "baseline_failed"
 
@@ -180,7 +180,7 @@ def test_final_evidence_preserves_unopened_role_objects(execution_checkpoint):
     from lib.state import read
     from lib.verification import valid_evidence
     driver = execution_checkpoint("accepted")
-    driver.role("lazy-final", "final_verifier")
+    driver.explorer("lazy-final", "final")
     driver.send("check_run", {"role_id": "lazy-final", "stage": "final"})
     state = read(driver.directory)
     assert set(dict.__getitem__(state, "roles")) == {"$object"}
@@ -195,7 +195,7 @@ def test_invalid_final_role_fails_closed(execution_checkpoint, role_value):
     from lib.finalize import finalize
     from lib.verification import valid_evidence
     driver = execution_checkpoint("accepted")
-    driver.role("invalid-final", "final_verifier")
+    driver.explorer("invalid-final", "final")
     driver.send("check_run", {"role_id": "invalid-final", "stage": "final"})
     state = driver.state
     if role_value == "missing":
@@ -217,7 +217,7 @@ def test_malformed_original_history_fails_closed(execution_checkpoint, monkeypat
     from lib import check_evidence, state_history
     from lib.common import Rejected
     driver = execution_checkpoint("accepted")
-    driver.role("history-final", "final_verifier")
+    driver.explorer("history-final", "final")
     result = driver.send("check_run", {"role_id": "history-final", "stage": "final"})
     task = driver.task
     record = json.loads(artifacts.read_text(driver.directory / result["log"]))
@@ -233,7 +233,7 @@ def test_accepted_final_history_survives_revision_but_cannot_complete_new_head(e
     from lib.verification import valid_evidence
     from test_plan_revision import revise, revised
     driver = execution_checkpoint("accepted")
-    driver.role("historical-final", "final_verifier")
+    driver.explorer("historical-final", "final")
     driver.send("check_run", {"role_id": "historical-final", "stage": "final"})
     driver.send("role_result", {"role_id": "historical-final", "result": "DONE", "trace": "unit-test"})
     preserved = driver.task
@@ -249,7 +249,7 @@ def test_accepted_final_history_survives_revision_but_cannot_complete_new_head(e
     historical = finalize(deepcopy(driver.state), {}, driver.directory)
     assert historical["result"] == "partial"
     assert any("current HEAD" in gap["reason"] for gap in historical["missing"])
-    driver.role("current-final", "final_verifier")
+    driver.explorer("current-final", "final")
     assert driver.send("check_run", {"role_id": "current-final", "stage": "final"})["outcome"] == "passed"
     assert driver.send("finalize", task_id=None)["result"] == "complete"
 
@@ -261,7 +261,7 @@ def test_final_history_requires_authenticated_original_run(execution_checkpoint,
     from lib.state_objects import StateObjects
     from lib.verification import valid_evidence
     driver = execution_checkpoint("accepted")
-    driver.role("historical-final", "final_verifier")
+    driver.explorer("historical-final", "final")
     result = driver.send("check_run", {"role_id": "historical-final", "stage": "final"})
     task = driver.task
     path = driver.directory / result["log"]
@@ -292,7 +292,9 @@ def test_summary_exposes_full_raw_log_without_reexecution(execution_checkpoint, 
     driver = execution_checkpoint("started")
     (driver.root / "check.py").write_text("print('diagnostic-' * 1000)\n")
     driver.freeze()
-    result = driver.verify()
+    driver.role("verifier", "verifier")
+    explorer_id = "summary-independent-explorer"
+    result = driver.run_checks("independent", ident=explorer_id)
     assert result["outcome"] == "passed"
     aggregate = result["summary"]
     assert aggregate["requested_check_ids"] == aggregate["completed_check_ids"] == ["plan-1"]
@@ -307,7 +309,9 @@ def test_summary_exposes_full_raw_log_without_reexecution(execution_checkpoint, 
     assert machine["excerpt"]["truncated"] is True
     assert machine["configuration"]["sha256"]
     assert machine["basis_before"] == machine["basis_after"]
-    assert machine["assignment_id"] == machine["role_id"] == "verifier"
+    assert machine["assignment_id"] == machine["role_id"] == explorer_id
+    assert driver.state["roles"][explorer_id]["kind"] == "explorer"
+    assert driver.state["roles"][explorer_id]["assignment"]["id"] == explorer_id
     assert machine["role_trace"]["launch_ref"] == "synthetic-unit-test"
     assert machine["test_counts"]["passed"] is None
     record = json.loads(artifacts.read_text(driver.directory / result["log"]))
@@ -326,7 +330,7 @@ def test_missing_required_report_blocks_baseline_even_with_exit_zero(execution_c
                 {"format": "pytest-junit", "path": "missing.xml", "required": True}]}}]})
     driver.role("author", "executor")
     driver.send("start", {"role_id": "author", "paths": ["result.txt", "check.py"]})
-    result = driver.send("check_run", {"role_id": "author", "stage": "baseline"})
+    result = driver.run_checks("baseline")
     assert result["outcome"] == "unavailable" and result["summary"]["evidence_complete"] is False
     assert driver.state["status"] == "blocked"
     record = json.loads(artifacts.read_text(driver.directory / result["log"]))
@@ -414,7 +418,7 @@ def test_each_command_captures_report_before_next_check(execution_checkpoint, st
     if scope == "task":
         driver.role("report-author", "executor")
         driver.send("start", {"role_id": "report-author", "paths": ["result.txt", "check.py"]})
-        result = driver.send("check_run", {"role_id": "report-author", "stage": "baseline"})
+        result = driver.run_checks("baseline")
         assert result["outcome"] == ("unavailable" if first_missing else "baseline_recorded")
     else:
         final_role(driver)
@@ -495,3 +499,94 @@ def test_structured_report_capture_uses_existing_artifact_adapter(execution_chec
                 check_evidence.validate(state, record, checks, driver.directory)
             assert error.value.code == "evidence_basis"
 
+
+
+@pytest.mark.parametrize("kind", ["manual", "behavioral"])
+def test_semantic_command_is_attested_by_final_verifier_without_explorer_execution(execution_checkpoint, monkeypatch, kind):
+    from lib import verification
+    from test_final_project_checks import register, COMMAND
+    driver = execution_checkpoint("accepted")
+    register(driver, execution_kind=kind)
+    driver.send("role_register", {"role_id": "semantic-verifier", "kind": "final_verifier", "context_id": "semantic-verifier",
+        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
+    driver.explorer("semantic-aggregate", "final", task_id=None)
+    with pytest.raises(ValueError, match="verifier"):
+        driver.send("procedure_begin", {"role_id": "semantic-aggregate", "stage": "final", "check_id": "project-result"}, task_id=None)
+    driver.send("procedure_begin", {"role_id": "semantic-verifier", "stage": "final", "check_id": "project-result"}, task_id=None)
+    driver.send("procedure_result", {"role_id": "semantic-verifier", "check_id": "project-result", "outcome": "passed",
+        "steps": [{"command": COMMAND, "observation": "Synthetic contract attestation; no agent evaluation is run by this test"}],
+        "trace": "synthetic verifier attestation"}, task_id=None)
+    def unexpected(*args):
+        pytest.fail("Explorer attempted a semantic command")
+    monkeypatch.setattr(verification.check_runner, "run_command", unexpected)
+    result = driver.send("check_run", {"role_id": "semantic-aggregate", "stage": "final"}, task_id=None)
+    assert result["outcome"] == "passed"
+    from lib.final_checks import evidence
+    assert len(evidence(driver.state, driver.directory)[1]) == 1
+
+
+def test_procedure_type_is_explicit_and_deterministic_procedure_belongs_to_explorer(driver):
+    from lib import verification
+    state = driver.state
+    task = state["tasks"]["TASK-one"]
+    untyped = {"id": "procedure", "source": "test", "run": {"procedure": "behavioral-name.md"}}
+    with pytest.raises(ValueError, match="explicit type"):
+        verification.transition(state, task, {"type": "checks_register", "event_id": "register",
+            "payload": {"inventory": {"instructions": [], "ci": []}, "additional": [untyped]}}, driver.directory)
+    # A filename cannot select ownership: only the explicit kind does.
+    from lib.explorer_assignments import execution_kind
+    for kind in ("deterministic", "manual", "behavioral"):
+        assert execution_kind({**untyped, "execution_kind": kind}) == kind
+
+def test_deterministic_procedure_uses_explorer_and_keeps_current_aggregate(driver):
+    driver.worktree()
+    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": [
+        {"id": "deterministic-procedure", "source": "fixture", "criteria": ["AC-one"],
+         "location": "check.py", "execution_kind": "deterministic", "run": {"procedure": "check.py"}}]})
+    driver.role("author", "executor")
+    driver.send("start", {"role_id": "author", "paths": ["result.txt"]})
+    for stage in ("baseline", "independent"):
+        if stage == "independent":
+            driver.freeze()
+        driver.explorer(stage + "-explorer", stage)
+        driver.role(stage + "-verifier", "verifier")
+        with pytest.raises(ValueError, match="explorer"):
+            driver.send("procedure_begin", {"role_id": stage + "-verifier", "stage": stage, "check_id": "deterministic-procedure"})
+        driver.send("procedure_begin", {"role_id": stage + "-explorer", "stage": stage, "check_id": "deterministic-procedure"})
+        driver.send("procedure_result", {"role_id": stage + "-explorer", "check_id": "deterministic-procedure", "outcome": "passed",
+            "steps": ["Synthetic deterministic assertion observation"], "trace": "synthetic-unit-test"})
+        result = driver.send("check_run", {"role_id": stage + "-explorer", "stage": stage})
+        assert result["outcome"] == ("baseline_recorded" if stage == "baseline" else "passed")
+    from lib.verification import valid_evidence
+    assert len(valid_evidence(driver.state, driver.task, driver.directory)) == 2
+    driver.send("procedure_begin", {"role_id": "independent-explorer", "stage": "independent", "check_id": "deterministic-procedure"})
+    with pytest.raises(ValueError, match="latest procedure"):
+        valid_evidence(driver.state, driver.task, driver.directory)
+    driver.send("procedure_result", {"role_id": "independent-explorer", "check_id": "deterministic-procedure", "outcome": "failed",
+        "steps": ["Synthetic failure"], "trace": "synthetic-unit-test"})
+    with pytest.raises(ValueError, match="reserve"):
+        driver.send("procedure_begin", {"role_id": "independent-explorer", "stage": "independent", "check_id": "deterministic-procedure"})
+
+@pytest.mark.parametrize("owned,location,markers,skill", [
+    (["src/main.py"], "tests/evaluation.md", [".agents/skills/unrelated/SKILL.md"], False),
+    (["skills/new/SKILL.md"], "tests/evaluation.md", [], True),
+    (["skills/tool/scripts/run.py"], "tests/evaluation.md", ["skills/tool/SKILL.md"], True),
+    (["src/main.py"], "skills/tool/evals/check.md", ["skills/tool/SKILL.md"], True),
+    (["src/main.py"], "tests/evaluation.md", ["SKILL.md"], True),
+])
+def test_behavioral_stage_depends_on_assigned_skill_boundary(execution_checkpoint, monkeypatch, owned, location, markers, skill):
+    from lib import explorer_assignments
+    from lib.repository import repository
+    driver = execution_checkpoint("frozen")
+    driver.role("semantic-verifier", "verifier")
+    state = driver.state
+    task = state["tasks"]["TASK-one"]
+    task["paths"] = owned
+    repo = repository(driver.root)
+    monkeypatch.setattr(type(repo), "tracked", lambda self, ref: markers)
+    check = {"execution_kind": "behavioral", "run": {"procedure": "evaluation.md"}, "location": location}
+    if skill:
+        with pytest.raises(ValueError, match="only at final"):
+            explorer_assignments.procedure_role(state, task, "semantic-verifier", "independent", check)
+    else:
+        assert explorer_assignments.procedure_role(state, task, "semantic-verifier", "independent", check)["kind"] == "verifier"

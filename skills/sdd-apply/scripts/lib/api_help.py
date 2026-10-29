@@ -51,18 +51,22 @@ EVENTS = {
                     "run": {"command": ["executable", "argument"]}, "cwd": ".", "configuration": {}, "location": "optional project-relative path"}),
     "role_register": contract("Register an actually launched fresh host context; return its packet path.",
         ("role_id", "kind", "context_id", "fresh", "host", "launch_ref", "capabilities"),
-        ("successor_of", "agent_selection", "model_observation"),
-        choices={"kind": ["executor", "verifier", "reviewer", "final_verifier"], "host": ["codex", "claude-code"]},
+        ("successor_of", "agent_selection", "model_observation", "assignment"),
+        choices={"kind": ["executor", "verifier", "reviewer", "final_verifier", "explorer"], "host": ["codex", "claude-code"]},
         rules=["fresh and capabilities.fresh_context must be true; launch_ref records the actual host launch.",
                "With project settings, supply resolve_agent's result as agent_selection.",
+               "Explorer requires the shared assignment with id=role_id, exact scope/current basis, full check IDs and registry revision, plus capabilities.observations.",
+               "Finished non-final explorer contexts may continue only their own task with the same launch profile and a new assignment; final requires a fresh separate explorer.",
                "A lost-role successor names successor_of; resume resolves that specific predecessor."]),
-    "role_result": contract("Finish registered role work; this does not accept its task.", ("role_id", "result", "trace")),
+    "role_result": contract("Finish registered role work; this does not accept its task.", ("role_id", "result", "trace"),
+        rules=["Research result is an object: kind=research, answer, references, inspected_scope, limitations, assumptions and questions; role retains assignment identity/basis/launch."]),
     "start": contract("Admit an eligible task with checks, dashboard and active executor.", ("role_id", "paths"),
         rules=["List canonical project-relative owned files individually; each task requires an isolated worktree."]),
-    "check_run": contract("Run the complete registered check set and save actual results.", ("role_id", "stage"), ("timeout",),
+    "check_run": contract("Explorer executes the complete registered check set and saves actual results.", ("role_id", "stage"), ("timeout",),
         choices={"stage": ["baseline", "self", "independent", "integration", "final"]}, defaults={"timeout": 300},
         rules=["Baseline precedes implementation in a clean worktree; self/independent/integration require a frozen local commit.",
-               "Ordinary changes retain task-scoped final_verifier checks; an optional additional project registry uses task_id=null, only at final.",
+               "Only a registered matching explorer checks assignment may run; timeout covers the full assigned attempt including prior deterministic procedures and setup/report capture, capped by assignment limits and any explicit absolute deadline.",
+               "Ordinary changes retain task-scoped final explorer checks; an optional additional project registry uses task_id=null, only at final.",
                "Refactoring uses task_id=null and the whole confirmed applicable union."]),
     "check_setup": contract("Resolve planned setup/procedure after baseline while running or repairing.",
         ("check_id", "command", "description"), ("cwd", "configuration"),
@@ -71,6 +75,7 @@ EVENTS = {
         ("review_round", "additional"),
         additional={"id": "unique ID", "source": "review", "criteria": ["scoped AC-ID"], "run": {"command": ["executable", "argument"]}},
         rules=["review_round names the requesting round; the new candidate requires new checks and review.",
+               "Each addition has one exact command or existing contained procedure with scoped criteria; procedures require explicit execution_kind.",
                "Refactoring IDs cannot reuse another task's registered, historical or planned generated check ID."]),
     "checks_revise": contract("Stage an approved refactoring registry revision; confirm only with task acceptance.",
         ("registry_revision", "before", "after", "basis", "preserves", "reason", "mapping"),
@@ -83,8 +88,12 @@ EVENTS = {
                "Pending checks apply to this candidate; accepted checks stay confirmed for other tasks until atomic acceptance.",
                "Failure/unavailability keeps the revision unconfirmed and retains repair/review budgets.",
                "Changing approved obligations, groups or lifetimes requires spec_conflict/revised_plan."]),
-    "procedure_begin": contract("Bind the procedure to the clean Git commit before its assigned role executes it.", ("check_id", "role_id", "stage"),
-        choices={"stage": ["baseline", "self", "independent", "integration", "final"]}),
+    "procedure_begin": contract("Bind the procedure to the clean Git commit before its assigned role executes it.", ("check_id", "role_id", "stage"), ("timeout",),
+        choices={"stage": ["baseline", "self", "independent", "integration", "final"]},
+        rules=["execution_kind belongs to the check record outside run: command defaults deterministic; procedure requires an explicit deterministic/behavioral/manual type.",
+               "Deterministic begin starts or continues the full assignment attempt deadline; execute within returned remaining_timeout and check_deadline. Expired starts are rejected; over-budget results retain actual steps and reported_outcome but cannot pass.",
+               "Deterministic procedures belong to explorer; behavioral/manual including typed commands belong to verifier or final_verifier, and explorer only aggregates their attestation.",
+               "Behavioral checks of assigned skill packages execute only at final."]),
     "procedure_result": contract("Record actual steps/outcome and host trace for the same pending procedure role.",
         ("check_id", "role_id", "outcome", "steps", "trace"),
         choices={"outcome": ["passed", "failed", "unavailable", "skipped", "unstable"]},
@@ -165,8 +174,8 @@ def describe(operation=None, event=None):
     if event is not None:
         result["task_id"] = "null" if event in RUN_EVENTS else "TASK-ID or null" if event == "block" or event in WHOLE_EVENTS else "TASK-ID"
         if event in WHOLE_EVENTS:
-            result.setdefault("rules", []).append("For refactoring, task_id=null addresses whole-result checks or the final_verifier; check_setup uses the check's approved setup_task.")
-            result["rules"].append("For ordinary changes, task_id=null addresses an optional additional final project registry and its fresh final_verifier; check_setup is unavailable. Task-scoped final checks still apply.")
+            result.setdefault("rules", []).append("Null-scope research explorer registration/results need no final registry. Refactoring null-scope checks use the whole union, final explorer and separate final_verifier; check_setup uses the approved setup_task.")
+            result["rules"].append("For ordinary changes, null-scope checks address the optional final project registry, fresh explorer and separate final_verifier; check_setup is unavailable. Task-scoped final checks still apply.")
         result["envelope"] = {**ENVELOPE, "type": event}
     elif operation == "event":
         result["envelope"] = deepcopy(ENVELOPE)

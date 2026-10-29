@@ -94,7 +94,7 @@ def test_multiple_lost_roles_recover_individually(execution_checkpoint, separate
     assert (project / "result.txt").read_text() == "unfinished"
     driver.send("role_result", {"role_id": "new-author", "result": "DONE", "trace": "unit-test"})
     driver.send("candidate")
-    assert driver.send("check_run", {"role_id": "new-verifier", "stage": "independent"})["outcome"] == "passed"
+    assert driver.run_checks("independent")["outcome"] == "passed"
 
 
 def test_lost_role_resolution_must_match_predecessor_and_kind(execution_checkpoint):

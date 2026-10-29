@@ -40,15 +40,21 @@ def refactoring_context(state, task):
 
 def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
+    from . import explorer_assignments as explorer
+    registered = state["roles"].get(p.get("role_id"), {})
+    research = task is None and ((kind == "role_register" and p.get("kind") == "explorer"
+                                 and p.get("assignment", {}).get("kind") == "research")
+                                or kind == "role_result" and registered.get("assignment", {}).get("kind") == "research")
     whole = task is None and (state["basis"].get("work_kind") == "refactoring" or bool(state.get("final_checks")))
-    require(task is not None or whole and kind in {"role_register", "role_result"}, "task_required", "Task required")
+    require(task is not None or (whole or research) and kind in {"role_register", "role_result"}, "task_required", "Task required")
     task_id = task["plan"]["id"] if task else None
     if kind == "role_register":
         require(set(p) >= {"role_id", "kind", "context_id", "fresh", "host", "launch_ref", "capabilities"}, "role_schema", "Host context and launch evidence required")
-        require(p["kind"] in {"executor", "verifier", "reviewer", "final_verifier"} and p["fresh"] is True, "fresh_role", "A fresh context is mandatory")
-        if whole:
-            require(p["kind"] == "final_verifier", "final_role", "Run-level roles are final verifiers")
-        if state["basis"].get("work_kind") == "refactoring":
+        require(p["kind"] in {"executor", "verifier", "reviewer", "final_verifier", "explorer"}
+                and p["fresh"] is True, "fresh_role", "A fresh context is mandatory")
+        if whole and not research:
+            require(p["kind"] in {"final_verifier", "explorer"}, "final_role", "Run-level checks use final verifier and explorer roles")
+        if state["basis"].get("work_kind") == "refactoring" and p["kind"] != "explorer":
             require((p["kind"] == "final_verifier") == whole, "final_role", "Register refactoring final_verifier with task_id=null")
         require(p["host"] in {"codex", "claude-code"} and p["launch_ref"] and p["context_id"], "host_evidence", "Record actual host launch; do not simulate a role")
         require(p["role_id"] not in state["roles"], "duplicate_role", "Role already registered")
@@ -66,16 +72,32 @@ def transition(state, task, event, directory):
             require(not any(state["roles"][r]["kind"] == "executor" and state["roles"][r]["status"] == "active" for r in task["roles"]), "writer_active", "Finish or reconcile the previous executor before assigning another")
         for role in state["roles"].values():
             if role["context_id"] == p["context_id"]:
-                require(role["task_id"] == task_id and role["kind"] in {"reviewer", "verifier"} and p["kind"] in {"reviewer", "verifier"}, "context_reused", "Only verifier/reviewer of the same task may share a fresh context")
+                continuation = (role["kind"] == p["kind"] == "explorer" and role["task_id"] == task_id
+                                and role.get("assignment", {}).get("stage") != "final"
+                                and p.get("assignment", {}).get("stage") != "final"
+                                and role["status"] == "finished" and role["host"] == p["host"])
+                require(continuation or role["task_id"] == task_id and role["kind"] in {"reviewer", "verifier"}
+                        and p["kind"] in {"reviewer", "verifier"}, "context_reused",
+                        "Only verifier/reviewer or completed non-final explorer assignments of the same task may share a context")
                 previous = role.get("agent_selection")
                 if selection is not None or previous is not None:
                     require(selection is not None and previous is not None
-                            and selection["mode"] != "native-agent" and previous["mode"] != "native-agent"
+                            and (continuation or selection["mode"] != "native-agent" and previous["mode"] != "native-agent")
                             and configuration.launch_identity(selection) == configuration.launch_identity(previous),
                             "agent_selection_conflict", "Different agent selections require separate fresh contexts")
         require(p["capabilities"].get("fresh_context") is True, "host_limits", "Fresh context mechanism unavailable; distinguish busy slots from unsupported host")
+        if p["kind"] == "explorer":
+            explorer.validate(state, task, p)
         role = {**p, "task_id": task_id, "status": "active", "registered_at": now()}
         state["roles"][p["role_id"]] = role
+        if research:
+            packet = {"task": None, "role": role, "assignment": role["assignment"],
+                      "project_root": state["basis"]["project_root"], "execution_directory": str(directory),
+                      "sources": {entry: str(Path(state["basis"]["change_root"]) / entry)
+                                  for entry in document_paths(state["basis"])}}
+            path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
+            write_json(path, packet)
+            return {"role": role, "packet": str(path)}
         if whole:
             from .final_checks import applicable, basis, criteria, retired
             packet = {"task": None, "work_kind": state["basis"].get("work_kind", "change"), "role": role,
@@ -86,11 +108,15 @@ def transition(state, task, event, directory):
                                 "commits": value["commits"]} for key, value in state["tasks"].items()},
                 "sources": {entry: str(Path(state["basis"]["change_root"]) / entry)
                             for entry in document_paths(state["basis"])}}
+            if p["kind"] == "explorer":
+                packet["assignment"] = role["assignment"]
             path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
             write_json(path, packet)
             return {"role": role, "packet": str(path)}
         task["roles"].append(p["role_id"])
         packet = {"task": task["plan"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
+        if p["kind"] == "explorer":
+            packet["assignment"] = role["assignment"]
         if state["basis"].get("work_kind", "change") == "refactoring":
             packet["work_kind"] = "refactoring"
             packet["refactoring"] = refactoring_context(state, task)
@@ -116,6 +142,8 @@ def transition(state, task, event, directory):
         role = state["roles"].get(p.get("role_id"))
         require(role and role["task_id"] == task_id and role["status"] == "active", "role_missing", "Active registered role required")
         require(p.get("result") and p.get("trace"), "role_result", "Result and host trace required")
+        if role["kind"] == "explorer" and role["assignment"]["kind"] == "research":
+            explorer.research_result(p["result"])
         role.update(status="finished", result=p["result"], trace=p["trace"])
         # Executor DONE is deliberately only a role result.
         return {"role_finished": p["role_id"], "task_status": task["status"] if task else None}

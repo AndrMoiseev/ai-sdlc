@@ -213,7 +213,7 @@ def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_a
     driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, task_id=None)
     driver.send("role_register", {"role_id": "final", "kind": "final_verifier", "context_id": "final",
         "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
-    final = driver.send("check_run", {"role_id": "final", "stage": "final"}, task_id=None)
+    final = driver.run_checks("final", task_id=None)
     assert final["outcome"] == "passed"
     output = driver.log(final)
     assert "TASK-one/local-result" not in {item["check_id"] for item in output["outputs"]}
@@ -325,7 +325,8 @@ def test_refactoring_check_transitions_failed_replacement_never_confirms(removal
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     if outcome == "failed":
-        assert_rejected(driver, "repair_cycle_required", "check_run", {"role_id": "TASK-two-verifier", "stage": "independent"})
+        driver.explorer("retry-explorer", "independent")
+        assert_rejected(driver, "repair_cycle_required", "check_run", {"role_id": "retry-explorer", "stage": "independent"})
         driver.send("repair", {"reason": "Restore the approved replacing-state assertion"})
         assert driver.task["test_repair_cycles_started"] == 1
         assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
@@ -340,8 +341,8 @@ def test_refactoring_check_transitions_failed_replacement_never_confirms(removal
 def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal_checkpoint, monkeypatch, boundary, native):
     from lib import state, verification
     driver = removal_checkpoint("frozen", memory_worktree=not native)
-    driver.role("interrupted-verifier", "verifier")
-    attempt = event(driver, "check_run", {"role_id": "interrupted-verifier", "stage": "independent"}, "interrupted-evidence")
+    driver.explorer("interrupted-explorer", "independent")
+    attempt = event(driver, "check_run", {"role_id": "interrupted-explorer", "stage": "independent"}, "interrupted-evidence")
     target = type(storage(driver.directory)) if boundary == "state-before" else verification
     method = "save" if boundary == "state-before" else "write_json"
     original_write = getattr(target, method)
@@ -363,7 +364,7 @@ def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     driver.role("resume-reviewer", "reviewer")
     assert_rejected(driver, "required_checks", "review_start", {"role_id": "resume-reviewer"})
-    assert driver.verify("interrupted-verifier")["outcome"] == "passed"
+    assert driver.verify("interrupted-explorer")["outcome"] == "passed"
     if orphan_bytes is not None:
         assert artifacts.read_bytes(orphan) == orphan_bytes
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0

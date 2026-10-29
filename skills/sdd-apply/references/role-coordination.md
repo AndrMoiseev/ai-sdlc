@@ -30,3 +30,30 @@ Use actual fresh-context and messaging capabilities. Busy slots require waiting;
 missing capabilities block the dependent launch. Reconcile a lost worker's actual
 work before replacement through [resume](../flows/resume.md). Fabricated launch
 attestations and test stubs never count as real independent work.
+
+## Explorer dispatch
+
+Before baseline, self, independent or integration, prepare a checks assignment
+with the exact full registry IDs, registry revision and current basis. Use
+`lib.explorer_assignments.basis(state, task, "checks", stage)` against the validated
+saved state to construct the API basis; the engine recomputes it at registration
+and execution. For null task final it uses the whole applicable final basis.
+For research use `basis(state, task, "research")`, including null task scope;
+research does not need a final registry. Preserve the shared assignment format
+from [explorer](../../sdd-shared/references/explorer.md).
+
+Launch the resolved `sdd-apply.explorer` in a waiting state, record the observed
+capabilities under `capabilities.observations`, and register its `assignment`.
+Use `role_id` as assignment `id`, the original project root as `scope.project`,
+change ID as `scope.work`, and the task ID or null as `scope.task`. Pass the
+resulting packet and [explorer instructions](../../sdd-shared/agents/explorer.md).
+A continued context gets a new role ID after the prior role finishes; reuse only
+within one task, with the same launch identity, outside final.
+
+Stop writers and freeze the candidate before self/independent/integration.
+Explorer requests the existing check API; the orchestrator may relay its request
+with the real explorer trace. Return saved summary and raw artifact references
+through the orchestrator to the independent verifier. The verifier reads needed
+artifacts and test sources; it does not repeat deterministic execution. At final,
+launch fresh separate explorer and final_verifier contexts for each applicable
+scope. Keep behavioral/manual attestations with verifier/final_verifier.
