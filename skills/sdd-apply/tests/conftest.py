@@ -320,7 +320,30 @@ class Driver:
     def verify(self, role="verifier"):
         if role not in self.state["roles"]:
             self.role(role, "verifier")
-        return self.run_checks("independent")
+        result = self.run_checks("independent")
+        if result["outcome"] == "passed":
+            self.conclude(role=role)
+        return result
+
+    def conclude(self, role="verifier", stage=None, outcome="passed", check_request=None, task_id="current"):
+        """Explicit synthetic criterion assessment, separate from the runner."""
+        from lib.verification_results import packet
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        state = self._view()
+        task = state["tasks"][selected_task]
+        context = packet(state, task, self.directory)
+        criteria_results = [{"criterion_id": criterion, "outcome": outcome,
+                             "reason": "Synthetic fixture criterion and test source inspected",
+                             "references": ["synthetic fixture source and registered check"]}
+                            for criterion in context.pop("criteria")]
+        if check_request:
+            for item in criteria_results:
+                item["check_request"] = check_request
+        if stage:
+            context["stage"] = stage
+        return self.send("verification_result", {**context, "role_id": role,
+            "criteria_results": criteria_results, "limitations": [], "trace": "synthetic-unit-test conclusion"},
+            task_id=selected_task)
 
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
@@ -335,6 +358,7 @@ class Driver:
         self.role(verifier, "verifier")
         result = self.run_checks("integration")
         assert result["outcome"] == "passed"
+        self.conclude(role=verifier)
         self.review(prefix + "integration-reviewer")
         self.send("role_result", {"role_id": verifier, "result": "DONE", "trace": "unit-test"})
         return result

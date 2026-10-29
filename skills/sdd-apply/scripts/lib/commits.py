@@ -2,7 +2,7 @@
 from .common import contained, require
 from .repository import repository
 from .effects import intent, observed
-from .verification import valid_evidence
+from .verification_results import require_passed
 
 
 def freeze(state, task, event, directory):
@@ -86,7 +86,7 @@ def confirm(state, task, commit):
 def transition(state, task, event, directory):
     require(task and task["status"] == "committing", "commit_phase", "Only reviewed candidates may be committed")
     reviewed(state, task)
-    valid_evidence(state, task, directory, "integration" if task["worktree"] and task["worktree"].get("integrated") else None)
+    require_passed(state, task, directory)
     root = state["basis"]["project_root"]
     repo = repository(root)
     require(repo.branch() == state["basis"]["branch"], "branch_changed", "Execution branch changed")

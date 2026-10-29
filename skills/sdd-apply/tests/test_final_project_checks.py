@@ -431,12 +431,14 @@ def complete_followup(driver):
     send("candidate")
     role("followup-verifier", "verifier")
     assert driver.run_checks("independent", task_id="TASK-two")["outcome"] == "passed"
+    driver.conclude(role="followup-verifier", task_id="TASK-two")
     review("followup-reviewer")
     send("transfer")
     send("integrate")
     send("candidate")
     role("followup-integration", "verifier")
     assert driver.run_checks("integration", task_id="TASK-two")["outcome"] == "passed"
+    driver.conclude(role="followup-integration", task_id="TASK-two")
     review("followup-integration-reviewer")
     send("commit")
     assert send("accept")["status"] == "accepted"

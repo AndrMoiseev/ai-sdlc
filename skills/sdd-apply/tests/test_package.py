@@ -33,4 +33,9 @@ def test_explorer_execution_instructions_match_role_api():
     assert "task explorer" in flow and "raw evidence references" in flow
     assert "machine summary and raw evidence references" in verifier
     assert "procedure_begin/result" in verifier
+    conclusion = describe(event="verification_result")
+    assert conclusion["choices"]["stage"] == ["independent", "integration"]
+    assert "verification_result" in flow and "checks_extend.verification_result" in flow
+    assert "`criterion_id`" in verifier and "`check_request`" in verifier
+    assert "read_object" in verifier
     assert (ROOT.parent / "sdd-shared/agents/explorer.md").is_file()

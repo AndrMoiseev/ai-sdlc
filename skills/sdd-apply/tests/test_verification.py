@@ -3,6 +3,102 @@ import pytest
 from pathlib import Path
 
 
+@pytest.mark.parametrize("stage", ["independent", "integration"])
+@pytest.mark.parametrize("addition_kind", ["command", "procedure"])
+def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, stage, addition_kind):
+    from copy import deepcopy
+    import sys
+    driver = execution_checkpoint("pending")
+    driver.worktree()
+    command = driver.task["plan"]["verification"][0]["run"]["command"]
+    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": [
+        {"id": "B", "source": "fixture", "criteria": ["AC-one"], "run": {"command": command}}]})
+    driver.role("author", "executor")
+    driver.send("start", {"role_id": "author", "paths": ["result.txt", "check.py"]})
+    driver.run_checks("baseline")
+    (driver.root / "result.txt").write_text("fixture implementation\n")
+    driver.freeze()
+    assert driver.verify()["outcome"] == "passed"
+    verifier = "verifier"
+    if stage == "integration":
+        driver.review()
+        driver.send("transfer")
+        driver.send("integrate")
+        driver.send("candidate")
+        verifier = "integration-verifier"
+        driver.role(verifier, "verifier")
+        assert driver.run_checks(stage)["outcome"] == "passed"
+    previous = driver.task
+    checks = deepcopy(previous["checks"])
+    result = driver.conclude(role=verifier, outcome="unavailable", check_request="Add explicit subtraction coverage")
+    conclusion = result["verification_result"]["id"]
+    addition = {"id": "C", "source": "verifier gap", "criteria": ["AC-one"],
+                "run": {"command": [sys.executable, "-B", "-c", "assert 5 - 3 == 2"]}}
+    if addition_kind == "procedure":
+        addition.update(run={"procedure": "check.py"}, execution_kind="deterministic")
+    driver.send("checks_extend", {"verification_result": conclusion, "additional": [addition]})
+    expanded = driver.task
+    assert expanded["checks"][:2] == checks
+    assert [check["id"] for check in expanded["checks"]] == ["plan-1", "B", "C"]
+    assert expanded["check_registry"]["revision"] == previous["check_registry"]["revision"] + 1
+    assert expanded["evidence"] == previous["evidence"]
+    for field in ("test_repair_cycles_started", "review_rounds_started", "active_review", "active_repair", "last_check_failed"):
+        assert expanded[field] == previous[field]
+    driver.role("gap-reviewer", "reviewer")
+    with pytest.raises(ValueError):
+        driver.send("review_start", {"role_id": "gap-reviewer"})
+    if addition_kind == "procedure":
+        driver.explorer("procedure-explorer", stage)
+        driver.send("procedure_begin", {"role_id": "procedure-explorer", "stage": stage, "check_id": "C"})
+        driver.send("procedure_result", {"role_id": "procedure-explorer", "check_id": "C", "outcome": "passed",
+            "steps": ["Synthetic deterministic check inspected"], "trace": "synthetic-unit-test"})
+    result = driver.run_checks(stage)
+    assert result["outcome"] == "passed"
+    assert result["summary"]["requested_check_ids"] == ["plan-1", "B", "C"]
+    with pytest.raises(ValueError, match="registry or applicable check attempt changed"):
+        driver.send("review_start", {"role_id": "gap-reviewer"})
+    driver.conclude(role=verifier)
+    assert driver.send("review_start", {"role_id": "gap-reviewer"})["round"] == previous["review_rounds_started"] + 1
+
+
+@pytest.mark.parametrize("damage", ["passed", "foreign", "stale", "no_request", "foreign_criterion", "both_bases"])
+def test_verifier_extension_rejects_invalid_basis(execution_checkpoint, damage):
+    driver = execution_checkpoint("verified")
+    outcome = "passed" if damage == "passed" else "failed"
+    request = None if damage in {"passed", "no_request"} else "Add boundary coverage"
+    result = driver.conclude(outcome=outcome, check_request=request)
+    conclusion = result["verification_result"]["id"]
+    addition = {"id": "C", "source": "gap", "criteria": ["AC-one"],
+                "run": driver.task["checks"][0]["run"]}
+    value = {"verification_result": conclusion, "additional": [addition]}
+    if damage == "foreign":
+        value["verification_result"] = "another-task-conclusion"
+    elif damage == "stale":
+        driver.run_checks("independent")
+    elif damage == "foreign_criterion":
+        addition["criteria"] = ["AC-another-task"]
+    elif damage == "both_bases":
+        value["review_round"] = "unrelated-round"
+    before = driver.task
+    with pytest.raises(ValueError):
+        driver.send("checks_extend", value)
+    assert driver.task == before
+
+
+def test_gap_preparation_reopens_executor_without_fabricated_failure(execution_checkpoint):
+    driver = execution_checkpoint("verified")
+    result = driver.conclude(outcome="failed", check_request="Prepare another exact assertion")
+    conclusion = result["verification_result"]["id"]
+    driver.send("checks_extend", {"verification_result": conclusion, "additional": [
+        {"id": "C", "source": "gap", "criteria": ["AC-one"], "run": driver.task["checks"][0]["run"]}]})
+    assert driver.send("repair", {"reason": "Prepare verifier-requested assertion", "defect_evidence": conclusion}) == {
+        "status": "repairing", "cycle": None}
+    assert driver.task["test_repair_cycles_started"] == driver.task["review_rounds_started"] == 0
+    driver.freeze()
+    assert driver.verify()["outcome"] == "passed"
+    assert driver.review()["status"] == "integrating"
+
+
 @pytest.mark.parametrize("target", ["result.txt", "sdd/changes/demo/design.md"])
 def test_successful_command_cannot_hide_changes_during_verification(execution_checkpoint, target):
     import json

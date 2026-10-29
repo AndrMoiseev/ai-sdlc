@@ -104,10 +104,13 @@ a role attestation, not an exit code. Stop writers for the entire check. Ignored
 files may hold generated output or disposable environments; test inputs and
 source code must be tracked.
 
-After `more_checks`, `checks_extend` takes the requesting `review_round` and
-additional checks. Existing checks stay mandatory; new registry contents
-invalidate prior verification. Apply [repair](../flows/repair.md) before fixes
-or retries after failure.
+`checks_extend` accepts exactly one basis: the current verifier conclusion's
+event ID in `verification_result`, or the requesting reviewer `more_checks`
+`review_round`. The verifier path works before `review_start`; see
+[criterion conclusions](#criterion-conclusions). Existing checks stay mandatory;
+registration, setup and extension advance the registry revision. New registry
+contents invalidate prior execution and conclusions. Apply
+[repair](../flows/repair.md) before fixes or retries after failure.
 
 ## Candidate identity
 
@@ -129,6 +132,36 @@ to the current SDD directory, excluding `execution/`; source files are identifie
 by Git rather than a repository-wide file inventory.
 
 ## Evidence gates
+
+### Criterion conclusions
+
+For independent/integration, the active independent task verifier submits
+`verification_result` with `role_id`, `stage`, current `basis`, exact
+`evidence_refs`, `criteria_results`, `limitations` and `trace`. Each criterion
+appears exactly once as `criterion_id`, `outcome: passed|failed|unavailable`,
+`reason` and nonempty inspected source/evidence `references`. Use the role
+packet's `verification` fields, refreshed through the orchestrator after each run.
+Evidence references contain check ID, check-run event ID, log path/hash and
+summary object reference. Stored bytes, nested raw references and identity are
+validated; matching metadata alone is insufficient.
+
+A failed/unavailable criterion may include a concrete `check_request` describing
+the missing assertion. Reference that current conclusion in `checks_extend` and
+bind each exact command or explicitly typed procedure to the requested criteria.
+The request and extension preserve review/test-repair counters. If preparation
+needs source edits, reopen the executor through `repair` with the recorded gap
+as `defect_evidence`; set `test_failure` only for an actual failed test. Run the
+whole expanded registry and obtain a new conclusion. Changing requirements
+requires `spec_conflict`; insufficient tests within an approved AC do not.
+
+`review_start`, `transfer`, `commit` and `accept` require both a successful
+mandatory run and the latest passed conclusion for the current task stage.
+Source, normative basis, registry, configuration or a newer applicable attempt
+invalidates the conclusion. Negative conclusions remain in history; neither an
+older pass, `role_result`, self evidence nor reviewer verdict replaces them.
+After integration obtain a new integration run and conclusion.
+
+### Primary execution evidence
 
 Retain command, stdout/stderr, exit status, duration, tested commit SHA, Git
 cleanliness observations, current-change document hashes, launch

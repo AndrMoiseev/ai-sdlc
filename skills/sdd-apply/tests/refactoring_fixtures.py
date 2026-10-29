@@ -94,7 +94,10 @@ class AcceptanceDriver(Driver):
         self.send("integrate")
         self.send("candidate")
         self.role("integration-verifier", "verifier")
-        return self.run_checks("integration")
+        result = self.run_checks("integration")
+        if result["outcome"] == "passed":
+            self.conclude(role="integration-verifier")
+        return result
 
     def corrupt(self, mutate):
         """Inject a damaged persisted input, not an always-rejecting route stub."""

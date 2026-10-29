@@ -364,7 +364,12 @@ def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     driver.role("resume-reviewer", "reviewer")
     assert_rejected(driver, "required_checks", "review_start", {"role_id": "resume-reviewer"})
-    assert driver.verify("interrupted-explorer")["outcome"] == "passed"
+    # Recovery runs new evidence; its criterion conclusion has a separate verifier.
+    assert driver.verify("recovery-verifier")["outcome"] == "passed"
+    conclusion = driver.task["verification_results"][-1]
+    assert conclusion["role_id"] == "recovery-verifier"
+    assert driver.state["roles"][conclusion["role_id"]]["kind"] == "verifier"
+    assert driver.state["roles"]["interrupted-explorer"]["kind"] == "explorer"
     if orphan_bytes is not None:
         assert artifacts.read_bytes(orphan) == orphan_bytes
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
@@ -424,8 +429,14 @@ def test_refactoring_check_transitions_resume_document_edit_retains_pending_revi
 def test_refactoring_check_transitions_ordinary_work_keeps_its_contract(project):
     driver = AcceptanceDriver(approved_basis(project, "change"))
     assert driver.start()["outcome"] == "baseline_recorded"
+    # DEC-verification-result gives ordinary conclusions a registry revision;
+    # it does not authorize the refactoring-only checks_revise operation.
+    registry = deepcopy(driver.task["check_registry"])
+    assert registry["revision"] == 1
     assert_rejected(driver, "revision_work_kind", "checks_revise", {})
-    assert "check_registry" not in driver.task
+    assert driver.task["check_registry"] == registry
+    assert "transition" not in registry
+    assert selected(driver.state, driver.task) == registry["history"][-1]["checks"]
 
 
 def test_refactoring_check_transitions_approved_revised_plan_preserves_old_transition_and_route(removal_checkpoint):

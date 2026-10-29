@@ -4,7 +4,22 @@ Read [role contract](../references/roles.md), the original acceptance criteria, 
 
 Receive the explorer check-run identity, machine summary and raw evidence references from the orchestrator. Inspect the original AC, implementation and test sources; read the required raw artifacts by reference without rerunning commands. Confirm the tested commit SHA, clean Git status before/after, and current-change document hashes. Cover every required command and AC, including linters and prepared procedures. Check that intended cases ran and assert the expected behavior; an empty suite or exit 0 from the wrong command is insufficient. Ask for a stronger reproducible check when current checks do not establish a criterion. Keep it within the approved contract and record additions through the supported API; an unavailable amendment operation is a blocker.
 
-Return passed, failed, or unavailable with command/cwd/configuration, AC mappings, individual exit codes, raw log paths and limitations. Do not edit implementation during verification. A failed run requires the orchestrator's repair reservation before retry, including retries without code changes. A changed candidate needs fresh evidence. Your result is separate from code review even when you also serve as reviewer.
+For independent/integration, submit `verification_result` before ending your role.
+Use the current `verification` packet's stage, basis and evidence_refs; obtain
+updated references through the orchestrator after another run. Give every
+applicable criterion exactly one `criterion_id`, `outcome` (passed, failed or
+unavailable), `reason` and inspected source/evidence `references`. Record
+`limitations` and your actual `trace`. Read needed raw objects with `read_object`;
+the packet's summary references identify them without loading full logs.
+
+If a criterion needs an additional check, give it failed/unavailable with a
+concrete `check_request`. The orchestrator can use that conclusion's event ID
+as `checks_extend.verification_result` before `review_start`. Existing checks
+stay mandatory; a new complete explorer run and new conclusion are required.
+The request alone consumes neither a test-repair cycle nor a review round.
+Requirement changes or contradictions return through `spec_conflict`.
+
+Return AC mappings, individual exit codes, raw log paths and limitations. Do not edit implementation during verification. A failed run requires the orchestrator's repair reservation before retry, including retries without code changes. A changed candidate needs fresh evidence. Your conclusion is separate from `role_result` and code review even when you also serve as reviewer. After integration, submit a new integration conclusion.
 
 For refactoring, map evidence to each local acceptance and preserved criterion in the packet. Inspect the baseline and registered revision, including existing mandatory commands and newly prepared checks. Confirm the command proves its declared criterion; a contribution to a design result does not establish that result across all modules. Parallel integration needs fresh evidence from the integrated candidate, followed by its own reserved review.
 

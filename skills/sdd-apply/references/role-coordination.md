@@ -57,3 +57,13 @@ through the orchestrator to the independent verifier. The verifier reads needed
 artifacts and test sources; it does not repeat deterministic execution. At final,
 launch fresh separate explorer and final_verifier contexts for each applicable
 scope. Keep behavioral/manual attestations with verifier/final_verifier.
+
+For a task verifier, the generated packet's `verification` field supplies stage,
+basis, applicable criteria and saved check-run/log/summary references. If that
+verifier continues after another run, refresh these fields with
+`lib.verification_results.packet(state, task, directory)` on the saved state and
+send them through the orchestrator. Keep explorer conversation out of the packet.
+The verifier reads raw artifacts through `read_object` and submits the separate
+`verification_result` before finishing its role. Wait for both current execution
+and conclusion to pass before review, transfer, commit or acceptance. After
+integration, repeat the handoff for the integration basis.

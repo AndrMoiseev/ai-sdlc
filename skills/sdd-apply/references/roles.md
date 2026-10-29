@@ -49,6 +49,11 @@ the message gives the result and references. A combined verifier/reviewer contex
 returns distinct results for its two registered roles. Finish API work before
 ending the role; DONE is an implementation claim, not acceptance.
 
+Task verifiers submit `verification_result` for independent/integration before
+`role_result`. Each conclusion covers the exact applicable criteria and current
+basis/evidence references; role completion or explorer success cannot replace it.
+See [checks and evidence](api-checks.md#criterion-conclusions) for gap requests.
+
 The orchestrator handles launch, registration, replacement and state transitions
 under [role coordination](role-coordination.md); workers need not load that procedure.
 

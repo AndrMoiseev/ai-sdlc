@@ -26,7 +26,7 @@ def reduce(state, event, directory):
         from .budgets import extend
         return extend(state, task, payload)
     # Results of already-running external work can be recorded while blocked.
-    if kind not in {"role_result", "review_result", "role_register", "finalize"}:
+    if kind not in {"role_result", "review_result", "role_register", "verification_result", "finalize"}:
         require(state["status"] == "active" and not state["blockers"], "run_blocked", str(state["blockers"]))
     if kind != "role_result":
         assert_basis(state)
@@ -41,6 +41,9 @@ def reduce(state, event, directory):
     if kind == "role_register" and state["status"] != "active":
         predecessor = state["roles"].get(payload.get("successor_of"))
         require(predecessor and predecessor["status"] == "lost" and predecessor["task_id"] == event["task_id"] and all(b["reason"] == "lost_role" for b in state["blockers"]), "run_blocked", "Only a lost-role successor may be registered while blocked")
+    if kind == "verification_result":
+        from .verification_results import transition
+        return transition(state, task, event, directory)
     if kind in {"role_register", "role_result", "review_start", "review_result"}:
         from .roles import transition
         return transition(state, task, event, directory)

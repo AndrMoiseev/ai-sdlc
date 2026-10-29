@@ -8,14 +8,14 @@ from .artifact_storage import write as atomic
 from .commits import index_tree, reviewed
 from .effects import intent, observed
 from .state import snapshot, clean_source
-from .verification import valid_evidence
+from .verification_results import require_passed
 
 
 def transition(state, task, event, directory):
     require(task and task["worktree"], "worktree_required", "Integration requires a registered worktree task")
     require(task["status"] == "integrating", "integration_phase", "Review the task before transfer")
     reviewed(state, task)
-    valid_evidence(state, task, directory)
+    require_passed(state, task, directory)
     root = state["basis"]["project_root"]
     require(repository(root).head() == state["execution_head"], "execution_reconciliation",
             "Resume and explicitly accept the external HEAD before integration")

@@ -19,6 +19,7 @@ def accepted_worktree(basis, tmp_path):
     d.send('candidate')
     d.role('integration-verifier', 'verifier')
     d.run_checks("integration")
+    d.conclude(role="integration-verifier")
     d.review('integration-reviewer')
     d.send('commit')
     d.send('accept')

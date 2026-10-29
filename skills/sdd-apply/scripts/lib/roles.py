@@ -1,6 +1,7 @@
 """Host-attested fresh contexts and separate implementation/review results."""
 from .common import digest, now, require, write_json
-from .verification import current, independent, valid_evidence, local_criteria
+from .verification import current, independent, local_criteria
+from .verification_results import require_passed
 from .review_policy import proven, test_change_context
 from .inputs import read_plan_document, document_paths
 import re
@@ -117,6 +118,9 @@ def transition(state, task, event, directory):
         packet = {"task": task["plan"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if p["kind"] == "explorer":
             packet["assignment"] = role["assignment"]
+        if p["kind"] == "verifier":
+            from .verification_results import packet as verification_packet
+            packet["verification"] = verification_packet(state, task, directory)
         if state["basis"].get("work_kind", "change") == "refactoring":
             packet["work_kind"] = "refactoring"
             packet["refactoring"] = refactoring_context(state, task)
@@ -150,7 +154,7 @@ def transition(state, task, event, directory):
     if kind == "review_start":
         require(task["status"] in {"verifying", "reviewing", "integrating"}, "review_phase", "Verification precedes review")
         independent(state, task, p.get("role_id"), {"reviewer"})
-        valid_evidence(state, task, directory, "integration" if task.get("worktree", {}) and task["worktree"].get("integrated") else None)
+        require_passed(state, task, directory)
         from .budgets import reserve_review
         if not reserve_review(state, task, event["event_id"]):
             return {"blocked": "review_limit_reached"}

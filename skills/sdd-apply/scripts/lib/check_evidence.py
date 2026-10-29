@@ -187,7 +187,7 @@ def persist(state, record, checks, directory, check_run_id):
     return {**objects.pack(aggregate, root=True), "reference": record["summary"]}
 
 
-def validate(state, record, checks, directory, expected_run_id=None):
+def validate(state, record, checks, directory, expected_run_id=None, require_complete=True):
     """Every accepted summary must still resolve to this exact run and raw input."""
     objects = StateObjects(directory)
     require(record.get("summary") and record.get("check_run_id"), "evidence_missing",
@@ -198,7 +198,7 @@ def validate(state, record, checks, directory, expected_run_id=None):
     require(aggregate.get("identity") == expected, "evidence_basis", "Summary belongs to another basis or role")
     for field in ("basis_before", "basis_after", "registry"):
         objects.get(aggregate["identity"][field])
-    require(aggregate.get("evidence_complete") is True and aggregate.get("source_unchanged") is True,
+    require((not require_complete or aggregate.get("evidence_complete") is True) and aggregate.get("source_unchanged") is True,
             "evidence_incomplete", "Required raw or structured evidence is unavailable")
     require(aggregate.get("requested_check_ids") == [check["id"] for check in checks]
             and aggregate.get("missing_check_ids") == [], "evidence_basis", "Summary registry differs")
@@ -220,7 +220,7 @@ def validate(state, record, checks, directory, expected_run_id=None):
         require(all(machine.get(key) == value for key, value in check_identity.items()),
                 "evidence_basis", "Check summary belongs to another basis")
         objects.get(machine["configuration"])
-        require(machine.get("evidence_complete") is True
+        require((not require_complete or machine.get("evidence_complete") is True)
                 and machine.get("outcome") == output["outcome"]
                 and machine.get("exit_code") == output.get("exit_code")
                 and machine.get("command") == output.get("command"),
@@ -228,7 +228,7 @@ def validate(state, record, checks, directory, expected_run_id=None):
         raw_refs = machine.get("artifacts", {})
         require("command" not in output or execution_kind(check) != "deterministic" or {"stdout", "stderr"} <= raw_refs.keys(),
                 "evidence_missing", "Command raw streams are required")
-        require(execution_kind(check) == "deterministic" or "procedure" in raw_refs,
+        require(not require_complete or execution_kind(check) == "deterministic" or "procedure" in raw_refs,
                 "evidence_missing", "Semantic checks require their verifier's primary attestation")
         for stream, raw_reference in raw_refs.items():
             raw = objects.get(raw_reference)
@@ -240,7 +240,7 @@ def validate(state, record, checks, directory, expected_run_id=None):
         require([{key: report.get(key) for key in ("format", "path", "required")} for report in reports] == declared,
                 "evidence_basis", "Structured reports must match their exact registered declarations")
         for report in reports:
-            require(not report["required"] or report.get("reference") and not report.get("error"),
+            require(not require_complete or not report["required"] or report.get("reference") and not report.get("error"),
                     "evidence_incomplete", "Required structured report is unavailable")
             if report.get("reference"):
                 raw = objects.get(report["reference"])

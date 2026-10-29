@@ -25,8 +25,6 @@ def local_criteria(state, task):
 
 def record_registry(state, task, event):
     """Append snapshots; callers must authorize each mutation before recording it."""
-    if state["basis"].get("work_kind", "change") != "refactoring":
-        return
     registry = task.setdefault("check_registry", {"revision": 0, "confirmed_revision": 0, "history": []})
     registry["revision"] += 1
     registry["history"].append({"revision": registry["revision"], "event_id": event["event_id"],
@@ -221,10 +219,19 @@ def transition(state, task, event, directory):
         registry_current(state, task)
         return {"checks": checks}
     if kind == "checks_extend":
-        require(task["status"] == "verifying" and task["reviews"] and task["reviews"][-1]["verdict"] == "more_checks", "extension_phase", "A reviewer must request additional checks")
+        require(task["status"] == "verifying" and not task["active_review"],
+                "extension_phase", "Extend checks before review or after reviewer more_checks")
         current(state, task)
         additions = p.get("additional", [])
-        require(additions and p.get("review_round") == task["reviews"][-1]["round_id"], "extension_evidence", "Reference the review requesting additional checks")
+        require(bool(p.get("verification_result")) != bool(p.get("review_round")),
+                "extension_evidence", "Reference either a verifier conclusion or reviewer more_checks round")
+        if p.get("verification_result"):
+            from .verification_results import extension
+            extension(state, task, p, directory)
+        else:
+            require(task["reviews"] and task["reviews"][-1]["verdict"] == "more_checks"
+                    and additions and p.get("review_round") == task["reviews"][-1]["round_id"],
+                    "extension_evidence", "Reference the review requesting additional checks")
         require_new_ids(state, task, additions)
         for check in additions:
             require(isinstance(check, dict) and check.get("id") and check.get("source")
