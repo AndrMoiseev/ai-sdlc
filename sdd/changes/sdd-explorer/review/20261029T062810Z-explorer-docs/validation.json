@@ -1,0 +1,29 @@
+{
+  "structural_check": {
+    "exit_code": 0,
+    "elapsed_seconds": 3.0326033,
+    "errors": [],
+    "warnings": []
+  },
+  "external_report_parse": {
+    "exit_code": 0,
+    "elapsed_seconds": 1.6082393,
+    "files": [
+      "consistency.md",
+      "simplicity.md",
+      "summary.md",
+      "decisions.md"
+    ],
+    "method": "uv run --python C:/Program Files/Python314/python.exe --locked --script validate_reports.py"
+  },
+  "prior_parser_invocation": {
+    "status": "not_run",
+    "reason": "uv --with attempted dependency resolution and failed to reach pypi.org; no parser code executed",
+    "elapsed_seconds": 15.9160624
+  },
+  "git": {
+    "head": "71eaba61610ec34d74d2a4f1e8dfd0ded9c186ac",
+    "dirty": false
+  },
+  "tests_run": false
+}

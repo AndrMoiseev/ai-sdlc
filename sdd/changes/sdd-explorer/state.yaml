@@ -3,10 +3,10 @@ work_kind: change
 document_type: state
 change_id: sdd-explorer
 language: ru
-phase: planning
-flow: revise
-awaiting: final_approval
-updated_at: '2026-10-28T14:12:06Z'
+phase: plan_approved
+flow: plan
+awaiting: none
+updated_at: '2026-10-29T09:03:24Z'
 document_links:
   - proposal.md
   - design.md
@@ -19,8 +19,20 @@ document_links:
   - simplification-review.md
 review_links:
   - review/decisions.md
+  - review/summary.md
+  - review/20261029T062810Z-explorer-docs/consistency.md
+  - review/20261029T062810Z-explorer-docs/simplicity.md
+  - review/20261029T072150Z-explorer-plan/simplicity.md
+  - review/20261029T072150Z-explorer-plan/plan.md
 approval_refs:
   - USER-explorer-planning
-next_question: Q-design-and-plan
+  - USER-explorer-review-20261029
+  - USER-explorer-verifier-extension
+  - USER-explorer-documents-approved
+  - USER-explorer-plan-review-20261029
+  - USER-explorer-eval-launch-constraint
+  - USER-explorer-plan-fixes-20261029
+  - USER-explorer-plan-approved-without-execution
+next_question: null
 checks:
   structure: passed
