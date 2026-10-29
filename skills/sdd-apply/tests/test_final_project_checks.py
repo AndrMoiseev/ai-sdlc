@@ -36,16 +36,21 @@ def final_role(driver, ident="project-final", **fields):
         "capabilities": {"fresh_context": True}, **fields}, task_id=None)
 
 
-def run_final(driver, role="project-final", stage="final"):
+def run_final(driver, role="project-final", stage="final", conclude=True):
     registered = driver.state["roles"].get(role, {})
     if registered.get("kind") == "final_verifier" and registered.get("task_id") is None:
-        return driver.run_checks(stage, task_id=None)
-    return driver.send("check_run", {"role_id": role, "stage": stage}, task_id=None)
+        result = driver.run_checks(stage, task_id=None)
+    else:
+        result = driver.send("check_run", {"role_id": role, "stage": stage}, task_id=None)
+    if conclude and result["outcome"] == "passed":
+        driver.final_conclude(task_id=None)
+    return result
 
 
 def task_final(driver):
     driver.explorer("task-final", "final")
     assert driver.send("check_run", {"role_id": "task-final", "stage": "final"})["outcome"] == "passed"
+    driver.final_conclude()
 
 
 @pytest.fixture(scope="session")
@@ -140,6 +145,9 @@ def test_missing_required_final_report_preserves_exit_and_blocks_completion(exec
     summary = read_object(driver.directory, output["summary"])
     assert summary["task_id"] is None and summary["stage"] == "final"
     assert summary["structured_reports"][0]["error"]
+    with pytest.raises(Rejected, match="Every required final"):
+        driver.final_conclude(task_id=None)
+    assert driver.final_conclude(task_id=None, outcome="unavailable")["verification_result"]["outcome"] == "unavailable"
     assert driver.send("finalize", task_id=None)["result"] == "partial"
 
 
@@ -156,6 +164,177 @@ def test_ordinary_without_additional_registry_keeps_original_final_contract(exec
     assert "final_project_checks" not in compact(driver.state)
     assert driver.send("finalize", task_id=None)["result"] == "complete"
     assert "final_checks" not in driver.state
+
+
+@pytest.mark.parametrize("gap", ["missing", "failed", "unrelated"])
+def test_shared_criterion_requires_every_task_obligation(execution_checkpoint, monkeypatch, gap):
+    from lib import commits
+    from lib import finalize as finalizer
+    driver = execution_checkpoint("accepted")
+    task_final(driver)
+    state = driver.state
+    first = deepcopy(state["tasks"]["TASK-one"])
+    second = deepcopy(first)
+    second["plan"]["id"] = "TASK-two"
+    second["verification_results"] = []
+    state["tasks"]["TASK-two"] = second
+    first_conclusion = first["verification_results"][-1]
+    first_evidence = finalizer.valid_evidence(state, first, driver.directory, "final")
+    confirm, execution, assessment = finalizer.confirm, finalizer.valid_evidence, finalizer.conclusion
+
+    # Isolate aggregation with already-validated second-task boundary inputs.
+    # The first task retains real memory-adapter execution/conclusion history;
+    # role, scope and evidence integrity have separate gate matrices above/below.
+    def confirmed(state, task, commit):
+        if task["plan"]["id"] == "TASK-one":
+            return confirm(state, task, commit)
+        assert task["status"] == "accepted" and commit in task["commits"]
+
+    def executed(state, task, directory, stage):
+        if task["plan"]["id"] == "TASK-one":
+            return execution(state, task, directory, stage)
+        assert stage == "final"
+        return [{"check_id": "second-final", "head": first_evidence[0]["head"], "outcome": "passed"}]
+
+    def assessed(state, task, directory, stage):
+        assert stage == "final"
+        if task["plan"]["id"] == "TASK-one":
+            return assessment(state, task, directory, stage)
+        if gap == "missing":
+            raise Rejected("verification_missing", "Second task has no final conclusion")
+        return {"id": "second-conclusion", "criteria_results": [{"criterion_id": "AC-one",
+            "outcome": "failed" if gap == "failed" else "passed", "reason": "Second task assessment"}]}
+
+    monkeypatch.setattr(finalizer, "confirm", confirmed)
+    monkeypatch.setattr(commits, "confirm", confirmed)
+    monkeypatch.setattr(finalizer, "valid_evidence", executed)
+    monkeypatch.setattr(finalizer, "conclusion", assessed)
+    if gap == "unrelated":
+        state["blockers"].append({"reason": "unrelated_host_limitation", "task_id": None})
+    result = finalizer.finalize(state, {}, driver.directory)
+    assert result["result"] == "partial"
+    missing = {criterion for item in result["missing"] for criterion in item["criteria"]}
+    assert missing == (set() if gap == "unrelated" else {"AC-one"})
+    assert result["accepted_criteria"] == (["AC-one"] if gap == "unrelated" else [])
+    assert not set(result["accepted_criteria"]) & missing
+    assert state["tasks"]["TASK-one"] == first
+    assert all(item in result["evidence"] for item in first_evidence)
+    assert any(item["id"] == first_conclusion["id"] for item in result["verification_results"])
+
+
+@pytest.mark.parametrize("project", [False, True], ids=["task", "project"])
+@pytest.mark.parametrize("outcome", ["missing", "failed", "unavailable"])
+def test_final_execution_requires_its_own_current_conclusion(execution_checkpoint, project, outcome):
+    from lib.finalize import finalize
+    driver = execution_checkpoint("accepted")
+    if project:
+        task_final(driver)
+        register(driver)
+        final_role(driver)
+        run_final(driver, conclude=False)
+    else:
+        driver.run_checks("final")
+    task_id = None if project else "TASK-one"
+    before = deepcopy(driver.state)
+    if outcome != "missing":
+        driver.final_conclude(task_id=task_id, outcome=outcome)
+    else:
+        driver.send("role_register", {"role_id": "role-result-only", "kind": "final_verifier",
+            "context_id": "role-result-only", "fresh": True, "host": "codex",
+            "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=task_id)
+        driver.send("role_result", {"role_id": "role-result-only", "result": "passed",
+                                    "trace": "synthetic claim only"}, task_id=task_id)
+    final = finalize(driver.state, {}, driver.directory)
+    assert final["result"] == "partial" and final["accepted_criteria"] == []
+    assert any(gap.get("code") == "verification_" + outcome and gap["criteria"] == ["AC-one"]
+               and gap["reason"] and gap["next_action"] for gap in final["missing"])
+    holder = driver.state["final_checks"] if project else driver.task
+    assert holder["evidence"] == (before["final_checks"] if project else before["tasks"]["TASK-one"])["evidence"]
+    assert driver.task["test_repair_cycles_started"] == before["tasks"]["TASK-one"]["test_repair_cycles_started"]
+
+
+@pytest.mark.parametrize("project", [False, True], ids=["task", "project"])
+def test_final_conclusion_cannot_replace_execution_or_role_result(execution_checkpoint, project):
+    driver = execution_checkpoint("accepted")
+    if project:
+        task_final(driver)
+        register(driver)
+    task_id = None if project else "TASK-one"
+    with pytest.raises(Rejected, match="Every required"):
+        driver.final_conclude(task_id=task_id)
+    # A saved negative assessment may describe missing evidence, but cannot pass.
+    result = driver.final_conclude(task_id=task_id, outcome="unavailable")
+    assert result["verification_result"]["evidence_refs"] == []
+    assert driver.send("finalize", task_id=None)["result"] == "partial"
+
+
+@pytest.mark.parametrize("project", [False, True], ids=["task", "project"])
+def test_latest_negative_and_new_final_run_invalidate_pass(execution_checkpoint, project):
+    from lib.finalize import finalize
+    from lib.verification_results import applicable
+    driver = execution_checkpoint("accepted")
+    task_final(driver)
+    if project:
+        register(driver)
+        final_role(driver)
+        run_final(driver)
+    task_id = None if project else "TASK-one"
+    first = deepcopy((driver.state["final_checks"] if project else driver.task)["verification_results"][-1])
+    driver.final_conclude(task_id=task_id, outcome="failed")
+    assert finalize(driver.state, {}, driver.directory)["result"] == "partial"
+    driver.final_conclude(task_id=task_id)
+    assert finalize(driver.state, {}, driver.directory)["result"] == "complete"
+    if project:
+        run_final(driver, conclude=False)
+    else:
+        driver.run_checks("final")
+    state = driver.state
+    with pytest.raises(Rejected, match="attempt changed"):
+        applicable(state, None if project else state["tasks"]["TASK-one"], driver.directory, "final")
+    final = finalize(state, {}, driver.directory)
+    assert final["result"] == "partial"
+    assert any(gap.get("code") == "verification_stale" and gap["criteria"] == ["AC-one"]
+               and gap["reason"] and gap["next_action"] for gap in final["missing"])
+    holder = driver.state["final_checks"] if project else driver.task
+    assert first in holder["verification_results"]
+
+
+@pytest.mark.parametrize("damage", ["criteria", "duplicate", "foreign", "basis", "refs", "role", "scope", "author"])
+@pytest.mark.parametrize("project", [False, True], ids=["task", "project"])
+def test_final_conclusion_rejects_wrong_scope_identity_and_contract(execution_checkpoint, project, damage):
+    from lib.verification_results import packet, transition
+    driver = execution_checkpoint("accepted")
+    if project:
+        register(driver)
+    task_id = None if project else "TASK-one"
+    driver.run_checks("final", task_id=task_id)
+    driver.send("role_register", {"role_id": "assessment", "kind": "final_verifier", "context_id": "assessment",
+        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test",
+        "capabilities": {"fresh_context": True}}, task_id=task_id)
+    state = driver.state
+    task = state["tasks"].get(task_id)
+    value = packet(state, task, driver.directory, "final")
+    value["criteria_results"] = [{"criterion_id": ident, "outcome": "passed", "reason": "inspected",
+                                   "references": ["check.py"]} for ident in value.pop("criteria")]
+    value.update(role_id="assessment", limitations=[], trace="synthetic-unit-test")
+    if damage == "criteria":
+        value["criteria_results"] = []
+    elif damage == "duplicate":
+        value["criteria_results"] *= 2
+    elif damage == "foreign":
+        value["criteria_results"][0]["criterion_id"] = "AC-other"
+    elif damage == "basis":
+        value["basis"]["registry_revision"] += 1
+    elif damage == "refs":
+        value["evidence_refs"] = []
+    elif damage == "role":
+        state["roles"]["assessment"]["kind"] = "explorer"
+    elif damage == "scope":
+        state["roles"]["assessment"]["task_id"] = "TASK-other"
+    else:
+        state["roles"]["assessment"]["context_id"] = "author"
+    with pytest.raises(Rejected):
+        transition(state, task, {"event_id": "wrong-final", "payload": value}, driver.directory)
 
 
 def test_register_requires_accepted_integrated_tasks(driver):
@@ -273,6 +452,7 @@ def test_unrelated_or_tampered_log_does_not_prove_project_check(prepared_project
 
 @pytest.mark.parametrize("outcome", ["pending", "passed", "failed", "unavailable", "skipped", "unstable"])
 def test_latest_procedure_attempt_supersedes_same_basis_pass(prepared_project, outcome):
+    from lib.verification_results import applicable as conclusion
     driver = prepared_project(procedure=True)
     begin(driver)
     previous = finish(driver)
@@ -281,6 +461,8 @@ def test_latest_procedure_attempt_supersedes_same_basis_pass(prepared_project, o
     assert attempt["basis"] == previous["basis"] and attempt["attempt_id"] != previous["attempt_id"]
     if outcome != "pending":
         finish(driver, outcome=outcome)
+    with pytest.raises(Rejected, match="attempt changed"):
+        conclusion(driver.state, None, driver.directory, "final")
     _, matches, gaps = evidence(driver.state, driver.directory)
     assert matches == []
     assert gaps[0]["reason"] == ({"pending": "procedure_pending", "passed": "procedure_superseded"}.get(outcome, outcome))
@@ -444,6 +626,7 @@ def complete_followup(driver):
     assert send("accept")["status"] == "accepted"
     role("followup-final", "final_verifier")
     assert driver.run_checks("final", task_id="TASK-two")["outcome"] == "passed"
+    driver.final_conclude(task_id="TASK-two")
 
 
 def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(prepared_project):
@@ -462,6 +645,7 @@ def test_revised_plan_retains_mandatory_project_checks_after_new_task_finals(pre
     complete_followup(driver)
     driver.explorer("new-task-final", "final")
     assert driver.send("check_run", {"role_id": "new-task-final", "stage": "final"})["outcome"] == "passed"
+    driver.final_conclude()
     assert evidence(driver.state, driver.directory)[2][0]["reason"] == "final_evidence_missing"
     assert driver.send("finalize", task_id=None)["result"] == "partial"
     live = [role["context_id"] for role in driver.state["roles"].values() if role["status"] == "active"]

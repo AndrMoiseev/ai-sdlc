@@ -9,6 +9,7 @@ def test_full_lifecycle(driver, project):
     driver.send("accept")
     driver.role("final-context", "final_verifier")
     assert driver.run_checks("final")["outcome"] == "passed"
+    driver.conclude(role="final-context", stage="final")
     result = driver.send("finalize", {}, task_id=None)
     assert result["result"] == "complete"
     assert result["accepted_criteria"] == ["AC-one"]

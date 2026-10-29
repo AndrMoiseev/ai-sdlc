@@ -4,6 +4,18 @@ from .common import now, require
 from .commits import confirm, index_tree
 from .verification import valid_evidence
 from .review_policy import technical_debt
+from .verification_results import applicable as conclusion
+
+
+def conclusion_gaps(state, task, directory, required):
+    try:
+        result = conclusion(state, task, directory, "final")
+        return [{"criteria": [item["criterion_id"]], "reason": "verification_" + item["outcome"],
+                 "code": "verification_" + item["outcome"],
+                 "detail": item["reason"], "verification_result": result["id"]}
+                for item in result["criteria_results"] if item["outcome"] != "passed"]
+    except ValueError as exc:
+        return [{"criteria": sorted(required), "reason": str(exc), "code": getattr(exc, "code", None)}]
 
 
 def refactoring_result(state, directory):
@@ -16,12 +28,8 @@ def refactoring_result(state, directory):
         current, evidence, gaps = final_checks.evidence(state, directory)
         missing.extend(gaps)
         covered = {criterion for check in current["checks"] for criterion in check["criteria"]}
-        required = set(final_checks.criteria(state))
-        persistent = {key for key, record in state["acceptance"].items() if record["lifetime"] == "persistent"}
-        # A confirmed architecture replacement can retire structural local AC;
-        # design preservation and results always retain their own obligations.
-        structural = {criterion for record in retired if record["basis"].get("test_changes") for criterion in record["criteria"]}
-        required |= persistent - structural
+        required = final_checks.required_criteria(state)
+        missing.extend(conclusion_gaps(state, None, directory, required))
         for ident in sorted(required - covered):
             missing.append({"criteria": [ident], "reason": "criteria_uncovered"})
         failed = {criterion for gap in missing for criterion in gap["criteria"]}
@@ -53,7 +61,10 @@ def finalize(state, payload, directory):
             checks = valid_evidence(state, task, directory, "final")
             require(all(e.get("head") == head for e in checks), "final_head", "Final evidence must name current HEAD")
             evidence.extend(checks)
-            accepted.extend(task["plan"]["covers"])
+            gaps = conclusion_gaps(state, task, directory, task["plan"]["covers"])
+            missing.extend({**gap, "task_id": key} for gap in gaps)
+            failed = {criterion for gap in gaps for criterion in gap["criteria"]}
+            accepted.extend(criterion for criterion in task["plan"]["covers"] if criterion not in failed)
         except ValueError as exc:
             missing.append({"task_id": key, "criteria": task["plan"]["covers"], "reason": str(exc)})
     if not is_refactoring and state.get("final_checks"):
@@ -64,13 +75,16 @@ def finalize(state, payload, directory):
         try:
             final_checks.ready(state)
             current, project_evidence, gaps = final_checks.evidence(state, directory)
+            gaps.extend(conclusion_gaps(state, None, directory, required))
         except ValueError as exc:
             gaps = [{"criteria": required, "reason": str(exc)}]
         missing.extend(gaps)
         evidence.extend(project_evidence)
-        failed = {criterion for gap in gaps for criterion in gap["criteria"]}
-        accepted = [criterion for criterion in accepted if criterion not in failed]
         extra["project_checks"] = {"basis": current, "criteria": required, "gaps": gaps}
+    if not is_refactoring:
+        # A shared criterion needs every applicable task and project obligation.
+        failed = {criterion for gap in missing for criterion in gap["criteria"]}
+        accepted = [criterion for criterion in accepted if criterion not in failed]
     recommendations = technical_debt(state)
     decisions = payload.get("recommendation_decisions")
     if decisions is None:
@@ -83,7 +97,14 @@ def finalize(state, payload, directory):
             and {d.get("finding_id") for d in decisions} == {f["finding_id"] for f in recommendations}
             and all(d.get("reason") and d.get("action") in {"defer", "reject"} for d in decisions),
             "recommendation_decisions", "Identify each finding; defer debt or record rejection. Fixes require explicit user approval as follow-up after completion")
-    state["final"] = {"head": head, "time": now(), "accepted_criteria": sorted(set(accepted)), "missing": missing, "evidence": evidence, "recommendations": recommendations, "decisions": decisions, "commits": {k: t["commits"] for k, t in state["tasks"].items()}, "result": "partial" if missing else "complete", **extra}
+    conclusions = []
+    for task_id, holder in [*state["tasks"].items(), (None, state.get("final_checks", {}))]:
+        latest = next((item for item in reversed(holder.get("verification_results", [])) if item["stage"] == "final"), None)
+        if latest is not None:
+            conclusions.append({"task_id": task_id, **latest})
+    for gap in missing:
+        gap.setdefault("next_action", "Obtain current complete final execution and conclusion; attribute defects to an owned repair before edits")
+    state["final"] = {"head": head, "time": now(), "accepted_criteria": sorted(set(accepted)), "missing": missing, "evidence": evidence, "verification_results": conclusions, "recommendations": recommendations, "decisions": decisions, "commits": {k: t["commits"] for k, t in state["tasks"].items()}, "result": "partial" if missing else "complete", **extra}
     state["status"] = "blocked" if missing else "completed"
     if missing:
         state["blockers"].append({"reason": "final_incomplete", "resume_condition": "Resolve final missing evidence or defects", "missing": missing})

@@ -330,8 +330,8 @@ class Driver:
         from lib.verification_results import packet
         selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
         state = self._view()
-        task = state["tasks"][selected_task]
-        context = packet(state, task, self.directory)
+        task = state["tasks"].get(selected_task)
+        context = packet(state, task, self.directory, stage)
         criteria_results = [{"criterion_id": criterion, "outcome": outcome,
                              "reason": "Synthetic fixture criterion and test source inspected",
                              "references": ["synthetic fixture source and registered check"]}
@@ -344,6 +344,18 @@ class Driver:
         return self.send("verification_result", {**context, "role_id": role,
             "criteria_results": criteria_results, "limitations": [], "trace": "synthetic-unit-test conclusion"},
             task_id=selected_task)
+
+    def final_conclude(self, task_id="current", outcome="passed"):
+        """Separate synthetic final assessment; never inferred by production code."""
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        ident = f"final-verifier-{self.number + 1}"
+        self.send("role_register", {"role_id": ident, "kind": "final_verifier", "context_id": ident,
+            "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test",
+            "capabilities": {"fresh_context": True}}, task_id=selected_task)
+        result = self.conclude(role=ident, stage="final", outcome=outcome, task_id=selected_task)
+        self.send("role_result", {"role_id": ident, "result": "DONE",
+                                 "trace": "synthetic final assessment complete"}, task_id=selected_task)
+        return result
 
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")

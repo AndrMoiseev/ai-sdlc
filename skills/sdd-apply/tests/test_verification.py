@@ -347,6 +347,7 @@ def test_accepted_final_history_survives_revision_but_cannot_complete_new_head(e
     assert any("current HEAD" in gap["reason"] for gap in historical["missing"])
     driver.explorer("current-final", "final")
     assert driver.send("check_run", {"role_id": "current-final", "stage": "final"})["outcome"] == "passed"
+    driver.final_conclude()
     assert driver.send("finalize", task_id=None)["result"] == "complete"
 
 

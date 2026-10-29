@@ -74,6 +74,16 @@ def basis(state):
     return result
 
 
+def required_criteria(state):
+    if not refactoring(state):
+        return {criterion for check in registry(state)["checks"] for criterion in check["criteria"]}
+    persistent = {key for key, record in state["acceptance"].items() if record["lifetime"] == "persistent"}
+    structural = {criterion for record in retired(state) if record["basis"].get("test_changes")
+                  for criterion in record["criteria"]}
+    # Confirmed structural retirement cannot retire design results or preservation.
+    return set(criteria(state)) | (persistent - structural)
+
+
 def independent(state, role_id, active=True):
     role = state["roles"].get(role_id)
     require(role and role["kind"] == "explorer" and role["task_id"] is None
@@ -124,7 +134,7 @@ def register(state, event):
         explorer.execution_kind(check)
         if "command" in check["run"]:
             require_command(check["run"]["command"])
-    result = {"checks": checks, "revision": 0, "history": [], "evidence": [], "procedures": {},
+    result = {"checks": checks, "revision": 0, "history": [], "evidence": [], "verification_results": [], "procedures": {},
               "failures": {}, "inventory": payload["inventory"]}
     record_revision(result, event)
     state["final_checks"] = result

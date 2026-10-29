@@ -4,7 +4,7 @@ Read [role contract](../references/roles.md), the original acceptance criteria, 
 
 Receive the explorer check-run identity, machine summary and raw evidence references from the orchestrator. Inspect the original AC, implementation and test sources; read the required raw artifacts by reference without rerunning commands. Confirm the tested commit SHA, clean Git status before/after, and current-change document hashes. Cover every required command and AC, including linters and prepared procedures. Check that intended cases ran and assert the expected behavior; an empty suite or exit 0 from the wrong command is insufficient. Ask for a stronger reproducible check when current checks do not establish a criterion. Keep it within the approved contract and record additions through the supported API; an unavailable amendment operation is a blocker.
 
-For independent/integration, submit `verification_result` before ending your role.
+For independent/integration and final, submit `verification_result` before ending your role.
 Use the current `verification` packet's stage, basis and evidence_refs; obtain
 updated references through the orchestrator after another run. Give every
 applicable criterion exactly one `criterion_id`, `outcome` (passed, failed or
@@ -12,7 +12,7 @@ unavailable), `reason` and inspected source/evidence `references`. Record
 `limitations` and your actual `trace`. Read needed raw objects with `read_object`;
 the packet's summary references identify them without loading full logs.
 
-If a criterion needs an additional check, give it failed/unavailable with a
+For independent/integration, if a criterion needs an additional check, give it failed/unavailable with a
 concrete `check_request`. The orchestrator can use that conclusion's event ID
 as `checks_extend.verification_result` before `review_start`. Existing checks
 stay mandatory; a new complete explorer run and new conclusion are required.
@@ -30,7 +30,7 @@ baseline as a gap; a fresh passing replacement alone cannot prove old behavior.
 Use the [test evolution policy](../references/review-policy.md#tests-at-changed-module-boundaries)
 to distinguish structural retirement from lost preservation.
 
-For final verification, assess the fresh final explorer full-set evidence and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Attribute a defect to its task or report uncertain ownership for resolution.
+For final verification, assess the fresh final explorer full-set evidence and overall scenario on the final execution-branch HEAD. Earlier task logs cannot replace this run. Submit a final `verification_result` using the current verification packet: every required criterion needs its own assessment on the same basis as the fresh execution. Attribute a defect to its task or report uncertain ownership for resolution. Missing, failed or unavailable evidence leaves the result partial; a positive role_result cannot replace the conclusion.
 
 For ordinary additional project checks, use the run-level packet (`task: null`),
 null task scope and stage `final`. Assess every registered project check at the packet's current work identity, HEAD, approved plan commit and registry. Attest only behavioral/manual procedures using `procedure_begin/result`; explorer executes deterministic commands and procedures.

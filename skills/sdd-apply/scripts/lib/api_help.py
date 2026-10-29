@@ -102,16 +102,17 @@ EVENTS = {
         rules=["Then check_run reconciles the full registry; edits during a procedure make evidence stale."]),
     "candidate": contract("Commit owned paths locally and enter verification after task writers stop.",
         rules=["Returns commit metadata; no candidate artifact or reference is stored."]),
-    "verification_result": contract("Save an independent verifier's complete criterion conclusion for current task evidence.",
+    "verification_result": contract("Save a complete independent criterion conclusion for current task or final run evidence.",
         ("role_id", "stage", "basis", "evidence_refs", "criteria_results", "limitations", "trace"),
-        choices={"stage": ["independent", "integration"]},
+        choices={"stage": ["independent", "integration", "final"]},
         evidence_refs=[{"check_id": "registered ID", "log": "saved log path", "sha256": "log digest",
                         "check_run_id": "check_run event ID", "summary": "saved object reference"}],
         criteria_results=[{"criterion_id": "applicable AC-ID", "outcome": "passed|failed|unavailable",
                            "reason": "criterion assessment", "references": ["inspected source or evidence location"],
                            "check_request": "optional concrete additional check for failed/unavailable criterion"}],
         rules=["Use verification stage/basis/evidence_refs from the role packet, refreshed through the orchestrator after each run. Every applicable criterion appears exactly once.",
-               "Only the active task verifier independent of its authors may submit. Explorer, reviewer and role_result cannot substitute for this event.",
+               "Independent/integration require the active task verifier. Final requires a fresh separate final_verifier independent of all authors, in the exact task or null scope. Explorer, reviewer and role_result cannot substitute.",
+               "Ordinary task finals cover their own covers; optional null-scope project conclusions supplement them. Refactoring null-scope conclusions cover design results, preservation and applicable persistent criteria; retired checks remain history.",
                "Negative conclusions preserve gaps without fabricating command failure. Passed requires the latest full successful run and valid raw artifacts.",
                "Source, normative basis, configuration, registry or a newer check/procedure attempt invalidates the conclusion. Integration needs a new conclusion."]),
     "review_start": contract("Reserve one review round after current independent execution and verifier conclusion both pass.", ("role_id",)),
@@ -164,14 +165,15 @@ EVENTS = {
                "instruction contains actual execution text and source authorizing the revised plan and any mapped follow-up.",
                "Each completed_followups mapping replaces only that accepted task's obsolete budget stop with a new approved dependent task; counters and unrelated blockers remain.",
                "Unfinished tasks and active review/repair reservations cannot use completed_followups. Ordinary final project obligations survive revision; old attempts are archived and current-basis evidence is required."]),
-    "finalize": contract("Require accepted commits and fresh independent final-HEAD evidence for every AC.",
+    "finalize": contract("Require accepted commits, fresh final execution and a separate passed final conclusion for every applicable scope.",
         optional=("recommendation_decisions",),
         decision={"finding_id": "journal finding ID", "action": "defer|reject", "reason": "decision rationale"},
-        rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once."]),
+        rules=["Omission defers every recommendation; explicit decisions cover every finding exactly once.",
+               "Missing, stale, failed or incomplete execution/conclusion yields partial with criteria and next action. The report separates evidence from verification_results."]),
 }
 
 RUN_EVENTS = {"resume", "revised_plan", "finalize"}
-WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "repair"}
+WHOLE_EVENTS = {"checks_register", "check_setup", "check_run", "procedure_begin", "procedure_result", "role_register", "role_result", "verification_result", "repair"}
 ENVELOPE = {"event_id": "unique filesystem-safe ID", "run_id": "saved run ID",
             "expected_revision": "current integer revision",
             "type": "event name", "task_id": "TASK-ID or null for run event", "payload": {}}

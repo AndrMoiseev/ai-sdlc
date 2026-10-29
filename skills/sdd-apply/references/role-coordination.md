@@ -67,3 +67,12 @@ The verifier reads raw artifacts through `read_object` and submits the separate
 `verification_result` before finishing its role. Wait for both current execution
 and conclusion to pass before review, transfer, commit or acceptance. After
 integration, repeat the handoff for the integration basis.
+
+For final_verifier, refresh with
+`lib.verification_results.packet(state, task, directory, "final")`, using `None`
+for a run-level scope. Obtain a separate final conclusion for every ordinary
+task and, when registered, the additional project registry. Refactoring uses
+the whole null scope. Send current evidence references after all procedures
+have been aggregated; a newer attempt invalidates the previous conclusion.
+Finish final_verifier only after `verification_result` is saved, then call
+`finalize` and inspect execution evidence and conclusions separately.

@@ -158,11 +158,15 @@ class FinalDriver(RegistryDriver):
             fresh=True, host='codex', launch_ref='synthetic-unit-test', capabilities={'fresh_context': True},
             **({'successor_of': successor_of} if successor_of else {})), task_id=None)
 
-    def run_final(self, role='final'):
+    def run_final(self, role='final', conclude=True):
         registered = self.state['roles'].get(role, {})
         if registered.get('kind') == 'final_verifier' and registered.get('task_id') is None:
-            return self.run_checks('final', task_id=None)
-        return self.send('check_run', {'role_id': role, 'stage': 'final'}, task_id=None)
+            result = self.run_checks('final', task_id=None)
+        else:
+            result = self.send('check_run', {'role_id': role, 'stage': 'final'}, task_id=None)
+        if conclude and result['outcome'] == 'passed':
+            self.final_conclude(task_id=None)
+        return result
 
 
 @pytest.fixture(scope="session")
@@ -230,6 +234,48 @@ def test_complete_typed_migration_with_independent_whole_result(completed_migrat
     assert driver.state['roles']['final']['task_id'] is None
     assert projection(driver.state)['whole_result']['confirmed_criteria'] == ['AC-preserved', 'AC-result']
     assert compact(driver.state)['whole_result']['total_criteria'] == 2
+    assert {item['criterion_id'] for item in final['verification_results'][0]['criteria_results']} == {
+        'AC-result', 'AC-preserved', 'AC-a', 'AC-removed'}
+    assert final['verification_results'][0]['task_id'] is None
+
+
+@pytest.mark.parametrize('outcome', ['missing', 'failed', 'unavailable'])
+def test_whole_final_requires_conclusion_for_result_preservation_and_persistent_scope(completed_migration, outcome):
+    from lib.finalize import finalize
+    driver = completed_migration()
+    driver.final_role()
+    assert driver.run_final(conclude=False)['outcome'] == 'passed'
+    before = deepcopy(driver.state['final_checks']['evidence'])
+    if outcome != 'missing':
+        driver.final_conclude(task_id=None, outcome=outcome)
+    final = finalize(driver.state, {}, driver.directory)
+    assert final['result'] == 'partial' and final['accepted_criteria'] == []
+    missing = {criterion for gap in final['missing'] for criterion in gap['criteria']}
+    assert missing == {'AC-result', 'AC-preserved', 'AC-a', 'AC-removed'}
+    assert driver.state['final_checks']['evidence'] == before
+    assert final['retired_checks'][0]['check_id'] == 'TASK-one/adapter'
+
+
+def test_whole_pass_cannot_omit_persistent_criterion_or_reuse_negative_conclusion(completed_migration):
+    from lib.verification_results import packet
+    from lib.finalize import finalize
+    driver = completed_migration()
+    driver.final_role()
+    assert driver.run_final()['outcome'] == 'passed'
+    driver.send('role_register', dict(role_id='whole-assessment', kind='final_verifier', context_id='whole-assessment',
+        fresh=True, host='codex', launch_ref='synthetic-unit-test', capabilities={'fresh_context': True}), task_id=None)
+    context = packet(driver.state, None, driver.directory, 'final')
+    assert set(context.pop('criteria')) == {'AC-result', 'AC-preserved', 'AC-a', 'AC-removed'}
+    with pytest.raises(Rejected, match='every applicable criterion'):
+        driver.send('verification_result', dict(context, role_id='whole-assessment', limitations=[], trace='synthetic',
+            criteria_results=[dict(criterion_id=ident, outcome='passed', reason='inspected', references=['design.md'])
+                              for ident in ('AC-result', 'AC-preserved', 'AC-removed')]), task_id=None)
+    driver.conclude(role='whole-assessment', stage='final', task_id=None, outcome='failed')
+    assert finalize(driver.state, {}, driver.directory)['result'] == 'partial'
+    driver.conclude(role='whole-assessment', stage='final', task_id=None)
+    assert finalize(driver.state, {}, driver.directory)['result'] == 'complete'
+    assert driver.run_final(conclude=False)['outcome'] == 'passed'
+    assert finalize(driver.state, {}, driver.directory)['result'] == 'partial'
 
 
 @pytest.mark.parametrize('defect', ['missing-consumer', 'adapter-bypass'])
@@ -448,9 +494,12 @@ def passed_procedure(passed_procedure_checkpoint, repository_backend, state_back
 
 @pytest.mark.parametrize('outcome', ['pending', 'failed', 'unavailable', 'skipped', 'unstable'])
 def test_newer_same_basis_procedure_supersedes_aggregate_pass(passed_procedure, outcome):
+    from lib.verification_results import applicable as conclusion
     driver, previous, aggregate = passed_procedure
     before_basis = deepcopy(previous['basis'])
     next_attempt = begin_procedure(driver)
+    with pytest.raises(Rejected, match='attempt changed'):
+        conclusion(driver.state, None, driver.directory, 'final')
     assert next_attempt['basis'] == before_basis
     assert next_attempt['attempt_id'] != previous['attempt_id']
     if outcome != 'pending':

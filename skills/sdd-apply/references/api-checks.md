@@ -161,6 +161,20 @@ invalidates the conclusion. Negative conclusions remain in history; neither an
 older pass, `role_result`, self evidence nor reviewer verdict replaces them.
 After integration obtain a new integration run and conclusion.
 
+At final, a fresh separate `final_verifier` submits the same `verification_result`
+contract with `stage: final`. Ordinary task conclusions cover that task's `covers`;
+optional null-scope project conclusions cover only the additional registry.
+Refactoring null-scope conclusions cover design results, preservation and applicable
+persistent local criteria from the confirmed union. Retired checks stay historical.
+The packet's `verification` contains the exact criterion IDs, basis and evidence
+references. Every required scope needs fresh execution and a passed conclusion;
+`finalize` reports `partial` with missing criteria and a next action otherwise.
+The report separates execution `evidence` from `verification_results`. A newer
+pending, failed or superseding procedure invalidates both the old aggregate and
+its conclusion even at unchanged HEAD. Obtain a fresh aggregate and conclusion.
+Final defects use the existing owned repair path and task budgets; the
+`checks_extend` conclusion basis remains limited to independent/integration.
+
 ### Primary execution evidence
 
 Retain command, stdout/stderr, exit status, duration, tested commit SHA, Git
@@ -214,7 +228,7 @@ nonempty `additional`. Each check has a distinct ID within this registry, source
 approved `covers` criteria, and an exact command or existing procedure. The registry
 contains only these additional checks. Task registries and task-scoped final checks
 retain their existing meaning. Ordinary executions without this registry keep the
-original final acceptance contract.
+task-scoped final execution and conclusion requirement.
 
 Launch a fresh explorer independent of every executor and register its final checks assignment with `task_id: null`. Use it for `check_run` and deterministic procedures; launch a separate fresh final_verifier for semantic assessment and behavioral/manual procedures. Both use null task scope and stage `final`. Ordinary project checks have no `setup_task` and cannot
 use `check_setup`; planned preparation belongs to the task that implements it.

@@ -111,6 +111,9 @@ def transition(state, task, event, directory):
                             for entry in document_paths(state["basis"])}}
             if p["kind"] == "explorer":
                 packet["assignment"] = role["assignment"]
+            if p["kind"] == "final_verifier":
+                from .verification_results import packet as verification_packet
+                packet["verification"] = verification_packet(state, None, directory, "final")
             path = artifacts.contained(directory, f"runs/{state['run_id']}/roles/{p['role_id']}.json")
             write_json(path, packet)
             return {"role": role, "packet": str(path)}
@@ -118,9 +121,10 @@ def transition(state, task, event, directory):
         packet = {"task": task["plan"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if p["kind"] == "explorer":
             packet["assignment"] = role["assignment"]
-        if p["kind"] == "verifier":
+        if p["kind"] in {"verifier", "final_verifier"}:
             from .verification_results import packet as verification_packet
-            packet["verification"] = verification_packet(state, task, directory)
+            packet["verification"] = verification_packet(state, task, directory,
+                                                          "final" if p["kind"] == "final_verifier" else None)
         if state["basis"].get("work_kind", "change") == "refactoring":
             packet["work_kind"] = "refactoring"
             packet["refactoring"] = refactoring_context(state, task)

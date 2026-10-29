@@ -49,7 +49,7 @@ the message gives the result and references. A combined verifier/reviewer contex
 returns distinct results for its two registered roles. Finish API work before
 ending the role; DONE is an implementation claim, not acceptance.
 
-Task verifiers submit `verification_result` for independent/integration before
+Task verifiers submit `verification_result` for independent/integration; fresh final_verifiers submit it for final in their task or null scope before
 `role_result`. Each conclusion covers the exact applicable criteria and current
 basis/evidence references; role completion or explorer success cannot replace it.
 See [checks and evidence](api-checks.md#criterion-conclusions) for gap requests.
