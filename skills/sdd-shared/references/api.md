@@ -20,6 +20,9 @@ parent model described in [subagent selection](subagents.md).
 | `resolve_agent.py` | `{ok, result}` or error JSON; resolves selection without launching or writing settings |
 | `sdd_shared.module(name)` | Imports one public domain module, leaving unrelated dependencies unloaded |
 | `subagents` | `ROLES`, `settings`, `resolve`, `validate_selection`, `launch_identity`, strict JSON reads |
+| `explorer` | `validate_assignment`, `check_capabilities`; bounded research/check assignments and observed host capabilities |
+| `check_runner` | `valid_command`, `run_command(command, cwd, timeout)`; exact argument arrays, process-tree timeout handling and complete stdout/stderr |
+| `check_summary` | `report_specs`, `junit_counts`, `check_summary`, `aggregate`; machine summaries without execution-state ownership |
 | `documents` | Document parsing, record IDs, `InputError` and `ValidationError` |
 | `paths` | Contained document paths, change roots and verification locations |
 | `validation`, `reviews`, `checkpoints` | Structural validation, commit review/approval diagnostics and accepted Git checkpoints |
@@ -29,6 +32,63 @@ The normative data formats are [document formats](document-format.md) and
 the Python reader additionally rejects duplicate keys and whitespace-only agent
 names. Cross-record and filesystem constraints are checked by the Python modules.
 Execution events and state remain owned by sdd-apply.
+
+## Check evidence and summaries
+
+`check_runner.run_command` uses `shell=False`, captures exit code, UTC start
+time and monotonic duration, and reports timeout or launch failure as unavailable.
+It returns decoded stdout/stderr for inspection and base64 copies preserving
+every captured byte. Callers persist the raw outputs before returning a compact
+summary. The shared runner does not write an execution journal or accept work.
+
+Register optional reports in a check's configuration:
+
+```json
+{"structured_reports": [{"format": "pytest-junit", "path": "reports/results.xml", "required": true}]}
+```
+
+Each entry requires format, path and a boolean required flag. Read only exact
+registered paths through the consumer's artifact adapter. Absolute external
+result paths are supported; relative paths resolve against the command's cwd.
+Access errors remain evidence limitations. Preserve the declared path and its
+resolved identity without searching for alternative reports.
+`report_specs` also recognizes `--junitxml` and `--junit-xml`, with a separate
+value or `=value`, already present in the exact command. These reports are
+required; discovery never adds arguments or changes the command. Other formats
+are retained as primary artifacts with unknown test counts.
+Capture each report's bytes or read failure immediately after its producing
+command, before the next check runs. Later persistence uses that captured
+snapshot, so reusing an output path cannot replace an earlier check's evidence.
+
+Schema version 1 summaries bind work, run, assignment, check, role/launch trace,
+stage, before/after basis, registry revision, configuration and actual execution
+metadata to immutable artifact references. The aggregate names requested,
+completed and missing checks, per-check outcomes, source_unchanged and
+evidence_complete. Missing or malformed required reports make evidence incomplete
+while preserving the actual exit code and command outcome. A failed command
+with intact output remains failed even if an agent diagnosis claims success.
+
+Counts use null and unknown_fields for unobservable values. Generic commands
+have no known counts. Pytest JUnit supplies passed, failed (including errors),
+skipped and explicitly marked xfailed counts. Xfailed cases are separate from skips.
+Collected and xpassed remain null: JUnit cannot establish collection before
+selection, and non-strict XPASS can appear as an ordinary passing testcase.
+Skips describe observed execution, without deciding coverage of required AC.
+
+Each diagnostic excerpt contains at most 4096 characters, the stream reference,
+character offset, one-based starting line and truncation flag. It is a tail of
+stderr when present, otherwise stdout. Complete streams and structured reports
+remain in primary objects. Agent diagnosis is separate from machine fields;
+apply's generated aggregate initializes it to null.
+
+Apply stores these objects using its existing artifact/object adapters. Its
+check_run response contains the aggregate and summary references, without raw
+stdout/stderr. Large lists use existing object references. Use read_object to
+read a summary and its raw references without executing the command again.
+Raw envelopes carry identity and encoding (text or base64); report envelopes
+also retain format and registered path. Evidence gates verify object digests,
+identity, current basis and completeness before using a summary. Missing,
+altered or foreign raw objects cannot establish acceptance.
 
 ## Compatibility
 

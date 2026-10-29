@@ -382,7 +382,7 @@ def finish_procedure(driver, role='final', outcome='passed'):
     # The fixture host executes the prescribed Python assertion file; the engine
     # receives the same public procedure attestation a real final verifier uses.
     from lib import verification
-    output = verification.run_command([sys.executable, '-B', 'check_whole.py'], driver.root, 30)
+    output = verification.check_runner.run_command([sys.executable, '-B', 'check_whole.py'], driver.root, 30)
     assert output['outcome'] == 'passed' and output['exit_code'] == 0
     return driver.send('procedure_result', dict(check_id='CHECK-whole', role_id=role, outcome=outcome,
         steps=[{'command_execution': output, 'host_observation': outcome}],

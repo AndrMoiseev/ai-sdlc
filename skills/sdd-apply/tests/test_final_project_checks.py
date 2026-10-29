@@ -85,7 +85,8 @@ def begin(driver, role="project-final"):
 
 
 def finish(driver, role="project-final", outcome="passed"):
-    from lib.verification import run_command
+    from lib.inputs import spec_modules
+    run_command = spec_modules("check_runner").run_command
     output = run_command(COMMAND, Path(driver.state["basis"]["project_root"]), 30)
     assert output["outcome"] == "passed"
     return driver.send("procedure_result", {"check_id": "project-result", "role_id": role, "outcome": outcome,
@@ -115,6 +116,24 @@ def test_additional_registry_preserves_task_contract_and_requires_both_finals(pr
     result = driver.send("finalize", task_id=None)
     assert result["result"] == "complete" and result["accepted_criteria"] == ["AC-one"]
     assert result["project_checks"]["gaps"] == []
+
+
+def test_missing_required_final_report_preserves_exit_and_blocks_completion(execution_checkpoint):
+    from lib.state import read_object
+    driver = execution_checkpoint("accepted")
+    register(driver, configuration={"structured_reports": [
+        {"format": "pytest-junit", "path": "missing-final.xml", "required": True}]})
+    final_role(driver)
+    task_final(driver)
+    result = run_final(driver)
+    assert result["outcome"] == "failed" and result["failures"] == ["project-result"]
+    assert result["summary"]["evidence_complete"] is False
+    output = log(driver, result)["outputs"][0]
+    assert output["exit_code"] == 0 and output["outcome"] == "passed"
+    summary = read_object(driver.directory, output["summary"])
+    assert summary["task_id"] is None and summary["stage"] == "final"
+    assert summary["structured_reports"][0]["error"]
+    assert driver.send("finalize", task_id=None)["result"] == "partial"
 
 
 def test_missing_project_evidence_blocks_complete_after_task_final(prepared_project):

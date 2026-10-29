@@ -2,16 +2,15 @@
 from .repository import repository
 import json
 from pathlib import Path
-import subprocess
-import time
-import os
-import signal
 from copy import deepcopy
 from .common import contained, digest, now, require, write_json
 from .state import snapshot, clean_source
 from .inputs import spec_modules
 from .check_registry import selected, require_new_ids
 from . import artifact_storage as artifacts
+from . import check_evidence
+
+check_runner = spec_modules("check_runner")
 
 
 def local_criteria(state, task):
@@ -78,9 +77,16 @@ def independent(state, task, role_id, kinds):
 
 def valid_evidence(state, task, directory, stage=None):
     if stage != "final":
-        current(state, task)
+        source = current(state, task)
+    else:
+        source = snapshot(state, root_for(state, task))
     checks = selected(state, task, final=stage == "final")
-    matches, seen = [], set()
+    required = {check["id"] for check in checks}
+    if state["basis"].get("work_kind", "change") != "refactoring":
+        recorded = {item["check_id"] for item in task["evidence"]
+                    if item["stage"] in ({stage} if stage else {"independent", "integration"})}
+        require(required and required <= recorded, "required_checks", "Every required command/procedure must pass")
+    matches, seen, validated = [], set(), set()
     for item in reversed(task["evidence"]):
         if item["stage"] not in ({stage} if stage else {"independent", "integration"}):
             continue
@@ -93,6 +99,22 @@ def valid_evidence(state, task, directory, stage=None):
         raw = artifacts.read_bytes(path)
         require(digest(raw) == item["log_hash"], "evidence_corrupt", item["log"])
         log_data = json.loads(raw)
+        evidence_run_id = None
+        if not item.get("procedure"):
+            require(log_data.get("task_id") == task["plan"]["id"]
+                    and log_data.get("role_id") == item["role_id"]
+                    and log_data.get("stage") == item["stage"]
+                    and log_data.get("after") == log_data.get("before")
+                    and log_data.get("before", {}).get("commit") == item.get("head"),
+                    "evidence_basis", "Evidence must name this task and its unchanged recorded source")
+            if stage == "final":
+                if log_data.get("run_id") == state["run_id"]:
+                    require(log_data.get("before") == source, "evidence_basis",
+                            "Current-run final evidence must name the current source")
+                evidence_run_id = check_evidence.historical_context(state, task, log_data, item, directory)
+            else:
+                require(log_data.get("run_id") == state["run_id"] and log_data.get("before") == source,
+                        "evidence_basis", "Evidence must name the current run and source")
         if state["basis"].get("work_kind", "change") == "refactoring" and not item.get("procedure"):
             require(log_data.get("work_kind") == "refactoring"
                     and log_data.get("run_id") == state["run_id"]
@@ -110,6 +132,9 @@ def valid_evidence(state, task, directory, stage=None):
                 require(output.get("command") == run["command"] and output.get("exit_code") == 0
                         and output.get("criteria") == check["criteria"], "evidence_command",
                         "An unrelated successful command cannot establish a registered criterion")
+        if not item.get("procedure") and item["log_hash"] not in validated:
+            check_evidence.validate(state, log_data, checks, directory, expected_run_id=evidence_run_id)
+            validated.add(item["log_hash"])
         for output in log_data.get("outputs", []):
             if output.get("procedure_log"):
                 linked = artifacts.contained(directory, output["procedure_log"])
@@ -120,48 +145,12 @@ def valid_evidence(state, task, directory, stage=None):
         authors = {r["context_id"] for r in state["roles"].values() if r["kind"] == "executor" and (stage == "final" or r["task_id"] == task["plan"]["id"])}
         require(role["context_id"] not in authors and role["fresh"], "role_not_independent", "Evidence author is not independent")
         matches.append(item)
-    required = {c["id"] for c in checks}
     require(required and required <= {m["check_id"] for m in matches}, "required_checks", "Every required command/procedure must pass")
     return matches
 
 
-def valid_command(command):
-    return (isinstance(command, list) and bool(command)
-            and all(isinstance(arg, str) and "\0" not in arg for arg in command)
-            and bool(command[0].strip()))
-
-
-COMMAND_FORMAT = "command must be an argument array, e.g. ['pytest', '-q']; migrate legacy strings explicitly without changing approved checks"
-
-
 def require_command(command):
-    require(valid_command(command), "command_format", COMMAND_FORMAT)
-
-
-def run_command(command, cwd, timeout):
-    started, stamp = time.monotonic(), now()
-    if not valid_command(command):
-        return {"command": command, "cwd": str(cwd), "started_at": stamp, "duration_seconds": time.monotonic() - started, "exit_code": None, "stdout": "", "stderr": COMMAND_FORMAT, "outcome": "unavailable", "limitation": "command_format"}
-    try:
-        options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" else {"start_new_session": True}
-        process = subprocess.Popen(command, shell=False, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **options)
-        try:
-            stdout, stderr = process.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            if process.poll() is None:
-                if os.name == "nt":
-                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], shell=False, capture_output=True)
-                else:
-                    os.killpg(process.pid, signal.SIGKILL)
-            stdout, stderr = process.communicate(timeout=10)
-            return {"command": command, "cwd": str(cwd), "started_at": stamp, "duration_seconds": time.monotonic() - started, "exit_code": None, "stdout": stdout.decode("utf-8", "replace"), "stderr": stderr.decode("utf-8", "replace"), "outcome": "unavailable", "limitation": "timeout"}
-        code = process.returncode
-        outcome = "passed" if code == 0 else "failed"
-    except subprocess.TimeoutExpired as exc:
-        stdout, stderr, code, outcome = exc.stdout or b"", exc.stderr or b"", None, "unavailable"
-    except OSError as exc:
-        stdout, stderr, code, outcome = b"", str(exc).encode(), None, "unavailable"
-    return {"command": command, "cwd": str(cwd), "started_at": stamp, "duration_seconds": time.monotonic() - started, "exit_code": code, "stdout": stdout.decode("utf-8", "replace"), "stderr": stderr.decode("utf-8", "replace"), "outcome": outcome}
+    require(check_runner.valid_command(command), "command_format", check_runner.COMMAND_FORMAT)
 
 
 def transition(state, task, event, directory):
@@ -323,8 +312,9 @@ def transition(state, task, event, directory):
             continue
         relative = run.get("cwd", check["cwd"])
         cwd = root if relative == "." else contained(root, relative)
-        result = run_command(run["command"], cwd, p.get("timeout", 300))
+        result = check_runner.run_command(run["command"], cwd, p.get("timeout", 300))
         result.update(check_id=check["id"], configuration=run.get("configuration", check["configuration"]), criteria=check["criteria"])
+        result["_report_capture"] = check_evidence.capture_reports(result)
         outputs.append(result)
     after = snapshot(state, root)
     record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], "task_id": task["plan"]["id"], "role_id": role_id, "stage": stage, "before": before, "after": after, "outputs": outputs}
@@ -333,18 +323,20 @@ def transition(state, task, event, directory):
                       registered_checks=deepcopy(checks))
     relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
     path = artifacts.contained(directory, relative)
+    summary = check_evidence.persist(state, record, checks, directory, event["event_id"])
     write_json(path, record)
     outcome = "passed" if all(r["outcome"] == "passed" for r in outputs) and before == after else "failed"
-    if any(r["outcome"] == "unavailable" for r in outputs):
+    if any(r["outcome"] == "unavailable" or not r["evidence_complete"] for r in outputs):
         outcome = "unavailable"
     if stage == "baseline":
         task["baseline_checks"] = record
-        if all(r["outcome"] in {"passed", "planned_absence"} for r in outputs) and before == after:
-            return {"outcome": "baseline_recorded", "log": relative}
+        if all(r["outcome"] == "planned_absence" or r["outcome"] == "passed"
+               and r["evidence_complete"] for r in outputs) and before == after:
+            return {"outcome": "baseline_recorded", "log": relative, "summary": summary}
         state["status"] = "blocked"
         state["blockers"].append({"reason": "baseline_failed", "task_id": task["plan"]["id"], "resume_condition": "Resolve or explicitly scope the pre-existing failure", "log": relative})
     for result in outputs:
-        task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "outcome": result["outcome"] if before == after else "stale", "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root).head()})
+        task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "outcome": (result["outcome"] if result["evidence_complete"] else "unavailable") if before == after else "stale", "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root).head()})
     if stage != "self" or outcome != "passed":
         task["last_check_failed"] = outcome != "passed"
         if task["active_repair"] and outcome != "unavailable" and stage in {"independent", "integration", "final"}:
@@ -353,4 +345,4 @@ def transition(state, task, event, directory):
         if outcome != "passed":
             from .budgets import failure
             failure(state, task, "test", outcome)
-    return {"outcome": outcome, "log": relative}
+    return {"outcome": outcome, "log": relative, "summary": summary}

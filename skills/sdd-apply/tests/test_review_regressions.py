@@ -89,12 +89,12 @@ def test_cleanup_crash_reconciles_removed_worktree(cleanup_checkpoint, monkeypat
 def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
     driver = execution_checkpoint("verified")
     from lib import verification
-    original = verification.run_command
+    original = verification.check_runner.run_command
     def failure(*args):
         result = original(*args)
         result.update(outcome='failed', exit_code=1)
         return result
-    monkeypatch.setattr(verification, 'run_command', failure)
+    monkeypatch.setattr(verification.check_runner, 'run_command', failure)
     assert driver.verify()['outcome'] == 'failed'
     assert driver.task['last_check_failed']
     with pytest.raises(ValueError, match='Latest required'):

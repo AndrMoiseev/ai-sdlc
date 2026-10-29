@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from . import artifact_storage as artifacts
+from . import check_evidence
 from .common import contained, digest, now, require, write_json
 from .check_registry import confirmed_tasks, confirmed_revision, selected, refactoring, strings
 from .state import snapshot, clean_source
@@ -257,8 +258,10 @@ def execute(state, check, directory, current, timeout):
             return {"outcome": "unavailable", "description": "Required verification location is missing"}
     if "command" in run:
         cwd = run.get("cwd", check["cwd"])
-        output = verification.run_command(run["command"], root if cwd == "." else contained(root, cwd), timeout)
-        return {**output, "configuration": run.get("configuration", check["configuration"])}
+        output = verification.check_runner.run_command(run["command"], root if cwd == "." else contained(root, cwd), timeout)
+        output["configuration"] = run.get("configuration", check["configuration"])
+        output["_report_capture"] = check_evidence.capture_reports(output)
+        return output
     if "procedure" in run:
         return procedure_evidence(state, check, directory, current)
     return {"outcome": "unavailable", "description": "Required whole-result setup or procedure is unavailable"}
@@ -280,21 +283,25 @@ def run(state, event, directory):
     relative = f"runs/{state['run_id']}/final/{event['event_id']}.json"
     path = artifacts.contained(directory, relative)
     record = {"basis": before, "role_id": payload["role_id"], "task_id": None, "stage": "final", "after": after, "outputs": outputs}
+    summary = check_evidence.persist(state, record, before["checks"], directory, event["event_id"])
     write_json(path, record)
     outcome = "passed" if unchanged and all(output["outcome"] == "passed" for output in outputs) else "failed"
+    if not summary["evidence_complete"]:
+        outcome = "failed"
     for output in outputs:
         item = {"check_id": output["check_id"], "criteria": output["criteria"], "basis": before,
-                "role_id": payload["role_id"], "outcome": output["outcome"] if unchanged else "stale",
+                "role_id": payload["role_id"], "outcome": (output["outcome"] if output["evidence_complete"] else "unavailable") if unchanged else "stale",
                 "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now()}
         result["evidence"].append(item)
         if item["outcome"] != "passed":
             result["failures"][item["check_id"]] = item
     state["final"] = None
-    return {"outcome": outcome, "log": relative, "failures": list(result["failures"])}
+    return {"outcome": outcome, "log": relative, "failures": list(result["failures"]), "summary": summary}
 
 
 def evidence(state, directory):
     current, matches, gaps = basis(state), [], []
+    validated = set()
     for check in current["checks"]:
         latest_procedure = None
         if "procedure" in (check["setup"] or check["run"]):
@@ -339,6 +346,9 @@ def evidence(state, directory):
                 continue
             linked = artifacts.contained(directory, output["procedure_log"])
             require(artifacts.is_file(linked) and digest(artifacts.read_bytes(linked)) == output["procedure_log_hash"], "evidence_corrupt", "Procedure log changed")
+        if item["log_hash"] not in validated:
+            check_evidence.validate(state, record, current["checks"], directory)
+            validated.add(item["log_hash"])
         matches.append(item)
     return current, matches, gaps
 

@@ -85,7 +85,7 @@ def check_runner(request, monkeypatch):
         return
     from lib import verification
     from check_commands import run_command
-    monkeypatch.setattr(verification, "run_command", run_command)
+    monkeypatch.setattr(verification.check_runner, "run_command", run_command)
 
 
 @pytest.fixture
