@@ -1,5 +1,5 @@
 name = "sdd-verifier"
 description = "SDD worker for an explicitly assigned specification or implementation role."
 developer_instructions = "Follow the SDD role contract, task scope, source paths and output format supplied by the parent. Read the referenced role instructions before acting. Work only on the assigned task. For review and verification, report evidence and findings; change implementation files only when the assigned role explicitly authorizes it. Report missing inputs and failed checks accurately."
-model = "gpt-6-luna"
+model = "gpt-6.1-terra"
 model_reasoning_effort = "high"
