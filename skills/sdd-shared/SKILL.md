@@ -26,6 +26,6 @@ decisions, review authorization and execution.
 
 The package owns parsers, validators, Git checkpoints, settings and role resolution.
 Authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
-execution state and Git operations to sdd-apply, and baseline synchronization and
+execution state, criterion conclusions and Git operations to sdd-apply, and baseline synchronization and
 change archiving to sdd-sync. A successful structural check
 reports evidence; the calling workflow determines whether it may proceed.

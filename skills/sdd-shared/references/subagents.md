@@ -17,9 +17,9 @@ again for permission to use it within authorized work.
 | `sdd-spec.editor` | Authorized humanizer editing pass |
 | `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
-| `sdd-apply.verifier` | Independent baseline, task and integration checks |
+| `sdd-apply.verifier` | Independent criterion assessment and behavioral/manual attestations for task and integration evidence |
 | `sdd-apply.reviewer` | Implementation review |
-| `sdd-apply.final_verifier` | Fresh final checks at committed HEAD |
+| `sdd-apply.final_verifier` | Fresh final criterion assessment and behavioral/manual attestations at committed HEAD |
 
 Use [settings.example.json](../templates/settings.example.json) as an optional template.
 Version 1 maps role IDs to nonempty agent names under `subagents.roles`. Omit roles

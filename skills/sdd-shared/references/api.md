@@ -194,3 +194,9 @@ kind on a verification record. It returns deterministic for an unmarked command;
 a procedure requires `execution_kind: deterministic|behavioral|manual` outside
 its single-key `run`. Unknown types raise `ValueError`. Both document parsers and
 apply registration consume this contract; API and document versions are unchanged.
+
+The calling workflow assigns deterministic execution to explorer and keeps
+criterion assessment separate. For behavioral/manual checks, including explicitly
+typed commands, apply retains verifier/final_verifier attestation. Shared summaries
+preserve primary evidence and unknown counts; they neither grant execution
+permission nor establish acceptance. See [assignment and results](explorer.md).

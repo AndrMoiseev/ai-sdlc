@@ -42,3 +42,51 @@ def test_explorer_execution_instructions_match_role_api():
     assert "`criterion_id`" in verifier and "`check_request`" in verifier
     assert "read_object" in verifier
     assert (ROOT.parent / "sdd-shared/agents/explorer.md").is_file()
+
+
+def test_prepared_explorer_scenarios_have_consistent_inputs():
+    """Validate shipped fixture bytes, not agent behavior or an execution result.
+
+    Real package reads catch omitted/malformed distributed inputs; case combinations
+    use those in-memory values and the existing shared JUnit parser, without I/O.
+    Only apply/shared are required, including in a relocated installation.
+    """
+    import ast
+    from lib.inputs import spec_modules
+
+    fixture = json.loads((ROOT / "evals/explorer-fixtures.json").read_text(encoding="utf-8"))
+    assert fixture["behavioral_result"] == fixture["control"]["behavioral_result"] == "not_run"
+    assert fixture["criteria"] == ["AC-explorer-workflow"]
+    assert (ROOT / "evals" / fixture["procedure"]).is_file()
+    cases = {case["name"]: case for case in fixture["cases"]}
+    assert len(cases) == len(fixture["cases"]) == 3
+    assert set(cases) == {"ordinary-success", "verbose-failure", "mandatory-skip"}
+    common = fixture["common"]
+    assert common["metrics"] == {"tokens": None, "cost": None}
+    check = common["check"]
+    assert check["criteria"] == [common["criterion"]["id"]]
+    assert check["execution_kind"] == "deterministic"
+    command = check["run"]["command"]
+    summary = spec_modules("check_summary")
+    assert summary.report_specs(command, check["configuration"]) == [
+        {"format": "pytest-junit", "path": "{artifacts}/results.xml", "required": True}]
+    evals = json.loads((ROOT / "evals/evals.json").read_text(encoding="utf-8"))["evals"]
+    entries = {entry["id"]: entry for entry in evals}
+    assert len(entries) == len(evals)
+    for case in cases.values():
+        entry = entries[case["eval_id"]]
+        assert entry["prompt"] == case["prompt"]
+        assert entry["files"] == []  # Grader fixture must not be a worker input.
+        sources = common["sources"] | case["sources"]
+        assert check["location"] in sources and check["location"] in command
+        for name, source in sources.items():
+            ast.parse(source, filename=name)
+        counts = summary.junit_counts(case["sample_report"].encode())
+        assert {key: counts[key] for key in ("passed", "failed", "skipped")} == {
+            key: case["expected"][key] for key in ("passed", "failed", "skipped")}
+        assert counts["collected"] is None and counts["xpassed"] is None
+    assert [(cases[name]["expected"]["exit_code"],
+             cases[name]["expected"]["criterion_outcome"],
+             cases[name]["expected"]["review_eligible"]) for name in
+            ("ordinary-success", "verbose-failure", "mandatory-skip")] == [
+                (0, "passed", True), (1, "failed", False), (0, "unavailable", False)]

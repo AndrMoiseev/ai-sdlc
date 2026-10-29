@@ -181,6 +181,8 @@ def test_shared_and_legacy_commands_have_identical_outputs(tmp_path):
 
 
 def test_package_contains_only_sources_and_locks():
+    for relative in ('README.md', 'references/explorer.md', 'agents/explorer.md'):
+        assert (ROOT / relative).is_file(), relative
     for path in ROOT.rglob('*'):
         assert path.name not in {'.venv', '__pycache__', '.pytest_cache', 'node_modules'}
         assert path.suffix != '.pyc'

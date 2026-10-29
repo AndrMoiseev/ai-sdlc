@@ -59,3 +59,10 @@ snapshot while retaining project-added obligations. A plan incompatible with a
 pending transition is rejected before archival effects: reconcile that transition
 at a valid basis or adjust the approved plan. Existing conclusions remain history;
 obtain new execution evidence and a separate conclusion for the revised run.
+
+After reconciliation, inspect compact `explorer_assignments` and the separate
+execution/conclusion statuses in `tasks[id].verification`, `whole_result` or
+`final_project_checks`. Resolve relevant evidence through `read_object`. A saved
+passed command cannot fill a missing or stale conclusion; a conclusion cannot
+fill missing execution. Resume the applicable execution and assessment handoff
+with the retained registry and budgets.

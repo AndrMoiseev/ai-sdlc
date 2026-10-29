@@ -44,3 +44,12 @@ Authorization to execute includes local task commits; delivery beyond those comm
 
 When refactoring changes module boundaries and their tests, apply the
 [test evolution policy](references/review-policy.md#tests-at-changed-module-boundaries).
+
+## Execution and assessment
+
+Delegate bounded research and deterministic checks to explorer under
+[role coordination](references/role-coordination.md#explorer-dispatch). Send its
+saved summary and evidence references through the orchestrator to the verifier
+for criterion assessment. Read [execution ownership](references/api-checks.md#execution-ownership-and-one-batch-deadline)
+for explicitly typed behavioral/manual procedures and commands. Final acceptance
+uses fresh separate explorer and final_verifier contexts in each required scope.

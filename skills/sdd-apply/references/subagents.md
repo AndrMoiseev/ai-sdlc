@@ -1,9 +1,9 @@
 # Project subagent selection
 
-Before a new executor, verifier, reviewer or final_verifier launch, read
+Before a new explorer, executor, verifier, reviewer or final_verifier launch, read
 [the shared subagent contract](../../sdd-shared/references/subagents.md) in the
 sibling `sdd-shared` package. If it is missing, stop with a critical dependency error.
-That shared contract defines `.sdd/settings.json`, all eight roles, host behavior,
+That shared contract defines `.sdd/settings.json`, the role registry, host behavior,
 fallbacks and source evidence. Read that reference directly; do not invoke the
 authoring workflow. Update the SDD bundle together.
 

@@ -4,7 +4,7 @@ Read before launching workers. Resolve [project subagent selection](subagents.md
 for every new launch. Each task's executor starts fresh; verifier/reviewer contexts
 are separate from every author. They may share one fresh context for that task
 only when resolved launch identities match, with distinct role IDs and results.
-Claude Code native-agent selections always use separate contexts. Final verifiers
+Claude Code native-agent selections always use separate contexts. Final explorers and final verifiers
 start fresh. Repair may reuse a surviving executor with its existing selection;
 a replacement requires a fresh successor registered through `successor_of`
 and reconciled through `resume`.

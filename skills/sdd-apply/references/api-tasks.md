@@ -7,8 +7,9 @@ or candidate work and [review policy](review-policy.md) before acting on finding
 
 Role registration attests an actual launch; role_result only ends that role's
 work. Review_start reserves a round before review; review_result returns the
-separate test_integrity assessment. Only current
-evidence, passing review and a confirmed task commit permit acceptance.
+separate test_integrity assessment. Acceptance requires current execution evidence
+and a passed `verification_result` on the same basis, passing review and a confirmed
+task commit.
 
 `candidate` commits the stopped executor's owned changes locally before checks
 and review. A candidate commit is an unaccepted result. Execution uses

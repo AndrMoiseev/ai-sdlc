@@ -84,7 +84,9 @@ Active role IDs are not a liveness check. Neither view proves candidate bytes,
 approvals or evidence current; transition handlers enforce their own gates.
 Executor DONE and exit 0 alone establish neither acceptance nor completion.
 
-Only orchestrator-authorized events write state. A launched verifier may submit
-its assigned `check_run`; otherwise it requests that operation from the
-orchestrator. Keep the actual role request and tool trace. Registering a role
-without launching it is not independent verification.
+Only orchestrator-authorized events write state. A launched explorer with a matching
+checks assignment may submit its assigned `check_run`; otherwise it requests that
+operation from the orchestrator. Keep the actual role request and tool trace.
+Registering a role without launching it is not independent verification. The verifier
+assesses saved evidence and submits a separate `verification_result`; it does not
+execute deterministic checks.

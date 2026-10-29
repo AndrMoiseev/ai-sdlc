@@ -283,3 +283,18 @@ marks unstarted checks unavailable and blocks further work through the existing
 failure path. Event replay returns the saved result without another process.
 Changing explorer does not bypass failed-run repair reservations or reset lifetime
 counters; a genuinely new authorized repair retry may execute a new full batch.
+
+## Reading compact evidence
+
+Start with the machine summary and original criteria/test sources. Check the
+requested, completed and missing IDs, current basis, `source_unchanged`,
+`evidence_complete` and `test_counts`, including skipped/xfailed/xpassed and
+`unknown_fields`. An ordinary success need not load the full log. Open the relevant
+raw object with `read_object` when a failure, skip or coverage question needs it;
+retain its digest and location in the criterion assessment. Excerpts may be
+truncated; the full primary artifact remains authoritative. Unknown counts are
+null, not zero. Explorer diagnosis is separate from machine outcomes. Missing or
+invalid required evidence, or a skipped mandatory area without other sufficient
+current evidence, blocks acceptance. Reading the full log does not justify a new
+execution; request an actual rerun through the orchestrator when its basis or
+coverage requires one.

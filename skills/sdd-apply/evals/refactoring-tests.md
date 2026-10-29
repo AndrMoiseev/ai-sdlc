@@ -1,6 +1,6 @@
 # Boundary-test decisions: paired final evaluation
 
-Run actual agents only at final acceptance of the whole plan. Task-level checks
+Run actual agents only at final acceptance of the whole plan and within the user-authorized evaluation scope. A plan that explicitly defers evaluation requires a separate user instruction; preparation is not permission to launch it. Task-level checks
 exercise `test_refactoring_boundary_tests.py` and
 `test_refactoring_behavior_runner.py` without a model. Those synthetic contracts
 do not establish old or new agent behavior.
