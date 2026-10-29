@@ -1215,7 +1215,7 @@ dependencies:
     .agents/skills/sdd-shared/agents/openai.yaml: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
     .agents/skills/sdd-shared/api.json: sha256:5d10d4c91767ed9e570cb885d40d90ae0a3a86f5773f86658f487b70d3c20dea
     .agents/skills/sdd-shared/references/api.md: sha256:95a94c310426e65bce5e334cf5034657d7c59e9f172987382d0b5a8ce5436c33
-    .agents/skills/sdd-shared/references/coordination.md: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+    .agents/skills/sdd-shared/references/coordination.md: sha256:b3ce560fad4eb6a13d60ba5458eece0fa8355632b11299d911dd7a988f801e1a
     .agents/skills/sdd-shared/references/current-specifications.md: sha256:9f20e34f49529bd3c95a5d425dd0909d3199fa3fa442b5d4c4ccd1814eb31bd5
     .agents/skills/sdd-shared/references/document-format-discussion.md: sha256:97f0fada78da8c161482524e2b7bb1c1f913a53b63a1565296e239938ba27239
     .agents/skills/sdd-shared/references/document-format-normative.md: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
@@ -1260,7 +1260,7 @@ dependencies:
     .claude/skills/sdd-shared/agents/openai.yaml: sha256:04215071f6ea41e6574cc3c949ac1fb9da8bd5216646f24abb72225518c8b5ac
     .claude/skills/sdd-shared/api.json: sha256:5d10d4c91767ed9e570cb885d40d90ae0a3a86f5773f86658f487b70d3c20dea
     .claude/skills/sdd-shared/references/api.md: sha256:95a94c310426e65bce5e334cf5034657d7c59e9f172987382d0b5a8ce5436c33
-    .claude/skills/sdd-shared/references/coordination.md: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+    .claude/skills/sdd-shared/references/coordination.md: sha256:b3ce560fad4eb6a13d60ba5458eece0fa8355632b11299d911dd7a988f801e1a
     .claude/skills/sdd-shared/references/current-specifications.md: sha256:9f20e34f49529bd3c95a5d425dd0909d3199fa3fa442b5d4c4ccd1814eb31bd5
     .claude/skills/sdd-shared/references/document-format-discussion.md: sha256:97f0fada78da8c161482524e2b7bb1c1f913a53b63a1565296e239938ba27239
     .claude/skills/sdd-shared/references/document-format-normative.md: sha256:386a373e0f1354747631a4e813079fb6d463b347b54e02b12a0e145e07578d89
@@ -5635,7 +5635,7 @@ dependencies:
   content_hash: sha256:a27667596bd22b09d30381eb3d49a4e4da24e173bb52be1390cf69477803947a
   constraint: 3.2.0
   resolved_tag: v3.2.0
-  resolved_at: '2026-10-28T17:40:11+00:00'
+  resolved_at: '2026-10-29T05:58:50+00:00'
   exec_status: deployed
 deployments:
 - kind: project-relative
@@ -14043,7 +14043,7 @@ deployments:
   owners:
   - local:skills/sdd-shared
   active_owner: local:skills/sdd-shared
-  content_hash: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+  content_hash: sha256:b3ce560fad4eb6a13d60ba5458eece0fa8355632b11299d911dd7a988f801e1a
 - kind: project-relative
   target: claude
   value: .claude/skills/sdd-shared/references/current-specifications.md
@@ -24447,7 +24447,7 @@ deployments:
   owners:
   - local:skills/sdd-shared
   active_owner: local:skills/sdd-shared
-  content_hash: sha256:e0d5776559174ef2a1520a6dbe7771194c76592dfc0253a8386a864c54e4e054
+  content_hash: sha256:b3ce560fad4eb6a13d60ba5458eece0fa8355632b11299d911dd7a988f801e1a
 - kind: project-relative
   target: codex
   value: .agents/skills/sdd-shared/references/current-specifications.md
