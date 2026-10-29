@@ -1,0 +1,428 @@
+{
+  "criteria": [
+    "AC-explorer-visibility"
+  ],
+  "description": "Synthetic saved compact read responses for a prepared manual evaluation; no behavioral result claimed.",
+  "behavioral_result": "not_run",
+  "cases": [
+    {
+      "name": "complete-pair",
+      "expected_eligible": true,
+      "response": {
+        "result": {
+          "updated_at": "2026-10-29T00:00:00Z",
+          "run_id": "synthetic",
+          "change_id": "order-export",
+          "active_roles": {},
+          "view": "compact",
+          "revision": 42,
+          "artifacts": {
+            "state": "state.json",
+            "run": "runs/synthetic"
+          },
+          "completion": {
+            "result": "complete",
+            "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "status": "completed",
+          "explorer_assignments": [
+            {
+              "scope": {
+                "task": "TASK-one",
+                "work": "order-export",
+                "project": "/synthetic/project"
+              },
+              "role_id": "final-explorer",
+              "stage": "final",
+              "successor_of": null,
+              "kind": "checks",
+              "status": "finished"
+            }
+          ],
+          "view_version": 1,
+          "blockers": [],
+          "available_tasks": [],
+          "tasks": {
+            "TASK-one": {
+              "active_repair": null,
+              "active_review": null,
+              "test_repair_limit": 5,
+              "review_rounds_started": 2,
+              "attempt": 1,
+              "test_repair_cycles_started": 0,
+              "review_rounds_completed": 2,
+              "verification": {
+                "final": {
+                  "execution": {
+                    "references": [
+                      {
+                        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "check_id": "plan-1",
+                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                      }
+                    ],
+                    "status": "passed",
+                    "checks": [
+                      {
+                        "check_id": "plan-1",
+                        "criteria": [
+                          "AC-one"
+                        ],
+                        "location": "check.py",
+                        "status": "passed",
+                        "reason": "passed"
+                      }
+                    ]
+                  },
+                  "conclusion": {
+                    "status": "passed",
+                    "id": "final-conclusion",
+                    "role_id": "final-verifier"
+                  }
+                }
+              },
+              "review_limit": 3,
+              "status": "accepted",
+              "blockers": []
+            }
+          }
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "command-only",
+      "expected_eligible": false,
+      "response": {
+        "result": {
+          "updated_at": "2026-10-29T00:00:00Z",
+          "run_id": "synthetic",
+          "change_id": "order-export",
+          "active_roles": {},
+          "view": "compact",
+          "revision": 42,
+          "artifacts": {
+            "state": "state.json",
+            "run": "runs/synthetic"
+          },
+          "completion": {
+            "result": "complete",
+            "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "status": "completed",
+          "explorer_assignments": [
+            {
+              "scope": {
+                "task": "TASK-one",
+                "work": "order-export",
+                "project": "/synthetic/project"
+              },
+              "role_id": "final-explorer",
+              "stage": "final",
+              "successor_of": null,
+              "kind": "checks",
+              "status": "finished"
+            }
+          ],
+          "view_version": 1,
+          "blockers": [],
+          "available_tasks": [],
+          "tasks": {
+            "TASK-one": {
+              "active_repair": null,
+              "active_review": null,
+              "test_repair_limit": 5,
+              "review_rounds_started": 2,
+              "attempt": 1,
+              "test_repair_cycles_started": 0,
+              "review_rounds_completed": 2,
+              "verification": {
+                "final": {
+                  "execution": {
+                    "references": [
+                      {
+                        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "check_id": "plan-1",
+                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                      }
+                    ],
+                    "status": "passed",
+                    "checks": [
+                      {
+                        "check_id": "plan-1",
+                        "criteria": [
+                          "AC-one"
+                        ],
+                        "location": "check.py",
+                        "status": "passed",
+                        "reason": "passed"
+                      }
+                    ]
+                  },
+                  "conclusion": {
+                    "status": "missing",
+                    "id": null,
+                    "role_id": null
+                  }
+                }
+              },
+              "review_limit": 3,
+              "status": "accepted",
+              "blockers": []
+            }
+          }
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "missing-execution",
+      "expected_eligible": false,
+      "response": {
+        "result": {
+          "updated_at": "2026-10-29T00:00:00Z",
+          "run_id": "synthetic",
+          "change_id": "order-export",
+          "active_roles": {},
+          "view": "compact",
+          "revision": 42,
+          "artifacts": {
+            "state": "state.json",
+            "run": "runs/synthetic"
+          },
+          "completion": {
+            "result": "complete",
+            "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "status": "completed",
+          "explorer_assignments": [
+            {
+              "scope": {
+                "task": "TASK-one",
+                "work": "order-export",
+                "project": "/synthetic/project"
+              },
+              "role_id": "final-explorer",
+              "stage": "final",
+              "successor_of": null,
+              "kind": "checks",
+              "status": "finished"
+            }
+          ],
+          "view_version": 1,
+          "blockers": [],
+          "available_tasks": [],
+          "tasks": {
+            "TASK-one": {
+              "active_repair": null,
+              "active_review": null,
+              "test_repair_limit": 5,
+              "review_rounds_started": 2,
+              "attempt": 1,
+              "test_repair_cycles_started": 0,
+              "review_rounds_completed": 2,
+              "verification": {
+                "final": {
+                  "execution": {
+                    "references": [],
+                    "status": "missing",
+                    "checks": [
+                      {
+                        "check_id": "plan-1",
+                        "criteria": [
+                          "AC-one"
+                        ],
+                        "location": "check.py",
+                        "status": "missing",
+                        "reason": "evidence_missing"
+                      }
+                    ]
+                  },
+                  "conclusion": {
+                    "status": "passed",
+                    "id": "final-conclusion",
+                    "role_id": "final-verifier"
+                  }
+                }
+              },
+              "review_limit": 3,
+              "status": "accepted",
+              "blockers": []
+            }
+          }
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "stale-conclusion",
+      "expected_eligible": false,
+      "response": {
+        "result": {
+          "updated_at": "2026-10-29T00:00:00Z",
+          "run_id": "synthetic",
+          "change_id": "order-export",
+          "active_roles": {},
+          "view": "compact",
+          "revision": 42,
+          "artifacts": {
+            "state": "state.json",
+            "run": "runs/synthetic"
+          },
+          "completion": {
+            "result": "complete",
+            "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "status": "completed",
+          "explorer_assignments": [
+            {
+              "scope": {
+                "task": "TASK-one",
+                "work": "order-export",
+                "project": "/synthetic/project"
+              },
+              "role_id": "final-explorer",
+              "stage": "final",
+              "successor_of": null,
+              "kind": "checks",
+              "status": "finished"
+            }
+          ],
+          "view_version": 1,
+          "blockers": [],
+          "available_tasks": [],
+          "tasks": {
+            "TASK-one": {
+              "active_repair": null,
+              "active_review": null,
+              "test_repair_limit": 5,
+              "review_rounds_started": 2,
+              "attempt": 1,
+              "test_repair_cycles_started": 0,
+              "review_rounds_completed": 2,
+              "verification": {
+                "final": {
+                  "execution": {
+                    "references": [
+                      {
+                        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "check_id": "plan-1",
+                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                      }
+                    ],
+                    "status": "passed",
+                    "checks": [
+                      {
+                        "check_id": "plan-1",
+                        "criteria": [
+                          "AC-one"
+                        ],
+                        "location": "check.py",
+                        "status": "passed",
+                        "reason": "passed"
+                      }
+                    ]
+                  },
+                  "conclusion": {
+                    "status": "stale",
+                    "id": "final-conclusion",
+                    "role_id": "final-verifier"
+                  }
+                }
+              },
+              "review_limit": 3,
+              "status": "accepted",
+              "blockers": []
+            }
+          }
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "partial",
+      "expected_eligible": false,
+      "response": {
+        "result": {
+          "updated_at": "2026-10-29T00:00:00Z",
+          "run_id": "synthetic",
+          "change_id": "order-export",
+          "active_roles": {},
+          "view": "compact",
+          "revision": 42,
+          "artifacts": {
+            "state": "state.json",
+            "run": "runs/synthetic"
+          },
+          "completion": {
+            "result": "partial",
+            "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "status": "blocked",
+          "explorer_assignments": [
+            {
+              "scope": {
+                "task": "TASK-one",
+                "work": "order-export",
+                "project": "/synthetic/project"
+              },
+              "role_id": "final-explorer",
+              "stage": "final",
+              "successor_of": null,
+              "kind": "checks",
+              "status": "finished"
+            }
+          ],
+          "view_version": 1,
+          "blockers": [],
+          "available_tasks": [],
+          "tasks": {
+            "TASK-one": {
+              "active_repair": null,
+              "active_review": null,
+              "test_repair_limit": 5,
+              "review_rounds_started": 2,
+              "attempt": 1,
+              "test_repair_cycles_started": 0,
+              "review_rounds_completed": 2,
+              "verification": {
+                "final": {
+                  "execution": {
+                    "references": [
+                      {
+                        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "check_id": "plan-1",
+                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                      }
+                    ],
+                    "status": "passed",
+                    "checks": [
+                      {
+                        "check_id": "plan-1",
+                        "criteria": [
+                          "AC-one"
+                        ],
+                        "location": "check.py",
+                        "status": "passed",
+                        "reason": "passed"
+                      }
+                    ]
+                  },
+                  "conclusion": {
+                    "status": "passed",
+                    "id": "final-conclusion",
+                    "role_id": "final-verifier"
+                  }
+                }
+              },
+              "review_limit": 3,
+              "status": "accepted",
+              "blockers": []
+            }
+          }
+        },
+        "ok": true
+      }
+    }
+  ]
+}

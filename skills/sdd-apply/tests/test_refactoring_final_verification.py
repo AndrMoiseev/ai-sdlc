@@ -213,6 +213,15 @@ def completed_migration(completed_migrations, repository_backend, state_backend)
         repository_backend, state_backend, memory_worktree=memory_worktree)
 
 
+def test_whole_final_progress_never_opens_raw_evidence(completed_migration, monkeypatch):
+    """AC-explorer-visibility: refactoring null-scope read stays a metadata projection."""
+    from test_read_views import assert_run_progress_uses_metadata
+    driver = completed_migration()
+    driver.final_role()
+    assert driver.run_final()["outcome"] == "passed"
+    assert_run_progress_uses_metadata(driver, monkeypatch, "whole_result")
+
+
 def test_complete_typed_migration_with_independent_whole_result(completed_migration):
     # The representative executable lifecycle observes actual working files.
     driver = completed_migration(memory_worktree=False)

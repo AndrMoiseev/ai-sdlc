@@ -7,6 +7,85 @@ from .common import digest, require, write_json
 from .state import assert_basis, snapshot, execution_source
 
 
+def revised_checks(state, old, plan, basis, event):
+    """Reconcile approved plan definitions without dropping registered obligations."""
+    fresh = deepcopy(old)
+    registry = old.get("check_registry", {})
+    pending = registry.get("transition") and registry["revision"] > registry.get("confirmed_revision", 0)
+    if pending:
+        transition = registry["transition"]
+        criteria = {criterion for check in old["checks"] for criterion in check["criteria"]}
+        criteria.update(criterion for field in ("before", "after")
+                        for check in transition.get(field, []) for criterion in check["criteria"])
+        criteria.update(transition.get("basis", {}).get("transitional_criteria", []))
+        acceptance = {item["id"]: item for item in basis.get("acceptance", [])}
+        def contract(record, fields):
+            # Approved prose changes need fresh assessment, not registry rejection.
+            return {key: sorted(record[key]) if isinstance(record[key], list) else record[key]
+                    for key in fields if record is not None and key in record}
+        acceptance_fields = ("id", "task", "lifetime", "until_task", "replaced_by")
+        permission_fields = ("id", "action", "criteria", "replacement_criteria", "decision")
+        prior_permissions = {item["id"]: item for item in old["plan"].get("test_changes", [])}
+        next_permissions = {item["id"]: item for item in plan.get("test_changes", [])}
+        require(all(set(old["plan"].get(key, [])) == set(plan.get(key, [])) for key in ("preserves", "covers"))
+                and old["plan"].get("scope") == plan.get("scope")
+                and all(contract(state.get("acceptance", {}).get(key), acceptance_fields)
+                        == contract(acceptance.get(key), acceptance_fields) for key in criteria)
+                and all(key in prior_permissions and key in next_permissions
+                        and contract(prior_permissions[key], permission_fields)
+                        == contract(next_permissions[key], permission_fields)
+                        for key in transition.get("basis", {}).get("test_changes", [])),
+                "pending_registry_conflict", "Reconcile the pending registry transition at its valid basis or adjust the approved plan before revised_plan")
+    def definitions(record):
+        return {(record["id"] + "/" + check["id"] if basis.get("work_kind") == "refactoring" else f"plan-{i + 1}"):
+                {"id": record["id"] + "/" + check["id"] if basis.get("work_kind") == "refactoring" else f"plan-{i + 1}",
+                 "criteria": check["criteria"], "source": "tasks.md", "location": check["location"],
+                 "run": check["run"], "cwd": ".", "configuration": {}, "setup": None,
+                 **({"execution_kind": check["execution_kind"]} if "execution_kind" in check else {})}
+                for i, check in enumerate(record["verification"])}
+    before, after = definitions(old["plan"]), definitions(plan)
+    changed = {key for key in before.keys() | after.keys() if before.get(key) != after.get(key)}
+    if old["checks"] and changed:
+        require(not pending, "pending_registry_conflict", "Preserve the pending registry transition before changing plan checks")
+        evolved = set()
+        for entry in registry.get("history", []):
+            transition = entry.get("transition", {})
+            prior = {item["id"]: item for item in transition.get("before", [])}
+            following = {item["id"]: item for item in transition.get("after", [])}
+            evolved.update(key for key in prior.keys() | following.keys() if prior.get(key) != following.get(key))
+        require(not changed & evolved, "registry_plan_conflict",
+                "Preserve evolved check definitions; reconcile their approved transition before changing the plan")
+        require(not any(check["id"] in changed and check["id"] not in before for check in old["checks"]),
+                "duplicate_check", "Revised plan check ID conflicts with a registered project obligation")
+        fresh["checks"] = [check for check in fresh["checks"] if check["id"] not in changed]
+        fresh["checks"].extend(deepcopy(after[key]) for key in after if key in changed)
+        from .verification import record_registry
+        record_registry(state, fresh, event)
+        fresh["check_registry"]["history"][-1]["basis_commit"] = basis["head"]
+    return fresh
+
+
+def reconcile_task_procedures(state, task, predecessor, successor, resolution, event, directory):
+    pending = {key: value for key, value in task.get("procedures", {}).items()
+               if value["role_id"] == predecessor["role_id"]}
+    supplied = resolution.get("abandon_procedures", [])
+    require(isinstance(supplied, list) and all(isinstance(key, str) for key in supplied)
+            and len(supplied) == len(set(supplied)) and set(supplied) == set(pending),
+            "procedure_reconciliation", "Explicitly list every unfinished predecessor check in abandon_procedures")
+    for key, attempt in pending.items():
+        relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}-{digest(key)[:16]}.json"
+        record = {**attempt, "check_id": key, "outcome": "abandoned", "successor": successor["role_id"],
+                  "resolution": resolution, "trace": event["payload"]["host_trace"]}
+        path = artifacts.contained(directory, relative)
+        write_json(path, record)
+        task["evidence"].append({"check_id": key, "stage": attempt["stage"], "role_id": predecessor["role_id"],
+                                 "outcome": "abandoned", "procedure": True, "log": relative,
+                                 "log_hash": digest(artifacts.read_bytes(path)), "head": attempt["before"]["commit"]})
+        del task["procedures"][key]
+    if pending:
+        state["final"] = None
+
+
 def completed_followups(state, plans, payload):
     """Resolve only an abandoned repair stop explicitly replaced by new work."""
     mappings = payload.get("completed_followups", [])
@@ -66,6 +145,13 @@ def transition(state, task, event, directory):
                 appended = True
                 require(plan["number"] > last_number, "new_tasks_append_only", "Number new tasks after the existing plan")
         resolved = completed_followups(state, plans, p)
+        require(all(key in plans or not old["checks"] for key, old in state["tasks"].items()),
+                "registered_task_removed", "Preserve tasks with registered obligations in the revised plan")
+        # Validate every registry conflict before archive files or other effects.
+        retained = {key: revised_checks(state, old, plans[key], basis, event)
+                    for key, old in state["tasks"].items() if key in plans and old["status"] != "accepted"}
+        from .final_checks import revised_registry
+        final_registry = revised_registry(state, basis, event)
         previous_run = state["run_id"]
         from .state_objects import StateObjects
         objects = StateObjects(directory)
@@ -75,10 +161,10 @@ def transition(state, task, event, directory):
         state["previous_run"] = previous_run
         state["basis"] = basis
         if basis.get("work_kind", "change") == "refactoring":
-            state.pop("final_checks", None)
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
                          for kind in ("acceptance", "verification")})
-        elif state.get("final_checks"):
+        if state.get("final_checks"):
+            state["final_checks"] = final_registry
             # Accepted covers and registered project obligations survive. The
             # archived run owns interrupted attempts; new run identity makes all
             # retained evidence historical and requires a fresh complete run.
@@ -96,6 +182,9 @@ def transition(state, task, event, directory):
                 for field in ("review_limit", "review_rounds_started", "review_rounds_completed", "test_repair_limit", "test_repair_cycles_started", "active_repair", "repair_cycles", "budget_decisions", "commits"):
                     fresh[field] = old[field]
                 fresh["prior_result"] = {"$object": objects.put(objects.pack(old, root=True))}
+                for field in ("checks", "inventory", "check_registry", "evidence", "verification_results", "roles", "last_check_failed"):
+                    if field in retained[plan["id"]]:
+                        fresh[field] = retained[plan["id"]][field]
             state["tasks"][plan["id"]] = fresh
         # Budget blockers survive a revised plan. Other old blockers are retained
         # in the archived run and checked again against the new basis.
@@ -139,10 +228,10 @@ def transition(state, task, event, directory):
             if t is None and role["kind"] in {"final_verifier", "explorer"}:
                 issues.append({"reason": "lost_role", "task_id": None, "role_id": role["role_id"],
                                "resume_condition": "Register a fresh run-level successor of the same role kind"})
-            if t and t["status"] not in {"pending", "accepted"}:
-                if t["status"] != "blocked":
+            if t and (t["status"] not in {"pending", "accepted"} or role["kind"] == "explorer"):
+                if t["status"] not in {"blocked", "pending", "accepted"}:
                     t["before_block"] = t["status"]
-                t["status"] = "blocked"
+                    t["status"] = "blocked"
                 item = {"reason": "lost_role", "task_id": role["task_id"], "role_id": role["role_id"], "resume_condition": "Register a fresh successor with preserved files and task packet"}
                 t["blockers"].append(item)
                 issues.append(item)
@@ -183,6 +272,9 @@ def transition(state, task, event, directory):
                     or predecessor["kind"] == "explorer" and predecessor.get("assignment", {}).get("kind") == "checks"):
                 from .final_checks import reconcile_procedures
                 reconcile_procedures(state, predecessor, successor, resolution, event, directory)
+            elif predecessor["task_id"] is not None:
+                reconcile_task_procedures(state, state["tasks"][predecessor["task_id"]], predecessor,
+                                          successor, resolution, event, directory)
         def resolved(blocker):
             return (blocker["reason"] == reason
                     and blocker.get("task_id", resolution.get("task_id")) == resolution.get("task_id")

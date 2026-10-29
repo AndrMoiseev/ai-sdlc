@@ -169,6 +169,8 @@ def procedure_evidence(state, task, check, stage, before, directory):
                    and e["stage"] == stage and e.get("procedure")), None)
     if not latest:
         return {"outcome": "unavailable", "description": "procedure_missing"}
+    if latest["outcome"] == "abandoned" or state["roles"].get(latest["role_id"], {}).get("status") == "lost":
+        return {"outcome": "unavailable", "description": "procedure_abandoned_or_role_lost"}
     path = artifacts.contained(directory, latest["log"])
     require(artifacts.is_file(path) and digest(artifacts.read_bytes(path)) == latest["log_hash"],
             "evidence_corrupt", "Procedure evidence changed")
@@ -287,7 +289,7 @@ def transition(state, task, event, directory):
         require(not task.get("last_check_failed") or task["active_repair"], "repair_cycle_required", "A retry after failure must reserve a repair cycle")
         previous = next((item for item in reversed(task["evidence"]) if item.get("procedure")
                          and item["check_id"] == check["id"] and item["stage"] == stage), None)
-        require(not previous or previous["outcome"] == "passed" or task["active_repair"],
+        require(not previous or previous["outcome"] in {"passed", "abandoned"} or task["active_repair"],
                 "repair_cycle_required", "A failed procedure retry must reserve a repair cycle")
         if stage not in {"baseline", "final"}:
             current(state, task)

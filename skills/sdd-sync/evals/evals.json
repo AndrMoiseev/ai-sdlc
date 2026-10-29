@@ -34,6 +34,14 @@
       "expectations": ["Превью сохраняет все байты проекта", "Sync-only не создаёт архив", "Повторный sync не дублирует REQ/AC"]
     },
     {
+      "id": 6,
+      "name": "separate-final-proofs",
+      "category": "guard",
+      "prompt": "Проверь завершение order-export по сохранённому ответу apply read перед переносом спецификаций. Используй explorer-read-fixtures.json, включая успешную пару и случаи неполных доказательств.",
+      "expected_output": "Перенос допускается только при complete с актуальными final execution и verification conclusion; отрицательные случаи сохраняют активное изменение.",
+      "expectations": ["Проверены отдельные execution и conclusion", "Command-only не принят", "Missing execution и stale conclusion блокируют запись", "Partial остаётся активным", "Эвал запускается только по отдельному поручению пользователя"]
+    },
+    {
       "id": 5,
       "name": "resume-removal",
       "category": "recovery",

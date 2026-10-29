@@ -53,6 +53,14 @@ def task_final(driver):
     driver.final_conclude()
 
 
+def test_project_final_progress_never_opens_raw_evidence(prepared_project, monkeypatch):
+    """AC-explorer-visibility: ordinary null-scope read stays a metadata projection."""
+    from test_read_views import assert_run_progress_uses_metadata
+    driver = prepared_project()
+    assert run_final(driver)["outcome"] == "passed"
+    assert_run_progress_uses_metadata(driver, monkeypatch, "final_project_checks")
+
+
 @pytest.fixture(scope="session")
 def final_project_checkpoints(execution_checkpoints, repository_seeds):
     from checkpoints import LazyCheckpoints

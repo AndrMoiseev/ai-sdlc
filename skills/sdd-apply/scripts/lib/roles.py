@@ -89,7 +89,8 @@ def transition(state, task, event, directory):
         require(p["capabilities"].get("fresh_context") is True, "host_limits", "Fresh context mechanism unavailable; distinguish busy slots from unsupported host")
         if p["kind"] == "explorer":
             explorer.validate(state, task, p)
-        role = {**p, "task_id": task_id, "status": "active", "registered_at": now()}
+        role = {**p, "task_id": task_id, "status": "active", "registered_at": now(),
+                "registered_revision": state["revision"] + 1}
         state["roles"][p["role_id"]] = role
         if research:
             packet = {"task": None, "role": role, "assignment": role["assignment"],

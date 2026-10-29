@@ -11,6 +11,15 @@ Use installed `--help-event` for the selected recovery operation's exact payload
 
 ## Source reconciliation
 
+For a lost task/run explorer, retain its assignment, launch trace, evidence and
+batch deadline. Register the same-kind successor with a fresh context and a new
+assignment at the current basis. In the lost-role resolution list every unfinished
+predecessor check in `abandon_procedures`. Resume records those attempts as
+`abandoned`; the successor begins a new procedure rather than completing the old
+one. The replacement shares the existing deadline and lifetime repair counters.
+A missing research answer stays unfinished. The role's `DONE` result never supplies
+a verification conclusion.
+
 Resume and new task worktree creation require a clean main source tree; execution artifacts remain separately managed. Preserve dirty changes and ask for the user's commit or discard decision. A clean unexpected HEAD produces `execution_head_changed`. After showing its changes and receiving actual user acceptance, submit a resolution with that reason, the exact observed `head`, `evidence`, and `instruction: {text, source}`. It advances only `execution_head`; it preserves admitted tasks and document records. It does not move the shared specification checkpoint ref or approve a revised plan. Known apply commits advance the execution source automatically. Worktree refresh requires the main HEAD to have already been reconciled. In-flight task worktree edits remain preserved.
 
 ## Revision contract
@@ -43,3 +52,10 @@ Unfinished tasks return to `pending` for reassessment against the revised basis;
 their prior results, commits and continuing budgets remain linked. Preserve run
 history. Historical evidence from completed tasks remains historical; final
 acceptance still requires fresh checks against the current basis and final HEAD.
+
+Registered checks, inventory, confirmed revisions and pending transitions survive
+reassessment. Approved changes to plan-owned check definitions append a registry
+snapshot while retaining project-added obligations. A plan incompatible with a
+pending transition is rejected before archival effects: reconcile that transition
+at a valid basis or adjust the approved plan. Existing conclusions remain history;
+obtain new execution evidence and a separate conclusion for the revised run.

@@ -98,6 +98,49 @@ def record_revision(result, event):
                               "checks": deepcopy(result["checks"])})
 
 
+def planned_checks(records):
+    return [{"id": item["id"], "criteria": item["criteria"], "source": "tasks.md",
+             "location": item["location"], "run": item["run"], "setup_task": item.get("setup_task"),
+             "setup": None, "cwd": ".", "configuration": {},
+             **({"execution_kind": item["execution_kind"]} if "execution_kind" in item else {})}
+            for item in records]
+
+
+def revised_registry(state, approved, event):
+    """Apply the approved whole definitions while retaining project obligations."""
+    if not state.get("final_checks"):
+        return None
+    result = deepcopy(registry(state))
+    if approved.get("work_kind") != "refactoring":
+        return result
+    previous = {item["id"]: item for item in planned_checks(state.get("verification", {}).values())}
+    following = planned_checks(approved["verification"])
+    current = {item["id"]: item for item in result["checks"]}
+    additional = [item for item in result["checks"] if item["id"] not in previous]
+    require(not {item["id"] for item in following} & {item["id"] for item in additional},
+            "duplicate_check", "Approved whole check ID conflicts with a registered project obligation")
+    reserved = set()
+    for task in state["tasks"].values():
+        reserved.update(item["id"] for item in task["checks"])
+        for entry in task.get("check_registry", {}).get("history", []):
+            reserved.update(item["id"] for item in entry["checks"])
+            for field in ("before", "after"):
+                reserved.update(item["id"] for item in entry.get("transition", {}).get(field, []))
+    for task in approved["tasks"]:
+        reserved.update(task["id"] + "/" + item["id"] for item in task["verification"])
+    require(not reserved & {item["id"] for item in following}, "duplicate_check",
+            "Approved whole check ID conflicts with a task registry or transition")
+    # Identical definitions keep their prepared setup. Changed definitions require
+    # their newly approved run; old prepared commands remain in immutable history.
+    checks = [deepcopy(current[item["id"]]) if previous.get(item["id"]) == item and item["id"] in current
+              else deepcopy(item) for item in following] + additional
+    if checks != result["checks"]:
+        result["checks"] = checks
+        record_revision(result, event)
+        result["history"][-1]["basis_commit"] = approved["head"]
+    return result
+
+
 def register(state, event):
     from .verification import require_command
     require(not state.get("final_checks"), "registry_frozen", "Register whole checks once")
@@ -106,11 +149,7 @@ def register(state, event):
             "inventory_required", "Record inspected instructions and CI")
     if not refactoring(state):
         ready(state)
-    checks = [{"id": item["id"], "criteria": item["criteria"], "source": "tasks.md",
-               "location": item["location"], "run": item["run"], "setup_task": item.get("setup_task"),
-               "setup": None, "cwd": ".", "configuration": {},
-               **({"execution_kind": item["execution_kind"]} if "execution_kind" in item else {})}
-              for item in state.get("verification", {}).values()]
+    checks = planned_checks(state.get("verification", {}).values())
     allowed = set(criteria(state)) | {key for key, item in state.get("acceptance", {}).items() if item["lifetime"] == "persistent"}
     require(isinstance(payload.get("additional", []), list), "check_schema", "Additional checks must be a list")
     for item in payload.get("additional", []):
@@ -413,16 +452,25 @@ def transition(state, event, directory):
 
 
 def progress(state):
-    from .state import execution_directory
+    """Recorded metadata only; acceptance separately validates raw artifacts."""
+    from .state_view import check_progress
     required = (set(criteria(state)) if refactoring(state) else
                 {criterion for check in registry(state)["checks"] for criterion in check["criteria"]})
     confirmed, gaps = set(), []
+    proof = check_progress(state, None, "final")
     try:
         ready(state)
-        _, matches, gaps = evidence(state, execution_directory(state["basis"]))
+        checks = proof["execution"]["checks"]
+        gaps = [{key: item[key] for key in ("check_id", "criteria", "location", "reason")}
+                for item in checks if item["status"] != "passed"]
+        if not checks and proof["execution"]["status"] != "passed":
+            gaps = [{"reason": proof["execution"]["status"], "criteria": sorted(required)}]
         failed = {criterion for gap in gaps for criterion in gap["criteria"]}
-        confirmed = {criterion for item in matches for criterion in item["criteria"]} - failed
+        confirmed = {criterion for item in checks if item["status"] == "passed" for criterion in item["criteria"]} - failed
     except ValueError as exc:
         gaps = [{"reason": str(exc), "criteria": sorted(required)}]
-    return {"confirmed_criteria": sorted(confirmed & required), "total_criteria": len(required),
+    if proof["conclusion"]["status"] != "passed":
+        confirmed.clear()
+        gaps.append({"reason": "verification_" + proof["conclusion"]["status"], "criteria": sorted(required)})
+    return {**proof, "confirmed_criteria": sorted(confirmed & required), "total_criteria": len(required),
             "gaps": gaps, "retired_checks": retired(state)}

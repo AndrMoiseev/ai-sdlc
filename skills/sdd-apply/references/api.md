@@ -57,6 +57,7 @@ stored manifest with references; it does not expand the execution history.
 | Needed information | View |
 |---|---|
 | Revision, task status, blockers, budgets, active role IDs | `compact` |
+| Explorer scope/stage/status and separate execution/conclusion status | `compact`: `explorer_assignments`, `tasks[id].verification`, run-final progress |
 | Resume, lost response/effect investigation or debugging | `full`, then only relevant referenced objects |
 | Checks, evidence, findings, plan or authorization absent from compact | `full`, then `read_object` for the relevant reference |
 
