@@ -121,11 +121,9 @@ def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, 
         assert not (project / "sdd/changes/demo/execution/candidates").exists()
     assert driver.verify()["outcome"] == "passed"
     assert driver.review()["status"] == "integrating"
-    assert driver.integrate_verified()["outcome"] == "passed"
-    with pytest.raises(Rejected) as error:
-        driver.send("commit")
-    assert error.value.code == "commit_phase"
-    assert driver.review("integration-reviewer")["status"] == "committing"
+    assert driver.integrate_verified()["commit"]["sha"]
+    assert driver.task["status"] == "committing"
+    assert driver.task["review_rounds_started"] == 1
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
     assert driver.task["baseline_checks"] == baseline
@@ -257,12 +255,11 @@ def test_refactoring_acceptance_real_failure_requires_reserved_repair_and_retain
     driver.freeze()
     assert driver.verify()["outcome"] == "passed"
     driver.review()
-    assert driver.integrate_verified()["outcome"] == "passed"
-    driver.review("integration-reviewer")
+    assert driver.integrate_verified()["commit"]["sha"]
     driver.send("commit")
     assert driver.send("accept")["status"] == "accepted"
     assert driver.task["test_repair_cycles_started"] == 1
-    assert driver.task["review_rounds_started"] == 2
+    assert driver.task["review_rounds_started"] == 1
     assert driver.task["baseline_checks"] == baseline
     assert artifacts.read_bytes(driver.directory / failed["log"]) == failed_bytes
     assert any(item["outcome"] == "failed" for item in driver.task["evidence"])

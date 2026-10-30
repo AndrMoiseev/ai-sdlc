@@ -6,7 +6,7 @@ FIELDS = {
     "task": ({"number", "scope", "contributes_to", "preserves", "depends_on", "status", "verification"},
              {"cannot_parallel_with", "preservation_reason", "test_changes"}, "TASK"),
     "acceptance": ({"task", "conditions", "expected", "lifetime"}, {"until_task", "replaced_by"}, "AC"),
-    "verification": ({"criteria", "test_description", "location", "run"}, {"setup_task"}, "CHECK"),
+    "verification": ({"criteria", "test_description", "location", "run"}, {"setup_task", "execution_kind"}, "CHECK"),
 }
 
 KINDS = {"proposal": set(), "design": {"criterion", "decision"},

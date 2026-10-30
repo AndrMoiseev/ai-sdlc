@@ -65,26 +65,6 @@ def test_snapshot_and_stale_foreign_data(driver, tmp_path):
     assert "live data unavailable" in result
 
 
-def test_ordinary_final_project_panel_renders_live_criteria(basis, project, tmp_path, prepare_state):
-    from conftest import Driver
-    from test_commits import prepared
-    from test_final_project_checks import register, final_role, run_final
-    with prepare_state():
-        driver = Driver(basis)
-        prepared(driver, project)
-        driver.send("commit")
-        driver.send("accept")
-        register(driver)
-        final_role(driver)
-        assert run_final(driver)["outcome"] == "passed"
-    render(driver.directory)
-    result = dom(driver.directory, tmp_path)
-    assert 'aria-label="Final project checks"' in result
-    assert 'id="whole-result" hidden' not in result
-    assert "1 / 1 criteria confirmed" in result
-    assert "1 / 1 tasks accepted" in result
-
-
 @pytest.mark.parametrize("width", [1280, 540])
 def test_wave_layout_links_and_live_updates(monkeypatch, tmp_path, width):
     from test_waves import wave_state

@@ -1,0 +1,38 @@
+schema_version: 2
+work_kind: change
+document_type: state
+change_id: sdd-explorer
+language: ru
+phase: plan_approved
+flow: plan
+awaiting: none
+updated_at: '2026-10-29T09:03:24Z'
+document_links:
+  - proposal.md
+  - design.md
+  - specs/sdd-explorer/spec.md
+  - specs/sdd-execution/spec.md
+  - tasks.md
+  - decisions.md
+  - questions.md
+  - premortem.md
+  - simplification-review.md
+review_links:
+  - review/decisions.md
+  - review/summary.md
+  - review/20261029T062810Z-explorer-docs/consistency.md
+  - review/20261029T062810Z-explorer-docs/simplicity.md
+  - review/20261029T072150Z-explorer-plan/simplicity.md
+  - review/20261029T072150Z-explorer-plan/plan.md
+approval_refs:
+  - USER-explorer-planning
+  - USER-explorer-review-20261029
+  - USER-explorer-verifier-extension
+  - USER-explorer-documents-approved
+  - USER-explorer-plan-review-20261029
+  - USER-explorer-eval-launch-constraint
+  - USER-explorer-plan-fixes-20261029
+  - USER-explorer-plan-approved-without-execution
+next_question: null
+checks:
+  structure: passed

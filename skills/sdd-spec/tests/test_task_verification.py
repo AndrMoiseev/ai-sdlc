@@ -11,20 +11,33 @@ def test_future_tests_and_run_setup(bundle, run):
     assert not validate_documents(root, change, "plan")["errors"]
 
 
-@pytest.mark.parametrize("mutation", [lambda c: c.update(criteria=[]), lambda c: c.update(test_description=""), lambda c: c.update(location=""), lambda c: c.update(run={}), lambda c: c.update(run=dict(command="pytest", procedure="docs.md")), lambda c: c.update(run=dict(procedure="missing.md")), lambda c: c.update(criteria=["AC-absent"]), lambda c: c.update(run=dict(setup_required=""))])
+@pytest.mark.parametrize("mutation", [lambda c: c.update(criteria=[]), lambda c: c.update(test_description=""), lambda c: c.update(location=""), lambda c: c.update(run={}), lambda c: c.update(run=dict(command="pytest", procedure="docs.md")), lambda c: c.update(run=dict(procedure="missing.md"), execution_kind="manual"), lambda c: c.update(criteria=["AC-absent"]), lambda c: c.update(run=dict(setup_required=""))])
 def test_invalid_verification(bundle, mutation):
     root, change, _, task = bundle
     mutation(task["verification"][0])
     write_doc(change / "tasks.md", "tasks", [task])
-    assert validate_documents(root, change, "plan")["errors"]
+    errors = validate_documents(root, change, "plan")["errors"]
+    assert errors
+    if task["verification"][0]["run"] == {"procedure": "missing.md"}:
+        assert [error["code"] for error in errors] == ["missing_path"]
 
 
 def test_existing_procedure(bundle):
     root, change, _, task = bundle
     (root / "verification.md").write_text("Run smoke tests.\n")
     task["verification"][0]["run"] = dict(procedure="verification.md")
+    task["verification"][0]["execution_kind"] = "manual"
     write_doc(change / "tasks.md", "tasks", [task])
     assert not validate_documents(root, change, "plan")["errors"]
+
+
+def test_existing_procedure_requires_explicit_kind(bundle):
+    root, change, _, task = bundle
+    (root / "verification.md").write_text("Run smoke tests.\n")
+    task["verification"][0]["run"] = dict(procedure="verification.md")
+    write_doc(change / "tasks.md", "tasks", [task])
+    errors = validate_documents(root, change, "plan")["errors"]
+    assert [error["code"] for error in errors] == ["execution_kind"]
 
 
 @pytest.mark.parametrize("command", ["pytest", "pytest && echo ok", [], [""], [" "], [42], ["pytest", None], ["pytest", "bad\0arg"], {"argv": ["pytest"]}])

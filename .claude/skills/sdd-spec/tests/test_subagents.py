@@ -181,7 +181,7 @@ def test_probe_preparation_is_separate_and_does_not_launch(host, tmp_path):
         prepare(output, host)
 
 
-@pytest.mark.parametrize("script", ["resolve_agent.py", "prepare_subagent_eval.py"])
+@pytest.mark.parametrize("script", ["resolve_agent.py", "prepare_subagent_eval.py", "simplicity.py"])
 def test_new_entrypoints_relocate_without_consumer_changes(tmp_path, script, installed_packages):
     import os
     installed = installed_packages / "sdd-spec"
@@ -192,12 +192,20 @@ def test_new_entrypoints_relocate_without_consumer_changes(tmp_path, script, ins
     before = {p.relative_to(installed): p.read_bytes() for p in installed.rglob("*") if p.is_file()}
     consumer_before = (consumer / "pyproject.toml").read_bytes()
     env = dict(os.environ, UV_CACHE_DIR=str(tmp_path / "empty-uv-cache"))
-    # Both new scripts use stdlib only: an empty offline cache should succeed.
+    # These scripts use stdlib only: an empty offline cache should succeed.
+    # Simplicity must locate its bundled text after relocation; mocked readers
+    # cannot detect an accidental dependency on the author's cwd or installation.
+    arguments = ["--model", "gpt-6.1-sol"] if script == "simplicity.py" else ["--help"]
     for _ in range(2):
         result = subprocess.run(["uv", "run", "--locked", "--offline", "--python", sys.executable,
-                                 "--script", str(installed / "scripts" / script), "--help"],
-                                cwd=consumer, env=env, capture_output=True, text=True, timeout=60)
+                                 "--script", str(installed / "scripts" / script), *arguments],
+                                cwd=consumer, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60)
         assert result.returncode == 0, result.stderr
+        if script == "simplicity.py":
+            rendered = json.loads(result.stdout)
+            assert rendered["ok"]
+            assert rendered["profile"] == "references/simplicity-model-gpt-6.1-sol.md"
+            assert rendered["instructions"]
     assert before == {p.relative_to(installed): p.read_bytes() for p in installed.rglob("*") if p.is_file()}
     assert list(consumer.iterdir()) == [consumer / "pyproject.toml"]
     assert (consumer / "pyproject.toml").read_bytes() == consumer_before

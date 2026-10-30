@@ -80,7 +80,7 @@ class AcceptanceDriver(Driver):
             owned.append("check_local.py")
         self.send("start", {"role_id": "author", "paths": paths or owned})
         self.role("baseline-verifier", "verifier")
-        return self.send("check_run", {"role_id": "baseline-verifier", "stage": "baseline"})
+        return self.run_checks("baseline")
 
     def implement(self):
         (self.root / "result.txt").write_text("local implemented\n", encoding="utf-8")
@@ -90,11 +90,7 @@ class AcceptanceDriver(Driver):
                                       "description": "Assert the exact local result; retain the existing API regression"})
 
     def integrate_verified(self):
-        self.send("transfer")
-        self.send("integrate")
-        self.send("candidate")
-        self.role("integration-verifier", "verifier")
-        return self.send("check_run", {"role_id": "integration-verifier", "stage": "integration"})
+        return self.integrate()
 
     def corrupt(self, mutate):
         """Inject a damaged persisted input, not an always-rejecting route stub."""
@@ -167,7 +163,7 @@ class RegistryDriver(AcceptanceDriver):
         self.send("start", {"role_id": self.author, "paths": paths})
         verifier = self.task_id + "-baseline"
         self.role(verifier, "verifier")
-        return self.send("check_run", {"role_id": verifier, "stage": "baseline"})
+        return self.run_checks("baseline")
 
     def implement(self):
         if self.task_id == "TASK-one":

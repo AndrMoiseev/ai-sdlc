@@ -46,8 +46,9 @@ def test_every_local_markdown_link_resolves_inside_package():
 
 
 def test_required_resources_ship_together():
-    files = ["README.md", "pyproject.toml", "templates/state.yaml"]
-    files += [f"scripts/{name}{suffix}" for name in ("check", "snapshot", "test", "resolve_agent", "prepare_subagent_eval")
+    files = ["README.md", "pyproject.toml", "templates/state.yaml",
+             "references/explorer.md", "evals/fixtures/explorer.json"]
+    files += [f"scripts/{name}{suffix}" for name in ("check", "snapshot", "test", "resolve_agent", "prepare_subagent_eval", "simplicity")
               for suffix in (".py", ".py.lock")]
     files += [f"flows/{name}.md" for name in
               ("explore", "draft", "revise", "review", "user-review", "resume", "plan", "explain")]
@@ -58,7 +59,7 @@ def test_required_resources_ship_together():
                "document-format-discussion", "document-format-review", "discussion",
                "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency",
                "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation",
-               "resume-recovery", "checkpoint")]
+               "resume-recovery", "checkpoint", "simplicity", "simplicity-instructions", "simplicity-origin")]
     for file in files:
         assert (ROOT / file).is_file(), file
 

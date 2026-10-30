@@ -6,7 +6,8 @@ import sys
 import pytest
 
 from check_commands import run_command
-from lib.verification import run_command as process_command
+from lib.inputs import spec_modules
+process_command = spec_modules("check_runner").run_command
 
 
 @pytest.mark.parametrize("source", [

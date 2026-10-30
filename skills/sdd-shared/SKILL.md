@@ -18,11 +18,14 @@ decisions, review authorization and execution.
    and the operation-specific section it names. For agent launches, read
    [subagent selection](references/subagents.md). For worker coordination, read
    [coordination](references/coordination.md).
+4. For bounded research or check delegation, read the
+   [explorer assignment contract](references/explorer.md) and pass the
+   [explorer instructions](agents/explorer.md) to the worker.
 
 ## Ownership
 
 The package owns parsers, validators, Git checkpoints, settings and role resolution.
 Authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
-execution state and Git operations to sdd-apply, and baseline synchronization and
+execution state, criterion conclusions and Git operations to sdd-apply, and baseline synchronization and
 change archiving to sdd-sync. A successful structural check
 reports evidence; the calling workflow determines whether it may proceed.

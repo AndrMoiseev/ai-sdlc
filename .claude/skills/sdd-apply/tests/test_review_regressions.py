@@ -17,12 +17,9 @@ def accepted_worktree(basis, tmp_path):
     d.send('transfer')
     d.send('integrate')
     d.send('candidate')
-    d.role('integration-verifier', 'verifier')
-    d.send('check_run', {'role_id': 'integration-verifier', 'stage': 'integration'})
-    d.review('integration-reviewer')
     d.send('commit')
     d.send('accept')
-    for name in ['verifier', 'integration-verifier']:
+    for name in ['verifier']:
         d.send('role_result', {'role_id': name, 'result': 'finished', 'trace': 'synthetic'})
     return d, wt
 
@@ -89,12 +86,12 @@ def test_cleanup_crash_reconciles_removed_worktree(cleanup_checkpoint, monkeypat
 def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
     driver = execution_checkpoint("verified")
     from lib import verification
-    original = verification.run_command
+    original = verification.check_runner.run_command
     def failure(*args):
         result = original(*args)
         result.update(outcome='failed', exit_code=1)
         return result
-    monkeypatch.setattr(verification, 'run_command', failure)
+    monkeypatch.setattr(verification.check_runner, 'run_command', failure)
     assert driver.verify()['outcome'] == 'failed'
     assert driver.task['last_check_failed']
     with pytest.raises(ValueError, match='Latest required'):
@@ -109,14 +106,13 @@ def test_ownership_path_alias_rejected(basis, project):
     with pytest.raises(ValueError, match='canonical'):
         driver.send('start', {'role_id': 'author', 'paths': ['./check.py']})
 
-def test_final_checks_cannot_accept_uncommitted_implementation(execution_checkpoint):
+def test_completion_cannot_accept_uncommitted_implementation(execution_checkpoint):
     driver = execution_checkpoint("accepted")
     project = Path(driver.state["basis"]["project_root"])
     committed = repository(project).content('HEAD', 'result.txt')
     (project / 'result.txt').write_text('different uncommitted implementation')
-    driver.role('final', 'final_verifier')
-    with pytest.raises(ValueError, match='before verification|changed'):
-        driver.send('check_run', {'role_id': 'final', 'stage': 'final'})
+    result = driver.send("finalize", task_id=None)
+    assert result["result"] == "partial"
     assert repository(project).content('HEAD', 'result.txt') == committed
     assert committed.decode().splitlines() == ['verified result']
 

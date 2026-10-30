@@ -2,7 +2,6 @@
 from .common import contained, require
 from .repository import repository
 from .effects import intent, observed
-from .verification import valid_evidence
 
 
 def freeze(state, task, event, directory):
@@ -25,6 +24,9 @@ def freeze(state, task, event, directory):
     require(repo.changed_paths(baseline["commit"]) <= set(task["paths"]), "candidate_scope", "Commits changed files outside task ownership")
     parent = repo.head()
     tree = repo.tree_for_paths(task["paths"], parent)
+    if worktree.get("integrated"):
+        require(tree == worktree.get("integration_tree"), "integration_drift",
+                "Integrated files changed after transfer or recorded conflict resolution")
     path, journal = intent(directory, state, event, "candidate_commit", {"root": root, "parent": parent, "tree": tree})
     expected = journal["request"]["precondition"]
     require(not worktree.get("integrated") or expected["parent"] == state["execution_head"],
@@ -46,6 +48,8 @@ def freeze(state, task, event, directory):
             if actual["parent"] and task["plan"]["id"] in actual["message"] and repo.changed_paths(actual["parent"], sha) <= set(task["paths"]):
                 result["parent"] = actual["parent"]
     require(repo.head() == result["sha"] and repo.tree(result["sha"]) == result["tree"], "commit_drift", "Candidate commit changed")
+    if worktree.get("integrated"):
+        require(result["tree"] == worktree["integration_tree"], "integration_drift", "Commit differs from the recorded integration")
     if result["sha"] != result["parent"]:
         actual = repo.commit_info(result["sha"])
         require(actual["parent"] == result["parent"], "commit_parent", "Candidate parent changed")
@@ -86,12 +90,19 @@ def confirm(state, task, commit):
 def transition(state, task, event, directory):
     require(task and task["status"] == "committing", "commit_phase", "Only reviewed candidates may be committed")
     reviewed(state, task)
-    valid_evidence(state, task, directory, "integration" if task["worktree"] and task["worktree"].get("integrated") else None)
+    from .integration import verified_transfer
+    verified_transfer(state, task, directory)
+    from .verification import current
+    current(state, task)
     root = state["basis"]["project_root"]
     repo = repository(root)
     require(repo.branch() == state["basis"]["branch"], "branch_changed", "Execution branch changed")
+    candidate = task["candidate_commit"]
+    require(candidate["sha"] == repo.head() and candidate["tree"] == task["worktree"]["integration_tree"],
+            "commit_candidate", "Confirm the unchanged recorded integration commit")
     if event["type"] == "accept":
-        require(task["commits"], "commit_required", "A commit is mandatory")
+        require(task["commits"] and task["commits"][-1]["sha"] == candidate["sha"],
+                "commit_required", "Confirmation of the current integration commit is mandatory")
         confirm(state, task, task["commits"][-1])
         from .check_registry import confirm as confirm_registry
         confirm_registry(state, task, event)
@@ -99,7 +110,7 @@ def transition(state, task, event, directory):
         task["integration_active"] = False
         task.pop("repairing_result", None)
         return {"status": "accepted", "sha": task["commits"][-1]["sha"]}
-    require(task["worktree"] and task["worktree"].get("integrated"), "integration_required", "Check and review integration before accepting the task")
+    require(task["worktree"] and task["worktree"].get("integrated"), "integration_required", "Integrate the verified worktree before accepting the task")
     result = dict(task["candidate_commit"])
     require(result["root"] == root and result["sha"] == repo.head(), "commit_candidate", "Integration candidate must name execution HEAD")
     require(result["sha"] != result["parent"], "empty_commit", "Task has no changes to commit")

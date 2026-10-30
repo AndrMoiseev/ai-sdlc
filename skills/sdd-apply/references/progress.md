@@ -12,13 +12,6 @@ Expanded evidence preferences are browser-local and scoped to the page path, cha
 
 If state succeeded but view generation failed, run `dashboard` again. Preserve the accepted state and commit: regenerating HTML must not replay implementation or Git operations. Neither a manually edited summary nor dashboard grants acceptance.
 
-For refactoring, show accepted tasks separately from confirmed whole criteria.
-The whole-result panel reports current evidence gaps and retired checks with
-confirmed reasons. Contributions and accepted task counts do not establish the
-whole result. A changed integrated HEAD, approved plan commit or applicable registry removes
-old confirmation from the current projection; historical logs remain available.
-
-Ordinary executions with an additional final registry show a separate final project
-checks panel (`final_project_checks` in compact and dashboard data). Its confirmed
-criteria describe only those project checks. Accepted task counts and task final
-evidence remain separate requirements; either missing set blocks final completion.
+Completion summarizes accepted tasks and their original evidence. For refactoring,
+report `final.unassessed_criteria` explicitly; task contributions do not prove whole
+results. The dashboard has no separate final-check panel.

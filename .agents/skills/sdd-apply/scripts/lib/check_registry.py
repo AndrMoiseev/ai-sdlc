@@ -182,12 +182,14 @@ def revise(state, task, event):
     allowed = local_criteria(state, task) | {criterion for item in before for criterion in item["criteria"]}
     old = {item["id"]: item for item in before}
     for check in after:
-        require(set(check) <= {"id", "criteria", "source", "location", "run", "cwd", "configuration", "setup"}
+        require(set(check) <= {"id", "criteria", "source", "location", "run", "cwd", "configuration", "setup", "execution_kind"}
                 and {"id", "criteria", "source", "run", "cwd", "configuration", "setup"} <= check.keys()
                 and isinstance(check["id"], str) and check["id"] and isinstance(check["source"], str) and check["source"]
                 and strings(check["criteria"]) and check["criteria"] and set(check["criteria"]) <= allowed
                 and isinstance(check["cwd"], str) and isinstance(check["configuration"], dict),
                 "check_schema", "New checks require complete scoped command records")
+        from .explorer_assignments import execution_kind
+        execution_kind(check)
         if old.get(check["id"]) == check:
             continue
         require(check["setup"] is None and isinstance(check["run"], dict) and set(check["run"]) in ({"command"}, {"procedure"}),

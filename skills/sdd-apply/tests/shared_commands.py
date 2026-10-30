@@ -16,10 +16,23 @@ from functools import wraps
 from collections import OrderedDict
 
 from lib.common import require
+import shared as dependency
 
 
 _entrypoints = {}
 _parser_caches = {}
+_modules = {}
+_source_loader = dependency.__file__
+
+
+def source_module(module_name, work_kind="change"):
+    # Relocated/missing dependency contracts must exercise the real loader.
+    if dependency.__file__ != _source_loader:
+        return dependency.load(module_name, work_kind=work_kind)
+    key = module_name, work_kind
+    if key not in _modules:
+        _modules[key] = dependency.load(module_name, work_kind=work_kind)
+    return _modules[key]
 
 
 def remember(cache, key, value):
@@ -67,8 +80,10 @@ def reuse_parsers(module):
 
 
 def spec_modules(module_name="documents"):
-    from shared import load
-    module = load(module_name)
+    # This adapter uses the immutable source installation. Distribution tests
+    # exercise locate/load directly against their separate copied packages.
+    # Retain module objects, not parsed documents or validation outcomes.
+    module = source_module(module_name)
     return reuse_parsers(module) if module_name == "documents" else module
 
 

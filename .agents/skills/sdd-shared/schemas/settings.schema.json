@@ -11,7 +11,7 @@
       "properties": {
         "roles": {
           "type": "object",
-          "propertyNames": {"enum": ["sdd-spec.document_reviewer", "sdd-spec.plan_reviewer", "sdd-spec.editor", "sdd-spec.editorial_reviewer", "sdd-apply.executor", "sdd-apply.verifier", "sdd-apply.reviewer", "sdd-apply.final_verifier"]},
+          "propertyNames": {"enum": ["sdd-spec.explorer", "sdd-apply.explorer", "sdd-spec.document_reviewer", "sdd-spec.plan_reviewer", "sdd-spec.editor", "sdd-spec.editorial_reviewer", "sdd-apply.executor", "sdd-apply.verifier", "sdd-apply.reviewer"]},
           "additionalProperties": {"type": "string", "minLength": 1, "pattern": "^\\S(?:[\\s\\S]*\\S)?$"}
         }
       }

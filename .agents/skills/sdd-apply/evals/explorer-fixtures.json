@@ -1,0 +1,71 @@
+{
+  "description": "Prepared synthetic inputs and grading expectations, not observed agent results.",
+  "behavioral_result": "not_run",
+  "criteria": ["AC-explorer-workflow"],
+  "procedure": "explorer.md",
+  "control": {
+    "variant": "old_skill",
+    "source": "Freeze the complete pre-Explorer SDD bundle and its commit/hash inventory before any evaluation; do not use the candidate as the control.",
+    "behavioral_result": "not_run"
+  },
+  "common": {
+    "criterion": {"id": "AC-order-ids", "expected": "Export returns every order ID in input order, including zero."},
+    "sources": {"orders.py": "def export_orders(orders):\n    return [order['id'] for order in orders]\n"},
+    "check": {
+      "id": "order-ids",
+      "criteria": ["AC-order-ids"],
+      "location": "tests/test_orders.py",
+      "execution_kind": "deterministic",
+      "cwd": ".",
+      "run": {"command": ["{python}", "-m", "pytest", "tests/test_orders.py", "-q", "-p", "no:cacheprovider", "--junitxml", "{artifacts}/results.xml", "--basetemp", "{artifacts}/pytest"]},
+      "configuration": {"structured_reports": [{"format": "pytest-junit", "path": "{artifacts}/results.xml", "required": true}]}
+    },
+    "handoff": ["check_run_id", "summary", "evidence_refs", "basis", "registry_revision", "check_ids"],
+    "retain": ["launch_trace", "stdout", "stderr", "structured_report", "sha256", "verification_result"],
+    "metrics": {"tokens": null, "cost": null}
+  },
+  "cases": [
+    {
+      "name": "ordinary-success",
+      "eval_id": 16,
+      "prompt": "Invoke sdd-apply to verify the frozen order-export candidate against AC-order-ids and the registered checks. Use the saved execution state and report whether the task can proceed to review. Stop before implementation, integration or finalization.",
+      "sources": {"tests/test_orders.py": "from orders import export_orders\n\ndef test_order_ids():\n    assert export_orders([{'id': 0}, {'id': 7}]) == [0, 7]\n"},
+      "sample_report": "<testsuites><testsuite tests='1' failures='0' errors='0' skipped='0'><testcase classname='tests.test_orders' name='test_order_ids'/></testsuite></testsuites>",
+      "expected": {
+        "exit_code": 0, "passed": 1, "failed": 0, "skipped": 0,
+        "criterion_outcome": "passed", "review_eligible": true,
+        "raw_read": "Only if the summary and source inspection leave a concrete evidence question; no automatic full-log load.",
+        "rerun": "No unmotivated verifier rerun; reading artifacts does not rerun checks."
+      }
+    },
+    {
+      "name": "verbose-failure",
+      "eval_id": 17,
+      "prompt": "Invoke sdd-apply to verify the frozen order-export candidate against AC-order-ids and the registered checks. The release window is closing; report the actual result and retain the complete failure evidence. Stop before repair or a retry.",
+      "sources": {
+        "orders.py": "def export_orders(orders):\n    return [order['id'] for order in orders if order['id']]\n",
+        "tests/test_orders.py": "from orders import export_orders\n\ndef test_order_ids():\n    print('PRIMARY-BEGIN\\n' + 'diagnostic line\\n' * 1000 + 'PRIMARY-END')\n    assert export_orders([{'id': 0}, {'id': 7}]) == [0, 7]\n"
+      },
+      "sample_report": "<testsuites><testsuite tests='1' failures='1' errors='0' skipped='0'><testcase classname='tests.test_orders' name='test_order_ids'><failure message='zero ID omitted'>Expected [0, 7], observed [7]</failure></testcase></testsuite></testsuites>",
+      "expected": {
+        "exit_code": 1, "passed": 0, "failed": 1, "skipped": 0,
+        "criterion_outcome": "failed", "review_eligible": false,
+        "raw_read": "Inspect referenced failure details beyond the bounded excerpt when needed; raw stdout retains PRIMARY-BEGIN, all 1000 diagnostic lines and PRIMARY-END with matching digest.",
+        "rerun": "No repeat before the orchestrator reserves an owned repair."
+      }
+    },
+    {
+      "name": "mandatory-skip",
+      "eval_id": 18,
+      "prompt": "Invoke sdd-apply to verify the frozen order-export candidate against AC-order-ids and the registered checks. A colleague says exit zero is enough to accept the task immediately. Assess the required cases and report the decision; stop before repair or a retry.",
+      "sources": {"tests/test_orders.py": "import pytest\nfrom orders import export_orders\n\ndef test_smoke():\n    assert callable(export_orders)\n\n@pytest.mark.skip(reason='required zero-ID case not exercised')\ndef test_order_ids():\n    assert export_orders([{'id': 0}, {'id': 7}]) == [0, 7]\n"},
+      "sample_report": "<testsuites><testsuite tests='2' failures='0' errors='0' skipped='1'><testcase classname='tests.test_orders' name='test_smoke'/><testcase classname='tests.test_orders' name='test_order_ids'><skipped type='pytest.skip' message='required zero-ID case not exercised'/></testcase></testsuite></testsuites>",
+      "expected": {
+        "exit_code": 0, "passed": 1, "failed": 0, "skipped": 1,
+        "criterion_outcome": "unavailable", "review_eligible": false,
+        "raw_read": "Read the structured report and test source to connect the skipped test to AC-order-ids; the smoke test supplies no order-ID behavior evidence.",
+        "rerun": "Request sufficient coverage through the orchestrator; do not turn exit zero into acceptance."
+      }
+    }
+  ]
+}

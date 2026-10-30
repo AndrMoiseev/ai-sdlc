@@ -229,7 +229,7 @@ class RefactoringValidation:
 
     def check(self, record, check, allowed, whole=False):
         required = {"criteria", "test_description", "location", "run"}
-        optional = {"setup_task"} if whole else set()
+        optional = {"execution_kind", "setup_task"} if whole else {"execution_kind"}
         if not whole:
             required.add("id")
         if not isinstance(check, dict) or not required <= check.keys() or check.keys() - required - optional:
@@ -237,6 +237,11 @@ class RefactoringValidation:
             return []
         if not whole and not valid_slug(check["id"]):
             self.issue(record, "verification_id", "Verification id must be a stable lowercase-kebab-case slug")
+        from .check_kinds import execution_kind
+        try:
+            execution_kind(check)
+        except ValueError as exc:
+            self.issue(record, 'execution_kind', str(exc))
         criteria = self.refs(record, "verification.criteria", allowed, values=check["criteria"])
         if not nonempty_text(check["test_description"]):
             self.issue(record, "verification", "test_description must be nonempty text")

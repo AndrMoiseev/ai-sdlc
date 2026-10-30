@@ -25,8 +25,10 @@ task worktree HEADs and uncommitted edits are not document inputs.
 Execution
 naturally advances HEAD; ongoing transitions preserve the admitted task scope
 and use current Git state checks. Checkpoint acceptance
-does not authorize new tasks. Use `revised_plan` with an approved plan and an
-explicit execution instruction to reconcile changed scope while preserving work.
+does not authorize new tasks. Use `revised_plan` to reconcile changed scope while
+preserving work. Its `instruction` records the revised plan approval's actual text
+and source; it is evidence of that approval, not a second user approval. An explicit
+pause still requires a later instruction to start.
 
 `initialize` takes validation arguments plus optional `isolation`.
 It validates, records a run and generates the

@@ -85,7 +85,7 @@ def check_runner(request, monkeypatch):
         return
     from lib import verification
     from check_commands import run_command
-    monkeypatch.setattr(verification, "run_command", run_command)
+    monkeypatch.setattr(verification.check_runner, "run_command", run_command)
 
 
 @pytest.fixture
@@ -117,10 +117,13 @@ def prepare_state(request):
 @pytest.fixture(autouse=True)
 def shared_cli(monkeypatch):
     from lib import inputs
-    from shared_commands import spec_call, spec_modules
+    from shared_commands import spec_call, spec_modules, source_module
     original = inputs.spec_call
     monkeypatch.setattr(inputs, "spec_call", spec_call)
     monkeypatch.setattr(inputs, "spec_modules", spec_modules)
+    # Modules imported during collection retain the original spec_modules
+    # callable, whose globals still resolve inputs.load at call time.
+    monkeypatch.setattr(inputs, "load", source_module)
     return original
 
 
@@ -276,12 +279,42 @@ class Driver:
     def role(self, ident, kind, context=None):
         return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
 
+    def explorer(self, ident, stage=None, task_id="current", context=None, **fields):
+        from lib.explorer_assignments import basis
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        state = self._view()
+        task = state["tasks"].get(selected_task)
+        kind = "checks" if stage else "research"
+        current = basis(state, task, kind, stage)
+        assignment = {"id": ident, "kind": kind,
+            "scope": {"project": state["basis"]["project_root"], "work": state["change_id"], "task": selected_task},
+            "basis": current, "read_scope": ["project"], "outputs": [str(self.directory)], "limits": {"timeout": 300}}
+        if stage:
+            assignment.update(stage=stage, check_ids=[check["id"] for check in current["checks"]],
+                              registry_revision=current["registry_revision"])
+        else:
+            assignment["question"] = "Inspect the synthetic fixture"
+        payload = {"role_id": ident, "kind": "explorer", "context_id": context or ident, "fresh": True,
+            "host": "codex", "launch_ref": "synthetic-unit-test", "assignment": assignment,
+            "capabilities": {"fresh_context": True, "observations": {
+                name: {"available": True, "trace": "synthetic adapter observation"}
+                for name in ("launch", "read", "write_artifacts", "run_command")}}, **fields}
+        return self.send("role_register", payload, task_id=selected_task)
+
+    def run_checks(self, stage, ident=None, task_id="current"):
+        ident = ident or f"{getattr(self, 'task_id', 'TASK-one')}-{stage}-explorer-{self.number + 1}"
+        self.explorer(ident, stage, task_id=task_id)
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        result = self.send("check_run", {"role_id": ident, "stage": stage}, task_id=selected_task)
+        self.send("role_result", {"role_id": ident, "result": "DONE", "trace": "synthetic adapter check completed"}, task_id=selected_task)
+        return result
+
     def start(self, paths=None):
         self.worktree()
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
         self.role("author", "executor")
         self.send("start", {"role_id": "author", "paths": paths or ["result.txt", "check.py"]})
-        self.send("check_run", {"role_id": "author", "stage": "baseline"})
+        self.run_checks("baseline")
 
     def freeze(self):
         self.send("role_result", {"role_id": "author", "result": "DONE", "trace": "unit-test"})
@@ -290,7 +323,31 @@ class Driver:
     def verify(self, role="verifier"):
         if role not in self.state["roles"]:
             self.role(role, "verifier")
-        return self.send("check_run", {"role_id": role, "stage": "independent"})
+        result = self.run_checks("independent")
+        if result["outcome"] == "passed":
+            self.conclude(role=role)
+        return result
+
+    def conclude(self, role="verifier", stage=None, outcome="passed", check_request=None, task_id="current"):
+        """Explicit synthetic criterion assessment, separate from the runner."""
+        from lib.verification_results import packet
+        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
+        state = self._view()
+        task = state["tasks"].get(selected_task)
+        context = packet(state, task, self.directory, stage)
+        criteria_results = [{"criterion_id": criterion, "outcome": outcome,
+                             "reason": "Synthetic fixture criterion and test source inspected",
+                             "references": ["synthetic fixture source and registered check"]}
+                            for criterion in context.pop("criteria")]
+        if check_request:
+            for item in criteria_results:
+                item["check_request"] = check_request
+        if stage:
+            context["stage"] = stage
+        return self.send("verification_result", {**context, "role_id": role,
+            "criteria_results": criteria_results, "limitations": [], "trace": "synthetic-unit-test conclusion"},
+            task_id=selected_task)
+
 
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
@@ -300,14 +357,7 @@ class Driver:
     def integrate(self, prefix=""):
         self.send("transfer")
         self.send("integrate")
-        self.send("candidate")
-        verifier = prefix + "integration-verifier"
-        self.role(verifier, "verifier")
-        result = self.send("check_run", {"role_id": verifier, "stage": "integration"})
-        assert result["outcome"] == "passed"
-        self.review(prefix + "integration-reviewer")
-        self.send("role_result", {"role_id": verifier, "result": "DONE", "trace": "unit-test"})
-        return result
+        return self.send("candidate")
 
 
 @pytest.fixture
@@ -333,7 +383,10 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         (driver.root / "result.txt").write_text("verified result\n")
         driver.freeze()
         yield "frozen", driver
-        assert driver.verify()["outcome"] == "passed"
+        driver.role("verifier", "verifier")
+        assert driver.run_checks("independent")["outcome"] == "passed"
+        yield "executed", driver
+        driver.conclude()
         yield "verified", driver
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
@@ -352,4 +405,4 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
 
 @pytest.fixture
 def execution_checkpoint(execution_checkpoints, repository_backend, state_backend):
-    return lambda stage: execution_checkpoints[stage].restore(repository_backend, state_backend)
+    return lambda stage, **options: execution_checkpoints[stage].restore(repository_backend, state_backend, **options)

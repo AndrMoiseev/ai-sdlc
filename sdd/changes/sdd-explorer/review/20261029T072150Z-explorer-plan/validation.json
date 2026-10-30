@@ -1,0 +1,248 @@
+{
+    "schema_version":  1,
+    "review_run_id":  "20261029T072150Z-explorer-plan",
+    "reviewed_commit":  "3d6eccf648aae378826314468ec703a10789849b",
+    "structural_check":  {
+                             "command":  "uv run --python \"C:\\Program Files\\Python314\\python.exe\" --locked --script \"C:\\Users\\Andrew\\repos\\ai-sdlc\\.agents\\skills\\sdd-spec\\scripts\\check.py\" --project-root \"C:\\Users\\Andrew\\repos\\ai-sdlc\" --change sdd-explorer --stage plan",
+                             "exit_code":  0,
+                             "elapsed_seconds":  0.8738571,
+                             "result":  {
+                                            "schema_version":  2,
+                                            "stage":  "plan",
+                                            "work_kind":  "change",
+                                            "change_id":  "sdd-explorer",
+                                            "errors":  [
+
+                                                       ],
+                                            "warnings":  [
+                                                             {
+                                                                 "code":  "changed_since_review",
+                                                                 "path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\sdd\\changes\\sdd-explorer\\review\\20261029T072150Z-explorer-plan\\plan.md",
+                                                                 "element_id":  null,
+                                                                 "message":  "Review evidence is unavailable or differs from HEAD; assess the consequences without revoking existing work authorization."
+                                                             },
+                                                             {
+                                                                 "code":  "changed_since_review",
+                                                                 "path":  "C:\\Users\\Andrew\\repos\\ai-sdlc\\sdd\\changes\\sdd-explorer\\review\\20261029T072150Z-explorer-plan\\simplicity.md",
+                                                                 "element_id":  null,
+                                                                 "message":  "Review evidence is unavailable or differs from HEAD; assess the consequences without revoking existing work authorization."
+                                                             }
+                                                         ],
+                                            "checkpoint_status":  {
+                                                                      "schema_version":  2,
+                                                                      "operation":  "inspect",
+                                                                      "status":  "dirty",
+                                                                      "work_kind":  "change",
+                                                                      "change_id":  "sdd-explorer",
+                                                                      "checkpoint_ref":  "refs/sdd/checkpoints/change/sdd-explorer/0d4025ff616972a23d86d6af0811589e317bcef5447c48a510bf124d2fc8f8e0",
+                                                                      "head":  "71eaba61610ec34d74d2a4f1e8dfd0ded9c186ac",
+                                                                      "accepted_commit":  null,
+                                                                      "dirty":  true,
+                                                                      "changes":  [
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/decisions.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/design.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/premortem.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/proposal.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/questions.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/decisions.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/specs/sdd-execution/spec.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/specs/sdd-explorer/spec.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/state.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/state.yaml"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  " M",
+                                                                                          "path":  "sdd/changes/sdd-explorer/tasks.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T062810Z-explorer-docs/consistency.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T062810Z-explorer-docs/launch.json"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T062810Z-explorer-docs/simplicity.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T062810Z-explorer-docs/validation.json"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T072150Z-explorer-plan/launch.json"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T072150Z-explorer-plan/plan.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/20261029T072150Z-explorer-plan/simplicity.md"
+                                                                                      },
+                                                                                      {
+                                                                                          "status":  "??",
+                                                                                          "path":  "sdd/changes/sdd-explorer/review/summary.md"
+                                                                                      }
+                                                                                  ],
+                                                                      "diagnostics":  [
+
+                                                                                      ],
+                                                                      "exit_code":  0
+                                                                  },
+                                            "discussion_status":  {
+                                                                      "open_questions":  [
+
+                                                                                         ],
+                                                                      "blocking_questions":  [
+
+                                                                                             ],
+                                                                      "complete":  true,
+                                                                      "provenance":  "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."
+                                                                  },
+                                            "review_status":  {
+                                                                  "required_lenses":  [
+                                                                                          "plan",
+                                                                                          "simplicity"
+                                                                                      ],
+                                                                  "coverage":  {
+                                                                                   "plan":  "completed",
+                                                                                   "simplicity":  "completed"
+                                                                               },
+                                                                  "reports":  {
+                                                                                  "20261029T062810Z-explorer-docs/consistency":  {
+                                                                                                                                     "stage":  "document_review",
+                                                                                                                                     "lens_id":  "consistency",
+                                                                                                                                     "result":  "completed_with_findings",
+                                                                                                                                     "evidence":  "current",
+                                                                                                                                     "reviewed_commit":  "71eaba61610ec34d74d2a4f1e8dfd0ded9c186ac"
+                                                                                                                                 },
+                                                                                  "20261029T062810Z-explorer-docs/simplicity":  {
+                                                                                                                                    "stage":  "document_review",
+                                                                                                                                    "lens_id":  "simplicity",
+                                                                                                                                    "result":  "completed_no_findings",
+                                                                                                                                    "evidence":  "current",
+                                                                                                                                    "reviewed_commit":  "71eaba61610ec34d74d2a4f1e8dfd0ded9c186ac"
+                                                                                                                                },
+                                                                                  "20261029T072150Z-explorer-plan/plan":  {
+                                                                                                                              "stage":  "plan_review",
+                                                                                                                              "lens_id":  "plan",
+                                                                                                                              "result":  "completed_with_findings",
+                                                                                                                              "evidence":  "changed_since_review",
+                                                                                                                              "reviewed_commit":  "3d6eccf648aae378826314468ec703a10789849b"
+                                                                                                                          },
+                                                                                  "20261029T072150Z-explorer-plan/simplicity":  {
+                                                                                                                                    "stage":  "plan_review",
+                                                                                                                                    "lens_id":  "simplicity",
+                                                                                                                                    "result":  "completed_no_findings",
+                                                                                                                                    "evidence":  "changed_since_review",
+                                                                                                                                    "reviewed_commit":  "3d6eccf648aae378826314468ec703a10789849b"
+                                                                                                                                }
+                                                                              },
+                                                                  "complete":  true,
+                                                                  "unresolved_findings":  [
+                                                                                              "20261029T072150Z-explorer-plan/plan/FIND-spec-explorer-final-verification",
+                                                                                              "20261029T072150Z-explorer-plan/plan/FIND-apply-suite-selection",
+                                                                                              "20261029T072150Z-explorer-plan/plan/FIND-runtime-instructions-late"
+                                                                                          ],
+                                                                  "unfinished_fixes":  [
+
+                                                                                       ]
+                                                              },
+                                            "approval_status":  {
+                                                                    "approved":  false,
+                                                                    "ready":  false,
+                                                                    "applicability":  {
+                                                                                          "USER-explorer-planning":  true,
+                                                                                          "USER-explorer-review-20261029":  true,
+                                                                                          "USER-explorer-verifier-extension":  true,
+                                                                                          "USER-explorer-documents-approved":  true,
+                                                                                          "USER-explorer-plan-review-20261029":  true
+                                                                                      },
+                                                                    "work_authorizations":  {
+
+                                                                                            },
+                                                                    "provenance":  "Recorded decisions; user authorship and change provenance are not verified."
+                                                                },
+                                            "tasks":  {
+                                                          "available_by_graph":  [
+                                                                                     "TASK-explorer-contract"
+                                                                                 ],
+                                                          "cannot_parallel_with":  {
+                                                                                       "TASK-explorer-contract":  [
+
+                                                                                                                  ],
+                                                                                       "TASK-check-summary":  [
+
+                                                                                                              ],
+                                                                                       "TASK-spec-explorer":  [
+
+                                                                                                              ],
+                                                                                       "TASK-apply-explorer":  [
+
+                                                                                                               ],
+                                                                                       "TASK-verification-result":  [
+
+                                                                                                                    ],
+                                                                                       "TASK-final-explorer":  [
+
+                                                                                                               ],
+                                                                                       "TASK-explorer-recovery":  [
+
+                                                                                                                  ],
+                                                                                       "TASK-explorer-workflow":  [
+
+                                                                                                                  ]
+                                                                                   },
+                                                          "parallel_safety":  "Requires reviewer assessment of shared files and other conflicts"
+                                                      },
+                                            "progress":  {
+                                                             "done":  0,
+                                                             "total":  8
+                                                         }
+                                        }
+                         },
+    "input_verification":  {
+                               "normative_files_match_snapshot":  true,
+                               "git_diff_exit_code":  0,
+                               "head":  "71eaba61610ec34d74d2a4f1e8dfd0ded9c186ac",
+                               "primary_index_empty":  true,
+                               "whitespace_exit_code":  0
+                           },
+    "limitations":  [
+                        "Static review and structural validation only; implementation test suites and their duration were not checked.",
+                        "The checker compares reviewed_commit to branch HEAD; changed_since_review warnings coexist with separately verified matching working-tree inputs.",
+                        "Review snapshots do not establish an accepted SDD checkpoint or plan approval."
+                    ]
+}

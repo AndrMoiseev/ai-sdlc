@@ -1,4 +1,5 @@
-from lib.reviews import review_status
+from lib.reviews import review_status, _validate_user
+from lib.documents import ValidationError
 
 from test_review_records import checkpoint, project, report, write, finding
 import pytest
@@ -157,3 +158,21 @@ def test_approval_survives_accepted_commit_transition(tmp_path, checkpoint_obser
     result = review_status(tmp_path, root, "documents")
     assert result["approval_status"]["approved"] is True
     assert result["approval_status"]["ready"] is True
+
+
+@pytest.mark.parametrize("kind", ["review_consent", "review_waiver"])
+@pytest.mark.parametrize("lenses,valid", [
+    (["plan"], True), (["plan", "simplicity"], True), (["simplicity"], True),
+    (["consistency"], False), (["security"], False), (["simplicity", "simplicity"], False),
+])
+def test_plan_review_authorization_lenses_in_memory(kind, lenses, valid):
+    from pathlib import Path
+    record = user(None, kind)
+    record["scope"] = {"stage": "plan_review", "lenses": lenses}
+    if kind == "review_consent":
+        record["scope"]["run_id"] = "plan-run"
+    if valid:
+        _validate_user(record, Path("demo"), {}, oid_length=40)
+    else:
+        with pytest.raises(ValidationError):
+            _validate_user(record, Path("demo"), {}, oid_length=40)

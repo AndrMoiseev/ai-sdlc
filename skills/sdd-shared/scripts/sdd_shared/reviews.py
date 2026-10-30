@@ -9,6 +9,8 @@ from .checkpoints import inspect
 from .checkpoint_git import Git, GitError
 
 STAGES = {"documents": "document_review", "plan": "plan_review"}
+DOCUMENT_LENSES = ("consistency", "simplicity")
+PLAN_LENSES = ("plan", "simplicity")
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
 COMMON = {"schema_version", "change_id", "document_type", "language", "work_kind"}
 
@@ -60,12 +62,12 @@ def required_lenses(project_root: Path) -> list[str]:
     root = contained(Path(project_root), "sdd/arch-lenses")
     index = contained(root, "index.md")
     if not index.exists():
-        return ["consistency"]
+        return list(DOCUMENT_LENSES)
     doc = read_document(index)
     fields(doc.meta, {"schema_version", "lenses"}, {"document_type", "language"})
     require(doc.meta["schema_version"] == 1, "Unsupported lens index version")
     require(isinstance(doc.meta["lenses"], list), "lenses must be a list")
-    result = ["consistency"]
+    result = list(DOCUMENT_LENSES)
     for lens in doc.meta["lenses"]:
         fields(lens, {"id", "title", "path"})
         require(text(lens["id"]) and SLUG.fullmatch(lens["id"]) and len(lens["id"]) <= 64, "Invalid lens id")
@@ -133,8 +135,8 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
         lenses = required_lenses(project_root)
     except (ValidationError, TypeError, KeyError) as exc:
         diagnose(project_root / "sdd/arch-lenses/index.md", exc, "lens_index")
-        lenses = ["consistency"]
-    required = lenses if stage == "documents" else ["plan"]
+        lenses = list(DOCUMENT_LENSES)
+    required = lenses if stage == "documents" else list(PLAN_LENSES)
     review_root = contained(root, "review")
     for path in sorted(review_root.glob("*/*.md")):
         try:
@@ -148,7 +150,7 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
             require(meta["run_id"] == path.parent.name and meta["lens_id"] == path.stem, "Report identity disagrees with path")
             require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", meta["run_id"]), "Invalid run id")
             require(SLUG.fullmatch(meta["lens_id"]) is not None, "Invalid lens id")
-            require((meta["lens_id"] == "plan") == (meta["stage"] == "plan_review"), "Lens/stage mismatch")
+            require(meta["lens_id"] in PLAN_LENSES if meta["stage"] == "plan_review" else meta["lens_id"] != "plan", "Lens/stage mismatch")
             require(meta["result"] in {"completed_no_findings", "completed_with_findings", "incomplete"}, "Invalid report result")
             if meta["reviewed_commit"] is not None or meta["result"] != "incomplete":
                 commit_oid(meta["reviewed_commit"], oid_length)
@@ -348,7 +350,7 @@ def _validate_user(record, root, findings, work_kind="change", oid_length=None):
     if "lenses" in scope:
         require(strings(scope["lenses"]) and scope["lenses"], "Explicit lenses required")
         require(all(SLUG.fullmatch(lens) for lens in scope["lenses"]), "Invalid lens id")
-        require((scope["lenses"] == ["plan"]) if scope["stage"] == "plan_review" else "plan" not in scope["lenses"], "Authorization lens/stage mismatch")
+        require(all(lens in PLAN_LENSES for lens in scope["lenses"]) if scope["stage"] == "plan_review" else "plan" not in scope["lenses"], "Authorization lens/stage mismatch")
     if "run_id" in scope:
         require(text(scope["run_id"]) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", scope["run_id"]), "Explicit run required")
     if "work" in scope:

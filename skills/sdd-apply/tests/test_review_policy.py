@@ -89,8 +89,6 @@ def completed_with_debt(driver):
     driver.integrate()
     driver.send("commit")
     driver.send("accept")
-    driver.role("final-context", "final_verifier")
-    driver.send("check_run", {"role_id": "final-context", "stage": "final"})
 
 
 def test_debt_survives_reload_and_does_not_prevent_completion(reviewing_driver):

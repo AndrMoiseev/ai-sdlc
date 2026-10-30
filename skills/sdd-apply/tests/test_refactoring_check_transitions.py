@@ -172,7 +172,7 @@ def test_ordinary_check_ids_remain_task_local(project):
         assert [check["id"] for check in result["checks"]] == ["plan-1", "shared-check"]
 
 
-def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_and_final(project, tmp_path):
+def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_tasks(project, tmp_path):
     # Exercise the full lifecycle with numbering that disagrees with dependencies.
     # Ordering combinations belong to scheduler/wave tests, not repeated migrations.
     driver = removing(project, tmp_path, non_topological=True)
@@ -210,20 +210,11 @@ def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_a
     assert {tuple(item["command"]) for item in api_baseline} == {(sys.executable, "-B", "check_api.py")}
     driver.implement()
     finish(driver)
-    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, task_id=None)
-    driver.send("role_register", {"role_id": "final", "kind": "final_verifier", "context_id": "final",
-        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
-    final = driver.send("check_run", {"role_id": "final", "stage": "final"}, task_id=None)
-    assert final["outcome"] == "passed"
-    output = driver.log(final)
-    assert "TASK-one/local-result" not in {item["check_id"] for item in output["outputs"]}
-    assert {criterion for item in output["outputs"] for criterion in item["criteria"]} == {"AC-result", "AC-preserved", "AC-removed", "AC-later"}
-    api_final = [item for item in output["outputs"] if item["criteria"] == ["AC-preserved"]]
-    assert {item["check_id"] for item in api_final} == {"TASK-one/api-regression", "TASK-two/api-regression"}
-    assert {tuple(item["command"]) for item in api_final} == {(sys.executable, "-B", "check_api.py")}
-    from lib.final_checks import evidence
-    assert evidence(driver.state, driver.directory)[2] == []
-    assert driver.state["final"] is None
+    result = driver.send("finalize", task_id=None)
+    assert result["result"] == "complete"
+    whole = {c for check in driver.state["verification"].values() for c in check["criteria"]}
+    assert result["unassessed_criteria"] == sorted(whole - set(result["accepted_criteria"]))
+    assert result["unassessed_criteria"]
 
 
 @pytest.mark.parametrize("damage,code", [
@@ -325,7 +316,8 @@ def test_refactoring_check_transitions_failed_replacement_never_confirms(removal
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     if outcome == "failed":
-        assert_rejected(driver, "repair_cycle_required", "check_run", {"role_id": "TASK-two-verifier", "stage": "independent"})
+        driver.explorer("retry-explorer", "independent")
+        assert_rejected(driver, "repair_cycle_required", "check_run", {"role_id": "retry-explorer", "stage": "independent"})
         driver.send("repair", {"reason": "Restore the approved replacing-state assertion"})
         assert driver.task["test_repair_cycles_started"] == 1
         assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
@@ -340,8 +332,8 @@ def test_refactoring_check_transitions_failed_replacement_never_confirms(removal
 def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal_checkpoint, monkeypatch, boundary, native):
     from lib import state, verification
     driver = removal_checkpoint("frozen", memory_worktree=not native)
-    driver.role("interrupted-verifier", "verifier")
-    attempt = event(driver, "check_run", {"role_id": "interrupted-verifier", "stage": "independent"}, "interrupted-evidence")
+    driver.explorer("interrupted-explorer", "independent")
+    attempt = event(driver, "check_run", {"role_id": "interrupted-explorer", "stage": "independent"}, "interrupted-evidence")
     target = type(storage(driver.directory)) if boundary == "state-before" else verification
     method = "save" if boundary == "state-before" else "write_json"
     original_write = getattr(target, method)
@@ -363,7 +355,12 @@ def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     driver.role("resume-reviewer", "reviewer")
     assert_rejected(driver, "required_checks", "review_start", {"role_id": "resume-reviewer"})
-    assert driver.verify("interrupted-verifier")["outcome"] == "passed"
+    # Recovery runs new evidence; its criterion conclusion has a separate verifier.
+    assert driver.verify("recovery-verifier")["outcome"] == "passed"
+    conclusion = driver.task["verification_results"][-1]
+    assert conclusion["role_id"] == "recovery-verifier"
+    assert driver.state["roles"][conclusion["role_id"]]["kind"] == "verifier"
+    assert driver.state["roles"]["interrupted-explorer"]["kind"] == "explorer"
     if orphan_bytes is not None:
         assert artifacts.read_bytes(orphan) == orphan_bytes
     assert driver.task["check_registry"].get("confirmed_revision", 0) == 0
@@ -423,8 +420,14 @@ def test_refactoring_check_transitions_resume_document_edit_retains_pending_revi
 def test_refactoring_check_transitions_ordinary_work_keeps_its_contract(project):
     driver = AcceptanceDriver(approved_basis(project, "change"))
     assert driver.start()["outcome"] == "baseline_recorded"
+    # DEC-verification-result gives ordinary conclusions a registry revision;
+    # it does not authorize the refactoring-only checks_revise operation.
+    registry = deepcopy(driver.task["check_registry"])
+    assert registry["revision"] == 1
     assert_rejected(driver, "revision_work_kind", "checks_revise", {})
-    assert "check_registry" not in driver.task
+    assert driver.task["check_registry"] == registry
+    assert "transition" not in registry
+    assert selected(driver.state, driver.task) == registry["history"][-1]["checks"]
 
 
 def test_refactoring_check_transitions_approved_revised_plan_preserves_old_transition_and_route(removal_checkpoint):

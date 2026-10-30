@@ -4,6 +4,9 @@ Read this file only when changing the sdd-apply package itself: its instructions
 runtime, tests or dependencies. Applying an approved plan in another project
 does not activate these rules or require running this package's tests.
 
+For changes to test evolution at module boundaries, use the
+[paired evaluation procedure](../evals/refactoring-tests.md) only for an explicitly authorized evaluation.
+
 ## Test architecture
 
 Keep most scenarios at the execution-engine boundary with fast adapters. Run
