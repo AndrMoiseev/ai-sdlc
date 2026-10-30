@@ -1,6 +1,6 @@
 # Review findings and technical debt
 
-Apply this policy to task, integration, and final code reviews. Accept a finding
+Apply this policy to task code reviews. Accept a finding
 for repair only when evidence demonstrates a violation of at least one approved
 acceptance criterion, accepted architecture decision, or applicable project rule.
 This keeps implementation within the agreed scope while preserving useful ideas.
@@ -61,7 +61,7 @@ for approval mid-plan, or starting another repair/review cycle solely for them.
 Use `more_checks` only to resolve a specific gap in evidence for an AC,
 architecture decision, or project rule; explain that gap in `test_integrity`.
 
-After completing the plan and final verification, finalize with debt deferred by
+After accepting all plan tasks, finalize with debt deferred by
 default. A nonempty journal does not prevent completion. Present a brief summary
 of the debt, its consequences, and proposed fixes, with a link to the journal.
 Ask which items the user explicitly approves for correction, then wait before

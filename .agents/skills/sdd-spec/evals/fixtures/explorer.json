@@ -1,0 +1,107 @@
+{
+  "sources": {
+    "src/orders.py": "def export_orders(orders):\n    return [order['id'] for order in orders]\n",
+    "tests/test_orders.py": "from orders import export_orders\n\ndef test_ids():\n    assert export_orders([{'id': 7}]) == [7]\n"
+  },
+  "research": {
+    "id": "orders-research",
+    "kind": "research",
+    "scope": {
+      "project": "{project}",
+      "work": null,
+      "task": null
+    },
+    "basis": {
+      "source_revision": "fixture-v1",
+      "documents": {}
+    },
+    "read_scope": [
+      "{project}/src/orders.py",
+      "{project}/tests/test_orders.py"
+    ],
+    "outputs": [
+      "{artifacts}/orders-research.result.json"
+    ],
+    "limits": {
+      "seconds": 60,
+      "summary_words": 300
+    },
+    "question": "Where are order identifiers selected, and which test covers them?"
+  },
+  "checks": {
+    "id": "documents-check",
+    "kind": "checks",
+    "scope": {
+      "project": "{project}",
+      "work": "demo",
+      "task": null
+    },
+    "basis": {
+      "source_revision": "fixture-v1",
+      "documents": {
+        "design.md": "fixture-digest"
+      }
+    },
+    "read_scope": [
+      "{project}/sdd/changes/demo"
+    ],
+    "outputs": [
+      "{artifacts}/documents-check.result.json"
+    ],
+    "limits": {
+      "seconds": 60,
+      "summary_words": 300
+    },
+    "check_ids": [
+      "documents"
+    ],
+    "stage": "documents",
+    "registry_revision": 0
+  },
+  "launch": {
+    "context_id": "fixture-explorer",
+    "trace": "fixture-only: not an actual launch",
+    "effective_model": null,
+    "effective_effort": null
+  },
+  "research_result": {
+    "status": "completed",
+    "answer": "export_orders selects order identifiers; test_ids checks one identifier.",
+    "sources": [
+      "src/orders.py:2",
+      "tests/test_orders.py:4-5"
+    ],
+    "inspected_scope": [
+      "src/orders.py",
+      "tests/test_orders.py"
+    ],
+    "gaps": [],
+    "assumptions": [],
+    "questions": [],
+    "limitations": []
+  },
+  "check_cases": [
+    {
+      "exit_code": 0,
+      "expected": "valid_structure"
+    },
+    {
+      "exit_code": 1,
+      "expected": "structural_errors"
+    },
+    {
+      "exit_code": 2,
+      "expected": "not_run"
+    },
+    {
+      "exit_code": null,
+      "expected": "not_run"
+    }
+  ],
+  "criteria": [
+    "AC-explorer-research",
+    "AC-explorer-assignment",
+    "AC-spec-research-handoff",
+    "AC-spec-check-delegation"
+  ]
+}

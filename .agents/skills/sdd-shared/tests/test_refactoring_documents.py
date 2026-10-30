@@ -245,7 +245,7 @@ def test_refactoring_documents_until_task_own_replacement_and_predecessor_rechec
 
 def test_refactoring_documents_setup_procedure_empty_preserves_and_symmetry(plan):
     plan["tasks"][-1].update(run={"setup_required": "Create the final check"}, setup_task="TASK-convert")
-    plan["tasks"][0]["verification"][0]["run"] = {"procedure": "docs/baseline.md#contract"}
+    plan["tasks"][0]["verification"][0].update(run={"procedure": "docs/baseline.md#contract"}, execution_kind="manual")
     plan["tasks"][0]["verification"][1]["run"] = {"setup_required": "Prepare regression check"}
     plan["tasks"][2].update(preserves=[], preservation_reason="This isolated step has no applicable preservation area")
     plan["tasks"][2]["verification"].pop(1)
@@ -331,3 +331,37 @@ def test_refactoring_documents_unknown_fields_and_nested_examples(tmp_path):
     with pytest.raises(documents.ValidationError) as exc:
         documents.read_document(path, "refactoring")
     assert exc.value.code == "record_fields"
+
+
+@pytest.mark.parametrize("kind", ["deterministic", "manual", "behavioral", None, "unknown"])
+def test_execution_kind_parser_for_local_and_whole_records(plan, kind):
+    for check in (plan["tasks"][0]["verification"][0], plan["tasks"][-1]):
+        check["run"] = {"procedure": "docs/baseline.md"}
+        if kind is not None:
+            check["execution_kind"] = kind
+    errors = codes(plan)
+    assert ("execution_kind" in errors) == (kind in (None, "unknown"))
+    if kind not in (None, "unknown"):
+        assert not errors
+
+
+@pytest.mark.parametrize("kind", ["deterministic", "manual", "behavioral", None])
+def test_ordinary_execution_kind_parser(tmp_path, kind):
+    root = tmp_path / "sdd/changes/sample-change"
+    for name, relative in [("proposal", "proposal.md"), ("design", "design.md"),
+                           ("spec", "specs/sample-capability/spec.md"), ("tasks", "tasks.md")]:
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((COLLECTION / "sdd-spec/templates" / f"{name}.md").read_bytes())
+    procedure = tmp_path / "checks.md"
+    procedure.write_text("Synthetic verification procedure\n")
+    task_document = documents.read_document(root / "tasks.md")
+    check = task_document.records[0]["verification"][0]
+    check["run"] = {"procedure": "checks.md"}
+    if kind is not None:
+        check["execution_kind"] = kind
+    write_document(root, "tasks", task_document.records, work_kind=None)
+    errors = {error["code"] for error in validation.validate_documents(tmp_path, root, "plan")["errors"]}
+    assert ("execution_kind" in errors) == (kind is None)
+    if kind is not None:
+        assert not errors

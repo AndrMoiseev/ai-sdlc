@@ -1,6 +1,7 @@
 """Complete binary transfer packages and serialized integration."""
 from .repository import repository
 from pathlib import Path
+from copy import deepcopy
 import json
 from .common import digest, require, write_json
 from . import artifact_storage as artifacts
@@ -8,14 +9,27 @@ from .artifact_storage import write as atomic
 from .commits import index_tree, reviewed
 from .effects import intent, observed
 from .state import snapshot, clean_source
-from .verification import valid_evidence
+from .verification_results import require_passed
+
+
+def verified_transfer(state, task, directory):
+    """Validate retained worktree evidence without rerunning it on execution HEAD."""
+    worktree = task["worktree"]
+    package = task.get("transfer")
+    require(package and worktree.get("integration_tree"), "transfer_missing", "Integrate the verified transfer package first")
+    require(package["snapshot"] == snapshot(state, worktree["path"]),
+            "transfer_changed", "The verified worktree changed after transfer")
+    source_task = deepcopy(task)
+    source_task["worktree"]["integrated"] = False
+    evidence = require_passed(state, source_task, directory, "independent")
+    return evidence
 
 
 def transition(state, task, event, directory):
     require(task and task["worktree"], "worktree_required", "Integration requires a registered worktree task")
     require(task["status"] == "integrating", "integration_phase", "Review the task before transfer")
     reviewed(state, task)
-    valid_evidence(state, task, directory)
+    require_passed(state, task, directory)
     root = state["basis"]["project_root"]
     require(repository(root).head() == state["execution_head"], "execution_reconciliation",
             "Resume and explicitly accept the external HEAD before integration")
@@ -34,10 +48,11 @@ def transition(state, task, event, directory):
         require(repository(root).head() == journal["request"]["precondition"]["head"], "integration_head", "Execution HEAD changed during conflict resolution")
         observed(effect, journal, {"before": journal["request"]["precondition"]["before"], "after": snapshot(state, root), "resolution": p, "head": repository(root).head()})
         worktree["integrated"] = True
+        worktree["integration_tree"] = index_tree(root, task["paths"], repository(root).head())
         task["integration_active"] = True
         task["freeze_base"] = journal["request"]["precondition"]["before"]
         task["executor"] = p["role_id"]
-        return {"resolved": p["intent_id"], "next": "candidate; independent integration checks and review"}
+        return {"resolved": p["intent_id"], "next": "candidate; commit; accept"}
     if event["type"] == "transfer":
         changed = source_repo.changed_paths(worktree["base"])
         require(changed <= set(task["paths"]), "transfer_ownership", "Changed files outside task ownership require explicit accounting")
@@ -81,8 +96,8 @@ def transition(state, task, event, directory):
             "integration_drift", "Integration differs from the recorded Git merge; preserve and resolve explicitly")
     result = observed(effect, journal, {"before": expected["before"], "after": after, "head": repository(root).head()})
     worktree["integrated"] = True
+    worktree["integration_tree"] = journal["expected_tree"]
     task["integration_active"] = True
     task["freeze_base"] = expected["before"]
-    # New candidate and independent integration checks/review are mandatory,
-    # including clean application to a changed execution branch.
+    # Preserve the worktree evidence; the recorded merge tree binds the commit.
     return result

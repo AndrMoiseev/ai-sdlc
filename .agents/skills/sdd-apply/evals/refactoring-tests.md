@@ -1,6 +1,6 @@
-# Boundary-test decisions: paired final evaluation
+# Boundary-test decisions: paired evaluation
 
-Run actual agents only at final acceptance of the whole plan. Task-level checks
+Run actual agents only for an explicitly authorized evaluation. A plan that explicitly defers evaluation requires a separate user instruction; preparation is not permission to launch it. Task-level checks
 exercise `test_refactoring_boundary_tests.py` and
 `test_refactoring_behavior_runner.py` without a model. Those synthetic contracts
 do not establish old or new agent behavior.
@@ -23,7 +23,7 @@ copy. The fixture supplies task facts and original tests, not grading answers.
 Assertions and grader instructions remain in the external orchestrator workspace.
 The exercise tests role decisions and concrete test edits, not a full SDD
 execution lifecycle. The engine lifecycle is covered separately by deterministic
-registry tests and final integration checks.
+registry tests and approved task checks.
 
 ## Freeze and prepare
 
@@ -107,6 +107,6 @@ uv run --python "<python>" --locked --script "<runner>" verify --workspace "<ext
 ```
 
 Automatic discovery is skipped because sdd-apply is explicitly invoked. This
-suite supplies pressure/micro repetitions for boundary decisions. Final whole-plan
+suite supplies pressure/micro repetitions for boundary decisions. Whole-plan
 checks must also cover other changed role instructions and any broader approved
 behavior scenarios. Preserve all failed attempts and their measured wall time.

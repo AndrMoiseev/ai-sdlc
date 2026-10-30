@@ -177,9 +177,14 @@ def validate_documents(project_root: Path, change_root: Path, stage: str, work_k
             problem(record, "verification", "verification must be a nonempty list")
             checks = []
         for check in checks:
-            if not isinstance(check, dict) or set(check) != {"criteria", "test_description", "location", "run"}:
+            if not isinstance(check, dict) or (not {"criteria", "test_description", "location", "run"} <= check.keys() or check.keys() - {"criteria", "test_description", "location", "run", "execution_kind"}):
                 problem(record, "verification", "Each verification requires criteria, test_description, location and run")
                 continue
+            from .check_kinds import execution_kind
+            try:
+                execution_kind(check)
+            except ValueError as exc:
+                problem(record, 'execution_kind', str(exc))
             criteria = check["criteria"]
             if not isinstance(criteria, list) or not criteria or any(not isinstance(x, str) or x not in covers for x in criteria):
                 problem(record, "verification_criteria", "Verification criteria must be a nonempty subset of covers")

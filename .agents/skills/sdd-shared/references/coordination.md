@@ -18,3 +18,11 @@ Keep intermediate user updates to one or two sentences: the material change and
 next step. If an update is due without new events, briefly name what is pending.
 Expand for blockers or user decisions; retain the calling flow's full reports,
 evidence, approvals and final response requirements.
+
+For explorer work, hand off the saved assignment and actual result references
+under [the explorer contract](explorer.md). The orchestrator forwards the machine
+summary, current basis and primary evidence references to an independent verifier;
+explorer conversation is not verification input. The verifier opens needed raw
+artifacts and assesses criteria. Reading an artifact does not require rerunning
+its command. A requested rerun returns through the orchestrator and the owning
+workflow's existing budgets and execution permissions.

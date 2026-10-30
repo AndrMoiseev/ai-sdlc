@@ -11,6 +11,15 @@ Use installed `--help-event` for the selected recovery operation's exact payload
 
 ## Source reconciliation
 
+For a lost task/run explorer, retain its assignment, launch trace, evidence and
+batch deadline. Register the same-kind successor with a fresh context and a new
+assignment at the current basis. In the lost-role resolution list every unfinished
+predecessor check in `abandon_procedures`. Resume records those attempts as
+`abandoned`; the successor begins a new procedure rather than completing the old
+one. The replacement shares the existing deadline and lifetime repair counters.
+A missing research answer stays unfinished. The role's `DONE` result never supplies
+a verification conclusion.
+
 Resume and new task worktree creation require a clean main source tree; execution artifacts remain separately managed. Preserve dirty changes and ask for the user's commit or discard decision. A clean unexpected HEAD produces `execution_head_changed`. After showing its changes and receiving actual user acceptance, submit a resolution with that reason, the exact observed `head`, `evidence`, and `instruction: {text, source}`. It advances only `execution_head`; it preserves admitted tasks and document records. It does not move the shared specification checkpoint ref or approve a revised plan. Known apply commits advance the execution source automatically. Worktree refresh requires the main HEAD to have already been reconciled. In-flight task worktree edits remain preserved.
 
 ## Revision contract
@@ -35,11 +44,20 @@ The operation removes only that task's obsolete budget stop, preserving its full
 record and spent counters. Unfinished-task budget stops and unrelated blockers
 remain; this mapping cannot authorize another repair of the completed task.
 
-Ordinary final project registries survive revision with their mandatory definitions
-and inventory. Prior attempts remain historical; obtain fresh final evidence at
-the revised basis after the new tasks are accepted.
-
 Unfinished tasks return to `pending` for reassessment against the revised basis;
 their prior results, commits and continuing budgets remain linked. Preserve run
-history. Historical evidence from completed tasks remains historical; final
-acceptance still requires fresh checks against the current basis and final HEAD.
+history. Accepted tasks retain their original evidence and conclusions for completion.
+Only unfinished or revised task work needs new execution and assessment.
+
+Registered checks, inventory, confirmed revisions and pending transitions survive
+reassessment. Approved changes to plan-owned check definitions append a registry
+snapshot while retaining project-added obligations. A plan incompatible with a
+pending transition is rejected before archival effects: reconcile that transition
+at a valid basis or adjust the approved plan. Existing conclusions remain history;
+obtain new execution evidence and a separate conclusion for unfinished or revised task work.
+
+After reconciliation, inspect compact `explorer_assignments` and the separate
+execution/conclusion statuses in `tasks[id].verification`. Resolve relevant evidence through `read_object`. A saved
+passed command cannot fill a missing or stale conclusion; a conclusion cannot
+fill missing execution. Resume the applicable execution and assessment handoff
+with the retained registry and budgets.

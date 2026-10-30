@@ -4,9 +4,9 @@ The executable format contract lives in `scripts/lib/state.py`,
 `state_objects.py` and `state_history.py`; transition handlers enforce
 event-specific invariants. These checks govern persisted execution state.
 
-The runtime accepts only schema version 3. Preserve an old execution until an
-explicit conversion has verified it and saved a backup; ordinary reads never
-migrate or rewrite state. The input basis uses schema 2 with admission `head`.
+The runtime accepts schema version 3 with the current required records. Preserve
+older execution artifacts unchanged; this contract supplies no migration or
+compatibility reader. The input basis uses schema 2 with admission `head`.
 Document paths are derived when needed; specification files and document contents
 come from the current `HEAD` of `basis.project_root`.
 Preserve legacy manifests and execution evidence for explicit
@@ -74,6 +74,16 @@ their objects intact and obtain fresh evidence through the supported workflow.
 
 ## Reading evidence
 
+Explorer assignments remain in role records, including actual launch, basis,
+successor lineage and consumed batch deadline. `registered_revision` records the
+role registration event's execution revision, so assignment chronology survives
+sorted object keys, equal timestamps and wall-clock changes. Task
+`verification_results` are separate immutable history collections. Schema 3 stores
+them through the same object adapter as evidence; no conversion is performed.
+Resume preserves these histories. Accepted tasks retain their original proof;
+revised unfinished work needs new evidence without
+rewriting historical outcomes or synthesizing conclusions from successful logs.
+
 Use `read` with `view: "compact"` for control decisions and `view: "full"` to see
 the manifest's references. Use `read_object` for one descriptor at a time. It
 verifies the requested bytes and leaves nested references encoded. Reports retain their existing paths; their snapshot data may also
@@ -81,3 +91,12 @@ contain object references. Preserve the complete execution directory when moving
 or backing up evidence; copying `state.json` alone is insufficient.
 
 Task candidate artifacts and references are no longer written. Historical candidate files are left untouched and are not consulted by current checks or resume.
+
+Compact and dashboard show the latest explorer assignment per scope/kind/stage
+and stage-specific `execution`/`conclusion` statuses. `tasks[id].verification`
+contains task stages. `completion` exposes the saved final result and HEAD. These are read
+metadata projections, not a live raw-evidence audit or authorization gate.
+Per-check statuses and criterion gaps come from recorded outcomes, pending
+procedures and current basis. They do not reopen run logs, raw streams or reports.
+Inspect evidence references and the saved final `verification_results` when
+establishing completion; acceptance operations retain full raw validation.

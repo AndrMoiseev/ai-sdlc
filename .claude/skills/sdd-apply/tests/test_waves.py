@@ -8,13 +8,14 @@ from lib.state import new_task
 
 
 def wave_state():
+    """Projection fixture: task phases exercise layout; execution proofs are absent."""
     dependencies = {"A": [], "B": [], "C": ["A"], "D": ["A"], "E": ["A"],
                     "F": ["B"], "G": ["B"], "H": ["C", "F"]}
     tasks = {key: new_task(dict(id=key, number=i, depends_on=deps, covers=["AC-demo"]))
              for i, (key, deps) in enumerate(dependencies.items(), 1)}
-    return dict(schema_version=1, change_id="Execution waves", run_id="demo", revision=0,
+    return dict(schema_version=3, change_id="Execution waves", run_id="demo", revision=0,
                 updated_at="2026-10-15T12:00:00Z", status="active",
-                tasks=tasks, blockers=[], final=None)
+                basis={"work_kind": "change"}, roles={}, tasks=tasks, blockers=[], final=None)
 
 
 def membership(data):
@@ -95,7 +96,12 @@ def test_empty_and_completed_plans():
     for task in state["tasks"].values():
         task["status"] = "accepted"
     state["status"] = "completed"
-    assert all(w["status"] == "completed" for w in projection(state)["waves"])
+    data = projection(state)
+    assert all(w["status"] == "completed" for w in data["waves"])
+    # Layout phases alone must never synthesize execution or conclusion proof.
+    assert data["explorer_assignments"] == []
+    for task in data["tasks"]:
+        assert task["verification"] == {}
     state["tasks"] = {}
     assert projection(state)["waves"] == []
 

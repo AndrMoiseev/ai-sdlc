@@ -82,11 +82,12 @@
       ]
     },
     "location": {"allOf": [{"$ref": "#/$defs/path"}, {"type": "string", "pattern": "^(?!\\s)(?!.*\\s$)(?!.*(?:^|/)\\.git(?:/|$))[^\\u0000-\\u001f*?\\[\\]#;|&<>`\"]+$", "not": {"enum": [".", "./"]}}]},
+    "executionKind": {"if": {"properties": {"run": {"required": ["procedure"]}}}, "then": {"required": ["execution_kind"]}},
     "taskCheck": {
-      "type": "object", "additionalProperties": false, "required": ["id", "criteria", "test_description", "location", "run"],
+      "type": "object", "additionalProperties": false, "required": ["id", "criteria", "test_description", "location", "run"], "allOf": [{"$ref": "#/$defs/executionKind"}],
       "properties": {
         "id": {"$ref": "#/$defs/slug"}, "criteria": {"$ref": "#/$defs/criteria"}, "test_description": {"$ref": "#/$defs/text"},
-        "location": {"$ref": "#/$defs/location"}, "run": {"$ref": "#/$defs/run"}
+        "location": {"$ref": "#/$defs/location"}, "run": {"$ref": "#/$defs/run"}, "execution_kind": {"enum": ["deterministic", "behavioral", "manual"]}
       }
     },
     "testChange": {
@@ -131,9 +132,9 @@
       "properties": {
         "sdd_record": {"const": "verification"}, "id": {"type": "string", "minLength": 7, "maxLength": 70, "pattern": "^CHECK-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
         "criteria": {"$ref": "#/$defs/criteria"}, "test_description": {"$ref": "#/$defs/text"}, "location": {"$ref": "#/$defs/location"},
-        "run": {"$ref": "#/$defs/run"}, "setup_task": {"$ref": "#/$defs/taskId"}
+        "run": {"$ref": "#/$defs/run"}, "execution_kind": {"enum": ["deterministic", "behavioral", "manual"]}, "setup_task": {"$ref": "#/$defs/taskId"}
       },
-      "allOf": [{"if": {"properties": {"run": {"required": ["setup_required"]}}}, "then": {"required": ["setup_task"]}}]
+      "allOf": [{"$ref": "#/$defs/executionKind"}, {"if": {"properties": {"run": {"required": ["setup_required"]}}}, "then": {"required": ["setup_task"]}}]
     }
   }
 }

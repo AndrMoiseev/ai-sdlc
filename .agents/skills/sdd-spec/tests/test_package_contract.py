@@ -46,7 +46,8 @@ def test_every_local_markdown_link_resolves_inside_package():
 
 
 def test_required_resources_ship_together():
-    files = ["README.md", "pyproject.toml", "templates/state.yaml"]
+    files = ["README.md", "pyproject.toml", "templates/state.yaml",
+             "references/explorer.md", "evals/fixtures/explorer.json"]
     files += [f"scripts/{name}{suffix}" for name in ("check", "snapshot", "test", "resolve_agent", "prepare_subagent_eval", "simplicity")
               for suffix in (".py", ".py.lock")]
     files += [f"flows/{name}.md" for name in

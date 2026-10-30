@@ -112,6 +112,8 @@ def test_no_change_repair_rechecks_same_tree_in_new_task_commit(execution_checkp
     assert driver.verify("repair-verifier")["outcome"] == "passed"
     driver.review("repair-reviewer")
     driver.integrate(prefix="repair-")
+    with pytest.raises(ValueError, match="current integration commit is mandatory"):
+        driver.send("accept")
     repaired = driver.send("commit")["sha"]
     assert repaired != head
     assert repository(main).tree(repaired) == repository(main).tree(head)

@@ -28,20 +28,20 @@ def test_help_covers_event_schema_without_accessing_execution_state(monkeypatch)
 def test_resume_help_explains_specific_loss_and_legacy_resolution():
     result = describe(event="resume")
     assert set(result["required"]) == {"host_trace", "live_contexts"}
-    assert {"role_id", "successor", "task_id", "reason", "evidence", "head", "instruction"} == set(result["resolution"])
+    assert {"role_id", "successor", "task_id", "reason", "evidence", "head", "instruction", "abandon_procedures"} == set(result["resolution"])
     assert any("successor_of" in rule for rule in result["rules"])
 
 
-def test_ordinary_project_final_help_preserves_task_finals_and_followup_budgets():
+def test_completion_help_preserves_task_acceptance_and_followup_budgets():
     registration = describe(event="checks_register")
-    assert registration["task_id"] == "TASK-ID or null"
-    assert any("after all tasks are accepted" in rule for rule in registration["rules"])
-    assert any("Task-scoped final checks still apply" in rule for rule in registration["rules"])
+    assert registration["task_id"] == "TASK-ID"
+    assert "final_verifier" not in describe(event="role_register")["choices"]["kind"]
+    assert "unassessed_criteria" in " ".join(describe(event="finalize")["rules"])
     revision = describe(event="revised_plan")
     assert "completed_followups" in revision["optional"]
     assert set(revision["completed_followups"][0]) == {"completed_task", "followup_task"}
     assert any("counters and unrelated blockers remain" in rule for rule in revision["rules"])
-    assert any("obligations survive revision" in rule for rule in revision["rules"])
+    assert any("Retain checks" in rule for rule in revision["rules"])
 
 
 @pytest.mark.parametrize("args", [{"operation": "missing"}, {"event": "missing"},

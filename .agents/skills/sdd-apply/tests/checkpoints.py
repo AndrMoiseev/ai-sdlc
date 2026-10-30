@@ -24,7 +24,7 @@ def preparation(repositories, states=None):
     from memory_state import MemoryStates
     states = states if states is not None else MemoryStates()
     with use_repositories(repositories), use_storage(states), use_artifacts(states.artifacts), \
-            patch("lib.verification.run_command", run_command):
+            patch("lib.verification.check_runner.run_command", run_command):
         yield states
 
 
