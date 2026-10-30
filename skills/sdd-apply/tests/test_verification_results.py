@@ -19,10 +19,9 @@ def payload(driver, role="verifier", outcome="passed"):
 
 
 def executed(execution_checkpoint):
-    driver = execution_checkpoint("frozen")
-    driver.role("verifier", "verifier")
-    assert driver.run_checks("independent")["outcome"] == "passed"
-    return driver
+    # Each negative submission restores real, independently serialized evidence.
+    # Only conclusion inputs/artifacts vary; no command-side mutation is tested.
+    return execution_checkpoint("executed", memory_worktree=True)
 
 
 @pytest.mark.parametrize("operation,checkpoint", [
@@ -31,7 +30,7 @@ def executed(execution_checkpoint):
 @pytest.mark.parametrize("conclusion", ["missing", "failed", "unavailable"])
 def test_every_task_gate_requires_positive_conclusion(execution_checkpoint, operation, checkpoint, conclusion):
     from lib.transitions import reduce
-    driver = execution_checkpoint(checkpoint)
+    driver = execution_checkpoint(checkpoint, memory_worktree=True)
     state = driver.state
     task = state["tasks"]["TASK-one"]
     if operation == "review_start":
@@ -87,7 +86,7 @@ def test_conclusion_rejects_incomplete_foreign_and_stale_inputs(execution_checkp
     assert driver.task["verification_results"] == []
 
 
-@pytest.mark.parametrize("kind", ["executor", "explorer", "reviewer", "final_verifier", "foreign-verifier"])
+@pytest.mark.parametrize("kind", ["executor", "explorer", "reviewer", "foreign-verifier"])
 def test_only_active_independent_task_verifier_can_conclude(execution_checkpoint, kind):
     from lib.verification_results import transition
     driver = executed(execution_checkpoint)
@@ -226,21 +225,26 @@ def test_raw_artifact_corruption_blocks_conclusion_use(execution_checkpoint, whe
             require_passed(driver.state, driver.task, driver.directory)
 
 
-def test_integration_needs_new_conclusion_and_packet_for_exact_run(execution_checkpoint):
+def test_integration_preserves_original_evidence_without_running_checks(execution_checkpoint, monkeypatch):
+    from lib import verification
     driver = execution_checkpoint("worktree-reviewed")
+    evidence = driver.task["evidence"]
+    conclusions = driver.task["verification_results"]
+    roles = driver.task["roles"]
+    def unexpected(*args, **kwargs):
+        pytest.fail("Transfer must not execute checks again")
+    monkeypatch.setattr(verification.check_runner, "run_command", unexpected)
     driver.send("transfer")
     driver.send("integrate")
     driver.send("candidate")
-    assert driver.run_checks("integration")["outcome"] == "passed"
-    registration = driver.role("integrated-verifier", "verifier")
-    saved = json.loads(artifacts.read_text(registration["packet"]))
-    context = saved["verification"]
-    assert context["stage"] == "integration" and context["criteria"] == ["AC-one"]
-    assert context["evidence_refs"][0]["check_run_id"]
-    assert context["evidence_refs"][0]["summary"]["sha256"]
-    assert context["basis"]["source"]["commit"] == driver.task["candidate_commit"]["sha"]
-    driver.role("integrated-reviewer", "reviewer")
-    with pytest.raises(Rejected, match="verifier conclusion"):
-        driver.send("review_start", {"role_id": "integrated-reviewer"})
-    driver.conclude(role="integrated-verifier")
-    assert driver.send("review_start", {"role_id": "integrated-reviewer"})["round"] == 2
+    assert driver.task["status"] == "committing"
+    assert driver.task["review_rounds_started"] == 1
+    driver.send("commit")
+    assert driver.send("accept")["status"] == "accepted"
+    assert driver.task["evidence"] == evidence
+    assert driver.task["verification_results"] == conclusions
+    assert driver.task["roles"] == roles
+    assert conclusions[-1]["basis"]["source"]["commit"] == driver.task["transfer"]["commit"]
+    from lib.state_view import check_progress
+    proof = check_progress(driver.state, driver.task, "independent")
+    assert proof["execution"]["status"] == proof["conclusion"]["status"] == "passed"

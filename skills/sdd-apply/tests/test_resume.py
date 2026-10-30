@@ -142,13 +142,12 @@ def test_replacing_another_reviewer_does_not_steal_reserved_round(execution_chec
     assert driver.task["active_reviewer"] == "reviewer"
 
 
-@pytest.mark.parametrize("scope", ["task", "final"])
-def test_lost_explorer_abandons_procedure_preserving_attempt_budget(execution_checkpoint, monkeypatch, scope):
+def test_lost_explorer_abandons_procedure_preserving_attempt_budget(execution_checkpoint, monkeypatch):
     """AC-explorer-resume: task/run recovery uses memory state and a fake clock."""
     from test_budgets import procedure_deadline_setup, timed_explorer
     from lib import explorer_assignments
     from lib.state_storage import storage
-    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint, scope)
+    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint)
     clock = [1000.0]
     monkeypatch.setattr(explorer_assignments.time, "time", lambda: clock[0])
     monkeypatch.setattr(explorer_assignments.time, "monotonic", lambda: clock[0])
@@ -171,7 +170,7 @@ def test_lost_explorer_abandons_procedure_preserving_attempt_budget(execution_ch
     resolution["abandon_procedures"] = ["timed-procedure"]
     driver.send("resume", payload, task_id=None)
     state = driver.state
-    holder = state["tasks"][task_id] if task_id else state["final_checks"]
+    holder = state["tasks"][task_id]
     assert holder["procedures"] == {}
     assert holder["evidence"][-1]["outcome"] == "abandoned"
     assert state["roles"]["lost-explorer"]["check_budget"] == before["roles"]["lost-explorer"]["check_budget"]
@@ -307,54 +306,6 @@ def test_incompatible_pending_revision_rejects_before_archive(execution_checkpoi
         driver.send("revised_plan", {"instruction": {"text": "Approved revised plan", "source": "synthetic-user"}}, task_id=None)
     assert storage(driver.directory).read() == before
     assert set(artifact_storage.paths(driver.directory)) == paths
-
-
-@pytest.mark.parametrize("change", ["add", "command", "metadata", "collision"])
-def test_revised_plan_reconciles_whole_checks_and_preserves_project_registry(project, monkeypatch, change):
-    """AC-explorer-resume: memory reducer checks obligations, not just criterion coverage."""
-    from conftest import Driver
-    from refactoring_fixtures import approved_basis
-    from lib import inputs, artifact_storage
-    from lib.final_checks import applicable
-    from lib.state_storage import storage
-    driver = Driver(approved_basis(project))
-    command = driver.state["basis"]["verification"][0]["run"]
-    driver.send("checks_register", {"inventory": {"instructions": ["AGENTS.md"], "ci": []},
-        "additional": [{"id": "CHECK-project", "source": "CI", "criteria": ["AC-result"], "run": command}]}, task_id=None)
-    before = driver.state
-    approved = deepcopy(before["basis"])
-    approved["head"] = "d" * 40
-    if change in {"add", "collision"}:
-        added = deepcopy(approved["verification"][0])
-        added["id"] = "CHECK-added" if change == "add" else "CHECK-project"
-        approved["verification"].append(added)
-    elif change == "command":
-        approved["verification"][0]["run"] = {"command": ["python", "replacement.py"]}
-    else:
-        approved["verification"][0]["test_description"] = "Approved clearer whole-check description"
-    monkeypatch.setattr(inputs, "validate", lambda *args, **kwargs: deepcopy(approved))
-    saved = storage(driver.directory).read()
-    paths = set(artifact_storage.paths(driver.directory))
-    payload = {"instruction": {"text": "Approved whole-check revision", "source": "synthetic-user"}}
-    if change == "collision":
-        with pytest.raises(ValueError, match="conflicts with a registered project obligation"):
-            driver.send("revised_plan", payload, task_id=None)
-        assert storage(driver.directory).read() == saved
-        assert set(artifact_storage.paths(driver.directory)) == paths
-        return
-    driver.send("revised_plan", payload, task_id=None)
-    state = driver.state
-    old, new = before["final_checks"], state["final_checks"]
-    checks = {item["id"]: item for item in applicable(state)}
-    assert set(checks) == {item["id"] for item in approved["verification"]} | {"CHECK-project"}
-    assert checks["CHECK-project"] == next(item for item in old["checks"] if item["id"] == "CHECK-project")
-    assert checks["CHECK-whole"]["run"] == approved["verification"][0]["run"]
-    assert new["inventory"] == old["inventory"]
-    assert new["history"][:old["revision"]] == old["history"]
-    assert new["revision"] == old["revision"] + (change != "metadata")
-    assert state["run_id"] != before["run_id"]
-    if change != "metadata":
-        assert new["history"][-1]["basis_commit"] == approved["head"]
 
 
 def test_whole_registry_revision_retains_prepared_setup_and_proof_history():

@@ -18,16 +18,16 @@ execution HEAD, retain the original baseline checks as history, then implement
 the repair. Do not rerun initial baseline as an admission gate on the known
 failing result. Follow
 the same candidate, worktree review, integration and acceptance steps; keep the
-task's existing budgets. This also handles a final defect after worktree cleanup.
+task's existing budgets. This also handles a defect discovered after worktree cleanup.
 
 If a recorded repair only repeats checks, the runtime creates an empty local
 candidate commit labelled with the repaired task, then an integration candidate
 commit. This preserves task attribution even when other tasks have advanced
 HEAD. Fresh tasks still need actual owned changes for acceptance.
 
-There are five test-repair cycles per TASK-ID across self, independent, integration, and final stages. Initial implementation and the first failure consume no repair cycle. A successful fifth cycle can proceed. A failed fifth cycle or need for a sixth blocks the whole run. Returning to the same executor, a replacement role, changed phase or new session does not reset counters.
+There are five test-repair cycles per TASK-ID across self, independent and legacy integration stages. Initial implementation and the first failure consume no repair cycle. A successful fifth cycle can proceed. A failed fifth cycle or need for a sixth blocks the whole run. Returning to the same executor, a replacement role, changed phase or new session does not reset counters.
 
-There are three review rounds per TASK-ID, counting the first and all post-integration/final-defect reviews. `review_start` reserves before substantive review. Continue an interrupted round on the unchanged candidate without a second reservation; a new candidate or new substantive review requires a new round. The third passing round can proceed. A blocking third round or need for a fourth blocks the whole run. Test retries and review rounds are separate budgets.
+There are three review rounds per TASK-ID, counting the first and reviews of repairs, including defects discovered after acceptance. Transfer to the execution branch does not require another code review or consume a round. `review_start` reserves before substantive review. Continue an interrupted round on the unchanged candidate without a second reservation; a repaired candidate or new substantive review requires a new round. The third passing round can proceed. A blocking third round or need for a fourth blocks the whole run. Test retries and review rounds are separate budgets.
 
 Before handing work back, confirm the reservation succeeded. Reuse the task's executor while its context is available; otherwise register a fresh successor with partial work, remaining AC, decisions and rejected approaches. End writing with `role_result`, submit `candidate` to commit the repaired result, then obtain current checks and review. Keep previous candidate commits and logs as history. A passing old review cannot accept a changed candidate.
 

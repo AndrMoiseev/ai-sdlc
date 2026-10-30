@@ -3,9 +3,8 @@ import pytest
 from pathlib import Path
 
 
-@pytest.mark.parametrize("stage", ["independent", "integration"])
 @pytest.mark.parametrize("addition_kind", ["command", "procedure"])
-def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, stage, addition_kind):
+def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, addition_kind):
     from copy import deepcopy
     import sys
     driver = execution_checkpoint("pending")
@@ -20,14 +19,7 @@ def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, stage
     driver.freeze()
     assert driver.verify()["outcome"] == "passed"
     verifier = "verifier"
-    if stage == "integration":
-        driver.review()
-        driver.send("transfer")
-        driver.send("integrate")
-        driver.send("candidate")
-        verifier = "integration-verifier"
-        driver.role(verifier, "verifier")
-        assert driver.run_checks(stage)["outcome"] == "passed"
+    stage = "independent"
     previous = driver.task
     checks = deepcopy(previous["checks"])
     result = driver.conclude(role=verifier, outcome="unavailable", check_request="Add explicit subtraction coverage")
@@ -272,115 +264,6 @@ def test_extension_rejects_string_command(execution_checkpoint):
     assert len(driver.task["checks"]) == 1
 
 
-def test_final_evidence_preserves_unopened_role_objects(execution_checkpoint):
-    from lib.state import read
-    from lib.verification import valid_evidence
-    driver = execution_checkpoint("accepted")
-    driver.explorer("lazy-final", "final")
-    driver.send("check_run", {"role_id": "lazy-final", "stage": "final"})
-    state = read(driver.directory)
-    assert set(dict.__getitem__(state, "roles")) == {"$object"}
-    task = state["tasks"]["TASK-one"]
-    assert valid_evidence(state, task, driver.directory, "final")
-    assert "lazy-final" in state["roles"]
-
-
-@pytest.mark.parametrize("role_value", ["missing", None, "invalid"])
-def test_invalid_final_role_fails_closed(execution_checkpoint, role_value):
-    from lib.common import Rejected
-    from lib.finalize import finalize
-    from lib.verification import valid_evidence
-    driver = execution_checkpoint("accepted")
-    driver.explorer("invalid-final", "final")
-    driver.send("check_run", {"role_id": "invalid-final", "stage": "final"})
-    state = driver.state
-    if role_value == "missing":
-        del state["roles"]["invalid-final"]
-    else:
-        state["roles"]["invalid-final"] = role_value
-    with pytest.raises(Rejected) as error:
-        valid_evidence(state, state["tasks"]["TASK-one"], driver.directory, "final")
-    assert error.value.code == "unknown_role"
-    result = finalize(state, {}, driver.directory)
-    assert result["result"] == "partial"
-    assert any("role" in gap["reason"] for gap in result["missing"])
-
-
-@pytest.mark.parametrize("entry", [{}, {"event": None, "result": {}},
-                                   {"event": {"payload": None}, "result": {"summary": {}}}])
-def test_malformed_original_history_fails_closed(execution_checkpoint, monkeypatch, entry):
-    import json
-    from lib import check_evidence, state_history
-    from lib.common import Rejected
-    driver = execution_checkpoint("accepted")
-    driver.explorer("history-final", "final")
-    result = driver.send("check_run", {"role_id": "history-final", "stage": "final"})
-    task = driver.task
-    record = json.loads(artifacts.read_text(driver.directory / result["log"]))
-    monkeypatch.setattr(state_history, "lookup", lambda *args: entry)
-    with pytest.raises(Rejected) as error:
-        check_evidence.historical_context(driver.state, task, record, task["evidence"][-1], driver.directory)
-    assert error.value.code == "evidence_basis"
-
-
-def test_accepted_final_history_survives_revision_but_cannot_complete_new_head(execution_checkpoint):
-    from copy import deepcopy
-    from lib.finalize import finalize
-    from lib.verification import valid_evidence
-    from test_plan_revision import revise, revised
-    driver = execution_checkpoint("accepted")
-    driver.explorer("historical-final", "final")
-    driver.send("check_run", {"role_id": "historical-final", "stage": "final"})
-    driver.send("role_result", {"role_id": "historical-final", "result": "DONE", "trace": "unit-test"})
-    preserved = driver.task
-    project = Path(driver.state["basis"]["project_root"])
-    design = project / "sdd/changes/demo/design.md"
-    design.write_bytes(design.read_bytes() + b"\nClarified design.\n")
-    revise(project, ["one"])
-    revised(driver)
-    assert driver.task == preserved
-    assert valid_evidence(driver.state, driver.task, driver.directory, "final")
-    # Inspect the real final gate on a detached state; do not create a recovery
-    # blocker merely to prove historical evidence cannot complete the new HEAD.
-    historical = finalize(deepcopy(driver.state), {}, driver.directory)
-    assert historical["result"] == "partial"
-    assert any("current HEAD" in gap["reason"] for gap in historical["missing"])
-    driver.explorer("current-final", "final")
-    assert driver.send("check_run", {"role_id": "current-final", "stage": "final"})["outcome"] == "passed"
-    driver.final_conclude()
-    assert driver.send("finalize", task_id=None)["result"] == "complete"
-
-
-@pytest.mark.parametrize("damage", ["run", "event", "summary"])
-def test_final_history_requires_authenticated_original_run(execution_checkpoint, damage):
-    import json
-    from lib.common import Rejected, digest, write_json
-    from lib.state_objects import StateObjects
-    from lib.verification import valid_evidence
-    driver = execution_checkpoint("accepted")
-    driver.explorer("historical-final", "final")
-    result = driver.send("check_run", {"role_id": "historical-final", "stage": "final"})
-    task = driver.task
-    path = driver.directory / result["log"]
-    record = json.loads(artifacts.read_text(path))
-    if damage == "run":
-        record["run_id"] = "foreign-run"
-    elif damage == "event":
-        record["check_run_id"] = "unrecorded-check-run"
-    else:
-        objects = StateObjects(driver.directory)
-        aggregate = objects.get(record["summary"])
-        aggregate["diagnosis"] = "substituted summary"
-        record["summary"] = objects.put(aggregate)
-    write_json(path, record)
-    for item in task["evidence"]:
-        if item["log"] == result["log"]:
-            item["log_hash"] = digest(artifacts.read_bytes(path))
-    with pytest.raises(Rejected) as error:
-        valid_evidence(driver.state, task, driver.directory, "final")
-    assert error.value.code == "evidence_basis"
-
-
 def test_summary_exposes_full_raw_log_without_reexecution(execution_checkpoint, monkeypatch):
     import json
     import os
@@ -475,19 +358,16 @@ def test_summary_raw_integrity_blocks_gate(execution_checkpoint, damage):
                                 "foreign": "evidence_basis", "basis": "evidence_basis"}[damage]
 
 
-@pytest.mark.parametrize("scope", ["task", "final"])
 @pytest.mark.parametrize("first_missing", [False, True])
 def test_each_command_captures_report_before_next_check(execution_checkpoint, state_backend, monkeypatch,
-                                                       scope, first_missing):
+                                                       first_missing):
     import base64
     import json
     import sys
     from lib import verification
     from lib.state_objects import StateObjects
-    from test_final_project_checks import final_role, run_final
-    driver = execution_checkpoint("pending" if scope == "task" else "accepted")
-    if scope == "task":
-        driver.worktree()
+    driver = execution_checkpoint("pending")
+    driver.worktree()
     report_path = driver.root.parent / "command-report-results" / "shared.xml"
     state_backend.artifacts.register(report_path.parent)
     skipped = b'<testsuite tests="8" skipped="8">' + b'<testcase><skipped/></testcase>' * 8 + b'</testsuite>'
@@ -511,16 +391,11 @@ def test_each_command_captures_report_before_next_check(execution_checkpoint, st
                              "--junitxml", str(report_path)]}},
     ]
     driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": checks},
-                task_id="TASK-one" if scope == "task" else None)
-    if scope == "task":
-        driver.role("report-author", "executor")
-        driver.send("start", {"role_id": "report-author", "paths": ["result.txt", "check.py"]})
-        result = driver.run_checks("baseline")
-        assert result["outcome"] == ("unavailable" if first_missing else "baseline_recorded")
-    else:
-        final_role(driver)
-        result = run_final(driver)
-        assert result["outcome"] == ("failed" if first_missing else "passed")
+                task_id="TASK-one")
+    driver.role("report-author", "executor")
+    driver.send("start", {"role_id": "report-author", "paths": ["result.txt", "check.py"]})
+    result = driver.run_checks("baseline")
+    assert result["outcome"] == ("unavailable" if first_missing else "baseline_recorded")
     record = json.loads(artifacts.read_text(driver.directory / result["log"]))
     objects = StateObjects(driver.directory)
     machines = {output["check_id"]: objects.get(output["summary"]) for output in record["outputs"]}
@@ -597,31 +472,6 @@ def test_structured_report_capture_uses_existing_artifact_adapter(execution_chec
             assert error.value.code == "evidence_basis"
 
 
-
-@pytest.mark.parametrize("kind", ["manual", "behavioral"])
-def test_semantic_command_is_attested_by_final_verifier_without_explorer_execution(execution_checkpoint, monkeypatch, kind):
-    from lib import verification
-    from test_final_project_checks import register, COMMAND
-    driver = execution_checkpoint("accepted")
-    register(driver, execution_kind=kind)
-    driver.send("role_register", {"role_id": "semantic-verifier", "kind": "final_verifier", "context_id": "semantic-verifier",
-        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
-    driver.explorer("semantic-aggregate", "final", task_id=None)
-    with pytest.raises(ValueError, match="verifier"):
-        driver.send("procedure_begin", {"role_id": "semantic-aggregate", "stage": "final", "check_id": "project-result"}, task_id=None)
-    driver.send("procedure_begin", {"role_id": "semantic-verifier", "stage": "final", "check_id": "project-result"}, task_id=None)
-    driver.send("procedure_result", {"role_id": "semantic-verifier", "check_id": "project-result", "outcome": "passed",
-        "steps": [{"command": COMMAND, "observation": "Synthetic contract attestation; no agent evaluation is run by this test"}],
-        "trace": "synthetic verifier attestation"}, task_id=None)
-    def unexpected(*args):
-        pytest.fail("Explorer attempted a semantic command")
-    monkeypatch.setattr(verification.check_runner, "run_command", unexpected)
-    result = driver.send("check_run", {"role_id": "semantic-aggregate", "stage": "final"}, task_id=None)
-    assert result["outcome"] == "passed"
-    from lib.final_checks import evidence
-    assert len(evidence(driver.state, driver.directory)[1]) == 1
-
-
 def test_procedure_type_is_explicit_and_deterministic_procedure_belongs_to_explorer(driver):
     from lib import verification
     state = driver.state
@@ -664,26 +514,14 @@ def test_deterministic_procedure_uses_explorer_and_keeps_current_aggregate(drive
     with pytest.raises(ValueError, match="reserve"):
         driver.send("procedure_begin", {"role_id": "independent-explorer", "stage": "independent", "check_id": "deterministic-procedure"})
 
-@pytest.mark.parametrize("owned,location,markers,skill", [
-    (["src/main.py"], "tests/evaluation.md", [".agents/skills/unrelated/SKILL.md"], False),
-    (["skills/new/SKILL.md"], "tests/evaluation.md", [], True),
-    (["skills/tool/scripts/run.py"], "tests/evaluation.md", ["skills/tool/SKILL.md"], True),
-    (["src/main.py"], "skills/tool/evals/check.md", ["skills/tool/SKILL.md"], True),
-    (["src/main.py"], "tests/evaluation.md", ["SKILL.md"], True),
-])
-def test_behavioral_stage_depends_on_assigned_skill_boundary(execution_checkpoint, monkeypatch, owned, location, markers, skill):
-    from lib import explorer_assignments
-    from lib.repository import repository
-    driver = execution_checkpoint("frozen")
-    driver.role("semantic-verifier", "verifier")
-    state = driver.state
-    task = state["tasks"]["TASK-one"]
-    task["paths"] = owned
-    repo = repository(driver.root)
-    monkeypatch.setattr(type(repo), "tracked", lambda self, ref: markers)
-    check = {"execution_kind": "behavioral", "run": {"procedure": "evaluation.md"}, "location": location}
-    if skill:
-        with pytest.raises(ValueError, match="only at final"):
-            explorer_assignments.procedure_role(state, task, "semantic-verifier", "independent", check)
-    else:
-        assert explorer_assignments.procedure_role(state, task, "semantic-verifier", "independent", check)["kind"] == "verifier"
+
+@pytest.mark.parametrize("kind", ["manual", "behavioral"])
+def test_semantic_procedure_requires_task_verifier(kind):
+    from lib.explorer_assignments import procedure_role
+    task = {"plan": {"id": "TASK-one"}}
+    check = {"execution_kind": kind, "run": {"procedure": "eval.md"}}
+    state = {"roles": {name: {"kind": name, "task_id": "TASK-one", "status": "active"}
+                       for name in ("explorer", "verifier")}}
+    with pytest.raises(ValueError, match="task verifier"):
+        procedure_role(state, task, "explorer", "independent", check)
+    assert procedure_role(state, task, "verifier", "independent", check)["kind"] == "verifier"

@@ -34,10 +34,10 @@ def test_explorer_execution_instructions_match_role_api():
     assert "machine summary and raw evidence references" in verifier
     assert "procedure_begin/result" in verifier
     conclusion = describe(event="verification_result")
-    assert conclusion["choices"]["stage"] == ["independent", "integration", "final"]
-    assert conclusion["task_id"] == "TASK-ID or null"
+    assert conclusion["choices"]["stage"] == ["independent", "integration"]
+    assert conclusion["task_id"] == "TASK-ID"
     final_flow = (ROOT / "flows/finalize.md").read_text()
-    assert "verification_result" in final_flow and "explorer" in final_flow and "final_verifier" in final_flow
+    assert "accepted" in final_flow and "finalize" in final_flow
     assert "verification_result" in flow and "checks_extend.verification_result" in flow
     assert "`criterion_id`" in verifier and "`check_request`" in verifier
     assert "read_object" in verifier

@@ -73,11 +73,6 @@ def reduce(state, event, directory):
         clean_source(task["start_snapshot"])
         return {"status": "running"}
     if kind == "repair":
-        if state.get("final_checks", {}).get("failures"):
-            require(payload.get("final_checks"), "repair_owner_required", "Attribute final failures before reopening a task author")
-        if state.get("final_checks") and payload.get("final_checks"):
-            from .final_checks import repair
-            return repair(state, task, payload, directory, event)
         from .budgets import repair
         return repair(state, task, payload)
     if kind in {"commit", "accept"}:

@@ -133,30 +133,21 @@ def test_revision_rejects_new_tasks_before_existing(driver, project, placement):
     assert driver.state == before
 
 
-def test_revision_keeps_acceptance_and_allows_repeated_final_checks(execution_checkpoint):
+def test_revision_keeps_acceptance_for_completion(execution_checkpoint):
     driver = execution_checkpoint("accepted")
     project = Path(driver.state["basis"]["project_root"])
-    driver.role("old-final", "final_verifier")
-    driver.run_checks("final")
-    driver.conclude(role="old-final", stage="final")
-    driver.send("role_result", {"role_id": "old-final", "result": "DONE", "trace": "unit-test"})
     assert driver.send("finalize", task_id=None)["result"] == "complete"
     completed = driver.task
-    # The orchestrator repeats final checks; no saved candidate invalidates old logs.
+    # Approved plan revision retains accepted tasks and their original proof.
     path = project / "sdd/changes/demo/design.md"
     path.write_bytes(path.read_bytes() + b"\nClarified design.\n")
     revise(project, ["one"])
     revised(driver)
     assert driver.task == completed
-    from lib.verification import valid_evidence
-    assert valid_evidence(driver.state, driver.task, driver.directory, "final")
-    from lib.verification_results import applicable
-    with pytest.raises(Rejected, match="attempt changed"):
-        applicable(driver.state, driver.task, driver.directory, "final")
-    driver.role("new-final", "final_verifier")
-    assert driver.run_checks("final")["outcome"] == "passed"
-    driver.conclude(role="new-final", stage="final")
     assert driver.send("finalize", task_id=None)["result"] == "complete"
+    from lib.state_view import compact
+    proof = compact(driver.state)["tasks"]["TASK-one"]["verification"]["independent"]
+    assert proof["execution"]["status"] == proof["conclusion"]["status"] == "passed"
 
 
 def stopped_completed_task(driver):

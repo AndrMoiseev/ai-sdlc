@@ -225,7 +225,7 @@ def transition(state, task, event, directory):
         if role["status"] == "active" and role["context_id"] not in p["live_contexts"]:
             role["status"] = "lost"
             t = state["tasks"].get(role["task_id"])
-            if t is None and role["kind"] in {"final_verifier", "explorer"}:
+            if t is None and role["kind"] == "explorer":
                 issues.append({"reason": "lost_role", "task_id": None, "role_id": role["role_id"],
                                "resume_condition": "Register a fresh run-level successor of the same role kind"})
             if t and (t["status"] not in {"pending", "accepted"} or role["kind"] == "explorer"):
@@ -268,11 +268,7 @@ def transition(state, task, event, directory):
             require(any(b["reason"] == reason and b.get("task_id") == resolution.get("task_id")
                         and b.get("role_id") == lost_role for b in state["blockers"]),
                     "successor_required", "No unresolved loss for this role")
-            if predecessor["task_id"] is None and (predecessor["kind"] == "final_verifier"
-                    or predecessor["kind"] == "explorer" and predecessor.get("assignment", {}).get("kind") == "checks"):
-                from .final_checks import reconcile_procedures
-                reconcile_procedures(state, predecessor, successor, resolution, event, directory)
-            elif predecessor["task_id"] is not None:
+            if predecessor["task_id"] is not None:
                 reconcile_task_procedures(state, state["tasks"][predecessor["task_id"]], predecessor,
                                           successor, resolution, event, directory)
         def resolved(blocker):

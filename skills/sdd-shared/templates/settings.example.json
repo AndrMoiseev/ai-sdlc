@@ -10,8 +10,7 @@
       "sdd-spec.editorial_reviewer": "sdd-proofreader",
       "sdd-apply.executor": "sdd-developer",
       "sdd-apply.verifier": "sdd-verifier",
-      "sdd-apply.reviewer": "sdd-reviewer",
-      "sdd-apply.final_verifier": "sdd-verifier"
+      "sdd-apply.reviewer": "sdd-reviewer"
     }
   }
 }

@@ -69,6 +69,7 @@ def test_settings_schema_roles_match_runtime():
     schema = json.loads((ROOT / 'schemas/settings.schema.json').read_text())
     roles = schema['properties']['subagents']['properties']['roles']['propertyNames']['enum']
     assert set(roles) == set(bootstrap().load(ROOT, 'subagents').ROLES)
+    assert 'sdd-apply.final_verifier' not in roles
     example = json.loads((ROOT / 'templates/settings.example.json').read_text())
     assert example['subagents']['roles']['sdd-spec.explorer'] == 'sdd-explorer'
     assert example['subagents']['roles']['sdd-apply.explorer'] == 'sdd-explorer'
@@ -148,7 +149,7 @@ def test_setup_runs_without_spec_from_relocated_install(tmp_path):
                         '--host', 'codex', '--user-agent-dir', tmp_path / 'empty-agents', cwd=consumer)
         assert result.returncode == 0, result.stderr + result.stdout
         inspection = json.loads(result.stdout)['result']
-        assert len(inspection['roles']) == 10
+        assert len(inspection['roles']) == 9
         assert inspection['inputs']['sdd_shared'] == str((collection / 'sdd-shared').resolve())
     assert inventory(consumer) == before
     assert inventory(collection) == packages

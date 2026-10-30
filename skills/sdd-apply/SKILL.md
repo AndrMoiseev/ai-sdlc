@@ -24,13 +24,9 @@ Before coordinating workers, read the [shared coordination contract](../sdd-shar
 
 ## Skill development acceptance
 
-When creating or changing skills, accept each individual planned task using only
-deterministic tests. Schedule all behavioral checks, including agent-based evals,
-trigger tests and pressure scenarios, exclusively for final acceptance of the
-whole plan. Apply this boundary to baseline, self-checks, independent verification,
-integration and repair retries as well. If the approved plan requires a behavioral
-check before final acceptance, return that conflict to sdd-spec before execution;
-do not silently omit the check or replace it with a deterministic test.
+Use deterministic tests for task acceptance when changing skills. Run behavioral,
+trigger and pressure evals only when explicitly authorized and assigned to a task
+or a separate evaluation request. There is no automatic final evaluation phase.
 
 ## Route
 
@@ -51,5 +47,4 @@ Delegate bounded research and deterministic checks to explorer under
 [role coordination](references/role-coordination.md#explorer-dispatch). Send its
 saved summary and evidence references through the orchestrator to the verifier
 for criterion assessment. Read [execution ownership](references/api-checks.md#execution-ownership-and-one-batch-deadline)
-for explicitly typed behavioral/manual procedures and commands. Final acceptance
-uses fresh separate explorer and final_verifier contexts in each required scope.
+for explicitly typed behavioral/manual procedures and commands. Complete the plan from accepted tasks using [finalize](flows/finalize.md).

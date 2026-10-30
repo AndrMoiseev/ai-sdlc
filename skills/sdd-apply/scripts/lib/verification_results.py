@@ -12,44 +12,18 @@ def stage_for(task):
     return "integration" if task.get("worktree") and task["worktree"].get("integrated") else "independent"
 
 
-def scope(state, task):
-    if task is not None:
-        return task
-    from .final_checks import registry
-    return registry(state)
-
-
-def criteria(state, task):
-    if task is not None:
-        return local_criteria(state, task)
-    from .final_checks import required_criteria
-    return required_criteria(state)
-
-
-def ready(state, task, stage):
-    if stage == "final":
-        from .final_checks import ready as final_ready
-        final_ready(state)
-    if task is not None:
-        current(state, task)
-
-
 def verifier(state, task, role_id, stage, active=True):
-    if stage != "final" and active:
+    if active:
         return independent(state, task, role_id, {"verifier"})
     role = state["roles"].get(role_id)
-    require(role and role["kind"] == ("final_verifier" if stage == "final" else "verifier")
-            and role["task_id"] == (task["plan"]["id"] if task else None)
+    require(role and role["kind"] == "verifier"
+            and role["task_id"] == task["plan"]["id"]
             and role["status"] in ({"active"} if active else {"active", "finished"}),
             "role_unavailable", "Conclusion requires its registered independent verifier")
     authors = {value["context_id"] for value in state["roles"].values()
-               if value["kind"] == "executor" and (stage == "final" or value["task_id"] == task["plan"]["id"])}
+               if value["kind"] == "executor" and value["task_id"] == task["plan"]["id"]}
     require(role["fresh"] is True and role["context_id"] not in authors,
             "role_not_independent", "Author cannot supply a conclusion")
-    if stage == "final":
-        require(not any(other["context_id"] == role["context_id"]
-                        for ident, other in state["roles"].items() if ident != role_id),
-                "final_role", "Final conclusion requires a fresh separate final verifier")
     return role
 
 
@@ -81,18 +55,14 @@ def evidence_refs(task, stage, directory):
 def packet(state, task, directory, stage=None):
     stage = stage or stage_for(task)
     return {"stage": stage, "basis": basis(state, task, "checks", stage),
-            "criteria": sorted(criteria(state, task)),
-            "evidence_refs": evidence_refs(scope(state, task), stage, directory)}
+            "criteria": sorted(local_criteria(state, task)),
+            "evidence_refs": evidence_refs(task, stage, directory)}
 
 
 def validate_refs(state, task, stage, refs, directory):
     from .check_evidence import validate
     from .check_registry import selected
-    if task is None:
-        from .final_checks import applicable as final_checks
-        checks = final_checks(state)
-    else:
-        checks = selected(state, task, final=stage == "final")
+    checks = selected(state, task)
     expected = basis(state, task, "checks", stage)
     source = expected["source"]
     validated = set()
@@ -100,17 +70,17 @@ def validate_refs(state, task, stage, refs, directory):
         if ref["log"] in validated:
             continue
         record = json.loads(artifacts.read_bytes(artifacts.contained(directory, ref["log"])))
-        identity = record.get("basis", {}) if task is None else record
+        identity = record
         require(identity.get("run_id") == state["run_id"]
-                and record.get("task_id") == (task["plan"]["id"] if task else None)
+                and record.get("task_id") == task["plan"]["id"]
                 and record.get("stage") == stage
-                and (record.get("basis") == expected if task is None else record.get("before") == source)
+                and record.get("before") == source
                 and record.get("after") == source,
                 "verification_basis", "Conclusion evidence must belong to this task, stage and unchanged source")
         from .explorer_assignments import authorize
         role = authorize(state, task, record.get("role_id"), stage, active=False)
         authors = {value["context_id"] for value in state["roles"].values()
-                   if value["kind"] == "executor" and (stage == "final" or value["task_id"] == task["plan"]["id"])}
+                   if value["kind"] == "executor" and value["task_id"] == task["plan"]["id"]}
         require(role["fresh"] is True and role["context_id"] not in authors,
                 "role_not_independent", "Conclusion evidence must come from an independent explorer")
         validate(state, record, checks, directory, require_complete=False)
@@ -124,11 +94,11 @@ def validate_refs(state, task, stage, refs, directory):
 
 def applicable(state, task, directory, stage=None):
     stage = stage or stage_for(task)
-    holder = scope(state, task)
+    holder = task
     results = holder.get("verification_results", [])
     result = next((item for item in reversed(results) if item["stage"] == stage), None)
     require(result is not None, "verification_missing", "A current verifier conclusion is required")
-    ready(state, task, stage)
+    current(state, task)
     require(result["basis"] == basis(state, task, "checks", stage)
             and result["attempts_hash"] == digest(attempts(holder, stage)),
             "verification_stale", "Source, registry or applicable check attempt changed after the conclusion")
@@ -140,14 +110,7 @@ def applicable(state, task, directory, stage=None):
 
 
 def execution(state, task, directory, stage):
-    if task is not None:
-        return valid_evidence(state, task, directory, stage)
-    from .final_checks import evidence as final_evidence
-    _, evidence, gaps = final_evidence(state, directory)
-    require(not gaps, "required_checks", "Every required final command/procedure must pass: " + str(gaps))
-    require(criteria(state, task) <= {criterion for item in evidence for criterion in item["criteria"]},
-            "criteria_uncovered", "Final evidence must cover every applicable criterion")
-    return evidence
+    return valid_evidence(state, task, directory, stage)
 
 
 def require_passed(state, task, directory, stage=None):
@@ -175,13 +138,12 @@ def extension(state, task, payload, directory):
 def transition(state, task, event, directory):
     p = event["payload"]
     stage = p.get("stage")
-    require(stage == "final" or task is not None and stage in {"independent", "integration"} and stage == stage_for(task),
-            "verification_stage", "Use the current independent/integration stage or final")
-    require(not (stage == "final" and task is not None and state["basis"].get("work_kind") == "refactoring"),
-            "final_role", "Refactoring final conclusion uses the whole null scope")
+    require(task is not None and stage != "final", "verification_stage", "Use task verification; final assessment has been removed")
+    require(stage in {"independent", "integration"} and stage == stage_for(task),
+            "verification_stage", "Use the current independent/integration stage")
     verifier(state, task, p.get("role_id"), stage)
-    ready(state, task, stage)
-    holder = scope(state, task)
+    current(state, task)
+    holder = task
     require(p.get("basis") == basis(state, task, "checks", stage),
             "verification_basis", "Use the current source, manifest and complete registry basis")
     refs = evidence_refs(holder, stage, directory)
@@ -193,7 +155,7 @@ def transition(state, task, event, directory):
             "verification_criteria", "Provide criterion results")
     identifiers = [item.get("criterion_id") for item in results]
     require(all(isinstance(value, str) for value in identifiers)
-            and len(identifiers) == len(set(identifiers)) and set(identifiers) == criteria(state, task),
+            and len(identifiers) == len(set(identifiers)) and set(identifiers) == local_criteria(state, task),
             "verification_criteria", "Cover every applicable criterion exactly once, without foreign criteria")
     for item in results:
         require(item.get("outcome") in {"passed", "failed", "unavailable"}
@@ -213,6 +175,4 @@ def transition(state, task, event, directory):
     result = {**deepcopy(p), "id": event["event_id"], "outcome": outcome,
               "attempts_hash": digest(attempts(holder, stage)), "time": now()}
     holder.setdefault("verification_results", []).append(result)
-    if stage == "final":
-        state["final"] = None
     return {"verification_result": result}

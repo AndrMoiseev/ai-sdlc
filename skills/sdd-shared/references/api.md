@@ -197,6 +197,6 @@ apply registration consume this contract; API and document versions are unchange
 
 The calling workflow assigns deterministic execution to explorer and keeps
 criterion assessment separate. For behavioral/manual checks, including explicitly
-typed commands, apply retains verifier/final_verifier attestation. Shared summaries
+typed commands, apply retains task verifier attestation. Shared summaries
 preserve primary evidence and unknown counts; they neither grant execution
 permission nor establish acceptance. See [assignment and results](explorer.md).

@@ -7,7 +7,7 @@ evidence. Use installed event help for exact fields.
 
 For work on skills, apply the [skill development acceptance rule](../SKILL.md#skill-development-acceptance)
 before registering checks: task stages use deterministic tests, and behavioral
-checks run only at final acceptance of the whole plan.
+checks require explicit authorization and a task or separate evaluation request.
 
 Read the installed sdd-shared `references/document-format-tasks.md`, section
 «Задача и ее проверка». `location` is relative to project or active worktree,
@@ -72,7 +72,7 @@ applicability in the same state write as task acceptance. Failed or unavailable
 replacement checks keep the task unaccepted; reserve repair before editing or
 retrying and retain the existing lifetime counters.
 
-Later tasks and task-scoped `final` checks use the confirmed applicable set.
+Later tasks use the confirmed applicable set.
 Retired adapter checks remain historical observations with their original
 outcomes. Inspect `resume.check_registries` for the confirmed revision/checks and
 the separate pending transition after an interruption. Resume preserves that
@@ -95,7 +95,8 @@ representation needs fresh checks against the updated registry.
 ## Running checks
 
 `check_run` executes the complete applicable registry for the assigned `role_id` and stage
-(`baseline`, `self`, `independent`, `integration`, `final`), with optional timeout.
+(`baseline`, `self`, `independent`), with optional timeout. The API also
+retains the legacy `integration` stage; ordinary transfer does not dispatch it.
 For a registered procedure, use `procedure_begin` with check/role/stage, execute
 it in that role, and submit `procedure_result` with the same IDs, outcome, actual
 steps and host trace. Then `check_run` reconciles the full assigned set. Git commit
@@ -116,15 +117,18 @@ contents invalidate prior execution and conclusions. Apply
 
 `candidate` is the existing event name for committing the stopped executor's
 owned changes and entering verification. After integration, the same event
-commits the integrated result before integration checks. It returns `commit`
+commits the recorded integration tree and enters `committing`. It returns `commit`
 metadata and records the recoverable Git operation in `candidate_commit`.
 Reuse the identical event after an interrupted commit so its durable intent
 can recover the result.
 
 No task candidate, candidate reference or `candidates/` artifact is recorded.
 Checks and reviews do not compare a saved candidate with the current tree.
-The orchestrator must run checks and review again after changes, repairs or
-integration. Keep writers stopped throughout checking and review.
+The orchestrator must run checks and review again after implementation changes
+or repairs in the task worktree. Transfer retains that evidence, verifier
+conclusion and review. Integration acceptance validates the recorded merge tree,
+unchanged source and evidence artifacts without running checks again. Keep
+writers stopped throughout checking and review.
 
 Command logs retain before/after Git and current-change document snapshots.
 Changes during a command make that run stale. Snapshot hashing remains limited
@@ -154,26 +158,14 @@ as `defect_evidence`; set `test_failure` only for an actual failed test. Run the
 whole expanded registry and obtain a new conclusion. Changing requirements
 requires `spec_conflict`; insufficient tests within an approved AC do not.
 
-`review_start`, `transfer`, `commit` and `accept` require both a successful
-mandatory run and the latest passed conclusion for the current task stage.
+`review_start` and `transfer` require both a successful mandatory worktree run
+and its latest passed conclusion. `commit` and `accept` validate that retained
+worktree evidence and the recorded integration tree.
 Source, normative basis, registry, configuration or a newer applicable attempt
 invalidates the conclusion. Negative conclusions remain in history; neither an
 older pass, `role_result`, self evidence nor reviewer verdict replaces them.
-After integration obtain a new integration run and conclusion.
-
-At final, a fresh separate `final_verifier` submits the same `verification_result`
-contract with `stage: final`. Ordinary task conclusions cover that task's `covers`;
-optional null-scope project conclusions cover only the additional registry.
-Refactoring null-scope conclusions cover design results, preservation and applicable
-persistent local criteria from the confirmed union. Retired checks stay historical.
-The packet's `verification` contains the exact criterion IDs, basis and evidence
-references. Every required scope needs fresh execution and a passed conclusion;
-`finalize` reports `partial` with missing criteria and a next action otherwise.
-The report separates execution `evidence` from `verification_results`. A newer
-pending, failed or superseding procedure invalidates both the old aggregate and
-its conclusion even at unchanged HEAD. Obtain a fresh aggregate and conclusion.
-Final defects use the existing owned repair path and task budgets; the
-`checks_extend` conclusion basis remains limited to independent/integration.
+After transfer, keep the original source references; do not create an integration
+run or conclusion. The `integration` stage remains readable for saved executions.
 
 ### Primary execution evidence
 
@@ -185,88 +177,31 @@ Repeat affected checks after changes to bytes, configuration, registry or normat
 basis. The orchestrator enforces this ordering; task evidence has no saved candidate
 comparison. A required unavailable check blocks; omission cannot make it green.
 
-Final checks use fresh explorer roles with separate final_verifier assessment on the clean final HEAD. Earlier logs do not replace that final run.
+## Plan completion
 
-## Refactoring whole-result checks
-
-Use `task_id: null` for `checks_register`, `check_setup`, final `check_run`, and
-final procedure events. Registration includes all tasks.md verification records
-and inspected project/CI checks. Prepare an unresolved whole check while its
-approved `setup_task` is running or repairing after baseline. Register the exact
-command and preparation description; an unavailable check blocks completion.
-
-After every task is accepted and integrated, a fresh run-level explorer
-executes the union of whole checks and confirmed applicable task/project checks.
-No synthetic owner task is created. Confirmed retired checks retain history and
-reasons; they are not rerun. Evidence binds work identity, clean integrated HEAD,
-approved plan commit and document paths and the exact applicable registry. Every command and procedure
-must pass at that same basis; unrelated exit zero or historical success is insufficient.
-
-Each whole procedure begins a distinct attempt. A newer pending or nonpassing
-attempt invalidates an older aggregate pass, even at the same source and registry.
-After a new procedure pass, run `check_run` again so the aggregate links that exact
-attempt and log. Keep all superseded results as history.
-
-When a run-level final verifier is lost during a procedure, register its fresh
-successor and resolve `lost_role` through `resume`. The resolution includes
-`abandon_procedures`, listing every unfinished check ID of that predecessor,
-alongside the ownership evidence and host trace. Resume archives those attempts
-as abandoned, preserving their original role, basis and trace. The successor
-begins and executes a fresh attempt; abandoned work supplies no passing evidence.
-
-A failed final check requires an owned repair before retry. Supply `repair` with
-`final_checks` IDs, `defect_evidence` and exact owned `paths`; select its task ID.
-Unknown ownership or an unplanned area returns to sdd-spec before edits. Repairs
-consume the responsible task's existing test-repair budget and require the usual
-candidate, independent checks, review and integration before final verification.
-
-## Ordinary final project checks
-
-After every ordinary task is accepted and integrated, register additional mandatory
-project checks with `checks_register`, `task_id: null`, inspected `inventory`, and
-nonempty `additional`. Each check has a distinct ID within this registry, source,
-approved `covers` criteria, and an exact command or existing procedure. The registry
-contains only these additional checks. Task registries and task-scoped final checks
-retain their existing meaning. Ordinary executions without this registry keep the
-task-scoped final execution and conclusion requirement.
-
-Launch a fresh explorer independent of every executor and register its final checks assignment with `task_id: null`. Use it for `check_run` and deterministic procedures; launch a separate fresh final_verifier for semantic assessment and behavioral/manual procedures. Both use null task scope and stage `final`. Ordinary project checks have no `setup_task` and cannot
-use `check_setup`; planned preparation belongs to the task that implements it.
-Register checks only when their exact executable command or procedure is known.
-
-Once registered, every project check is mandatory alongside task final evidence.
-Evidence binds work kind, change ID, run ID, clean integrated HEAD, approved plan commit and document paths, exact project registry and the task check definitions. Missing, failed,
-unavailable, foreign or stale evidence prevents `complete`. A successful project
-run cannot replace task-scoped final checks. The latest procedure attempt and
-lost-role recovery follow the run-level procedure contract above; rerun the aggregate
-after a fresh procedure pass. Assign final failures through the owned repair contract.
-
-On `revised_plan`, these registered obligations and their inventory remain required.
-The superseded run archives interrupted attempts and failures; retained logs are
-historical. The new run requires fresh evidence at its new basis after all appended
-tasks are accepted. Appending a task never silently removes a project check.
+`finalize` uses accepted task records without a new run, registry or conclusion.
+Keep original worktree identities in the report. Refactoring whole-result criteria
+without task evidence are reported as unassessed; completion does not assert them.
 
 ## Execution ownership and one batch deadline
 
 Only a registered explorer checks assignment for the exact stage, scope, current
 basis, full check IDs and registry revision can call `check_run`. Baseline runs
 before edits; self, independent and integration require stopped authors and a
-frozen commit; integration requires the integrated commit. Final requires a fresh
-explorer and accepted task or the applicable run-level registry. Self evidence
+frozen commit; integration requires the integrated commit. A checks assignment belongs to one task and its applicable registry. Self evidence
 never replaces independent evidence.
 
 Set `execution_kind` on the verification/check record, outside `run`.
 Commands default to `deterministic`; procedures require an explicit
 `deterministic`, `behavioral` or `manual`. The filename never selects a type.
 Deterministic procedures use explorer `procedure_begin/result`. Behavioral/manual
-procedures, including explicitly typed commands, use verifier at task stages or
-final_verifier at final. Their actual steps, exact command where present, raw
+procedures, including explicitly typed commands, use the task verifier. Their actual steps, exact command where present, raw
 references and trace form the primary attestation. Explorer aggregates that
 attestation and does not launch the semantic command. A newer or pending procedure
 invalidates an older aggregate. Before retrying a failed procedure, reserve repair;
 if it has not yet been aggregated, supply its defect evidence and `test_failure: true`. Semantic checks cannot be converted to a
 command with `check_setup`. Behavioral checks of assigned skill packages run
-only at final; ordinary non-skill work retains its verifier procedure stages.
+only when explicitly authorized; execute them in their assigned task.
 
 `timeout` is a positive finite budget for the entire assigned attempt, starting at
 the first deterministic `procedure_begin` or `check_run`, including procedure

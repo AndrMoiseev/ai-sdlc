@@ -59,13 +59,13 @@ def test_explorer_context_can_continue_own_task_but_not_change_role(execution_ch
     driver.send("role_result", {"role_id": "self-explorer", "result": "DONE", "trace": "unit"})
     driver.explorer("independent-explorer", "independent", context="research")
     assert driver.send("check_run", {"role_id": "independent-explorer", "stage": "independent"})["outcome"] == "passed"
-    for kind in ("executor", "verifier", "reviewer", "final_verifier"):
+    for kind in ("executor", "verifier", "reviewer"):
         with pytest.raises(ValueError, match="share"):
             driver.role("forbidden-" + kind, kind, context="research")
 
 
-@pytest.mark.parametrize("stage", ["baseline", "self", "independent", "integration", "final"])
-@pytest.mark.parametrize("kind", ["executor", "verifier", "reviewer", "final_verifier"])
+@pytest.mark.parametrize("stage", ["baseline", "self", "independent", "integration"])
+@pytest.mark.parametrize("kind", ["executor", "verifier", "reviewer"])
 def test_old_roles_cannot_execute_commands(execution_checkpoint, monkeypatch, stage, kind):
     from lib import verification
     driver = execution_checkpoint("started")
@@ -101,20 +101,6 @@ def test_explorer_assignment_rejects_scope_stage_stale_registry_and_capability(e
         driver.send("check_run", {"role_id": "good", "stage": "self"})
 
 
-def test_final_explorer_and_verifier_require_separate_new_contexts(execution_checkpoint):
-    driver = execution_checkpoint("accepted")
-    driver.explorer("research")
-    driver.send("role_result", {"role_id": "research", "result": {"kind": "research", "answer": "Done",
-        "references": [], "inspected_scope": ["result.txt"], "limitations": [], "assumptions": [], "questions": []}, "trace": "unit"})
-    for context in ("author", "verifier", "research"):
-        with pytest.raises(ValueError, match="share"):
-            driver.explorer("final-" + context, "final", context=context)
-    driver.explorer("final-explorer", "final")
-    with pytest.raises(ValueError, match="share"):
-        driver.role("same-final-verifier", "final_verifier", "final-explorer")
-    driver.role("final-verifier", "final_verifier")
-    assert driver.send("check_run", {"role_id": "final-explorer", "stage": "final"})["outcome"] == "passed"
-
 def test_lost_run_research_successor_does_not_require_final_registry(driver):
     driver.explorer("research", task_id=None)
     driver.send("resume", {"host_trace": "synthetic lost research context", "live_contexts": []}, task_id=None)
@@ -125,3 +111,31 @@ def test_lost_run_research_successor_does_not_require_final_registry(driver):
     assert result["status"] == "active"
     assert "final_checks" not in driver.state
     assert driver.state["roles"]["research"]["status"] == "lost"
+
+def test_removed_final_role_cannot_register():
+    from lib.roles import transition
+    from lib.common import Rejected
+    payload = {"role_id": "removed", "kind": "final_verifier", "context_id": "unused",
+               "fresh": True, "host": "codex", "launch_ref": "unit", "capabilities": {}}
+    with pytest.raises(Rejected) as error:
+        transition({"roles": {}}, {"plan": {"id": "TASK-one"}},
+                   {"type": "role_register", "payload": payload}, None)
+    assert error.value.code == "fresh_role"
+
+
+@pytest.mark.parametrize("event_type", ["check_run", "procedure_begin", "verification_result"])
+def test_removed_final_stage_rejects_before_io(event_type):
+    from lib import verification, verification_results
+    from lib.common import Rejected
+    operation = verification_results if event_type == "verification_result" else verification
+    with pytest.raises(Rejected) as error:
+        operation.transition({}, {}, {"type": event_type, "payload": {"stage": "final"}}, None)
+    assert error.value.code in {"check_stage", "verification_stage"}
+
+
+def test_run_scope_check_registration_is_removed():
+    from lib.verification import transition
+    from lib.common import Rejected
+    with pytest.raises(Rejected) as error:
+        transition({}, None, {"type": "checks_register", "payload": {}}, None)
+    assert error.value.code == "task_required"

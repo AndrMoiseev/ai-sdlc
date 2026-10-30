@@ -172,7 +172,7 @@ def test_ordinary_check_ids_remain_task_local(project):
         assert [check["id"] for check in result["checks"]] == ["plan-1", "shared-check"]
 
 
-def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_and_final(project, tmp_path):
+def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_tasks(project, tmp_path):
     # Exercise the full lifecycle with numbering that disagrees with dependencies.
     # Ordering combinations belong to scheduler/wave tests, not repeated migrations.
     driver = removing(project, tmp_path, non_topological=True)
@@ -210,20 +210,11 @@ def test_refactoring_check_transitions_confirm_after_accept_and_apply_to_later_a
     assert {tuple(item["command"]) for item in api_baseline} == {(sys.executable, "-B", "check_api.py")}
     driver.implement()
     finish(driver)
-    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}}, task_id=None)
-    driver.send("role_register", {"role_id": "final", "kind": "final_verifier", "context_id": "final",
-        "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}}, task_id=None)
-    final = driver.run_checks("final", task_id=None)
-    assert final["outcome"] == "passed"
-    output = driver.log(final)
-    assert "TASK-one/local-result" not in {item["check_id"] for item in output["outputs"]}
-    assert {criterion for item in output["outputs"] for criterion in item["criteria"]} == {"AC-result", "AC-preserved", "AC-removed", "AC-later"}
-    api_final = [item for item in output["outputs"] if item["criteria"] == ["AC-preserved"]]
-    assert {item["check_id"] for item in api_final} == {"TASK-one/api-regression", "TASK-two/api-regression"}
-    assert {tuple(item["command"]) for item in api_final} == {(sys.executable, "-B", "check_api.py")}
-    from lib.final_checks import evidence
-    assert evidence(driver.state, driver.directory)[2] == []
-    assert driver.state["final"] is None
+    result = driver.send("finalize", task_id=None)
+    assert result["result"] == "complete"
+    whole = {c for check in driver.state["verification"].values() for c in check["criteria"]}
+    assert result["unassessed_criteria"] == sorted(whole - set(result["accepted_criteria"]))
+    assert result["unassessed_criteria"]
 
 
 @pytest.mark.parametrize("damage,code", [

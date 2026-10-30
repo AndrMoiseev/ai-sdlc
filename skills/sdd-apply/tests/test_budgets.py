@@ -107,18 +107,13 @@ def test_failed_retry_replacement_and_event_replay_preserve_budget(execution_che
     assert driver.task["active_repair"] is None
 
 
-def procedure_deadline_setup(execution_checkpoint, scope):
-    driver = execution_checkpoint("verified" if scope == "task" else "accepted")
+def procedure_deadline_setup(execution_checkpoint):
+    driver = execution_checkpoint("verified")
     check = {"id": "timed-procedure", "source": "fixture", "criteria": ["AC-one"],
              "execution_kind": "deterministic", "run": {"procedure": "check.py"}}
-    if scope == "task":
-        driver.review(verdict="more_checks")
-        driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [check]})
-        return driver, "TASK-one", "independent"
-    command = deepcopy(driver.task["checks"][0]["run"])
-    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": [check,
-        {"id": "timed-command", "source": "fixture", "criteria": ["AC-one"], "run": command}]}, task_id=None)
-    return driver, None, "final"
+    driver.review(verdict="more_checks")
+    driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [check]})
+    return driver, "TASK-one", "independent"
 
 
 def timed_explorer(driver, task_id, stage, ident, deadline=None):
@@ -133,14 +128,13 @@ def timed_explorer(driver, task_id, stage, ident, deadline=None):
     driver.explorer(ident, stage, task_id=task_id, assignment=assignment)
 
 
-@pytest.mark.parametrize("scope", ["task", "final"])
 @pytest.mark.parametrize("elapsed", [4, 11])
-def test_procedure_and_commands_share_attempt_deadline(execution_checkpoint, monkeypatch, scope, elapsed):
+def test_procedure_and_commands_share_attempt_deadline(execution_checkpoint, monkeypatch, elapsed):
     from lib import explorer_assignments, verification, artifact_storage
     from lib.common import Rejected
     from lib.state_storage import storage
     import json
-    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint, scope)
+    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint)
     clock = [1000.0]
     monkeypatch.setattr(explorer_assignments.time, "time", lambda: clock[0])
     monkeypatch.setattr(explorer_assignments.time, "monotonic", lambda: clock[0])
@@ -164,14 +158,8 @@ def test_procedure_and_commands_share_attempt_deadline(execution_checkpoint, mon
         return original(command, cwd, max(10, timeout))
     monkeypatch.setattr(verification.check_runner, "run_command", run)
     before = storage(driver.directory).read()
-    if elapsed > 10 and scope == "final":
-        with pytest.raises(Rejected) as error:
-            driver.send("check_run", {"role_id": "aggregate-explorer", "stage": stage}, task_id=task_id)
-        assert error.value.code == "repair_owner_required"
-        assert storage(driver.directory).read() == before
-    else:
-        aggregate = driver.send("check_run", {"role_id": "aggregate-explorer", "stage": stage}, task_id=task_id)
-        assert aggregate["outcome"] == ("passed" if elapsed < 10 else "unavailable")
+    aggregate = driver.send("check_run", {"role_id": "aggregate-explorer", "stage": stage}, task_id=task_id)
+    assert aggregate["outcome"] == ("passed" if elapsed < 10 else "unavailable")
     assert timeouts == ([6] if elapsed < 10 else [])
     assert driver.task["test_repair_cycles_started"] == 0
     if elapsed < 10:
@@ -184,12 +172,11 @@ def test_procedure_and_commands_share_attempt_deadline(execution_checkpoint, mon
         assert storage(driver.directory).read() == before
 
 
-@pytest.mark.parametrize("scope", ["task", "final"])
-def test_expired_assignment_cannot_begin_procedure(execution_checkpoint, monkeypatch, scope):
+def test_expired_assignment_cannot_begin_procedure(execution_checkpoint, monkeypatch):
     from lib import explorer_assignments
     from lib.common import Rejected
     from lib.state_storage import storage
-    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint, scope)
+    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint)
     monkeypatch.setattr(explorer_assignments.time, "time", lambda: 1000.0)
     timed_explorer(driver, task_id, stage, "expired-explorer", "1970-01-01T00:00:01+00:00")
     before = storage(driver.directory).read()
@@ -203,7 +190,7 @@ def test_expired_assignment_cannot_begin_procedure(execution_checkpoint, monkeyp
 def test_reserved_procedure_repair_receives_new_attempt_budget(execution_checkpoint, monkeypatch):
     from lib import explorer_assignments
     from lib.common import Rejected
-    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint, "task")
+    driver, task_id, stage = procedure_deadline_setup(execution_checkpoint)
     clock = [1000.0]
     monkeypatch.setattr(explorer_assignments.time, "time", lambda: clock[0])
     monkeypatch.setattr(explorer_assignments.time, "monotonic", lambda: clock[0])

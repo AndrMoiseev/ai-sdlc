@@ -42,12 +42,13 @@ def test_fresh_defaults_apply_and_repeat_keep(tmp_path, host):
     plan = core.make_plan(defaults(view))
     project = Path(view["project_root"])
     assert not list(project.iterdir()), "Inspect and plan must be read-only"
-    assert len(plan["operations"]) == 10
+    assert len(plan["operations"]) == 9
+    assert not any("final-verifier" in op["path"] for op in plan["operations"])
     explorer_operations = [op for op in plan["operations"] if "agents/sdd-explorer." in op["path"]]
     assert len(explorer_operations) == 1
     assert plan["operations"][-1]["path"] == ".sdd/settings.json"
     result = core.apply_plan(plan)
-    assert len(result["changed"]) == 10
+    assert len(result["changed"]) == 9
     shared, _ = core.shared_contract()
     roles, _, _ = shared.settings(project)
     assert set(roles) == set(shared.ROLES)
@@ -296,7 +297,7 @@ def test_cli_inspect_does_not_write_consumer(tmp_path):
                              "--host", "codex", "--user-agent-dir", str(tmp_path / "user")],
                             capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(json.loads(result.stdout)["result"]["roles"]) == 10
+    assert len(json.loads(result.stdout)["result"]["roles"]) == 9
     assert not list(project.iterdir())
 
 
@@ -312,7 +313,7 @@ def test_switch_host_keeps_role_names_and_codex_bytes(tmp_path):
     core.apply_plan(core.make_plan(request))
     assert before == {p: p.read_bytes() for p in (project / ".codex").rglob("*") if p.is_file()}
     assert (project / ".sdd/settings.json").read_bytes() == settings_before
-    assert len(list((project / ".claude/agents").glob("*.md"))) == 9
+    assert len(list((project / ".claude/agents").glob("*.md"))) == 8
 
 
 def test_unset_roles_cannot_silently_keep_inheritance(tmp_path):

@@ -101,8 +101,7 @@ def test_empty_and_completed_plans():
     # Layout phases alone must never synthesize execution or conclusion proof.
     assert data["explorer_assignments"] == []
     for task in data["tasks"]:
-        proof = task["verification"]["final"]
-        assert proof["execution"]["status"] == proof["conclusion"]["status"] == "missing"
+        assert task["verification"] == {}
     state["tasks"] = {}
     assert projection(state)["waves"] == []
 

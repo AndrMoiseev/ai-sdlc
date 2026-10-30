@@ -214,29 +214,6 @@ def test_conclusion_history_is_externalized_and_roundtrips(driver):
     assert packed["schema_version"] == 3
 
 
-def test_prepared_sync_read_fixtures_require_both_final_proofs():
-    """AC-explorer-visibility: deterministic fixture validation, not a sync agent eval."""
-    root = Path(__file__).resolve().parents[2] / "sdd-sync"
-    fixture = json.loads((root / "evals/explorer-read-fixtures.json").read_text(encoding="utf-8"))
-    assert fixture["criteria"] == ["AC-explorer-visibility"]
-    assert fixture["behavioral_result"] == "not_run"
-    assert {item["name"] for item in fixture["cases"]} == {"complete-pair", "command-only", "missing-execution", "stale-conclusion", "partial"}
-    for case in fixture["cases"]:
-        view = case["response"]["result"]
-        proof = view["tasks"]["TASK-one"]["verification"]["final"]
-        eligible = (view["status"] == "completed" and view["completion"]["result"] == "complete"
-                    and view["tasks"]["TASK-one"]["status"] == "accepted"
-                    and proof["execution"]["status"] == proof["conclusion"]["status"] == "passed")
-        assert eligible == case["expected_eligible"]
-        assert bool(proof["execution"]["references"]) == (proof["execution"]["status"] == "passed")
-        assert proof["execution"]["checks"][0]["status"] == proof["execution"]["status"]
-        assert bool(proof["conclusion"]["id"]) == (proof["conclusion"]["status"] != "missing")
-    manual = (root / "evals/manual.md").read_text(encoding="utf-8")
-    workflow = (root / "references/workflow.md").read_text(encoding="utf-8")
-    assert "explorer-read-fixtures.json" in manual and "AC-explorer-visibility" in manual
-    assert "verification_results" in workflow and "read_object" in workflow
-
-
 @pytest.mark.parametrize("replacement", ["successor", "new_assignment"])
 @pytest.mark.parametrize("clock", ["equal", "backward"])
 def test_latest_explorer_survives_sorted_storage_and_clock_changes(driver, monkeypatch, replacement, clock):
@@ -264,43 +241,3 @@ def test_latest_explorer_survives_sorted_storage_and_clock_changes(driver, monke
         current = view["explorer_assignments"][0]
         assert (current["role_id"], current["scope"]["task"], current["kind"], current["stage"], current["status"]) == (
             "a-new", "TASK-one", "research", None, "active")
-
-
-def assert_run_progress_uses_metadata(driver, monkeypatch, field):
-    """Shared memory contract; guard run logs and raw/report immutable objects."""
-    from lib import artifact_storage, check_evidence
-    from lib.dashboard import projection
-    from lib.state import read
-    from lib.state_objects import StateObjects
-    state = driver.state
-    objects = StateObjects(driver.directory)
-    raw_hashes = set()
-    for item in state["final_checks"]["evidence"]:
-        if item.get("procedure"):
-            continue
-        record = json.loads(artifact_storage.read_bytes(driver.directory / item["log"]))
-        for output in record["outputs"]:
-            summary = objects.get(output["summary"])
-            raw_hashes.update(ref["sha256"] for ref in summary.get("artifacts", {}).values())
-            raw_hashes.update(report["reference"]["sha256"] for report in summary.get("structured_reports", [])
-                              if report.get("reference"))
-    assert raw_hashes, "Fixture must contain actual recorded raw stream references"
-    original_read, original_get = artifact_storage.read_bytes, StateObjects.get
-    def metadata_only(path):
-        assert "/runs/" not in str(path).replace("\\", "/"), "Progress opened a run log"
-        return original_read(path)
-    def no_raw_object(self, reference):
-        assert reference["sha256"] not in raw_hashes, "Progress opened raw stream/report evidence"
-        result = original_get(self, reference)
-        assert not (isinstance(result, dict) and "identity" in result and "stream" in result), "Progress expanded raw evidence"
-        return result
-    def no_acceptance_audit(*args, **kwargs):
-        pytest.fail("Read projection invoked the raw acceptance validator")
-    monkeypatch.setattr(artifact_storage, "read_bytes", metadata_only)
-    monkeypatch.setattr(StateObjects, "get", no_raw_object)
-    monkeypatch.setattr(check_evidence, "validate", no_acceptance_audit)
-    compact_view, dashboard_view = compact(driver), projection(read(driver.directory))
-    assert compact_view[field] == dashboard_view[field]
-    assert compact_view[field]["execution"]["status"] == "passed"
-    assert compact_view[field]["conclusion"]["status"] == "passed"
-    assert compact_view[field]["confirmed_criteria"]

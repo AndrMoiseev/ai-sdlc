@@ -21,7 +21,7 @@ def check_progress(state, task, stage):
     from .common import digest
     from .explorer_assignments import basis
     from .verification_results import attempts
-    holder = task if task is not None else state.get("final_checks", {})
+    holder = task
     evidence = [item for item in holder.get("evidence", []) if item.get("stage", "final") == stage]
     results = [item for item in holder.get("verification_results", []) if item["stage"] == stage]
     result = results[-1] if results else None
@@ -46,7 +46,14 @@ def check_progress(state, task, stage):
     if not evidence and not result and not holder.get("procedures"):
         return {"execution": execution, "conclusion": conclusion}
     try:
-        current = basis(state, task, "checks", stage)
+        # Accepted tasks retain proof of their original source and approved basis,
+        # including after later tasks or an approved plan revision.
+        current = result["basis"] if task["status"] == "accepted" and result else basis(state, task, "checks", stage)
+        if (task["status"] != "accepted" and stage == "independent" and (task.get("worktree") or {}).get("integrated")
+                and task.get("transfer")):
+            # Display retained proof of the worktree source, even after cleanup.
+            # This metadata projection does not authorize transfer or acceptance.
+            current["source"] = task["transfer"]["snapshot"]
     except ValueError:
         execution["status"] = "unavailable"
         if result:
@@ -62,7 +69,7 @@ def check_progress(state, task, stage):
         if pending and pending.get("stage", "final") == stage:
             status, reason = "pending", "procedure_pending"
         elif item is None:
-            status, reason = "missing", "final_evidence_missing" if task is None else "evidence_missing"
+            status, reason = "missing", "evidence_missing"
         else:
             role = state["roles"].get(item["role_id"], {})
             status = item["outcome"]
@@ -93,9 +100,7 @@ def task_verification(state, task):
         stages.add("baseline")
     stages.update(item["stage"] for item in task.get("verification_results", []))
     stages.update(item["stage"] for item in task.get("procedures", {}).values())
-    if task["status"] == "accepted" and state["basis"].get("work_kind") != "refactoring":
-        stages.add("final")
-    return {stage: check_progress(state, task, stage) for stage in sorted(stages)}
+    return {stage: check_progress(state, task, stage) for stage in sorted(stages - {"final"})}
 
 
 def compact(state):
@@ -113,12 +118,6 @@ def compact(state):
         for key, role in state["roles"].items() if role["status"] == "active"
     }
     whole = {}
-    if state["basis"].get("work_kind") == "refactoring":
-        from .final_checks import progress
-        whole = {"whole_result": progress(state)}
-    elif state.get("final_checks"):
-        from .final_checks import progress
-        whole = {"final_project_checks": progress(state)}
     return {
         **whole,
         "view": "compact", "view_version": 1,

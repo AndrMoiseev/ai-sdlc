@@ -77,10 +77,11 @@ their objects intact and obtain fresh evidence through the supported workflow.
 Explorer assignments remain in role records, including actual launch, basis,
 successor lineage and consumed batch deadline. `registered_revision` records the
 role registration event's execution revision, so assignment chronology survives
-sorted object keys, equal timestamps and wall-clock changes. Task and final
+sorted object keys, equal timestamps and wall-clock changes. Task
 `verification_results` are separate immutable history collections. Schema 3 stores
 them through the same object adapter as evidence; no conversion is performed.
-Resume preserves both histories. A revised run changes their applicability without
+Resume preserves these histories. Accepted tasks retain their original proof;
+revised unfinished work needs new evidence without
 rewriting historical outcomes or synthesizing conclusions from successful logs.
 
 Use `read` with `view: "compact"` for control decisions and `view: "full"` to see
@@ -93,8 +94,7 @@ Task candidate artifacts and references are no longer written. Historical candid
 
 Compact and dashboard show the latest explorer assignment per scope/kind/stage
 and stage-specific `execution`/`conclusion` statuses. `tasks[id].verification`
-contains task stages; `whole_result` or `final_project_checks` contains run-final
-statuses. `completion` exposes the saved final result and HEAD. These are read
+contains task stages. `completion` exposes the saved final result and HEAD. These are read
 metadata projections, not a live raw-evidence audit or authorization gate.
 Per-check statuses and criterion gaps come from recorded outcomes, pending
 procedures and current basis. They do not reopen run logs, raw streams or reports.

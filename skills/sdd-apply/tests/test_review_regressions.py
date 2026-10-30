@@ -17,13 +17,9 @@ def accepted_worktree(basis, tmp_path):
     d.send('transfer')
     d.send('integrate')
     d.send('candidate')
-    d.role('integration-verifier', 'verifier')
-    d.run_checks("integration")
-    d.conclude(role="integration-verifier")
-    d.review('integration-reviewer')
     d.send('commit')
     d.send('accept')
-    for name in ['verifier', 'integration-verifier']:
+    for name in ['verifier']:
         d.send('role_result', {'role_id': name, 'result': 'finished', 'trace': 'synthetic'})
     return d, wt
 
@@ -110,14 +106,13 @@ def test_ownership_path_alias_rejected(basis, project):
     with pytest.raises(ValueError, match='canonical'):
         driver.send('start', {'role_id': 'author', 'paths': ['./check.py']})
 
-def test_final_checks_cannot_accept_uncommitted_implementation(execution_checkpoint):
+def test_completion_cannot_accept_uncommitted_implementation(execution_checkpoint):
     driver = execution_checkpoint("accepted")
     project = Path(driver.state["basis"]["project_root"])
     committed = repository(project).content('HEAD', 'result.txt')
     (project / 'result.txt').write_text('different uncommitted implementation')
-    driver.role('final', 'final_verifier')
-    with pytest.raises(ValueError, match='before verification|changed'):
-        driver.run_checks("final")
+    result = driver.send("finalize", task_id=None)
+    assert result["result"] == "partial"
     assert repository(project).content('HEAD', 'result.txt') == committed
     assert committed.decode().splitlines() == ['verified result']
 

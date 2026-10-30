@@ -18,12 +18,6 @@ def projection(state):
     for item in tasks:
         item["verification"] = task_verification(state, state["tasks"][item["id"]])
     whole = {"explorer_assignments": assignments(state)}
-    if state.get("work_kind", state.get("basis", {}).get("work_kind")) == "refactoring":
-        from .final_checks import progress
-        whole["whole_result"] = progress(state)
-    elif state.get("final_checks"):
-        from .final_checks import progress
-        whole["final_project_checks"] = progress(state)
     return {**whole, "schema_version": 1, **({"work_kind": state["work_kind"]} if "work_kind" in state else {}), "change_id": state["change_id"], "run_id": state["run_id"], "revision": state["revision"], "updated_at": state["updated_at"], "status": state["status"], "accepted": sum(t["status"] == "accepted" for t in tasks), "total": len(tasks), "tasks": tasks, "waves": waves, "blockers": state["blockers"], "next": available(state), "final": state["final"], "technical_debt": technical_debt(state)}
 
 
@@ -66,12 +60,6 @@ def render(directory):
     for role in data["explorer_assignments"]:
         summary.append(f"- Explorer {role['role_id']}: scope {role['scope']['task'] or 'run'}; {role['kind']}; stage {role['stage'] or 'research'}; {role['status']}")
     summary.extend(["", "Blockers: " + json.dumps(data["blockers"], ensure_ascii=False)])
-    if "whole_result" in data or "final_project_checks" in data:
-        whole = data.get("whole_result", data.get("final_project_checks"))
-        label = "Whole criteria confirmed: " if "whole_result" in data else "Final project checks; criteria confirmed: "
-        summary.extend(["", label + ", ".join(whole["confirmed_criteria"]),
-                        "Gaps: " + json.dumps(whole["gaps"], ensure_ascii=False),
-                        "Retired checks and reasons: " + json.dumps(whole["retired_checks"], ensure_ascii=False)])
     debt = ["# Technical debt", "", "Recorded review findings; fixes require explicit user approval after plan completion.", ""]
     for finding in data["technical_debt"]:
         debt.extend([f"## {finding['finding_id']}", "", f"Path: {finding['path']}",
@@ -88,10 +76,6 @@ def render(directory):
     static = '<section><h2>Run explorers</h2>' + ''.join(
         f'<p>{escape(role["role_id"])} · {escape(role["stage"] or "research")} · {escape(role["status"])}</p>'
         for role in run_roles) + '</section>' + static
-    if "whole_result" in data or "final_project_checks" in data:
-        whole = data.get("whole_result", data.get("final_project_checks"))
-        label = "Whole result" if "whole_result" in data else "Final project checks"
-        static = '<section><h2>' + label + '</h2><pre>' + escape(json.dumps(whole, ensure_ascii=False, indent=2)) + '</pre></section>' + static
     html = template.replace("__SNAPSHOT__", serialized).replace("__STATIC_TASKS__", static).replace("__CHANGE__", escape(data["change_id"])).replace("__SAVED_AT__", escape(data["updated_at"]))
     atomic(directory / "dashboard.html", html)
     return {"dashboard": str(directory / "dashboard.html"), "summary": str(directory / "summary.md"), "technical_debt": str(directory / "technical-debt.md"), "revision": data["revision"]}

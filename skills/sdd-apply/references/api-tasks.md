@@ -7,14 +7,17 @@ or candidate work and [review policy](review-policy.md) before acting on finding
 
 Role registration attests an actual launch; role_result only ends that role's
 work. Review_start reserves a round before review; review_result returns the
-separate test_integrity assessment. Acceptance requires current execution evidence
-and a passed `verification_result` on the same basis, passing review and a confirmed
-task commit.
+separate test_integrity assessment. Acceptance requires valid worktree execution
+evidence and a passed `verification_result` on that basis, passing worktree review,
+an intact recorded transfer and a confirmed integration commit.
 
 `candidate` commits the stopped executor's owned changes locally before checks
 and review. A candidate commit is an unaccepted result. Execution uses
-task worktrees. After transfer, freeze and verify a new integration commit;
-`commit` confirms that reviewed commit and `accept` records task acceptance.
+task worktrees. After transfer, `candidate` freezes the recorded integration tree
+and advances the task to `committing`. `commit` confirms that integration commit
+and `accept` records task acceptance. These gates validate the unchanged worktree
+evidence and transfer integrity; they do not execute checks or request another
+verifier conclusion or code review. Keep evidence bound to its original commit.
 Use [candidate identity](api-checks.md#candidate-identity) for the commit transition and its scope.
 
 For an approved refactoring check replacement, use the staged registry contract

@@ -90,14 +90,7 @@ class AcceptanceDriver(Driver):
                                       "description": "Assert the exact local result; retain the existing API regression"})
 
     def integrate_verified(self):
-        self.send("transfer")
-        self.send("integrate")
-        self.send("candidate")
-        self.role("integration-verifier", "verifier")
-        result = self.run_checks("integration")
-        if result["outcome"] == "passed":
-            self.conclude(role="integration-verifier")
-        return result
+        return self.integrate()
 
     def corrupt(self, mutate):
         """Inject a damaged persisted input, not an always-rejecting route stub."""

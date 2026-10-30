@@ -32,8 +32,8 @@
                 "work": "order-export",
                 "project": "/synthetic/project"
               },
-              "role_id": "final-explorer",
-              "stage": "final",
+              "role_id": "task-explorer",
+              "stage": "independent",
               "successor_of": null,
               "kind": "checks",
               "status": "finished"
@@ -52,13 +52,13 @@
               "test_repair_cycles_started": 0,
               "review_rounds_completed": 2,
               "verification": {
-                "final": {
+                "independent": {
                   "execution": {
                     "references": [
                       {
                         "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "check_id": "plan-1",
-                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                        "log": "runs/synthetic/tasks/TASK-one/1/independent.json"
                       }
                     ],
                     "status": "passed",
@@ -76,8 +76,8 @@
                   },
                   "conclusion": {
                     "status": "passed",
-                    "id": "final-conclusion",
-                    "role_id": "final-verifier"
+                    "id": "task-conclusion",
+                    "role_id": "task-verifier"
                   }
                 }
               },
@@ -117,8 +117,8 @@
                 "work": "order-export",
                 "project": "/synthetic/project"
               },
-              "role_id": "final-explorer",
-              "stage": "final",
+              "role_id": "task-explorer",
+              "stage": "independent",
               "successor_of": null,
               "kind": "checks",
               "status": "finished"
@@ -137,13 +137,13 @@
               "test_repair_cycles_started": 0,
               "review_rounds_completed": 2,
               "verification": {
-                "final": {
+                "independent": {
                   "execution": {
                     "references": [
                       {
                         "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "check_id": "plan-1",
-                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                        "log": "runs/synthetic/tasks/TASK-one/1/independent.json"
                       }
                     ],
                     "status": "passed",
@@ -202,8 +202,8 @@
                 "work": "order-export",
                 "project": "/synthetic/project"
               },
-              "role_id": "final-explorer",
-              "stage": "final",
+              "role_id": "task-explorer",
+              "stage": "independent",
               "successor_of": null,
               "kind": "checks",
               "status": "finished"
@@ -222,7 +222,7 @@
               "test_repair_cycles_started": 0,
               "review_rounds_completed": 2,
               "verification": {
-                "final": {
+                "independent": {
                   "execution": {
                     "references": [],
                     "status": "missing",
@@ -240,8 +240,8 @@
                   },
                   "conclusion": {
                     "status": "passed",
-                    "id": "final-conclusion",
-                    "role_id": "final-verifier"
+                    "id": "task-conclusion",
+                    "role_id": "task-verifier"
                   }
                 }
               },
@@ -281,8 +281,8 @@
                 "work": "order-export",
                 "project": "/synthetic/project"
               },
-              "role_id": "final-explorer",
-              "stage": "final",
+              "role_id": "task-explorer",
+              "stage": "independent",
               "successor_of": null,
               "kind": "checks",
               "status": "finished"
@@ -301,13 +301,13 @@
               "test_repair_cycles_started": 0,
               "review_rounds_completed": 2,
               "verification": {
-                "final": {
+                "independent": {
                   "execution": {
                     "references": [
                       {
                         "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "check_id": "plan-1",
-                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                        "log": "runs/synthetic/tasks/TASK-one/1/independent.json"
                       }
                     ],
                     "status": "passed",
@@ -325,8 +325,8 @@
                   },
                   "conclusion": {
                     "status": "stale",
-                    "id": "final-conclusion",
-                    "role_id": "final-verifier"
+                    "id": "task-conclusion",
+                    "role_id": "task-verifier"
                   }
                 }
               },
@@ -366,8 +366,8 @@
                 "work": "order-export",
                 "project": "/synthetic/project"
               },
-              "role_id": "final-explorer",
-              "stage": "final",
+              "role_id": "task-explorer",
+              "stage": "independent",
               "successor_of": null,
               "kind": "checks",
               "status": "finished"
@@ -386,13 +386,13 @@
               "test_repair_cycles_started": 0,
               "review_rounds_completed": 2,
               "verification": {
-                "final": {
+                "independent": {
                   "execution": {
                     "references": [
                       {
                         "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "check_id": "plan-1",
-                        "log": "runs/synthetic/tasks/TASK-one/1/final.json"
+                        "log": "runs/synthetic/tasks/TASK-one/1/independent.json"
                       }
                     ],
                     "status": "passed",
@@ -410,8 +410,8 @@
                   },
                   "conclusion": {
                     "status": "passed",
-                    "id": "final-conclusion",
-                    "role_id": "final-verifier"
+                    "id": "task-conclusion",
+                    "role_id": "task-verifier"
                   }
                 }
               },

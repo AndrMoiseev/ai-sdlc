@@ -117,10 +117,13 @@ def prepare_state(request):
 @pytest.fixture(autouse=True)
 def shared_cli(monkeypatch):
     from lib import inputs
-    from shared_commands import spec_call, spec_modules
+    from shared_commands import spec_call, spec_modules, source_module
     original = inputs.spec_call
     monkeypatch.setattr(inputs, "spec_call", spec_call)
     monkeypatch.setattr(inputs, "spec_modules", spec_modules)
+    # Modules imported during collection retain the original spec_modules
+    # callable, whose globals still resolve inputs.load at call time.
+    monkeypatch.setattr(inputs, "load", source_module)
     return original
 
 
@@ -345,17 +348,6 @@ class Driver:
             "criteria_results": criteria_results, "limitations": [], "trace": "synthetic-unit-test conclusion"},
             task_id=selected_task)
 
-    def final_conclude(self, task_id="current", outcome="passed"):
-        """Separate synthetic final assessment; never inferred by production code."""
-        selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
-        ident = f"final-verifier-{self.number + 1}"
-        self.send("role_register", {"role_id": ident, "kind": "final_verifier", "context_id": ident,
-            "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test",
-            "capabilities": {"fresh_context": True}}, task_id=selected_task)
-        result = self.conclude(role=ident, stage="final", outcome=outcome, task_id=selected_task)
-        self.send("role_result", {"role_id": ident, "result": "DONE",
-                                 "trace": "synthetic final assessment complete"}, task_id=selected_task)
-        return result
 
     def review(self, role="reviewer", verdict="pass"):
         self.role(role, "reviewer")
@@ -365,15 +357,7 @@ class Driver:
     def integrate(self, prefix=""):
         self.send("transfer")
         self.send("integrate")
-        self.send("candidate")
-        verifier = prefix + "integration-verifier"
-        self.role(verifier, "verifier")
-        result = self.run_checks("integration")
-        assert result["outcome"] == "passed"
-        self.conclude(role=verifier)
-        self.review(prefix + "integration-reviewer")
-        self.send("role_result", {"role_id": verifier, "result": "DONE", "trace": "unit-test"})
-        return result
+        return self.send("candidate")
 
 
 @pytest.fixture
@@ -399,7 +383,10 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         (driver.root / "result.txt").write_text("verified result\n")
         driver.freeze()
         yield "frozen", driver
-        assert driver.verify()["outcome"] == "passed"
+        driver.role("verifier", "verifier")
+        assert driver.run_checks("independent")["outcome"] == "passed"
+        yield "executed", driver
+        driver.conclude()
         yield "verified", driver
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
@@ -418,4 +405,4 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
 
 @pytest.fixture
 def execution_checkpoint(execution_checkpoints, repository_backend, state_backend):
-    return lambda stage: execution_checkpoints[stage].restore(repository_backend, state_backend)
+    return lambda stage, **options: execution_checkpoints[stage].restore(repository_backend, state_backend, **options)

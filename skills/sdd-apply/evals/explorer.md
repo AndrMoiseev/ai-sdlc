@@ -1,8 +1,8 @@
-# Explorer handoff: prepared final evaluation
+# Explorer handoff: prepared evaluation
 
 This procedure is prepared, not run. Execute actual behavioral, trigger, control
 or repeated agent evaluations only after a separate explicit user instruction
-for final evaluation. Plan approval and deterministic fixture validation do not
+for this evaluation. Plan approval and deterministic fixture validation do not
 authorize them. Without that instruction report **not run; agent behavior not
 confirmed**. The owning criterion is AC-explorer-workflow; other Explorer criteria
 retain their original task owners.

@@ -20,55 +20,10 @@ def reference(value):
             "kind": "object" if isinstance(value, dict) else "array" if isinstance(value, list) else "string"}
 
 
-def historical_context(state, task, record, evidence, directory):
-    """Inspect accepted final history without granting current final acceptance."""
-    from . import state_history
-    objects = StateObjects(directory)
-    require(task["status"] == "accepted" and record.get("stage") == "final",
-            "evidence_basis", "Only accepted task final history can retain its original run")
-    entry = state_history.lookup(objects, state["event_index"], record.get("check_run_id"))
-    require(isinstance(entry, dict), "evidence_basis", "Original check run is absent from execution history")
-    event, result = entry.get("event"), entry.get("result")
-    require(isinstance(event, dict) and isinstance(result, dict)
-            and isinstance(event.get("payload"), dict)
-            and isinstance(result.get("summary"), dict)
-            and type(entry.get("revision")) is int,
-            "evidence_basis", "Original check run history is malformed")
-    require(entry.get("fingerprint") == digest(event) and 0 < entry["revision"] <= state["revision"]
-            and event.get("type") == "check_run" and event.get("run_id") == record.get("run_id")
-            and event.get("task_id") == task["plan"]["id"]
-            and event["payload"].get("role_id") == record.get("role_id")
-            and event["payload"].get("stage") == "final"
-            and result.get("log") == evidence["log"]
-            and result.get("summary", {}).get("reference") == record.get("summary"),
-            "evidence_basis", "Final evidence must match its authenticated original check run")
-    original_run = record["run_id"]
-    admitted_run = state["run_id"]
-    if admitted_run != original_run:
-        for revision in state_history.entries(objects, state):
-            revision_event = revision.get("event")
-            require(isinstance(revision_event, dict), "evidence_basis", "Admission history event is malformed")
-            if revision_event.get("type") != "revised_plan":
-                continue
-            admitted = revision.get("result")
-            require(isinstance(admitted, dict), "evidence_basis", "Admission history result is malformed")
-            if admitted.get("run_id") != admitted_run:
-                continue
-            require(isinstance(admitted.get("preserved_tasks"), list)
-                    and isinstance(admitted.get("previous_run"), str) and bool(admitted["previous_run"])
-                    and task["plan"]["id"] in admitted["preserved_tasks"],
-                    "evidence_basis", "Plan revision did not preserve this accepted task")
-            admitted_run = admitted["previous_run"]
-            if admitted_run == original_run:
-                break
-        require(admitted_run == original_run, "evidence_basis", "Historical run is not an admitted predecessor")
-    return original_run
-
-
 def command_cwd(state, record, check):
     task = state["tasks"].get(record["task_id"]) if record["task_id"] else None
     worktree = task.get("worktree") if task else None
-    root = Path(worktree["path"] if worktree and not worktree.get("integrated")
+    root = Path(worktree["path"] if worktree and record["stage"] in {"baseline", "self", "independent"}
                 else state["basis"]["project_root"])
     run = check["setup"] or check["run"]
     relative = run.get("cwd", check.get("cwd", "."))

@@ -9,7 +9,6 @@
     "sdd-spec.editorial_reviewer": {"agent": "sdd-editorial-reviewer", "codex": {"model": "gpt-6.1-sol", "effort": "medium"}, "claude-code": {"model": "sonnet", "effort": "high"}},
     "sdd-apply.executor": {"agent": "sdd-executor", "codex": {"model": "gpt-6.1-sol", "effort": "high"}, "claude-code": {"model": "sonnet", "effort": "high"}},
     "sdd-apply.verifier": {"agent": "sdd-verifier", "codex": {"model": "gpt-6-luna", "effort": "high"}, "claude-code": {"model": "sonnet", "effort": "high"}},
-    "sdd-apply.reviewer": {"agent": "sdd-reviewer", "codex": {"model": "gpt-6-astra", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}},
-    "sdd-apply.final_verifier": {"agent": "sdd-final-verifier", "codex": {"model": "gpt-6.1-sol", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}}
+    "sdd-apply.reviewer": {"agent": "sdd-reviewer", "codex": {"model": "gpt-6-astra", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}}
   }
 }

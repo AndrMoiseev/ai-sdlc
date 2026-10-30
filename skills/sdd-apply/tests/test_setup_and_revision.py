@@ -43,7 +43,7 @@ def test_review_procedure_extension_requires_explicit_kind(execution_checkpoint)
     assert storage(driver.directory).read() == before
 
 
-@pytest.mark.parametrize("stage", ["baseline", "self", "independent", "final"])
+@pytest.mark.parametrize("stage", ["baseline", "self", "independent"])
 def test_missing_command_location_blocks_even_when_command_passes(project, stage):
     # A broad command can succeed after its intended test has disappeared.
     reapprove(project, lambda t: t["verification"][0].update(run={"command": [sys.executable, "-B", "-c", "pass"]}))
@@ -58,22 +58,9 @@ def test_missing_command_location_blocks_even_when_command_passes(project, stage
         outputs = d.task["baseline_checks"]["outputs"]
     else:
         d.start()
-        if stage == "final":
-            (d.root / "result.txt").write_text("implemented\n")
-            d.freeze()
-            d.verify()
-            d.review()
-            d.integrate()
-            d.send("commit")
-            d.send("accept")
-            d.role("final", "final_verifier")
         (d.root / "check.py").unlink()
         if stage == "self":
             d.freeze()
-            result = d.run_checks(stage)
-        elif stage == "final":
-            stage_files(project, "check.py")
-            commit(project, "Final HEAD has missing verification location")
             result = d.run_checks(stage)
         else:
             d.freeze()

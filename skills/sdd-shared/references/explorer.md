@@ -77,7 +77,6 @@ result, approval or acceptance.
 An explorer context stays separate from authors and substantive verifiers or
 reviewers. The same task may reuse it for research, baseline, self, independent
 and integration assignments with the same profile and a new current basis. Changed
-inputs require new check evidence. Another task, a changed profile and final each
-require a fresh explorer. Final also requires a separate fresh final_verifier.
+inputs require new check evidence. Another task or a changed profile requires a fresh explorer.
 The calling workflow enforces these boundaries and retains existing repair/retry
 budgets; new assignments and contexts do not reset a whole-suite deadline.
