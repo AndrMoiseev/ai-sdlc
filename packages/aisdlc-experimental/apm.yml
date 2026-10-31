@@ -2,8 +2,4 @@ name: aisdlc-experimental
 version: "0.1.0"
 description: Experimental skills for ai-sdlc.
 dependencies:
-  apm:
-    - path: ../../skills/code-that-fits-in-your-head
-    - path: ../../skills/sdd-kb
-    - CodeAlive-AI/ai-driven-development/skills/ubiquitous-language
-    - CodeAlive-AI/ai-driven-development/skills/fpf-problem-solving
+  apm: []
