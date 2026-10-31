@@ -57,7 +57,7 @@ def test_required_resources_ship_together():
     files += [f"references/{name}.md" for name in
               ("document-format", "document-format-normative", "document-format-tasks",
                "document-format-discussion", "document-format-review", "discussion",
-               "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency",
+               "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "premortem",
                "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation",
                "resume-recovery", "checkpoint", "simplicity", "simplicity-instructions", "simplicity-origin")]
     for file in files:
