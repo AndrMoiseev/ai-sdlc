@@ -1,4 +1,4 @@
-# Guidelines — Task Routing for `code-that-fits-in-your-head`
+# Guidelines — Task Routing for `sdd-code-design`
 
 This is the routing layer for the skill. Find the user's task or symptom below, then load **only** the specific files listed.
 
