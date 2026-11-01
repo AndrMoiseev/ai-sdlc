@@ -120,7 +120,7 @@ def test_independent_run_catches_defect(execution_checkpoint):
     driver.freeze()
     assert driver.verify()["outcome"] == "failed"
     assert driver.task["last_check_failed"]
-    assert driver.task["test_repair_cycles_started"] == 0
+    assert driver.task["test_repair_cycles_started"] == 1
     with pytest.raises(ValueError, match="reserve"):
         driver.verify()
     driver.role("reviewer", "reviewer")

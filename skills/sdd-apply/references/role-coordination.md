@@ -34,7 +34,11 @@ attestations and test stubs never count as real independent work.
 
 ## Explorer dispatch
 
-Before baseline, self or independent checks, prepare a checks assignment
+Executor self-checks are local commands during implementation and repair. They
+need no Explorer assignment or repair event and do not consume the failure budget.
+The dispatch rules below govern registered Explorer checks.
+
+Before registered baseline, self or independent checks, prepare a checks assignment
 with the exact full registry IDs, registry revision and current basis. Use
 `lib.explorer_assignments.basis(state, task, "checks", stage)` against the validated
 saved state to construct the API basis; the engine recomputes it at registration

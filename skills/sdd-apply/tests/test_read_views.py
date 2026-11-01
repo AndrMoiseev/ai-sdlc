@@ -190,7 +190,8 @@ def test_execution_and_conclusion_are_visible_separately_without_raw_logs(execut
     driver.conclude(role="assessment")
     original = artifact_storage.read_bytes
     def no_raw_logs(path):
-        assert "/runs/" not in str(path).replace("\\", "/"), "Projection opened an execution log"
+        relative = Path(path).relative_to(driver.directory)
+        assert relative.parts[0] != "runs", "Projection opened an execution log"
         return original(path)
     monkeypatch.setattr(artifact_storage, "read_bytes", no_raw_logs)
     view = compact(driver)

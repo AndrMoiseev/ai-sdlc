@@ -13,7 +13,9 @@ candidate and direct Explorer to run the full project test and static-check set.
 Only after all required checks pass, launch both review lenses in parallel in new,
 separate fresh contexts. Each lens retains its assigned responsibility.
 
-Submit `repair` before fixes or a no-change retry after a failing mandatory test/linter. Include reason and reproducible evidence; for self-check failure explicitly include `test_failure: true`. One cycle covers the work until the next complete assigned check set. Reserve before work, retain the active cycle through interruption, and let the script close it on the check result. An unavailable runner leaves the cycle unfinished and blocks; do not retry unchanged infrastructure automatically.
+During implementation and repair, the executor runs local tests and fixes failures as often as needed. Self-checks do not consume the orchestrator's budget or require `repair`.
+
+After executor completion and candidate freeze, a failed independent check batch increases the task counter once, regardless of how many checks failed. Submit `repair` with the reason and recorded evidence to reopen the executor before fixes or a no-change retry. This event does not increase the counter. Retain active repair through interruption; the next complete independent check result closes it. An unavailable runner blocks dependent work without consuming a failure attempt; restore its availability before continuing.
 
 For an integrated or accepted task, `repair` preserves the previous worktree in
 history and clears its active assignment. Create a new task worktree from current
@@ -28,11 +30,11 @@ candidate commit labelled with the repaired task, then an integration candidate
 commit. This preserves task attribution even when other tasks have advanced
 HEAD. Fresh tasks still need actual owned changes for acceptance.
 
-There are five test-repair cycles per TASK-ID across self, independent and legacy integration stages. Initial implementation and the first failure consume no repair cycle. A successful fifth cycle can proceed. A failed fifth cycle or need for a sixth blocks the whole run. Returning to the same executor, a replacement role, changed phase or new session does not reset counters.
+There are five failed independent check batches per TASK-ID. The first failed batch counts as one; the fifth blocks the whole run before another repair. Successful independent checks, executor self-checks, baseline failures, unavailable checks and replay of a recorded result do not increase this counter. Returning to the same executor, a replacement role, changed phase or new session does not reset it. The stored `test_repair_cycles_started` field records this count; `repair` only reopens work.
 
 There are three review rounds per TASK-ID, counting the first and reviews of repairs, including defects discovered after acceptance. Transfer to the execution branch does not require another code review or consume a round. `review_start` reserves before substantive review. Continue an interrupted round on the unchanged candidate without a second reservation; a repaired candidate or new substantive review requires a new round. The third passing round can proceed. A blocking third round or need for a fourth blocks the whole run. Test retries and review rounds are separate budgets.
 
-Before handing work back, confirm the reservation succeeded. Reuse the task's executor while its context is available; otherwise register a fresh successor with partial work, remaining AC, decisions and rejected approaches. End writing with `role_result`, submit `candidate` to commit the repaired result, then obtain current checks and review. Keep previous candidate commits and logs as history. A passing old review cannot accept a changed candidate.
+Before handing work back, confirm `repair` succeeded. Reuse the task's executor while its context is available; otherwise register a fresh successor with partial work, remaining AC, decisions and rejected approaches. End writing with `role_result`, submit `candidate` to commit the repaired result, then obtain current checks and review. Keep previous candidate commits and logs as history. A passing old review cannot accept a changed candidate.
 
 For `review_limit_reached` or `test_repair_limit_reached`, preserve active work and reconcile effects already in flight. Report TASK-ID, limit/usage, remaining errors or findings, changes attempted, raw check evidence and the rest of the plan's state. Request one concrete option: a stated finite extension, return to sdd-spec, or stop with a partial result. Explain that this skill's approved budget contract requires that decision. Only `budget_extend` with the user's recorded source/text and increased finite limit permits additional work; general autonomy and elapsed time do not extend a budget.
 
