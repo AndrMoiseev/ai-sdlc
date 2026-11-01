@@ -1,6 +1,6 @@
 # Project subagent selection
 
-Before a new explorer, executor, verifier or reviewer launch, read
+Before a new explorer, executor or reviewer launch, read
 [the shared subagent contract](../../sdd-shared/references/subagents.md) in the
 sibling `sdd-shared` package. If it is missing, stop with a critical dependency error.
 That shared contract defines `.sdd/settings.json`, the role registry, host behavior,
@@ -28,14 +28,12 @@ not the task worktree. It returns launch parameters and evidence without spawnin
 Pass the complete result as `agent_selection` when registering the observed launch.
 Configuration errors or an unavailable requested launch capability block that role.
 
-Verifier/reviewer context sharing requires equal resolved launch identities. Compare
-their selections before spawning; differing models, effort or native agent definitions
-require separate contexts. Registration checks this invariant as well.
-Claude Code native-agent selections always use separate verifier/reviewer contexts;
-their name-only catalog cannot prove equal definition versions. Existing
-registrations without selection evidence remain readable; with settings.json present,
-new registrations require selection evidence. Interrupted launches with changed source
-hashes require reconciliation, not invented attestations or duplicate writers.
+Both required lenses resolve `sdd-apply.reviewer`. Each gets its own fresh context,
+including when selections are identical. Register exactly one `lens_id` per reviewer:
+`verification` or `code`. Launch them in parallel only after the full project tests
+and static checks pass. Settings select a profile, not permission to share contexts.
+With settings.json present, new registrations require selection evidence. Interrupted
+launches with changed source hashes require reconciliation.
 
 Repair and continuation retain the running executor's selection. Reconfigure only a
 fresh successor through role registration and resume reconciliation.

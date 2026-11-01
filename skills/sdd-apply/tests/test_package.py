@@ -29,18 +29,23 @@ def test_explorer_execution_instructions_match_role_api():
     serialized = json.dumps(registration)
     assert "explorer" in serialized and "assignment" in serialized
     flow = (ROOT / "flows/execute-parallel.md").read_text()
-    verifier = (ROOT / "agents/verifier.md").read_text()
-    assert "task explorer" in flow and "raw evidence references" in flow
-    assert "machine summary and raw evidence references" in verifier
-    assert "procedure_begin/result" in verifier
+    reviewer = (ROOT / "agents/reviewer.md").read_text()
+    verification = (ROOT / "references/verification-lens.md").read_text()
+    code = (ROOT / "references/code-lens.md").read_text()
+    assert registration["choices"]["kind"] == ["executor", "reviewer", "explorer"]
+    assert set(registration["choices"]["lens_id"]) == {"verification", "code"}
+    assert not (ROOT / "agents/verifier.md").exists()
+    assert "verification-lens.md" in reviewer and "code-lens.md" in reviewer
+    assert "machine summary and raw evidence references" in verification
+    assert "Execute no checks" in code
     conclusion = describe(event="verification_result")
     assert conclusion["choices"]["stage"] == ["independent", "integration"]
     assert conclusion["task_id"] == "TASK-ID"
     final_flow = (ROOT / "flows/finalize.md").read_text()
     assert "accepted" in final_flow and "finalize" in final_flow
-    assert "verification_result" in flow and "checks_extend.verification_result" in flow
-    assert "`criterion_id`" in verifier and "`check_request`" in verifier
-    assert "read_object" in verifier
+    assert "verification_result" in flow and "lens_id: code" in flow
+    assert "`criterion_id`" in verification and "`check_request`" in verification
+    assert "read_object" in verification
     assert (ROOT.parent / "sdd-shared/agents/explorer.md").is_file()
 
 
@@ -87,6 +92,6 @@ def test_prepared_explorer_scenarios_have_consistent_inputs():
         assert counts["collected"] is None and counts["xpassed"] is None
     assert [(cases[name]["expected"]["exit_code"],
              cases[name]["expected"]["criterion_outcome"],
-             cases[name]["expected"]["review_eligible"]) for name in
+             cases[name]["expected"]["acceptance_eligible"]) for name in
             ("ordinary-success", "verbose-failure", "mandatory-skip")] == [
-                (0, "passed", True), (1, "failed", False), (0, "unavailable", False)]
+                (0, "passed", True), (1, "not_assessed", False), (0, "unavailable", False)]

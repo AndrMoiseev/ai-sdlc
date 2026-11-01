@@ -196,7 +196,9 @@ its single-key `run`. Unknown types raise `ValueError`. Both document parsers an
 apply registration consume this contract; API and document versions are unchanged.
 
 The calling workflow assigns deterministic execution to explorer and keeps
-criterion assessment separate. For behavioral/manual checks, including explicitly
-typed commands, apply retains task verifier attestation. Shared summaries
+criterion assessment separate. The shared format names all three kinds, but
+sdd-apply accepts only deterministic checks and rejects manual/behavioral checks,
+including typed commands. Its verification review lens assesses saved evidence;
+reviewers never execute checks. Shared summaries
 preserve primary evidence and unknown counts; they neither grant execution
 permission nor establish acceptance. See [assignment and results](explorer.md).

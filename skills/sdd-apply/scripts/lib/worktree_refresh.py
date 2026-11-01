@@ -43,14 +43,14 @@ def finish(state, task, directory, effect, journal, resolution=None):
         "worktree": deepcopy(old), "refresh_event": journal["request"]["event"]["event_id"],
         "transfer": task.get("transfer"),
         "baseline_checks": task.get("baseline_checks"), "start_snapshot": task.get("start_snapshot"),
-        "active_review": task["active_review"], "active_reviewer": task.get("active_reviewer"),
+        "active_review": task["active_review"], "active_reviewers": task.get("active_reviewers"),
         "retained": old["path"],
     })
     task["worktree"] = {**old, "path": new, "base": saved["base"], "branch": saved["branch"],
                         "snapshot": journal["baseline"], "integrated": False}
     task["worktree"].pop("inventory", None)
     task["start_snapshot"] = journal["baseline"]
-    for field in ("transfer", "freeze_base", "active_reviewer", "candidate_commit"):
+    for field in ("transfer", "freeze_base", "active_reviewers", "review_basis", "candidate_commit"):
         task.pop(field, None)
     task["active_review"] = None
     if resolution:

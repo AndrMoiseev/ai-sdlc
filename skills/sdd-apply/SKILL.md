@@ -25,8 +25,8 @@ Before coordinating workers, read the [shared coordination contract](../sdd-shar
 ## Skill development acceptance
 
 Use deterministic tests for task acceptance when changing skills. Run behavioral,
-trigger and pressure evals only when explicitly authorized and assigned to a task
-or a separate evaluation request. There is no automatic final evaluation phase.
+trigger and pressure evals only as separately authorized evaluation work outside
+this task flow. There is no automatic final evaluation phase.
 
 ## Route
 
@@ -43,8 +43,12 @@ When refactoring changes module boundaries and their tests, apply the
 
 ## Execution and assessment
 
-Delegate bounded research and deterministic checks to explorer under
-[role coordination](references/role-coordination.md#explorer-dispatch). Send its
-saved summary and evidence references through the orchestrator to the verifier
-for criterion assessment. Read [execution ownership](references/api-checks.md#execution-ownership-and-one-batch-deadline)
-for explicitly typed behavioral/manual procedures and commands. Complete the plan from accepted tasks using [finalize](flows/finalize.md).
+After the executor reports completion, freeze its commit and direct Explorer to
+execute the full project test and static-check set under
+[role coordination](references/role-coordination.md#explorer-dispatch). Explorer
+executes the exact assignment and reports results; the orchestrator selects and
+registers the complete set. Only after it passes, launch the required
+[review lenses](references/review-policy.md#review-lenses) in parallel, each in its
+own fresh context. Reviewers inspect sources and saved evidence without executing
+checks. Manual and behavioral checks are outside this task flow. Complete the plan
+from accepted tasks using [finalize](flows/finalize.md).

@@ -28,14 +28,14 @@
     {
       "name": "ordinary-success",
       "eval_id": 16,
-      "prompt": "Invoke sdd-apply to verify the frozen order-export candidate against AC-order-ids and the registered checks. Use the saved execution state and report whether the task can proceed to review. Stop before implementation, integration or finalization.",
+      "prompt": "Invoke sdd-apply on the frozen order-export candidate. Run the full registered project checks, then launch both review lenses only if checks pass. Report whether the task can proceed to integration. Stop before implementation, integration or finalization.",
       "sources": {"tests/test_orders.py": "from orders import export_orders\n\ndef test_order_ids():\n    assert export_orders([{'id': 0}, {'id': 7}]) == [0, 7]\n"},
       "sample_report": "<testsuites><testsuite tests='1' failures='0' errors='0' skipped='0'><testcase classname='tests.test_orders' name='test_order_ids'/></testsuite></testsuites>",
       "expected": {
         "exit_code": 0, "passed": 1, "failed": 0, "skipped": 0,
-        "criterion_outcome": "passed", "review_eligible": true,
+        "criterion_outcome": "passed", "acceptance_eligible": true,
         "raw_read": "Only if the summary and source inspection leave a concrete evidence question; no automatic full-log load.",
-        "rerun": "No unmotivated verifier rerun; reading artifacts does not rerun checks."
+        "rerun": "Reviewers execute no checks; reading artifacts does not rerun them."
       }
     },
     {
@@ -49,7 +49,7 @@
       "sample_report": "<testsuites><testsuite tests='1' failures='1' errors='0' skipped='0'><testcase classname='tests.test_orders' name='test_order_ids'><failure message='zero ID omitted'>Expected [0, 7], observed [7]</failure></testcase></testsuite></testsuites>",
       "expected": {
         "exit_code": 1, "passed": 0, "failed": 1, "skipped": 0,
-        "criterion_outcome": "failed", "review_eligible": false,
+        "criterion_outcome": "not_assessed", "acceptance_eligible": false,
         "raw_read": "Inspect referenced failure details beyond the bounded excerpt when needed; raw stdout retains PRIMARY-BEGIN, all 1000 diagnostic lines and PRIMARY-END with matching digest.",
         "rerun": "No repeat before the orchestrator reserves an owned repair."
       }
@@ -62,7 +62,7 @@
       "sample_report": "<testsuites><testsuite tests='2' failures='0' errors='0' skipped='1'><testcase classname='tests.test_orders' name='test_smoke'/><testcase classname='tests.test_orders' name='test_order_ids'><skipped type='pytest.skip' message='required zero-ID case not exercised'/></testcase></testsuite></testsuites>",
       "expected": {
         "exit_code": 0, "passed": 1, "failed": 0, "skipped": 1,
-        "criterion_outcome": "unavailable", "review_eligible": false,
+        "criterion_outcome": "unavailable", "acceptance_eligible": false,
         "raw_read": "Read the structured report and test source to connect the skipped test to AC-order-ids; the smoke test supplies no order-ID behavior evidence.",
         "rerun": "Request sufficient coverage through the orchestrator; do not turn exit zero into acceptance."
       }

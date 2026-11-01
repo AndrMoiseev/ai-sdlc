@@ -6,8 +6,8 @@ evidence. Use installed event help for exact fields.
 ## Check registry
 
 For work on skills, apply the [skill development acceptance rule](../SKILL.md#skill-development-acceptance)
-before registering checks: task stages use deterministic tests, and behavioral
-checks require explicit authorization and a task or separate evaluation request.
+before registering checks: task stages accept deterministic tests and static
+checks only. Manual and behavioral checks require separate work outside this flow.
 
 Read the installed sdd-shared `references/document-format-tasks.md`, section
 «Задача и ее проверка». `location` is relative to project or active worktree,
@@ -18,7 +18,10 @@ location; when supplied, the same rule applies. Existence alone does not prove
 the expected tests ran.
 
 Register exact commands, cwd, configuration, source and AC before implementation,
-including project instructions and CI. `checks_register` takes inspected
+including the full project test and static-check set from project instructions,
+configuration and CI. The orchestrator selects and registers the complete set;
+Explorer executes the exact assignment without selection or acceptance decisions.
+`checks_register` takes inspected
 `inventory: {instructions: [...], ci: [...]}` and `additional` checks; explicit
 empty inventories are valid. An absent applicable linter is an explained inventory
 fact, not a successful check. Keep existing mandatory checks.
@@ -105,9 +108,10 @@ a role attestation, not an exit code. Stop writers for the entire check. Ignored
 files may hold generated output or disposable environments; test inputs and
 source code must be tracked.
 
-`checks_extend` accepts exactly one basis: the current verifier conclusion's
-event ID in `verification_result`, or the requesting reviewer `more_checks`
-`review_round`. The verifier path works before `review_start`; see
+After collecting both lens results, `checks_extend` accepts exactly one basis:
+the current verification conclusion's event ID in `verification_result`, or the
+verification reviewer's `more_checks` `review_round`. Neither path runs during an
+active review round; see
 [criterion conclusions](#criterion-conclusions). Existing checks stay mandatory;
 registration, setup and extension advance the registry revision. New registry
 contents invalidate prior execution and conclusions. Apply
@@ -125,8 +129,8 @@ can recover the result.
 No task candidate, candidate reference or `candidates/` artifact is recorded.
 Checks and reviews do not compare a saved candidate with the current tree.
 The orchestrator must run checks and review again after implementation changes
-or repairs in the task worktree. Transfer retains that evidence, verifier
-conclusion and review. Integration acceptance validates the recorded merge tree,
+or repairs in the task worktree. Transfer retains that evidence, criterion
+conclusion and both review lenses. Integration acceptance validates the recorded merge tree,
 unchanged source and evidence artifacts without running checks again. Keep
 writers stopped throughout checking and review.
 
@@ -139,7 +143,8 @@ by Git rather than a repository-wide file inventory.
 
 ### Criterion conclusions
 
-For independent/integration, the active independent task verifier submits
+Within the reserved review round, the active reviewer assigned the verification
+lens submits
 `verification_result` with `role_id`, `stage`, current `basis`, exact
 `evidence_refs`, `criteria_results`, `limitations` and `trace`. Each criterion
 appears exactly once as `criterion_id`, `outcome: passed|failed|unavailable`,
@@ -158,9 +163,11 @@ as `defect_evidence`; set `test_failure` only for an actual failed test. Run the
 whole expanded registry and obtain a new conclusion. Changing requirements
 requires `spec_conflict`; insufficient tests within an approved AC do not.
 
-`review_start` and `transfer` require both a successful mandatory worktree run
-and its latest passed conclusion. `commit` and `accept` validate that retained
-worktree evidence and the recorded integration tree.
+`review_start` requires the successful full mandatory worktree run; no criterion
+conclusion is required before the lenses start. The two lenses use the same frozen
+commit and check run, in parallel and in separate fresh contexts. `transfer` requires
+both lens verdicts and the latest criterion conclusion to pass. `commit` and `accept`
+validate that retained worktree evidence and the recorded integration tree.
 Source, normative basis, registry, configuration or a newer applicable attempt
 invalidates the conclusion. Negative conclusions remain in history; neither an
 older pass, `role_result`, self evidence nor reviewer verdict replaces them.
@@ -192,16 +199,17 @@ frozen commit; integration requires the integrated commit. A checks assignment b
 never replaces independent evidence.
 
 Set `execution_kind` on the verification/check record, outside `run`.
-Commands default to `deterministic`; procedures require an explicit
-`deterministic`, `behavioral` or `manual`. The filename never selects a type.
-Deterministic procedures use explorer `procedure_begin/result`. Behavioral/manual
-procedures, including explicitly typed commands, use the task verifier. Their actual steps, exact command where present, raw
-references and trace form the primary attestation. Explorer aggregates that
-attestation and does not launch the semantic command. A newer or pending procedure
-invalidates an older aggregate. Before retrying a failed procedure, reserve repair;
-if it has not yet been aggregated, supply its defect evidence and `test_failure: true`. Semantic checks cannot be converted to a
-command with `check_setup`. Behavioral checks of assigned skill packages run
-only when explicitly authorized; execute them in their assigned task.
+Commands default to `deterministic`; procedures require explicit `deterministic`.
+Registration and execution reject `manual` and `behavioral`, including typed
+commands. Do not omit a required unsupported check or relabel it to bypass this
+boundary; return the incompatible task contract to the orchestrator.
+
+Only Explorer executes the assigned commands and deterministic procedures through
+`check_run` and `procedure_begin/result`. It preserves exact steps, outputs and trace,
+and returns facts without deciding acceptance or the next action. Reviewers only
+read sources and saved evidence. A newer or pending procedure invalidates an older
+aggregate. Before retrying a failed procedure, reserve repair; if it has not been
+aggregated, supply defect evidence and `test_failure: true`.
 
 `timeout` is a positive finite budget for the entire assigned attempt, starting at
 the first deterministic `procedure_begin` or `check_run`, including procedure
@@ -228,7 +236,7 @@ requested, completed and missing IDs, current basis, `source_unchanged`,
 raw object with `read_object` when a failure, skip or coverage question needs it;
 retain its digest and location in the criterion assessment. Excerpts may be
 truncated; the full primary artifact remains authoritative. Unknown counts are
-null, not zero. Explorer diagnosis is separate from machine outcomes. Missing or
+null, not zero. Explorer observations are separate from machine outcomes and do not decide acceptance. Missing or
 invalid required evidence, or a skipped mandatory area without other sufficient
 current evidence, blocks acceptance. Reading the full log does not justify a new
 execution; request an actual rerun through the orchestrator when its basis or
