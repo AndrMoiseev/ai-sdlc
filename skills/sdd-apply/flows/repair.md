@@ -4,11 +4,14 @@ Load [task events](../references/api-tasks.md) and [checks and evidence](../refe
 
 Read the recorded failure, its tested commit, AC, logs, and remaining task budgets before changing code. For a code-review finding, apply the [review policy](../references/review-policy.md) before accepting it for repair. Repair only proven violations; retain all other findings in the technical debt journal and continue the plan. Attribute an accepted defect to a task. Unknown ownership or a proven defect outside the approved scope blocks pending resolution. A contract contradiction uses `spec_conflict` through [resume](resume.md).
 
-For `more_checks`, submit `checks_extend` with the requesting `review_round` ID
-and additional commands, sources and AC. Keep existing checks. Have the task explorer run the expanded
-set on the updated candidate and obtain a current verifier conclusion before
-reserving a new review round. For a verifier gap before review, use the alternative
+Collect both lens results before repair or extending checks. For `more_checks`,
+submit `checks_extend` with the verification lens's `review_round` ID and additional
+commands, sources and AC, or its current
 [conclusion basis](../references/api-checks.md#criterion-conclusions).
+Keep existing checks. Assign any new assertions to the executor, freeze the updated
+candidate and direct Explorer to run the full project test and static-check set.
+Only after all required checks pass, launch both review lenses in parallel in new,
+separate fresh contexts. Each lens retains its assigned responsibility.
 
 Submit `repair` before fixes or a no-change retry after a failing mandatory test/linter. Include reason and reproducible evidence; for self-check failure explicitly include `test_failure: true`. One cycle covers the work until the next complete assigned check set. Reserve before work, retain the active cycle through interruption, and let the script close it on the check result. An unavailable runner leaves the cycle unfinished and blocks; do not retry unchanged infrastructure automatically.
 

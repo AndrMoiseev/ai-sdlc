@@ -1,8 +1,8 @@
 """Host-attested fresh contexts and separate implementation/review results."""
 from .common import digest, now, require, write_json
-from .verification import current, independent, local_criteria
+from .verification import current, independent, local_criteria, valid_evidence
 from .verification_results import require_passed
-from .review_policy import proven, test_change_context
+from .review_policy import LENSES, proven, round_results, test_change_context
 from .inputs import read_plan_document, document_paths
 import re
 from . import artifact_storage as artifacts
@@ -50,8 +50,10 @@ def transition(state, task, event, directory):
     task_id = task["plan"]["id"] if task else None
     if kind == "role_register":
         require(set(p) >= {"role_id", "kind", "context_id", "fresh", "host", "launch_ref", "capabilities"}, "role_schema", "Host context and launch evidence required")
-        require(p["kind"] in {"executor", "verifier", "reviewer", "explorer"}
+        require(p["kind"] in {"executor", "reviewer", "explorer"}
                 and p["fresh"] is True, "fresh_role", "A fresh context is mandatory")
+        if p["kind"] == "reviewer":
+            require(p.get("lens_id") in LENSES, "review_lens", "Assign exactly one required review lens")
         require(p["host"] in {"codex", "claude-code"} and p["launch_ref"] and p["context_id"], "host_evidence", "Record actual host launch; do not simulate a role")
         require(p["role_id"] not in state["roles"], "duplicate_role", "Role already registered")
         require(isinstance(p["role_id"], str) and re.fullmatch(r"[A-Za-z0-9_-]+", p["role_id"]), "role_id", "Use a filesystem-safe role ID")
@@ -70,13 +72,11 @@ def transition(state, task, event, directory):
             if role["context_id"] == p["context_id"]:
                 continuation = (role["kind"] == p["kind"] == "explorer" and role["task_id"] == task_id
                                 and role["status"] == "finished" and role["host"] == p["host"])
-                require(continuation or role["task_id"] == task_id and role["kind"] in {"reviewer", "verifier"}
-                        and p["kind"] in {"reviewer", "verifier"}, "context_reused",
-                        "Only verifier/reviewer or completed explorer assignments of the same task may share a context")
+                require(continuation, "context_reused",
+                        "Only completed explorer assignments of the same task may share a context; every reviewer starts fresh")
                 previous = role.get("agent_selection")
                 if selection is not None or previous is not None:
                     require(selection is not None and previous is not None
-                            and (continuation or selection["mode"] != "native-agent" and previous["mode"] != "native-agent")
                             and configuration.launch_identity(selection) == configuration.launch_identity(previous),
                             "agent_selection_conflict", "Different agent selections require separate fresh contexts")
         require(p["capabilities"].get("fresh_context") is True, "host_limits", "Fresh context mechanism unavailable; distinguish busy slots from unsupported host")
@@ -97,7 +97,7 @@ def transition(state, task, event, directory):
         packet = {"task": task["plan"], "project_root": state["basis"]["project_root"], "execution_directory": str(directory), "paths": task["paths"], "worktree": task["worktree"], "checks": task["checks"], "prior_commits": task["commits"], "blockers": task["blockers"], "rejected_approaches": task.get("rejected_approaches", []), "role": role}
         if p["kind"] == "explorer":
             packet["assignment"] = role["assignment"]
-        if p["kind"] == "verifier":
+        if p["kind"] == "reviewer" and p["lens_id"] == "verification":
             from .verification_results import packet as verification_packet
             packet["verification"] = verification_packet(state, task, directory)
         if state["basis"].get("work_kind", "change") == "refactoring":
@@ -132,37 +132,75 @@ def transition(state, task, event, directory):
         return {"role_finished": p["role_id"], "task_status": task["status"] if task else None}
     if kind == "review_start":
         require(task["status"] in {"verifying", "reviewing", "integrating"}, "review_phase", "Verification precedes review")
-        independent(state, task, p.get("role_id"), {"reviewer"})
-        require_passed(state, task, directory)
+        role = independent(state, task, p.get("role_id"), {"reviewer"})
+        valid_evidence(state, task, directory)
+        lens = role["lens_id"]
+        from .verification_results import attempts, stage_for
+        basis = {"checks": explorer.basis(state, task, "checks", stage_for(task)),
+                 "attempts_hash": digest(attempts(task, stage_for(task)))}
         from .budgets import reserve_review
-        if not reserve_review(state, task, event["event_id"]):
-            return {"blocked": "review_limit_reached"}
-        task["active_reviewer"] = p["role_id"]
+        if task["active_review"]:
+            require(task["review_basis"] == basis, "review_stale", "Review lenses require the same check run and source")
+            require(lens not in task["active_reviewers"], "review_active", "Resume the existing review lens instead of reserving twice")
+        else:
+            if not reserve_review(state, task, event["event_id"]):
+                return {"blocked": "review_limit_reached"}
+            task["active_reviewers"] = {}
+            task["review_basis"] = basis
+        task["active_reviewers"][lens] = p["role_id"]
         task["status"] = "reviewing"
-        return {"round": task["review_rounds_started"]}
+        return {"round": task["review_rounds_started"], "lens_id": lens}
     require(kind == "review_result", "role_operation", kind)
-    require(task["active_review"] and task.get("active_reviewer") == p.get("role_id"), "review_not_started", "Reserve review round first")
-    independent(state, task, p["role_id"], {"reviewer"})
+    role = independent(state, task, p.get("role_id"), {"reviewer"})
+    lens = role["lens_id"]
+    require(task["active_review"] and task.get("active_reviewers", {}).get(lens) == p.get("role_id"), "review_not_started", "Reserve this review lens first")
     current(state, task)
+    from .verification_results import attempts, stage_for
+    require(task["review_basis"] == {"checks": explorer.basis(state, task, "checks", stage_for(task)),
+            "attempts_hash": digest(attempts(task, stage_for(task)))},
+            "review_stale", "Source, registry or check run changed during review")
     require("candidate" not in p, "review_schema", "Review results no longer accept candidate references")
     require(p.get("verdict") in {"pass", "changes", "more_checks"} and isinstance(p.get("findings"), list), "review_schema", "Verdict and findings required")
-    require(p.get("test_integrity") and p.get("trace"), "review_evidence", "Review assertions, skips/xfail and command weakening; retain trace")
+    require(p.get("trace"), "review_evidence", "Retain the actual reviewer trace")
+    if lens == "verification":
+        require(p.get("test_integrity"), "review_evidence", "Verification owns assertion strength and test integrity")
+        from .verification_results import applicable
+        conclusion = applicable(state, task, directory)
+        require(conclusion["role_id"] == p["role_id"] and conclusion["round_id"] == task["active_review"],
+                "verification_missing", "Submit this lens's current criterion conclusion")
+        require(p["verdict"] != "pass" or conclusion["outcome"] == "passed",
+                "verification_failed", "Unconfirmed criteria prevent a passing verification lens")
+    else:
+        require("test_integrity" not in p and p["verdict"] != "more_checks", "review_scope",
+                "Code review owns architecture and code quality; route test evidence gaps to verification")
     findings = []
     for finding in p["findings"]:
         require(isinstance(finding, dict), "finding_schema", "Finding must be an object")
         require(set(finding) >= {"severity", "criteria", "path", "problem", "resolution"}, "finding_schema", "Findings need AC, file and resolution condition")
         require(finding["severity"] in {"blocker", "recommendation"}, "finding_severity", "Unknown severity")
+        proof_kind = finding.get("proof", {}).get("kind") if isinstance(finding.get("proof"), dict) else None
+        require(not (lens == "code" and (proof_kind == "acceptance" or finding["criteria"]))
+                and not (lens == "verification" and proof_kind == "architecture"),
+                "review_scope", "Acceptance and test evidence belong to verification; architecture belongs to code")
         findings.append({**finding, "reported_severity": finding["severity"],
                          "severity": "blocker" if proven(finding) else "recommendation"})
     blockers = any(f["severity"] == "blocker" for f in findings)
     require(p["verdict"] != "pass" or not blockers, "review_blocker", "Pass conflicts with proven violations")
-    verdict = "pass" if p["verdict"] == "changes" and not blockers else p["verdict"]
-    result = {**p, "verdict": verdict, "reported_verdict": p["verdict"], "findings": findings,
+    verdict = ("pass" if p["verdict"] == "changes" and not blockers
+               and (lens == "code" or conclusion["outcome"] == "passed") else p["verdict"])
+    result = {**p, "lens_id": lens, "verdict": verdict, "reported_verdict": p["verdict"], "findings": findings,
               "round_id": task["active_review"], "round": task["review_rounds_started"]}
     task["reviews"].append(result)
+    state["roles"][p["role_id"]]["status"] = "finished"
+    results = round_results(task)
+    if set(results) != set(LENSES):
+        return {"verdict": verdict, "status": "reviewing", "pending_lenses": sorted(set(LENSES) - set(results))}
+    verdicts = {review["verdict"] for review in results.values()}
+    verdict = "changes" if "changes" in verdicts else "more_checks" if "more_checks" in verdicts else "pass"
+    if verdict == "pass":
+        require_passed(state, task, directory)
     task["review_rounds_completed"] += 1
     task["active_review"] = None
-    state["roles"][p["role_id"]]["status"] = "finished"
     if verdict == "pass":
         task["status"] = "integrating" if task["worktree"] and not task["worktree"].get("integrated") else "committing"
     elif verdict == "more_checks":

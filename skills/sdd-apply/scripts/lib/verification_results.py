@@ -12,14 +12,15 @@ def stage_for(task):
     return "integration" if task.get("worktree") and task["worktree"].get("integrated") else "independent"
 
 
-def verifier(state, task, role_id, stage, active=True):
+def reviewer(state, task, role_id, stage, active=True):
     if active:
-        return independent(state, task, role_id, {"verifier"})
-    role = state["roles"].get(role_id)
-    require(role and role["kind"] == "verifier"
+        role = independent(state, task, role_id, {"reviewer"})
+    else:
+        role = state["roles"].get(role_id)
+    require(role and role["kind"] == "reviewer" and role.get("lens_id") == "verification"
             and role["task_id"] == task["plan"]["id"]
             and role["status"] in ({"active"} if active else {"active", "finished"}),
-            "role_unavailable", "Conclusion requires its registered independent verifier")
+            "role_unavailable", "Conclusion requires the independent verification reviewer")
     authors = {value["context_id"] for value in state["roles"].values()
                if value["kind"] == "executor" and value["task_id"] == task["plan"]["id"]}
     require(role["fresh"] is True and role["context_id"] not in authors,
@@ -97,14 +98,14 @@ def applicable(state, task, directory, stage=None):
     holder = task
     results = holder.get("verification_results", [])
     result = next((item for item in reversed(results) if item["stage"] == stage), None)
-    require(result is not None, "verification_missing", "A current verifier conclusion is required")
+    require(result is not None, "verification_missing", "A current verification lens conclusion is required")
     current(state, task)
     require(result["basis"] == basis(state, task, "checks", stage)
             and result["attempts_hash"] == digest(attempts(holder, stage)),
             "verification_stale", "Source, registry or applicable check attempt changed after the conclusion")
     require(result["evidence_refs"] == evidence_refs(holder, stage, directory),
             "verification_stale", "Conclusion must reference the latest exact evidence")
-    verifier(state, task, result["role_id"], stage, active=False)
+    reviewer(state, task, result["role_id"], stage, active=False)
     validate_refs(state, task, stage, result["evidence_refs"], directory)
     return result
 
@@ -124,7 +125,7 @@ def require_passed(state, task, directory, stage=None):
 def extension(state, task, payload, directory):
     result = applicable(state, task, directory)
     require(payload.get("verification_result") == result["id"] and result["outcome"] in {"failed", "unavailable"},
-            "extension_evidence", "Reference the current failed or unavailable verifier conclusion")
+            "extension_evidence", "Reference the current failed or unavailable verification lens conclusion")
     requested = {item["criterion_id"] for item in result["criteria_results"]
                  if item["outcome"] != "passed" and item.get("check_request")}
     additions = payload.get("additional", [])
@@ -132,7 +133,7 @@ def extension(state, task, payload, directory):
             and isinstance(check.get("criteria"), list) and check["criteria"]
             and all(isinstance(value, str) for value in check["criteria"])
             and set(check["criteria"]) <= requested for check in additions),
-            "extension_evidence", "Bind each addition to a criterion with a concrete verifier check request")
+            "extension_evidence", "Bind each addition to a criterion with a concrete verification lens check request")
 
 
 def transition(state, task, event, directory):
@@ -141,7 +142,9 @@ def transition(state, task, event, directory):
     require(task is not None and stage != "final", "verification_stage", "Use task verification; final assessment has been removed")
     require(stage in {"independent", "integration"} and stage == stage_for(task),
             "verification_stage", "Use the current independent/integration stage")
-    verifier(state, task, p.get("role_id"), stage)
+    reviewer(state, task, p.get("role_id"), stage)
+    require(task["active_review"] and task.get("active_reviewers", {}).get("verification") == p["role_id"],
+            "review_not_started", "Reserve the verification lens after successful project checks")
     current(state, task)
     holder = task
     require(p.get("basis") == basis(state, task, "checks", stage),
@@ -167,12 +170,12 @@ def transition(state, task, event, directory):
             require(item["outcome"] != "passed" and isinstance(item["check_request"], str) and item["check_request"].strip(),
                     "verification_request", "A concrete additional check request belongs to an unconfirmed criterion")
     require(isinstance(p.get("limitations"), list) and all(isinstance(item, str) for item in p["limitations"])
-            and p.get("trace"), "verification_schema", "Record limitations and actual verifier trace")
+            and p.get("trace"), "verification_schema", "Record limitations and actual verification reviewer trace")
     outcomes = {item["outcome"] for item in results}
     outcome = "failed" if "failed" in outcomes else "unavailable" if "unavailable" in outcomes else "passed"
     if outcome == "passed":
         execution(state, task, directory, stage)
-    result = {**deepcopy(p), "id": event["event_id"], "outcome": outcome,
+    result = {**deepcopy(p), "id": event["event_id"], "outcome": outcome, "round_id": task["active_review"],
               "attempts_hash": digest(attempts(holder, stage)), "time": now()}
     holder.setdefault("verification_results", []).append(result)
     return {"verification_result": result}

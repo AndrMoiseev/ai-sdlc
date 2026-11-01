@@ -92,8 +92,8 @@ def test_directory_location_is_relative_to_project_not_command_cwd(project):
 def test_procedure_result_cannot_hide_missing_location(project):
     (project / "procedure.md").write_text("Inspect the check definition and verify the result.\n")
     stage_files(project, "procedure.md")
-    commit(project, "Existing manual procedure")
-    reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}, execution_kind="manual"))
+    commit(project, "Existing deterministic procedure")
+    reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}, execution_kind="deterministic"))
     d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     d.worktree()
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
@@ -101,7 +101,7 @@ def test_procedure_result_cannot_hide_missing_location(project):
     d.send("start", {"role_id": "author", "paths": ["check.py"]})
     (d.root / "check.py").unlink()
     d.freeze()
-    d.role("self-verifier", "verifier")
+    d.explorer("self-verifier", "self")
     d.send("procedure_begin", {"check_id": "plan-1", "role_id": "self-verifier", "stage": "self"})
     d.send("procedure_result", {"check_id": "plan-1", "role_id": "self-verifier", "outcome": "passed", "steps": ["Synthetic observation"], "trace": "unit"})
     assert d.run_checks("self")["outcome"] == "unavailable"
@@ -165,22 +165,22 @@ def test_linked_revision_preserves_counters_not_acceptance(basis, project):
 
 def test_procedure_requires_independent_performed_result(project):
     (project / "procedure.md").write_text("Check exact numeric addition and invalid input cases.\n")
-    reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}, execution_kind="manual"))
+    reapprove(project, lambda t: t["verification"][0].update(run={"procedure": "procedure.md"}, execution_kind="deterministic"))
     stage_files(project, "sdd", "procedure.md")
     commit(project, "approve fixture procedure")
     accept_checkpoint(project)
     d = Driver(validate(project, "demo", {"text": "Execute", "source": "fixture"}))
     d.send("checks_register", {"inventory": {"instructions": [], "ci": []}})
     d.role("author", "executor")
-    d.role("baseline", "verifier")
     d.worktree()
     d.send("start", {"role_id": "author", "paths": ["result.txt"]})
+    d.explorer("baseline", "baseline")
     d.send("procedure_begin", {"check_id": "plan-1", "role_id": "baseline", "stage": "baseline"})
     d.send("procedure_result", {"check_id": "plan-1", "role_id": "baseline", "outcome": "passed", "steps": ["Synthetic fixture observation; not actual browser evidence"], "trace": "unit"})
     assert d.run_checks("baseline")["outcome"] == "baseline_recorded"
     d.freeze()
-    d.role("verifier", "verifier")
-    d.send("procedure_begin", {"check_id": "plan-1", "role_id": "verifier", "stage": "independent"})
-    d.send("procedure_result", {"check_id": "plan-1", "role_id": "verifier", "outcome": "passed", "steps": ["Synthetic exact-output assertions"], "trace": "unit"})
+    d.explorer("procedure-explorer", "independent")
+    d.send("procedure_begin", {"check_id": "plan-1", "role_id": "procedure-explorer", "stage": "independent"})
+    d.send("procedure_result", {"check_id": "plan-1", "role_id": "procedure-explorer", "outcome": "passed", "steps": ["Synthetic exact-output assertions"], "trace": "unit"})
     assert d.verify()["outcome"] == "passed"
     assert d.review()["status"] == "integrating"

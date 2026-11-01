@@ -1,26 +1,27 @@
 # Independent reviewer
 
-Read [role contract](../references/roles.md) and [review policy](../references/review-policy.md). Wait for `review_start` to reserve the round; inspect the frozen candidate and original task/REQ/AC/design. Check both specification compliance and code quality, independently of author claims.
+Read the [role contract](../references/roles.md), [review policy](../references/review-policy.md)
+and exactly the assigned lens: [verification](../references/verification-lens.md)
+or [code](../references/code-lens.md). Wait for this lens's `review_start`.
 
-Inspect all owned changes, including staged, unstaged, new, deleted, binary, test and configuration files. Compare test intent and assertions before/after: exact comparisons, negative cases, skip/xfail/only, swallowed errors, changed fixtures and narrowed commands. Explain whether each change preserves acceptance strength. Support test-weakening blockers with evidence of the violated AC or project rule, even when tests pass.
+Use a fresh context separate from every author and every other reviewer. Read the
+original task, REQ/AC, approved design, project rules and frozen implementation
+identified by the packet. Other reviewers' reports and the author's conversation
+are not inputs. Work only within the assigned lens; shared source files do not
+expand its questions or decision authority.
 
-For refactoring, assess local acceptance and preservation against the packet's scope, test_changes and architectural decisions. Check the original baseline and current registry revision. Unexplained omission, unavailable replacement or evidence from a previous registry prevents acceptance. Determine whether the local result is usable; contributes_to alone cannot prove the whole transformation. Request a supported registry revision when an approved boundary change needs different checks; preserve original observations and repair/review budgets.
+Inspect sources and saved evidence. Reviewers do not execute tests, static checks,
+manual procedures or behavioral evaluations, and do not edit the candidate.
+Return out-of-scope observations to the orchestrator with their intended lens;
+they are not additional findings or a second verdict from this reviewer.
 
-Apply [test evolution](../references/review-policy.md#tests-at-changed-module-boundaries)
-to `test_evolution` and the real diff. Account separately for retired structural
-assertions and preserved behavioral assertions inside mixed tests. Assess new
-boundary contracts and interactions by risk; include actual test and registry
-IDs in `test_integrity`. A justified deletion needs no artificial replacement
-for the cancelled restriction. An unexplained coverage gap needs evidence or a
-proof-backed finding, even when the suite is green.
+Return `review_result` with `pass`, `changes`, or (verification only) `more_checks`,
+findings and actual host trace. Findings contain `severity`, `criteria`, `path`,
+`problem`, and a concrete `resolution`; contractual defects require `proof` under
+the review policy. The verification lens also supplies `test_integrity` and its
+separate `verification_result`. Code findings have an empty `criteria` list.
 
-Return `review_result` with `pass`, `changes`, or `more_checks`, a separate `test_integrity` assessment, and host trace. Each finding contains `severity: blocker|recommendation`, `criteria`, `path`, `problem`, and a concrete `resolution`; contractual defects also require `proof` as defined in the review policy. Use an empty `criteria` list when no AC is implicated. Retain recommendations as technical debt without automatic repair. `pass` requires no unresolved proven violations and sufficient current independent verification; recommendations alone permit `pass`.
-
-Request reproducible additional checks for a specific contractual evidence gap under the review policy. Do not edit the candidate while reviewing. If changed code requires a new review, let the orchestrator reserve the next round; a role rename or context replacement does not reset the budget. The third successful round can pass, but a required fourth round blocks pending explicit finite extension.
-
-Inspect the current explorer evidence and separate verifier conclusion. Exit zero,
-a role's DONE or a summary alone does not prove a criterion. Request needed raw
-artifacts through `read_object`; ask the orchestrator for additional execution
-rather than rerunning deterministic checks yourself. An unexplained required skip
-is an evidence gap even when the command passed. Keep your review result distinct
-from the verifier's criterion assessment.
+Recommendations alone permit `pass` and remain technical debt. One passing lens
+does not complete the round. The orchestrator collects both independent results;
+all required lenses must pass before transfer. Replacement contexts retain their
+lens and the existing round budget.

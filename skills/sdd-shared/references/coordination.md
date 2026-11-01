@@ -21,8 +21,8 @@ evidence, approvals and final response requirements.
 
 For explorer work, hand off the saved assignment and actual result references
 under [the explorer contract](explorer.md). The orchestrator forwards the machine
-summary, current basis and primary evidence references to an independent verifier;
-explorer conversation is not verification input. The verifier opens needed raw
-artifacts and assesses criteria. Reading an artifact does not require rerunning
+summary, current basis and primary evidence references to the verification review
+lens after the complete project check set passes. Explorer conversation is not
+verification input. The reviewer opens needed raw artifacts and assesses criteria. Reading an artifact does not require rerunning
 its command. A requested rerun returns through the orchestrator and the owning
 workflow's existing budgets and execution permissions.

@@ -58,7 +58,8 @@ def successor(driver, role_id, kind, predecessor):
     driver.send("role_register", {"role_id": role_id, "kind": kind,
         "context_id": role_id, "fresh": True, "host": "codex",
         "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True},
-        "successor_of": predecessor})
+        "successor_of": predecessor,
+        **({"lens_id": driver.state["roles"][predecessor].get("lens_id", "code")} if kind == "reviewer" else {})})
 
 
 @pytest.mark.parametrize("separate_observations", [False, True])
@@ -66,7 +67,7 @@ def test_multiple_lost_roles_recover_individually(execution_checkpoint, separate
     driver = execution_checkpoint("started")
     project = driver.root
     (project / "result.txt").write_text("unfinished")
-    driver.role("verifier", "verifier")
+    driver.verification_reviewer("verifier")
     driver.send("resume", {"host_trace": "unit-observation",
         "live_contexts": ["verifier"] if separate_observations else []}, task_id=None)
     if separate_observations:
@@ -84,7 +85,7 @@ def test_multiple_lost_roles_recover_individually(execution_checkpoint, separate
     assert [b["role_id"] for b in driver.task["blockers"]] == ["verifier"]
     assert [b["role_id"] for b in driver.state["blockers"]] == ["verifier"]
 
-    successor(driver, "new-verifier", "verifier", "verifier")
+    successor(driver, "new-verifier", "reviewer", "verifier")
     # Older clients can omit role_id; successor_of identifies exactly one loss.
     result = driver.send("resume", {"host_trace": "unit-observation", "live_contexts": ["new-author", "new-verifier"],
         "resolutions": [{"reason": "lost_role", "task_id": "TASK-one",
@@ -100,10 +101,10 @@ def test_multiple_lost_roles_recover_individually(execution_checkpoint, separate
 
 def test_lost_role_resolution_must_match_predecessor_and_kind(execution_checkpoint):
     driver = execution_checkpoint("started")
-    driver.role("verifier", "verifier")
+    driver.verification_reviewer("verifier")
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     successor(driver, "wrong-kind", "reviewer", "author")
-    successor(driver, "new-verifier", "verifier", "verifier")
+    successor(driver, "new-verifier", "reviewer", "verifier")
     for role_id, new_role in [("author", "wrong-kind"), ("author", "new-verifier")]:
         with pytest.raises(ValueError) as exc:
             driver.send("resume", {"host_trace": "unit-observation", "live_contexts": ["wrong-kind", "new-verifier"],
@@ -114,19 +115,24 @@ def test_lost_role_resolution_must_match_predecessor_and_kind(execution_checkpoi
 
 
 def test_reviewer_successor_continues_reserved_round_after_two_losses(execution_checkpoint):
-    driver = execution_checkpoint("reviewing")
+    driver = execution_checkpoint("verified")
+    driver.role("reviewer", "reviewer")
+    driver.send("review_start", {"role_id": "reviewer"})
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)
     assert driver.task["before_block"] == "reviewing"
     successor(driver, "new-reviewer", "reviewer", "reviewer")
-    successor(driver, "new-verifier", "verifier", "verifier")
+    successor(driver, "new-verifier", "reviewer", "verifier")
     driver.send("resume", {"host_trace": "unit-observation", "live_contexts": ["new-reviewer", "new-verifier"],
         "resolutions": [{"reason": "lost_role", "task_id": "TASK-one", "role_id": old,
             "successor": new, "evidence": "fresh role ready"}
             for old, new in [("reviewer", "new-reviewer"), ("verifier", "new-verifier")]]}, task_id=None)
     assert driver.task["status"] == "reviewing"
     assert driver.task["review_rounds_started"] == 1
+    driver.conclude(role="new-verifier")
+    driver.send("review_result", {"role_id": "new-verifier", "verdict": "pass", "findings": [],
+        "test_integrity": "commands and assertions preserved", "trace": "unit-test"})
     result = driver.send("review_result", {"role_id": "new-reviewer",
-        "verdict": "pass", "findings": [], "test_integrity": "commands and assertions preserved", "trace": "unit-test"})
+        "verdict": "pass", "findings": [], "trace": "unit-test"})
     assert result["status"] == "integrating"
 
 
@@ -139,7 +145,7 @@ def test_replacing_another_reviewer_does_not_steal_reserved_round(execution_chec
         "resolutions": [{"reason": "lost_role", "task_id": "TASK-one", "role_id": "other-reviewer",
             "successor": "replacement", "evidence": "fresh role ready"}]}, task_id=None)
     assert driver.task["status"] == "reviewing"
-    assert driver.task["active_reviewer"] == "reviewer"
+    assert driver.task["active_reviewers"]["code"] == "reviewer"
 
 
 def test_lost_explorer_abandons_procedure_preserving_attempt_budget(execution_checkpoint, monkeypatch):

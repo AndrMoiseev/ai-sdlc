@@ -10,7 +10,7 @@ from .path_resolution import resolve
 from .state_objects import StateObjects, encoded
 
 summary = spec_modules("check_summary")
-execution_kind = spec_modules("check_kinds").execution_kind
+from .explorer_assignments import execution_kind
 
 
 def reference(value):
@@ -101,6 +101,7 @@ def persist(state, record, checks, directory, check_run_id):
     by_id = {check["id"]: check for check in checks}
     for output in record["outputs"]:
         check = by_id[output["check_id"]]
+        execution_kind(check)
         run = check["setup"] or check["run"]
         if "command" in run:
             output.setdefault("command", run["command"])
@@ -111,7 +112,7 @@ def persist(state, record, checks, directory, check_run_id):
                           "configuration": objects.put(output["configuration"])}
         raw_refs = {}
         for stream in ("stdout", "stderr"):
-            if "command" in output and execution_kind(check) == "deterministic":
+            if "command" in output:
                 binary = output.get(stream + "_base64")
                 raw_refs[stream] = objects.put({"identity": check_identity, "stream": stream,
                     "encoding": "base64" if binary is not None else "text",
@@ -121,8 +122,7 @@ def persist(state, record, checks, directory, check_run_id):
                 "log": output["procedure_log"], "sha256": output["procedure_log_hash"]})
         captured = output.pop("_report_capture", None)
         if captured is None:
-            captured = (capture_reports(output, read_reports=False) if execution_kind(check) == "deterministic"
-                        else {"reports": [], "limitations": []})
+            captured = capture_reports(output, read_reports=False)
         reports, limitations = persist_reports(captured, objects, check_identity)
         machine = summary.check_summary(output, check_identity, raw_refs, reports, limitations)
         summaries.append(machine)
@@ -164,6 +164,7 @@ def validate(state, record, checks, directory, expected_run_id=None, require_com
     by_id = {check["id"]: check for check in checks}
     for output in record["outputs"]:
         check = by_id[output["check_id"]]
+        execution_kind(check)
         run = check["setup"] or check["run"]
         require(output.get("command") == run.get("command")
                 and output.get("configuration") == run.get("configuration", check.get("configuration", {}))
@@ -181,17 +182,14 @@ def validate(state, record, checks, directory, expected_run_id=None, require_com
                 and machine.get("command") == output.get("command"),
                 "evidence_incomplete", "Summary does not preserve command evidence")
         raw_refs = machine.get("artifacts", {})
-        require("command" not in output or execution_kind(check) != "deterministic" or {"stdout", "stderr"} <= raw_refs.keys(),
+        require("command" not in output or {"stdout", "stderr"} <= raw_refs.keys(),
                 "evidence_missing", "Command raw streams are required")
-        require(not require_complete or execution_kind(check) == "deterministic" or "procedure" in raw_refs,
-                "evidence_missing", "Semantic checks require their verifier's primary attestation")
         for stream, raw_reference in raw_refs.items():
             raw = objects.get(raw_reference)
             require(raw.get("identity") == check_identity and raw.get("stream") == stream,
                     "evidence_basis", "Raw evidence belongs to another run")
         reports = machine.get("structured_reports", [])
-        declared = (summary.report_specs(output.get("command"), output.get("configuration", {}))
-                    if execution_kind(check) == "deterministic" else [])
+        declared = summary.report_specs(output.get("command"), output.get("configuration", {}))
         require([{key: report.get(key) for key in ("format", "path", "required")} for report in reports] == declared,
                 "evidence_basis", "Structured reports must match their exact registered declarations")
         for report in reports:

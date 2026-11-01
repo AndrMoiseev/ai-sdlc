@@ -16,14 +16,21 @@ def finding(proof=None, severity="blocker"):
 
 @pytest.fixture
 def reviewing_driver(execution_checkpoint):
-    return execution_checkpoint("reviewing")
+    return execution_checkpoint("verified")
 
 
 def review(driver, findings, verdict="changes"):
-    return driver.send("review_result", {
-        "role_id": "reviewer",
-        "verdict": verdict, "findings": findings,
-        "test_integrity": "Original assertions preserved", "trace": "synthetic-unit-test"})
+    driver.role("reviewer", "reviewer")
+    driver.send("review_start", {"role_id": "reviewer"})
+    verification = any(item.get("criteria") or item.get("proof", {}).get("kind") == "acceptance"
+                       or item["path"].startswith("tests/") for item in findings)
+    role = "verifier" if verification else "reviewer"
+    driver.send("review_result", {"role_id": role, "verdict": verdict, "findings": findings,
+        **({"test_integrity": "Original assertions preserved"} if verification else {}),
+        "trace": "synthetic-unit-test"})
+    return driver.send("review_result", {"role_id": "reviewer" if verification else "verifier",
+        "verdict": "pass", "findings": [], "trace": "synthetic-unit-test",
+        **({} if verification else {"test_integrity": "Original assertions preserved"})})
 
 
 @pytest.mark.parametrize("proof", [None, {}, "AC-one", {"kind": []},
@@ -128,7 +135,7 @@ def test_test_count_objection_does_not_block_authorized_structural_retirement(re
                      resolution="Recreate the cancelled internal-call assertion")
     result = review(reviewing_driver, [objection])
     assert result["verdict"] == "pass"
-    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "recommendation"
+    assert reviewing_driver.task["reviews"][0]["findings"][0]["severity"] == "recommendation"
     assert reviewing_driver.task["test_repair_cycles_started"] == 0
 
 
@@ -139,4 +146,4 @@ def test_mixed_test_loss_has_a_preservation_proof_even_with_green_suite(reviewin
                      problem="Mixed test lost the preserved atomicity guarantee", resolution="Check both balances after a rejected transfer")
     result = review(reviewing_driver, [violation])
     assert result["verdict"] == "changes"
-    assert reviewing_driver.task["reviews"][-1]["findings"][0]["severity"] == "blocker"
+    assert reviewing_driver.task["reviews"][0]["findings"][0]["severity"] == "blocker"

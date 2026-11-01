@@ -59,13 +59,13 @@ def test_explorer_context_can_continue_own_task_but_not_change_role(execution_ch
     driver.send("role_result", {"role_id": "self-explorer", "result": "DONE", "trace": "unit"})
     driver.explorer("independent-explorer", "independent", context="research")
     assert driver.send("check_run", {"role_id": "independent-explorer", "stage": "independent"})["outcome"] == "passed"
-    for kind in ("executor", "verifier", "reviewer"):
+    for kind in ("executor", "reviewer"):
         with pytest.raises(ValueError, match="share"):
             driver.role("forbidden-" + kind, kind, context="research")
 
 
 @pytest.mark.parametrize("stage", ["baseline", "self", "independent", "integration"])
-@pytest.mark.parametrize("kind", ["executor", "verifier", "reviewer"])
+@pytest.mark.parametrize("kind", ["executor", "reviewer"])
 def test_old_roles_cannot_execute_commands(execution_checkpoint, monkeypatch, stage, kind):
     from lib import verification
     driver = execution_checkpoint("started")
@@ -112,10 +112,11 @@ def test_lost_run_research_successor_does_not_require_final_registry(driver):
     assert "final_checks" not in driver.state
     assert driver.state["roles"]["research"]["status"] == "lost"
 
-def test_removed_final_role_cannot_register():
+@pytest.mark.parametrize("kind", ["verifier", "final_verifier"])
+def test_removed_verification_roles_cannot_register(kind):
     from lib.roles import transition
     from lib.common import Rejected
-    payload = {"role_id": "removed", "kind": "final_verifier", "context_id": "unused",
+    payload = {"role_id": "removed", "kind": kind, "context_id": "unused",
                "fresh": True, "host": "codex", "launch_ref": "unit", "capabilities": {}}
     with pytest.raises(Rejected) as error:
         transition({"roles": {}}, {"plan": {"id": "TASK-one"}},

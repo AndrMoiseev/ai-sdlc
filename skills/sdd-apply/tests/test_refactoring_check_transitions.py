@@ -355,11 +355,11 @@ def test_refactoring_check_transitions_resume_after_interrupted_evidence(removal
     assert driver.resume()["check_registries"]["TASK-two"]["pending_transition"] is not None
     driver.role("resume-reviewer", "reviewer")
     assert_rejected(driver, "required_checks", "review_start", {"role_id": "resume-reviewer"})
-    # Recovery runs new evidence; its criterion conclusion has a separate verifier.
+    # Recovery runs fresh checks before the independent verification review lens.
     assert driver.verify("recovery-verifier")["outcome"] == "passed"
     conclusion = driver.task["verification_results"][-1]
     assert conclusion["role_id"] == "recovery-verifier"
-    assert driver.state["roles"][conclusion["role_id"]]["kind"] == "verifier"
+    assert driver.state["roles"][conclusion["role_id"]]["lens_id"] == "verification"
     assert driver.state["roles"]["interrupted-explorer"]["kind"] == "explorer"
     if orphan_bytes is not None:
         assert artifacts.read_bytes(orphan) == orphan_bytes
