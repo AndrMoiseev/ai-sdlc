@@ -25,6 +25,11 @@ for repair only when evidence demonstrates a violation of at least one approved
 acceptance criterion, accepted architecture decision, or applicable project rule.
 This keeps implementation within the agreed scope while preserving useful ideas.
 
+When another design skill is explicitly active, use its heuristics within this
+policy's review roles, check-execution limits, verdicts and repair scope. Treat
+heuristics as questions for investigation; a heuristic alone is not an applicable
+project rule or proof of a violation.
+
 For each finding, identify the affected code and observable behavior. For a
 contractual defect, include `proof: {kind, source, violation}`:
 
