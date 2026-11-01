@@ -9,6 +9,21 @@ Read the approved design and the complete owned implementation diff, including
 configuration. Report concrete architecture or code-rule violations with proof;
 other improvements are recommendations recorded as technical debt.
 
+Use these questions where the changed code exposes the relevant concern:
+
+- **Invariants:** where are domain constraints enforced across parsing,
+  construction and mutation? Are there paths around that boundary or scattered
+  copies of the same validation rule?
+- **Responsibilities:** does a unit combine unrelated responsibilities, side
+  effects or abstraction levels? Do its data and dependencies belong together,
+  or does it mostly manipulate another module's internals?
+- **Interfaces:** do names, types and operations make valid use and side effects
+  clear? Does the interface permit invalid combinations or require callers to
+  know a hidden ordering of operations?
+- **System complexity:** does a local simplification introduce dependency cycles,
+  layer violations, duplicated rules or broader coupling elsewhere? Does a new
+  abstraction or dependency duplicate an existing capability?
+
 The verification lens owns REQ/AC compliance, observable behavior, assertions,
 test coverage, test weakening and command/log sufficiency. Do not repeat those
 assessments or supply `test_integrity`, `verification_result` or `more_checks`.
