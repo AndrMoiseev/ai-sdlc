@@ -159,7 +159,7 @@ the missing assertion. Reference that current conclusion in `checks_extend` and
 bind each exact command or explicitly typed procedure to the requested criteria.
 The request and extension preserve review/test-repair counters. If preparation
 needs source edits, reopen the executor through `repair` with the recorded gap
-as `defect_evidence`; set `test_failure` only for an actual failed test. Run the
+as `defect_evidence`; this does not increase the independent-check failure count. Run the
 whole expanded registry and obtain a new conclusion. Changing requirements
 requires `spec_conflict`; insufficient tests within an approved AC do not.
 
@@ -208,8 +208,13 @@ Only Explorer executes the assigned commands and deterministic procedures throug
 `check_run` and `procedure_begin/result`. It preserves exact steps, outputs and trace,
 and returns facts without deciding acceptance or the next action. Reviewers only
 read sources and saved evidence. A newer or pending procedure invalidates an older
-aggregate. Before retrying a failed procedure, reserve repair; if it has not been
-aggregated, supply defect evidence and `test_failure: true`.
+aggregate. Aggregate a failed independent procedure through `check_run` before
+repair so the complete independent result charges the counter exactly once.
+After restoring an unavailable procedure, reopen work with its recorded evidence
+and freeze a fresh candidate; unavailable results do not charge the counter.
+Executor local tests run outside this independent-check API, without a failure
+limit or repair events. The `self` stage records evidence without charging the
+counter or requiring repair for its own failures.
 
 `timeout` is a positive finite budget for the entire assigned attempt, starting at
 the first deterministic `procedure_begin` or `check_run`, including procedure

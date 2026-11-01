@@ -275,7 +275,9 @@ def transition(state, task, event, directory):
         require(not task.get("last_check_failed") or task["active_repair"], "repair_cycle_required", "A retry after failure must reserve a repair cycle")
         previous = next((item for item in reversed(task["evidence"]) if item.get("procedure")
                          and item["check_id"] == check["id"] and item["stage"] == stage), None)
-        require(not previous or previous["outcome"] in {"passed", "abandoned"} or task["active_repair"],
+        require(stage == "self" or not previous
+                or previous["head"] != repository(root_for(state, task)).head()
+                or previous["outcome"] in {"passed", "abandoned"} or task["active_repair"],
                 "repair_cycle_required", "A failed procedure retry must reserve a repair cycle")
         if stage != "baseline":
             current(state, task)
@@ -392,11 +394,12 @@ def transition(state, task, event, directory):
             return {"outcome": "baseline_recorded", "log": relative, "summary": summary}
         state["status"] = "blocked"
         state["blockers"].append({"reason": "baseline_failed", "task_id": task["plan"]["id"], "resume_condition": "Resolve or explicitly scope the pre-existing failure", "log": relative})
+        task["failure"] = {"budget": "baseline", "outcome": outcome}
     for result in outputs:
         task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "outcome": (result["outcome"] if result["evidence_complete"] else "unavailable") if before == after else "stale", "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root).head()})
-    if stage != "self" or outcome != "passed":
+    if stage == "independent":
         task["last_check_failed"] = outcome != "passed"
-        if task["active_repair"] and outcome != "unavailable" and stage in {"independent", "integration"}:
+        if task["active_repair"] and outcome != "unavailable":
             task["repair_cycles"].append({"id": task["active_repair"], "outcome": outcome, "log": relative})
             task["active_repair"] = None
         if outcome != "passed":

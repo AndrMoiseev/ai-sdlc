@@ -34,7 +34,7 @@ this task flow. There is no automatic final evaluation phase.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
 3. Execute independent tasks in parallel using isolated task worktrees. Invoking sdd-apply authorizes this execution without a separate parallel request. Unavailable isolation blocks execution. Unsupported legacy execution states must be reconciled with their original skill version; do not rewrite their mode.
 4. Read [execute-parallel](flows/execute-parallel.md).
-5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed check or proven review violation, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
+5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed independent check after executor completion or proven review violation, read [repair](flows/repair.md). Executor self-checks remain within implementation and do not consume the failure budget. For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 
 Authorization to execute includes local task commits; delivery beyond those commits requires its own instruction.
 
