@@ -7,7 +7,7 @@ dependencies:
   package_type: apm_package
   source: local
   local_path: ./packages/aisdlc-core
-  content_hash: sha256:cb9913959933cf3e243dfcb30c5f50ed4c9a3e7ad216dcb52ee05025c8bf65fc
+  content_hash: sha256:88e49d7a17c2c7fadca242f898754914030b2690ba78124e8650c6bc11a5f9aa
 - repo_url: _local/aisdlc-experimental
   name: aisdlc-experimental
   version: 0.1.0
@@ -22,289 +22,293 @@ dependencies:
   source: local
   local_path: ./packages/aisdlc-skills
   content_hash: sha256:7848854f824bce18ea20e4c65a6cb37b2a0347b825a3c0a9bb129ae3f7b51516
-- repo_url: _local/code-that-fits-in-your-head
-  name: code-that-fits-in-your-head
+- repo_url: _local/sdd-code-design
+  name: sdd-code-design
   version: unknown
   depth: 2
   resolved_by: _local/aisdlc-core
   package_type: claude_skill
   deployed_files:
-  - .agents/skills/code-that-fits-in-your-head
-  - .agents/skills/code-that-fits-in-your-head/README.md
-  - .agents/skills/code-that-fits-in-your-head/SKILL.md
-  - .agents/skills/code-that-fits-in-your-head/guidelines.md
-  - .agents/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md
-  - .agents/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md
-  - .agents/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md
-  - .agents/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md
-  - .agents/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md
-  - .agents/skills/code-that-fits-in-your-head/references/api-design/examples/go.md
-  - .agents/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md
-  - .agents/skills/code-that-fits-in-your-head/references/api-design/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/api-design/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/code-navigation/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md
-  - .agents/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/patterns.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/decomposition/smells.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/encapsulation/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/examples/go.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/patterns.md
-  - .agents/skills/code-that-fits-in-your-head/references/evolution/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/foundations/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/foundations/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md
-  - .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/security/checklist.md
-  - .agents/skills/code-that-fits-in-your-head/references/security/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/security/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md
-  - .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md
-  - .agents/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md
-  - .agents/skills/code-that-fits-in-your-head/references/tooling/commands.md
-  - .agents/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md
-  - .agents/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md
-  - .agents/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md
-  - .agents/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md
-  - .agents/skills/code-that-fits-in-your-head/workflows/debug-defect.md
-  - .agents/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md
-  - .agents/skills/code-that-fits-in-your-head/workflows/review-code.md
-  - .agents/skills/code-that-fits-in-your-head/workflows/threat-model.md
-  - .claude/skills/code-that-fits-in-your-head
-  - .claude/skills/code-that-fits-in-your-head/README.md
-  - .claude/skills/code-that-fits-in-your-head/SKILL.md
-  - .claude/skills/code-that-fits-in-your-head/guidelines.md
-  - .claude/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md
-  - .claude/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md
-  - .claude/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md
-  - .claude/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md
-  - .claude/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md
-  - .claude/skills/code-that-fits-in-your-head/references/api-design/examples/go.md
-  - .claude/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md
-  - .claude/skills/code-that-fits-in-your-head/references/api-design/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/api-design/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/code-navigation/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md
-  - .claude/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/patterns.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/decomposition/smells.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/encapsulation/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/examples/go.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/patterns.md
-  - .claude/skills/code-that-fits-in-your-head/references/evolution/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/foundations/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/foundations/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md
-  - .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/security/checklist.md
-  - .claude/skills/code-that-fits-in-your-head/references/security/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/security/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md
-  - .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md
-  - .claude/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md
-  - .claude/skills/code-that-fits-in-your-head/references/tooling/commands.md
-  - .claude/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md
-  - .claude/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md
-  - .claude/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md
-  - .claude/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md
-  - .claude/skills/code-that-fits-in-your-head/workflows/debug-defect.md
-  - .claude/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md
-  - .claude/skills/code-that-fits-in-your-head/workflows/review-code.md
-  - .claude/skills/code-that-fits-in-your-head/workflows/threat-model.md
+  - .agents/skills/sdd-code-design
+  - .agents/skills/sdd-code-design/README.md
+  - .agents/skills/sdd-code-design/SKILL.md
+  - .agents/skills/sdd-code-design/agents/openai.yaml
+  - .agents/skills/sdd-code-design/guidelines.md
+  - .agents/skills/sdd-code-design/references/agent-native/hallucination-debugging.md
+  - .agents/skills/sdd-code-design/references/agent-native/knowledge.md
+  - .agents/skills/sdd-code-design/references/agent-native/reviewability.md
+  - .agents/skills/sdd-code-design/references/agent-native/types-as-guardrails.md
+  - .agents/skills/sdd-code-design/references/agent-native/verification-loops.md
+  - .agents/skills/sdd-code-design/references/api-design/examples/csharp.md
+  - .agents/skills/sdd-code-design/references/api-design/examples/go.md
+  - .agents/skills/sdd-code-design/references/api-design/examples/kotlin.md
+  - .agents/skills/sdd-code-design/references/api-design/knowledge.md
+  - .agents/skills/sdd-code-design/references/api-design/rules.md
+  - .agents/skills/sdd-code-design/references/code-navigation/knowledge.md
+  - .agents/skills/sdd-code-design/references/code-navigation/rules.md
+  - .agents/skills/sdd-code-design/references/codebase-setup/checklist.md
+  - .agents/skills/sdd-code-design/references/codebase-setup/knowledge.md
+  - .agents/skills/sdd-code-design/references/codebase-setup/rules.md
+  - .agents/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md
+  - .agents/skills/sdd-code-design/references/decomposition/examples/go.md
+  - .agents/skills/sdd-code-design/references/decomposition/examples/kotlin.md
+  - .agents/skills/sdd-code-design/references/decomposition/knowledge.md
+  - .agents/skills/sdd-code-design/references/decomposition/patterns.md
+  - .agents/skills/sdd-code-design/references/decomposition/rules.md
+  - .agents/skills/sdd-code-design/references/decomposition/smells.md
+  - .agents/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md
+  - .agents/skills/sdd-code-design/references/encapsulation/examples/go-testing.md
+  - .agents/skills/sdd-code-design/references/encapsulation/examples/go.md
+  - .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md
+  - .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin.md
+  - .agents/skills/sdd-code-design/references/encapsulation/knowledge.md
+  - .agents/skills/sdd-code-design/references/encapsulation/rules.md
+  - .agents/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md
+  - .agents/skills/sdd-code-design/references/evolution/examples/go.md
+  - .agents/skills/sdd-code-design/references/evolution/examples/kotlin.md
+  - .agents/skills/sdd-code-design/references/evolution/knowledge.md
+  - .agents/skills/sdd-code-design/references/evolution/patterns.md
+  - .agents/skills/sdd-code-design/references/evolution/rules.md
+  - .agents/skills/sdd-code-design/references/foundations/knowledge.md
+  - .agents/skills/sdd-code-design/references/foundations/rules.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/knowledge.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/patterns.md
+  - .agents/skills/sdd-code-design/references/outside-in-tdd/rules.md
+  - .agents/skills/sdd-code-design/references/practices-glossary/knowledge.md
+  - .agents/skills/sdd-code-design/references/security/checklist.md
+  - .agents/skills/sdd-code-design/references/security/knowledge.md
+  - .agents/skills/sdd-code-design/references/security/rules.md
+  - .agents/skills/sdd-code-design/references/separation-of-concerns/knowledge.md
+  - .agents/skills/sdd-code-design/references/separation-of-concerns/patterns.md
+  - .agents/skills/sdd-code-design/references/separation-of-concerns/rules.md
+  - .agents/skills/sdd-code-design/references/teamwork-git/checklist.md
+  - .agents/skills/sdd-code-design/references/teamwork-git/knowledge.md
+  - .agents/skills/sdd-code-design/references/teamwork-git/rules.md
+  - .agents/skills/sdd-code-design/references/tooling/commands.md
+  - .agents/skills/sdd-code-design/references/troubleshooting/knowledge.md
+  - .agents/skills/sdd-code-design/references/troubleshooting/patterns.md
+  - .agents/skills/sdd-code-design/references/troubleshooting/rules.md
+  - .agents/skills/sdd-code-design/workflows/add-feature-outside-in.md
+  - .agents/skills/sdd-code-design/workflows/debug-defect.md
+  - .agents/skills/sdd-code-design/workflows/operationalize-finding.md
+  - .agents/skills/sdd-code-design/workflows/review-code.md
+  - .agents/skills/sdd-code-design/workflows/threat-model.md
+  - .claude/skills/sdd-code-design
+  - .claude/skills/sdd-code-design/README.md
+  - .claude/skills/sdd-code-design/SKILL.md
+  - .claude/skills/sdd-code-design/agents/openai.yaml
+  - .claude/skills/sdd-code-design/guidelines.md
+  - .claude/skills/sdd-code-design/references/agent-native/hallucination-debugging.md
+  - .claude/skills/sdd-code-design/references/agent-native/knowledge.md
+  - .claude/skills/sdd-code-design/references/agent-native/reviewability.md
+  - .claude/skills/sdd-code-design/references/agent-native/types-as-guardrails.md
+  - .claude/skills/sdd-code-design/references/agent-native/verification-loops.md
+  - .claude/skills/sdd-code-design/references/api-design/examples/csharp.md
+  - .claude/skills/sdd-code-design/references/api-design/examples/go.md
+  - .claude/skills/sdd-code-design/references/api-design/examples/kotlin.md
+  - .claude/skills/sdd-code-design/references/api-design/knowledge.md
+  - .claude/skills/sdd-code-design/references/api-design/rules.md
+  - .claude/skills/sdd-code-design/references/code-navigation/knowledge.md
+  - .claude/skills/sdd-code-design/references/code-navigation/rules.md
+  - .claude/skills/sdd-code-design/references/codebase-setup/checklist.md
+  - .claude/skills/sdd-code-design/references/codebase-setup/knowledge.md
+  - .claude/skills/sdd-code-design/references/codebase-setup/rules.md
+  - .claude/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md
+  - .claude/skills/sdd-code-design/references/decomposition/examples/go.md
+  - .claude/skills/sdd-code-design/references/decomposition/examples/kotlin.md
+  - .claude/skills/sdd-code-design/references/decomposition/knowledge.md
+  - .claude/skills/sdd-code-design/references/decomposition/patterns.md
+  - .claude/skills/sdd-code-design/references/decomposition/rules.md
+  - .claude/skills/sdd-code-design/references/decomposition/smells.md
+  - .claude/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md
+  - .claude/skills/sdd-code-design/references/encapsulation/examples/go-testing.md
+  - .claude/skills/sdd-code-design/references/encapsulation/examples/go.md
+  - .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md
+  - .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin.md
+  - .claude/skills/sdd-code-design/references/encapsulation/knowledge.md
+  - .claude/skills/sdd-code-design/references/encapsulation/rules.md
+  - .claude/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md
+  - .claude/skills/sdd-code-design/references/evolution/examples/go.md
+  - .claude/skills/sdd-code-design/references/evolution/examples/kotlin.md
+  - .claude/skills/sdd-code-design/references/evolution/knowledge.md
+  - .claude/skills/sdd-code-design/references/evolution/patterns.md
+  - .claude/skills/sdd-code-design/references/evolution/rules.md
+  - .claude/skills/sdd-code-design/references/foundations/knowledge.md
+  - .claude/skills/sdd-code-design/references/foundations/rules.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/knowledge.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/patterns.md
+  - .claude/skills/sdd-code-design/references/outside-in-tdd/rules.md
+  - .claude/skills/sdd-code-design/references/practices-glossary/knowledge.md
+  - .claude/skills/sdd-code-design/references/security/checklist.md
+  - .claude/skills/sdd-code-design/references/security/knowledge.md
+  - .claude/skills/sdd-code-design/references/security/rules.md
+  - .claude/skills/sdd-code-design/references/separation-of-concerns/knowledge.md
+  - .claude/skills/sdd-code-design/references/separation-of-concerns/patterns.md
+  - .claude/skills/sdd-code-design/references/separation-of-concerns/rules.md
+  - .claude/skills/sdd-code-design/references/teamwork-git/checklist.md
+  - .claude/skills/sdd-code-design/references/teamwork-git/knowledge.md
+  - .claude/skills/sdd-code-design/references/teamwork-git/rules.md
+  - .claude/skills/sdd-code-design/references/tooling/commands.md
+  - .claude/skills/sdd-code-design/references/troubleshooting/knowledge.md
+  - .claude/skills/sdd-code-design/references/troubleshooting/patterns.md
+  - .claude/skills/sdd-code-design/references/troubleshooting/rules.md
+  - .claude/skills/sdd-code-design/workflows/add-feature-outside-in.md
+  - .claude/skills/sdd-code-design/workflows/debug-defect.md
+  - .claude/skills/sdd-code-design/workflows/operationalize-finding.md
+  - .claude/skills/sdd-code-design/workflows/review-code.md
+  - .claude/skills/sdd-code-design/workflows/threat-model.md
   deployed_file_hashes:
-    .agents/skills/code-that-fits-in-your-head/README.md: sha256:c1ec57869a12afd0da40a93e7f90c6e91185cfc23301590f0cc63f78fad562f4
-    .agents/skills/code-that-fits-in-your-head/SKILL.md: sha256:6f0c0c4a19c35acadce9537b7ad5b4f5690ba883ff272d5dea26f924604f2e9a
-    .agents/skills/code-that-fits-in-your-head/guidelines.md: sha256:ca55df999830bcb014a2c358018ea3b350456ef37b7c99c8629531916ccb0a78
-    .agents/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
-    .agents/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
-    .agents/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
-    .agents/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
-    .agents/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
-    .agents/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
-    .agents/skills/code-that-fits-in-your-head/references/api-design/examples/go.md: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
-    .agents/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
-    .agents/skills/code-that-fits-in-your-head/references/api-design/knowledge.md: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
-    .agents/skills/code-that-fits-in-your-head/references/api-design/rules.md: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
-    .agents/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
-    .agents/skills/code-that-fits-in-your-head/references/code-navigation/rules.md: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
-    .agents/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
-    .agents/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
-    .agents/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/patterns.md: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/rules.md: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
-    .agents/skills/code-that-fits-in-your-head/references/decomposition/smells.md: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
-    .agents/skills/code-that-fits-in-your-head/references/encapsulation/rules.md: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
-    .agents/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
-    .agents/skills/code-that-fits-in-your-head/references/evolution/examples/go.md: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
-    .agents/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
-    .agents/skills/code-that-fits-in-your-head/references/evolution/knowledge.md: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
-    .agents/skills/code-that-fits-in-your-head/references/evolution/patterns.md: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
-    .agents/skills/code-that-fits-in-your-head/references/evolution/rules.md: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
-    .agents/skills/code-that-fits-in-your-head/references/foundations/knowledge.md: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
-    .agents/skills/code-that-fits-in-your-head/references/foundations/rules.md: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
-    .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
-    .agents/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
-    .agents/skills/code-that-fits-in-your-head/references/security/checklist.md: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
-    .agents/skills/code-that-fits-in-your-head/references/security/knowledge.md: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
-    .agents/skills/code-that-fits-in-your-head/references/security/rules.md: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
-    .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
-    .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
-    .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
-    .agents/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
-    .agents/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
-    .agents/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
-    .agents/skills/code-that-fits-in-your-head/references/tooling/commands.md: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
-    .agents/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
-    .agents/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
-    .agents/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
-    .agents/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
-    .agents/skills/code-that-fits-in-your-head/workflows/debug-defect.md: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
-    .agents/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
-    .agents/skills/code-that-fits-in-your-head/workflows/review-code.md: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
-    .agents/skills/code-that-fits-in-your-head/workflows/threat-model.md: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
-    .claude/skills/code-that-fits-in-your-head/README.md: sha256:c1ec57869a12afd0da40a93e7f90c6e91185cfc23301590f0cc63f78fad562f4
-    .claude/skills/code-that-fits-in-your-head/SKILL.md: sha256:6f0c0c4a19c35acadce9537b7ad5b4f5690ba883ff272d5dea26f924604f2e9a
-    .claude/skills/code-that-fits-in-your-head/guidelines.md: sha256:ca55df999830bcb014a2c358018ea3b350456ef37b7c99c8629531916ccb0a78
-    .claude/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
-    .claude/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
-    .claude/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
-    .claude/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
-    .claude/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
-    .claude/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
-    .claude/skills/code-that-fits-in-your-head/references/api-design/examples/go.md: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
-    .claude/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
-    .claude/skills/code-that-fits-in-your-head/references/api-design/knowledge.md: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
-    .claude/skills/code-that-fits-in-your-head/references/api-design/rules.md: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
-    .claude/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
-    .claude/skills/code-that-fits-in-your-head/references/code-navigation/rules.md: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
-    .claude/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
-    .claude/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
-    .claude/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/patterns.md: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/rules.md: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
-    .claude/skills/code-that-fits-in-your-head/references/decomposition/smells.md: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
-    .claude/skills/code-that-fits-in-your-head/references/encapsulation/rules.md: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
-    .claude/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
-    .claude/skills/code-that-fits-in-your-head/references/evolution/examples/go.md: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
-    .claude/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
-    .claude/skills/code-that-fits-in-your-head/references/evolution/knowledge.md: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
-    .claude/skills/code-that-fits-in-your-head/references/evolution/patterns.md: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
-    .claude/skills/code-that-fits-in-your-head/references/evolution/rules.md: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
-    .claude/skills/code-that-fits-in-your-head/references/foundations/knowledge.md: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
-    .claude/skills/code-that-fits-in-your-head/references/foundations/rules.md: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
-    .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
-    .claude/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
-    .claude/skills/code-that-fits-in-your-head/references/security/checklist.md: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
-    .claude/skills/code-that-fits-in-your-head/references/security/knowledge.md: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
-    .claude/skills/code-that-fits-in-your-head/references/security/rules.md: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
-    .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
-    .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
-    .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
-    .claude/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
-    .claude/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
-    .claude/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
-    .claude/skills/code-that-fits-in-your-head/references/tooling/commands.md: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
-    .claude/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
-    .claude/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
-    .claude/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
-    .claude/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
-    .claude/skills/code-that-fits-in-your-head/workflows/debug-defect.md: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
-    .claude/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
-    .claude/skills/code-that-fits-in-your-head/workflows/review-code.md: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
-    .claude/skills/code-that-fits-in-your-head/workflows/threat-model.md: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
+    .agents/skills/sdd-code-design/README.md: sha256:006299e429a93b66a8ab2815cd3272ac2fa96a7460a4d2b042b13e14c0bd9be8
+    .agents/skills/sdd-code-design/SKILL.md: sha256:123b31b9b20b4539e7d98683f1254282394c7c736a5dd2b531fb59ed13bdae1b
+    .agents/skills/sdd-code-design/agents/openai.yaml: sha256:a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94
+    .agents/skills/sdd-code-design/guidelines.md: sha256:97aea58859b740b3f6f58211cfb8d67f4152c863524f023669dfb973fcff6b85
+    .agents/skills/sdd-code-design/references/agent-native/hallucination-debugging.md: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
+    .agents/skills/sdd-code-design/references/agent-native/knowledge.md: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
+    .agents/skills/sdd-code-design/references/agent-native/reviewability.md: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
+    .agents/skills/sdd-code-design/references/agent-native/types-as-guardrails.md: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
+    .agents/skills/sdd-code-design/references/agent-native/verification-loops.md: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
+    .agents/skills/sdd-code-design/references/api-design/examples/csharp.md: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
+    .agents/skills/sdd-code-design/references/api-design/examples/go.md: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
+    .agents/skills/sdd-code-design/references/api-design/examples/kotlin.md: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
+    .agents/skills/sdd-code-design/references/api-design/knowledge.md: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
+    .agents/skills/sdd-code-design/references/api-design/rules.md: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
+    .agents/skills/sdd-code-design/references/code-navigation/knowledge.md: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
+    .agents/skills/sdd-code-design/references/code-navigation/rules.md: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
+    .agents/skills/sdd-code-design/references/codebase-setup/checklist.md: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
+    .agents/skills/sdd-code-design/references/codebase-setup/knowledge.md: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
+    .agents/skills/sdd-code-design/references/codebase-setup/rules.md: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
+    .agents/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
+    .agents/skills/sdd-code-design/references/decomposition/examples/go.md: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
+    .agents/skills/sdd-code-design/references/decomposition/examples/kotlin.md: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
+    .agents/skills/sdd-code-design/references/decomposition/knowledge.md: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
+    .agents/skills/sdd-code-design/references/decomposition/patterns.md: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
+    .agents/skills/sdd-code-design/references/decomposition/rules.md: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
+    .agents/skills/sdd-code-design/references/decomposition/smells.md: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
+    .agents/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
+    .agents/skills/sdd-code-design/references/encapsulation/examples/go-testing.md: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
+    .agents/skills/sdd-code-design/references/encapsulation/examples/go.md: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
+    .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
+    .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin.md: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
+    .agents/skills/sdd-code-design/references/encapsulation/knowledge.md: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
+    .agents/skills/sdd-code-design/references/encapsulation/rules.md: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
+    .agents/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
+    .agents/skills/sdd-code-design/references/evolution/examples/go.md: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
+    .agents/skills/sdd-code-design/references/evolution/examples/kotlin.md: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
+    .agents/skills/sdd-code-design/references/evolution/knowledge.md: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
+    .agents/skills/sdd-code-design/references/evolution/patterns.md: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
+    .agents/skills/sdd-code-design/references/evolution/rules.md: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
+    .agents/skills/sdd-code-design/references/foundations/knowledge.md: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
+    .agents/skills/sdd-code-design/references/foundations/rules.md: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
+    .agents/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
+    .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
+    .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
+    .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
+    .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
+    .agents/skills/sdd-code-design/references/outside-in-tdd/knowledge.md: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
+    .agents/skills/sdd-code-design/references/outside-in-tdd/patterns.md: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
+    .agents/skills/sdd-code-design/references/outside-in-tdd/rules.md: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
+    .agents/skills/sdd-code-design/references/practices-glossary/knowledge.md: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
+    .agents/skills/sdd-code-design/references/security/checklist.md: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
+    .agents/skills/sdd-code-design/references/security/knowledge.md: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
+    .agents/skills/sdd-code-design/references/security/rules.md: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
+    .agents/skills/sdd-code-design/references/separation-of-concerns/knowledge.md: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
+    .agents/skills/sdd-code-design/references/separation-of-concerns/patterns.md: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
+    .agents/skills/sdd-code-design/references/separation-of-concerns/rules.md: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
+    .agents/skills/sdd-code-design/references/teamwork-git/checklist.md: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
+    .agents/skills/sdd-code-design/references/teamwork-git/knowledge.md: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
+    .agents/skills/sdd-code-design/references/teamwork-git/rules.md: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
+    .agents/skills/sdd-code-design/references/tooling/commands.md: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
+    .agents/skills/sdd-code-design/references/troubleshooting/knowledge.md: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
+    .agents/skills/sdd-code-design/references/troubleshooting/patterns.md: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
+    .agents/skills/sdd-code-design/references/troubleshooting/rules.md: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
+    .agents/skills/sdd-code-design/workflows/add-feature-outside-in.md: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
+    .agents/skills/sdd-code-design/workflows/debug-defect.md: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
+    .agents/skills/sdd-code-design/workflows/operationalize-finding.md: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
+    .agents/skills/sdd-code-design/workflows/review-code.md: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
+    .agents/skills/sdd-code-design/workflows/threat-model.md: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
+    .claude/skills/sdd-code-design/README.md: sha256:006299e429a93b66a8ab2815cd3272ac2fa96a7460a4d2b042b13e14c0bd9be8
+    .claude/skills/sdd-code-design/SKILL.md: sha256:123b31b9b20b4539e7d98683f1254282394c7c736a5dd2b531fb59ed13bdae1b
+    .claude/skills/sdd-code-design/agents/openai.yaml: sha256:a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94
+    .claude/skills/sdd-code-design/guidelines.md: sha256:97aea58859b740b3f6f58211cfb8d67f4152c863524f023669dfb973fcff6b85
+    .claude/skills/sdd-code-design/references/agent-native/hallucination-debugging.md: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
+    .claude/skills/sdd-code-design/references/agent-native/knowledge.md: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
+    .claude/skills/sdd-code-design/references/agent-native/reviewability.md: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
+    .claude/skills/sdd-code-design/references/agent-native/types-as-guardrails.md: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
+    .claude/skills/sdd-code-design/references/agent-native/verification-loops.md: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
+    .claude/skills/sdd-code-design/references/api-design/examples/csharp.md: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
+    .claude/skills/sdd-code-design/references/api-design/examples/go.md: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
+    .claude/skills/sdd-code-design/references/api-design/examples/kotlin.md: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
+    .claude/skills/sdd-code-design/references/api-design/knowledge.md: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
+    .claude/skills/sdd-code-design/references/api-design/rules.md: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
+    .claude/skills/sdd-code-design/references/code-navigation/knowledge.md: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
+    .claude/skills/sdd-code-design/references/code-navigation/rules.md: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
+    .claude/skills/sdd-code-design/references/codebase-setup/checklist.md: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
+    .claude/skills/sdd-code-design/references/codebase-setup/knowledge.md: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
+    .claude/skills/sdd-code-design/references/codebase-setup/rules.md: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
+    .claude/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
+    .claude/skills/sdd-code-design/references/decomposition/examples/go.md: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
+    .claude/skills/sdd-code-design/references/decomposition/examples/kotlin.md: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
+    .claude/skills/sdd-code-design/references/decomposition/knowledge.md: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
+    .claude/skills/sdd-code-design/references/decomposition/patterns.md: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
+    .claude/skills/sdd-code-design/references/decomposition/rules.md: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
+    .claude/skills/sdd-code-design/references/decomposition/smells.md: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
+    .claude/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
+    .claude/skills/sdd-code-design/references/encapsulation/examples/go-testing.md: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
+    .claude/skills/sdd-code-design/references/encapsulation/examples/go.md: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
+    .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
+    .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin.md: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
+    .claude/skills/sdd-code-design/references/encapsulation/knowledge.md: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
+    .claude/skills/sdd-code-design/references/encapsulation/rules.md: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
+    .claude/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
+    .claude/skills/sdd-code-design/references/evolution/examples/go.md: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
+    .claude/skills/sdd-code-design/references/evolution/examples/kotlin.md: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
+    .claude/skills/sdd-code-design/references/evolution/knowledge.md: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
+    .claude/skills/sdd-code-design/references/evolution/patterns.md: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
+    .claude/skills/sdd-code-design/references/evolution/rules.md: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
+    .claude/skills/sdd-code-design/references/foundations/knowledge.md: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
+    .claude/skills/sdd-code-design/references/foundations/rules.md: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
+    .claude/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
+    .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
+    .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
+    .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
+    .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
+    .claude/skills/sdd-code-design/references/outside-in-tdd/knowledge.md: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
+    .claude/skills/sdd-code-design/references/outside-in-tdd/patterns.md: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
+    .claude/skills/sdd-code-design/references/outside-in-tdd/rules.md: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
+    .claude/skills/sdd-code-design/references/practices-glossary/knowledge.md: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
+    .claude/skills/sdd-code-design/references/security/checklist.md: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
+    .claude/skills/sdd-code-design/references/security/knowledge.md: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
+    .claude/skills/sdd-code-design/references/security/rules.md: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
+    .claude/skills/sdd-code-design/references/separation-of-concerns/knowledge.md: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
+    .claude/skills/sdd-code-design/references/separation-of-concerns/patterns.md: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
+    .claude/skills/sdd-code-design/references/separation-of-concerns/rules.md: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
+    .claude/skills/sdd-code-design/references/teamwork-git/checklist.md: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
+    .claude/skills/sdd-code-design/references/teamwork-git/knowledge.md: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
+    .claude/skills/sdd-code-design/references/teamwork-git/rules.md: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
+    .claude/skills/sdd-code-design/references/tooling/commands.md: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
+    .claude/skills/sdd-code-design/references/troubleshooting/knowledge.md: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
+    .claude/skills/sdd-code-design/references/troubleshooting/patterns.md: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
+    .claude/skills/sdd-code-design/references/troubleshooting/rules.md: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
+    .claude/skills/sdd-code-design/workflows/add-feature-outside-in.md: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
+    .claude/skills/sdd-code-design/workflows/debug-defect.md: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
+    .claude/skills/sdd-code-design/workflows/operationalize-finding.md: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
+    .claude/skills/sdd-code-design/workflows/review-code.md: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
+    .claude/skills/sdd-code-design/workflows/threat-model.md: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
   source: local
-  local_path: ../../skills/code-that-fits-in-your-head
+  local_path: ../../skills/sdd-code-design
   declaring_parent: ./packages/aisdlc-core
-  anchored_local_path: skills/code-that-fits-in-your-head
-  content_hash: sha256:6b9e22524885ef9cfd75d87b7e41e0b11dcbf88f0290e75e923efd80710ef33b
+  anchored_local_path: skills/sdd-code-design
+  content_hash: sha256:c437a2c7e18ed19fdd617d16fbc2980522128b99a365117121d9a6beae5481d5
 - repo_url: _local/common-dependencies
   name: common-dependencies
   version: 0.1.0
@@ -7447,615 +7451,615 @@ deployments:
   content_hash: sha256:1ea25551e0359e547267d40e83812ffd1a7bdf7398826b65f2a2fcf1a11ba596
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head
+  value: .claude/skills/sdd-code-design
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: null
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/README.md
+  value: .claude/skills/sdd-code-design/README.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:c1ec57869a12afd0da40a93e7f90c6e91185cfc23301590f0cc63f78fad562f4
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:006299e429a93b66a8ab2815cd3272ac2fa96a7460a4d2b042b13e14c0bd9be8
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/SKILL.md
+  value: .claude/skills/sdd-code-design/SKILL.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:6f0c0c4a19c35acadce9537b7ad5b4f5690ba883ff272d5dea26f924604f2e9a
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:123b31b9b20b4539e7d98683f1254282394c7c736a5dd2b531fb59ed13bdae1b
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/guidelines.md
+  value: .claude/skills/sdd-code-design/guidelines.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:ca55df999830bcb014a2c358018ea3b350456ef37b7c99c8629531916ccb0a78
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:97aea58859b740b3f6f58211cfb8d67f4152c863524f023669dfb973fcff6b85
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md
+  value: .claude/skills/sdd-code-design/references/agent-native/hallucination-debugging.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md
+  value: .claude/skills/sdd-code-design/references/agent-native/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md
+  value: .claude/skills/sdd-code-design/references/agent-native/reviewability.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md
+  value: .claude/skills/sdd-code-design/references/agent-native/types-as-guardrails.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md
+  value: .claude/skills/sdd-code-design/references/agent-native/verification-loops.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md
+  value: .claude/skills/sdd-code-design/references/api-design/examples/csharp.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/api-design/examples/go.md
+  value: .claude/skills/sdd-code-design/references/api-design/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md
+  value: .claude/skills/sdd-code-design/references/api-design/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/api-design/knowledge.md
+  value: .claude/skills/sdd-code-design/references/api-design/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/api-design/rules.md
+  value: .claude/skills/sdd-code-design/references/api-design/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md
+  value: .claude/skills/sdd-code-design/references/code-navigation/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/code-navigation/rules.md
+  value: .claude/skills/sdd-code-design/references/code-navigation/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md
+  value: .claude/skills/sdd-code-design/references/codebase-setup/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md
+  value: .claude/skills/sdd-code-design/references/codebase-setup/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md
+  value: .claude/skills/sdd-code-design/references/codebase-setup/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md
+  value: .claude/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md
+  value: .claude/skills/sdd-code-design/references/decomposition/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md
+  value: .claude/skills/sdd-code-design/references/decomposition/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md
+  value: .claude/skills/sdd-code-design/references/decomposition/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/patterns.md
+  value: .claude/skills/sdd-code-design/references/decomposition/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/rules.md
+  value: .claude/skills/sdd-code-design/references/decomposition/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/decomposition/smells.md
+  value: .claude/skills/sdd-code-design/references/decomposition/smells.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/examples/go-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/encapsulation/rules.md
+  value: .claude/skills/sdd-code-design/references/encapsulation/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md
+  value: .claude/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/examples/go.md
+  value: .claude/skills/sdd-code-design/references/evolution/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md
+  value: .claude/skills/sdd-code-design/references/evolution/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/knowledge.md
+  value: .claude/skills/sdd-code-design/references/evolution/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/patterns.md
+  value: .claude/skills/sdd-code-design/references/evolution/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/evolution/rules.md
+  value: .claude/skills/sdd-code-design/references/evolution/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/foundations/knowledge.md
+  value: .claude/skills/sdd-code-design/references/foundations/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/foundations/rules.md
+  value: .claude/skills/sdd-code-design/references/foundations/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md
+  value: .claude/skills/sdd-code-design/references/outside-in-tdd/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md
+  value: .claude/skills/sdd-code-design/references/practices-glossary/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/security/checklist.md
+  value: .claude/skills/sdd-code-design/references/security/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/security/knowledge.md
+  value: .claude/skills/sdd-code-design/references/security/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/security/rules.md
+  value: .claude/skills/sdd-code-design/references/security/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md
+  value: .claude/skills/sdd-code-design/references/separation-of-concerns/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md
+  value: .claude/skills/sdd-code-design/references/separation-of-concerns/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md
+  value: .claude/skills/sdd-code-design/references/separation-of-concerns/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md
+  value: .claude/skills/sdd-code-design/references/teamwork-git/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md
+  value: .claude/skills/sdd-code-design/references/teamwork-git/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md
+  value: .claude/skills/sdd-code-design/references/teamwork-git/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/tooling/commands.md
+  value: .claude/skills/sdd-code-design/references/tooling/commands.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md
+  value: .claude/skills/sdd-code-design/references/troubleshooting/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md
+  value: .claude/skills/sdd-code-design/references/troubleshooting/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md
+  value: .claude/skills/sdd-code-design/references/troubleshooting/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md
+  value: .claude/skills/sdd-code-design/workflows/add-feature-outside-in.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/workflows/debug-defect.md
+  value: .claude/skills/sdd-code-design/workflows/debug-defect.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md
+  value: .claude/skills/sdd-code-design/workflows/operationalize-finding.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/workflows/review-code.md
+  value: .claude/skills/sdd-code-design/workflows/review-code.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
 - kind: project-relative
   target: claude
-  value: .claude/skills/code-that-fits-in-your-head/workflows/threat-model.md
+  value: .claude/skills/sdd-code-design/workflows/threat-model.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
 - kind: project-relative
   target: claude
@@ -17797,615 +17801,615 @@ deployments:
   content_hash: sha256:1ea25551e0359e547267d40e83812ffd1a7bdf7398826b65f2a2fcf1a11ba596
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head
+  value: .agents/skills/sdd-code-design
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: null
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/README.md
+  value: .agents/skills/sdd-code-design/README.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:c1ec57869a12afd0da40a93e7f90c6e91185cfc23301590f0cc63f78fad562f4
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:006299e429a93b66a8ab2815cd3272ac2fa96a7460a4d2b042b13e14c0bd9be8
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/SKILL.md
+  value: .agents/skills/sdd-code-design/SKILL.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:6f0c0c4a19c35acadce9537b7ad5b4f5690ba883ff272d5dea26f924604f2e9a
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:123b31b9b20b4539e7d98683f1254282394c7c736a5dd2b531fb59ed13bdae1b
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/guidelines.md
+  value: .agents/skills/sdd-code-design/guidelines.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
-  content_hash: sha256:ca55df999830bcb014a2c358018ea3b350456ef37b7c99c8629531916ccb0a78
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:97aea58859b740b3f6f58211cfb8d67f4152c863524f023669dfb973fcff6b85
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/agent-native/hallucination-debugging.md
+  value: .agents/skills/sdd-code-design/references/agent-native/hallucination-debugging.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2043c3c3cd65f963a385dc814f7a5898a8bfeaab2f2ba792e0634b7db4e24e1e
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/agent-native/knowledge.md
+  value: .agents/skills/sdd-code-design/references/agent-native/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:6bf72360ad1e7b8c15624e4a286c25d655f93c2d8dd18e8f319e2ecea8c9883a
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/agent-native/reviewability.md
+  value: .agents/skills/sdd-code-design/references/agent-native/reviewability.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:6506f79f126d42ae8612e979089c21a632f0eb35525399521d5993836e3d54aa
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/agent-native/types-as-guardrails.md
+  value: .agents/skills/sdd-code-design/references/agent-native/types-as-guardrails.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:50bde83dbc1b9c06cf5c335aa7e3093e469e73eeb2a27a48666635d0fdeaa099
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/agent-native/verification-loops.md
+  value: .agents/skills/sdd-code-design/references/agent-native/verification-loops.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:67be1b2fb116f92e5fff54442bb2fbfa6c2ac1e8cefa923b3191073d8ad0b7a9
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/api-design/examples/csharp.md
+  value: .agents/skills/sdd-code-design/references/api-design/examples/csharp.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:39eb377866d2aee126909d9620759ece95dc401625478a94364d2834231db51a
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/api-design/examples/go.md
+  value: .agents/skills/sdd-code-design/references/api-design/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0145113039034a5bd78c84618abe006575c78fd567b8e0dc189d042aa598f867
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/api-design/examples/kotlin.md
+  value: .agents/skills/sdd-code-design/references/api-design/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:dadbcf8639e397070a73b023c7c1d6839d6e3d72845eaaf59b05a384896da96b
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/api-design/knowledge.md
+  value: .agents/skills/sdd-code-design/references/api-design/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0ab95ae1b3efef32146b4c643197248d9450a0d542943cbef4ebfbe3d06cb2cd
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/api-design/rules.md
+  value: .agents/skills/sdd-code-design/references/api-design/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:593cf353ca23c3cd3c976877d981f44400c99930c523eb04cae9cb537a0a8e02
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/code-navigation/knowledge.md
+  value: .agents/skills/sdd-code-design/references/code-navigation/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:bdaedeb78bb6d1763ce09c0694ebada349a8e95c12a7e9583c23c4e265dc0fab
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/code-navigation/rules.md
+  value: .agents/skills/sdd-code-design/references/code-navigation/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:a76b65b7cddd0c41ee55dd89b5a416d5715ecb43b15619351d6d341a6ea9ab32
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/codebase-setup/checklist.md
+  value: .agents/skills/sdd-code-design/references/codebase-setup/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:7ada1595a27305d32a7bc047185c336e0175b48df7d0ce2d18e087a18bf5adf6
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/codebase-setup/knowledge.md
+  value: .agents/skills/sdd-code-design/references/codebase-setup/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b3e0f52fe61dcf1981876e36b4a575f964832675746554d3fa727225885d63d1
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/codebase-setup/rules.md
+  value: .agents/skills/sdd-code-design/references/codebase-setup/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ae63678f89144f96fe557e5574d0dc2b84951e78769899263ef195cda195e73f
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/csharp-aspnetcore.md
+  value: .agents/skills/sdd-code-design/references/decomposition/examples/csharp-aspnetcore.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:dfb6189bbd6c82ad9a625fc9a70507eca45615b7f2e950818d2f7184a6f6e477
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/go.md
+  value: .agents/skills/sdd-code-design/references/decomposition/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:66bfaa78a012c73166d4f2523927bb0ffccd9150861271120f5ba9731016caf7
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/examples/kotlin.md
+  value: .agents/skills/sdd-code-design/references/decomposition/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0ed26315a7eab49b7b1ba70bf122e115ea370232e7baa4033d140d6d39c3fd12
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/knowledge.md
+  value: .agents/skills/sdd-code-design/references/decomposition/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:914ea284825305fb3c1b157549141e0573c7cdbdd695b9c2109c3cf107da2dbe
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/patterns.md
+  value: .agents/skills/sdd-code-design/references/decomposition/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e4119e7f07de88dc6d9523c9cb691ed32df335740818078a59d05964cdb1e324
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/rules.md
+  value: .agents/skills/sdd-code-design/references/decomposition/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:0d9b47f3489fb1d3831d7352c4571757ab2ab38f168a91135182b5a38720f681
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/decomposition/smells.md
+  value: .agents/skills/sdd-code-design/references/decomposition/smells.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:80bca5364769240d6ac5ae5432a1152cc69ea37999c016ed0525c0513b114746
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/csharp-aspnetcore-xunit.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/examples/csharp-aspnetcore-xunit.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:3271f15a07d049c723fbd1f85a37ca9de4ff3f6b3f9704a80c7484893b272209
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go-testing.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/examples/go-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c3b5afaec6982b3704f70544552378dcb940f33e83fbfb88600a6b5a38bb742a
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/go.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e87fadae5e96b50602cb7aa548891d9c0f43e46befbef6d010b23e2f100d56b5
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin-junit5.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:cf5652e8c27af35999c31fe9aaa7d01ec738e26f4a90fc833fce8dc6b3d930e0
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/examples/kotlin.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:62ac693f20fd06ea73e4503bd53d5319a83d1b1f5e49188eb2ea024ff612f653
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/knowledge.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:65f6e668c926f62c2713daa833769e6d18382e663ab69a1fc36025c6541bab4a
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/encapsulation/rules.md
+  value: .agents/skills/sdd-code-design/references/encapsulation/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:411819ddbc45a685da58bfb6682b9888905c4b698ce0992f5b3ab575e7fdadbc
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/examples/csharp-aspnetcore.md
+  value: .agents/skills/sdd-code-design/references/evolution/examples/csharp-aspnetcore.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:cb5949bf1db83b24993bc4de42fe0a6103dead67a61021d6774485ab2e584e3e
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/examples/go.md
+  value: .agents/skills/sdd-code-design/references/evolution/examples/go.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b457d1a70014e84de0bd0ed337a6c2da5451a73fe4397620e422cb391618ddb6
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/examples/kotlin.md
+  value: .agents/skills/sdd-code-design/references/evolution/examples/kotlin.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:be193233269f3396a7fc600cb60c94cb9576bdc351835c8dd94bcddd37df0a52
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/knowledge.md
+  value: .agents/skills/sdd-code-design/references/evolution/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ba5c418ed56e94b6c11e212991a1bb08c5dc75625ab43e551fd6a68c3ba79412
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/patterns.md
+  value: .agents/skills/sdd-code-design/references/evolution/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2060bbeb4057d61e16e507f69383b5e8b5f63f9931bf63dc0b569c77f1103d0d
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/evolution/rules.md
+  value: .agents/skills/sdd-code-design/references/evolution/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:feb3ceefc0e20c09575a983a7d85069ec57d3fa930b4911da981884ad146e234
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/foundations/knowledge.md
+  value: .agents/skills/sdd-code-design/references/foundations/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e04f44d2115b1e4720daafbd1799e1d1d8ecb4ae3fd36e62d0b45a4e2daba6e4
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/foundations/rules.md
+  value: .agents/skills/sdd-code-design/references/foundations/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:3672a67657b22552a1273cf061193d1a44393052acba097ded5fd63868d794b1
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/examples/csharp-aspnetcore-xunit.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f6a1b5405d18a67e271291b0e0d9a9ea384a76c6f338abaddf25b92a833a2840
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-net-http-testing.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-net-http-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:b87c087687f978494bd3162dfefb1bdcfe337b0dd4b1d5cd497e462eb4bf734f
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/go-testing.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/examples/go-testing.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:37663ae7eb628aa89fd2215c3c58f55a0a8db9a68390e39a35894e5a299993c3
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-junit5.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c9adda654a19981feedc47e98bb3cbaedbdc5a4b52be4c46f1290c22a74e7668
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/examples/kotlin-ktor-junit5.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:bf4dbcae588cb216e255bc0dd756fa7d9fb6744716fdedc4b6fe15bbb6f7e41e
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/knowledge.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:46aece2f4f66e93a52a0d199fac0b4ab5925100ae8f7b8eb0f14a8954721f46a
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/patterns.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:a5668d420544502b652d92f0218c023283d5851dc86939620cb5f0a2e27de558
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/outside-in-tdd/rules.md
+  value: .agents/skills/sdd-code-design/references/outside-in-tdd/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:5cbc539b937e969202e51cbb6743948c2251d03d7c8e00c42e0a2c9ea127d127
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/practices-glossary/knowledge.md
+  value: .agents/skills/sdd-code-design/references/practices-glossary/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:2dbc534757e0c54f52d58ecd1e561952f6c9233c968e71160951796b28a9a902
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/security/checklist.md
+  value: .agents/skills/sdd-code-design/references/security/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:416315b476c383ff8def62526f0aaf05d9c93ba5efec5bc41a8a89f00478f7dd
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/security/knowledge.md
+  value: .agents/skills/sdd-code-design/references/security/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:44627a17e330186e787ff3f80ab736b5ca8b250cbd39f2242ba8c8ce14561902
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/security/rules.md
+  value: .agents/skills/sdd-code-design/references/security/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f9f501f09374d33707bbe93a400530aea652db2f43ca6d73c9db9a9d872b42e5
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/knowledge.md
+  value: .agents/skills/sdd-code-design/references/separation-of-concerns/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ddf040b39836c81a1b7eb3ef0a157c0e27bfa405712368947c2438e48770e880
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/patterns.md
+  value: .agents/skills/sdd-code-design/references/separation-of-concerns/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:4ee1816b691ca5da324a434a4a00fcb55c4046a479bf6d751df8b6afcebeda01
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/separation-of-concerns/rules.md
+  value: .agents/skills/sdd-code-design/references/separation-of-concerns/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:176e9fb85c5cfac5d6befb80f6d985af4533b463ca14a9d16d1725a8efb803c5
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/teamwork-git/checklist.md
+  value: .agents/skills/sdd-code-design/references/teamwork-git/checklist.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:73f63bb375c0990dec56acffaf4cc9461dd893962bb374e103dcebb5c36717db
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/teamwork-git/knowledge.md
+  value: .agents/skills/sdd-code-design/references/teamwork-git/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:d1d8555a0bc7dfb38bd25b6ab58aeecd3d03fa2d4fcd9e167c46b0d98f867aa3
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/teamwork-git/rules.md
+  value: .agents/skills/sdd-code-design/references/teamwork-git/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:25db064f7e4edd92705cc836206c76e4ca8f709fe4e0cf1c9c84995a667e4978
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/tooling/commands.md
+  value: .agents/skills/sdd-code-design/references/tooling/commands.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:21a5a0dc229251154ec10c5176759315f1bce8d03c61b9db41884eb47206ca37
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/troubleshooting/knowledge.md
+  value: .agents/skills/sdd-code-design/references/troubleshooting/knowledge.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:c12a9507229c7c0fec6c6f69b26847b01e2611b3418c3bc5491af5547b797438
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/troubleshooting/patterns.md
+  value: .agents/skills/sdd-code-design/references/troubleshooting/patterns.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:ec8cf7627eae16047f3693812fdf6a4033a042745c128bde8f6244d736af28e4
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/references/troubleshooting/rules.md
+  value: .agents/skills/sdd-code-design/references/troubleshooting/rules.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:e4e206309dcf82e061b691560717e8f3d25cb0e1f8b9c3a85bc050de1ee2e186
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/workflows/add-feature-outside-in.md
+  value: .agents/skills/sdd-code-design/workflows/add-feature-outside-in.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:137c348c42c0af5f498a53287914e08aff5285bae9f22b773aa19ac05a889c7c
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/workflows/debug-defect.md
+  value: .agents/skills/sdd-code-design/workflows/debug-defect.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:f528e9f940284b9ffd0a9346620bcae40bfff3d0858b74a9d025f2ef60ca3436
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/workflows/operationalize-finding.md
+  value: .agents/skills/sdd-code-design/workflows/operationalize-finding.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:4ac8f0e4cbfb04e08ec62f566092e0abe4391297618d412659b81ce74c96f266
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/workflows/review-code.md
+  value: .agents/skills/sdd-code-design/workflows/review-code.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:37a6fb797d3086b2c9f82c4d1dcef00831a21cbd591f6b8c0f4d6a693a56fc70
 - kind: project-relative
   target: codex
-  value: .agents/skills/code-that-fits-in-your-head/workflows/threat-model.md
+  value: .agents/skills/sdd-code-design/workflows/threat-model.md
   runtime: null
   scope: project
   owners:
-  - local:skills/code-that-fits-in-your-head
-  active_owner: local:skills/code-that-fits-in-your-head
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
   content_hash: sha256:63a28dee6810b03bcc1f6568635192161feb4f3463a8bcfb11c025c4961f9db9
 - kind: project-relative
   target: codex
@@ -26309,3 +26313,21 @@ deployments:
   - codealive-ai/ai-driven-development/skills/ubiquitous-language
   active_owner: codealive-ai/ai-driven-development/skills/ubiquitous-language
   content_hash: sha256:18c4aa8e74e494f9975270bd69b4c5a15ef6b6741512b2e73b2059e361e3f31c
+- kind: project-relative
+  target: codex
+  value: .agents/skills/sdd-code-design/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sdd-code-design/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - local:skills/sdd-code-design
+  active_owner: local:skills/sdd-code-design
+  content_hash: sha256:a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94

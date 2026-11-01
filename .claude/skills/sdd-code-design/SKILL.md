@@ -1,9 +1,10 @@
 ---
-name: code-that-fits-in-your-head
-description: Software-engineering heuristics based on Mark Seemann's Code That Fits in Your Head (2021), updated for agent-driven development. Use when writing or reviewing code, refactoring accidental complexity or a Big Ball of Mud, controlling technical or architectural debt in generated code, designing APIs and invariants, adding a feature through a walking skeleton and acceptance tests, debugging a defect with reproducible tests or bisection, threat-modelling endpoints and trust boundaries with STRIDE, planning a legacy or Strangler migration with rollback, or setting up a maintainable codebase. Covers decomposition and cyclomatic complexity, cohesion, encapsulation, outside-in TDD, separation of concerns, Git/review discipline, safe evolution, and troubleshooting. Not for language syntax, framework tutorials, production incident response, or performance profiling.
+name: sdd-code-design
+description: Software design and review heuristics based on Mark Seemann's Code That Fits in Your Head (2021), with agent-driven development amendments. Use only when the user explicitly invokes sdd-code-design; do not invoke automatically for coding, review, refactoring, or debugging tasks.
+disable-model-invocation: true
 ---
 
-# Code That Fits in Your Head
+# SDD Code Design
 
 Engineering heuristics for sustainable software, based on Mark Seemann's 2021 book and clearly labelled agent-era amendments.
 
@@ -33,6 +34,10 @@ Core mental model from Chapter 1:
 5. **Code is a liability.** Generated volume is not progress. Prefer the smallest coherent design that solves the problem without accumulating debt.
 
 See `references/foundations/` for more on sustainability, readability, and brain-limited design.
+
+## Invocation
+
+Apply this skill only when the user explicitly invokes sdd-code-design. Automatic invocation, including invocation by another skill, is prohibited.
 
 ## How to Use This Skill
 
