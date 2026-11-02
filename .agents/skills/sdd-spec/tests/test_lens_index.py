@@ -6,20 +6,28 @@ from test_review_records import project, report, write
 
 def test_default_and_added_lens(tmp_path):
     root = project(tmp_path)
-    assert required_lenses(tmp_path) == ["consistency", "simplicity"]
+    assert required_lenses(tmp_path) == ["consistency", "simplicity", "premortem"]
     index = tmp_path / "sdd/arch-lenses/index.md"
     write(index, {"schema_version": 1, "lenses": []})
     report(tmp_path, root)
     assert not review_status(tmp_path, root, "documents")["review_status"]["complete"]
     report(tmp_path, root, lens="simplicity")
+    result = review_status(tmp_path, root, "documents")["review_status"]
+    assert not result["complete"]
+    assert result["coverage"]["premortem"] == "missing"
+    report(tmp_path, root, lens="premortem", result="incomplete")
+    result = review_status(tmp_path, root, "documents")["review_status"]
+    assert not result["complete"]
+    assert result["coverage"]["premortem"] == "incomplete"
+    report(tmp_path, root, lens="premortem")
     assert review_status(tmp_path, root, "documents")["review_status"]["complete"]
     (index.parent / "security.md").write_text("Security")
     write(index, {"schema_version": 1, "lenses": [{"id": "security", "title": "Security", "path": "security.md"}]})
     result = review_status(tmp_path, root, "documents")["review_status"]
-    assert result["coverage"] == {"consistency": "completed", "simplicity": "completed", "security": "missing"}
+    assert result["coverage"] == {"consistency": "completed", "simplicity": "completed", "premortem": "completed", "security": "missing"}
 
 
-@pytest.mark.parametrize("lens", ["consistency", "simplicity", "plan"])
+@pytest.mark.parametrize("lens", ["consistency", "simplicity", "premortem", "plan"])
 def test_reserved_lens_ids_in_memory(monkeypatch, lens):
     from pathlib import Path
     from types import SimpleNamespace
@@ -37,6 +45,7 @@ def test_simplicity_coverage_is_separate_for_each_stage(tmp_path):
     root = project(tmp_path)
     report(tmp_path, root, run="documents", lens="consistency")
     report(tmp_path, root, run="documents", lens="simplicity")
+    report(tmp_path, root, run="documents", lens="premortem")
     report(tmp_path, root, run="plan", lens="plan", stage="plan")
     before = (root / "review/documents/simplicity.md").read_bytes()
     result = review_status(tmp_path, root, "plan")

@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 @pytest.mark.parametrize("addition_kind", ["command", "procedure"])
-def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, addition_kind):
+def test_verification_lens_gap_reruns_complete_set_before_next_review(execution_checkpoint, addition_kind):
     from copy import deepcopy
     import sys
     driver = execution_checkpoint("pending")
@@ -24,6 +24,8 @@ def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, addit
     checks = deepcopy(previous["checks"])
     result = driver.conclude(role=verifier, outcome="unavailable", check_request="Add explicit subtraction coverage")
     conclusion = result["verification_result"]["id"]
+    driver.review(verdict="more_checks")
+    previous = driver.task
     addition = {"id": "C", "source": "verifier gap", "criteria": ["AC-one"],
                 "run": {"command": [sys.executable, "-B", "-c", "assert 5 - 3 == 2"]}}
     if addition_kind == "procedure":
@@ -47,10 +49,10 @@ def test_verifier_gap_extends_green_ab_before_review(execution_checkpoint, addit
     result = driver.run_checks(stage)
     assert result["outcome"] == "passed"
     assert result["summary"]["requested_check_ids"] == ["plan-1", "B", "C"]
-    with pytest.raises(ValueError, match="registry or applicable check attempt changed"):
-        driver.send("review_start", {"role_id": "gap-reviewer"})
-    driver.conclude(role=verifier)
     assert driver.send("review_start", {"role_id": "gap-reviewer"})["round"] == previous["review_rounds_started"] + 1
+    driver.verification_reviewer("next-verification")
+    driver.send("review_start", {"role_id": "next-verification"})
+    driver.conclude(role="next-verification")
 
 
 @pytest.mark.parametrize("damage", ["passed", "foreign", "stale", "no_request", "foreign_criterion", "both_bases"])
@@ -60,6 +62,7 @@ def test_verifier_extension_rejects_invalid_basis(execution_checkpoint, damage):
     request = None if damage in {"passed", "no_request"} else "Add boundary coverage"
     result = driver.conclude(outcome=outcome, check_request=request)
     conclusion = result["verification_result"]["id"]
+    driver.review(verdict="more_checks")
     addition = {"id": "C", "source": "gap", "criteria": ["AC-one"],
                 "run": driver.task["checks"][0]["run"]}
     value = {"verification_result": conclusion, "additional": [addition]}
@@ -81,11 +84,13 @@ def test_gap_preparation_reopens_executor_without_fabricated_failure(execution_c
     driver = execution_checkpoint("verified")
     result = driver.conclude(outcome="failed", check_request="Prepare another exact assertion")
     conclusion = result["verification_result"]["id"]
+    driver.review(verdict="more_checks")
     driver.send("checks_extend", {"verification_result": conclusion, "additional": [
         {"id": "C", "source": "gap", "criteria": ["AC-one"], "run": driver.task["checks"][0]["run"]}]})
     assert driver.send("repair", {"reason": "Prepare verifier-requested assertion", "defect_evidence": conclusion}) == {
         "status": "repairing", "cycle": None}
-    assert driver.task["test_repair_cycles_started"] == driver.task["review_rounds_started"] == 0
+    assert driver.task["test_repair_cycles_started"] == 0
+    assert driver.task["review_rounds_started"] == 1
     driver.freeze()
     assert driver.verify()["outcome"] == "passed"
     assert driver.review()["status"] == "integrating"
@@ -115,7 +120,7 @@ def test_independent_run_catches_defect(execution_checkpoint):
     driver.freeze()
     assert driver.verify()["outcome"] == "failed"
     assert driver.task["last_check_failed"]
-    assert driver.task["test_repair_cycles_started"] == 0
+    assert driver.task["test_repair_cycles_started"] == 1
     with pytest.raises(ValueError, match="reserve"):
         driver.verify()
     driver.role("reviewer", "reviewer")
@@ -272,7 +277,7 @@ def test_summary_exposes_full_raw_log_without_reexecution(execution_checkpoint, 
     driver = execution_checkpoint("started")
     (driver.root / "check.py").write_text("print('diagnostic-' * 1000)\n")
     driver.freeze()
-    driver.role("verifier", "verifier")
+    driver.verification_reviewer("verifier")
     explorer_id = "summary-independent-explorer"
     result = driver.run_checks("independent", ident=explorer_id)
     assert result["outcome"] == "passed"
@@ -482,8 +487,10 @@ def test_procedure_type_is_explicit_and_deterministic_procedure_belongs_to_explo
             "payload": {"inventory": {"instructions": [], "ci": []}, "additional": [untyped]}}, driver.directory)
     # A filename cannot select ownership: only the explicit kind does.
     from lib.explorer_assignments import execution_kind
-    for kind in ("deterministic", "manual", "behavioral"):
-        assert execution_kind({**untyped, "execution_kind": kind}) == kind
+    assert execution_kind({**untyped, "execution_kind": "deterministic"}) == "deterministic"
+    for kind in ("manual", "behavioral"):
+        with pytest.raises(ValueError, match="deterministic checks only"):
+            execution_kind({**untyped, "execution_kind": kind})
 
 def test_deterministic_procedure_uses_explorer_and_keeps_current_aggregate(driver):
     driver.worktree()
@@ -496,7 +503,7 @@ def test_deterministic_procedure_uses_explorer_and_keeps_current_aggregate(drive
         if stage == "independent":
             driver.freeze()
         driver.explorer(stage + "-explorer", stage)
-        driver.role(stage + "-verifier", "verifier")
+        driver.verification_reviewer(stage + "-verifier")
         with pytest.raises(ValueError, match="explorer"):
             driver.send("procedure_begin", {"role_id": stage + "-verifier", "stage": stage, "check_id": "deterministic-procedure"})
         driver.send("procedure_begin", {"role_id": stage + "-explorer", "stage": stage, "check_id": "deterministic-procedure"})
@@ -516,12 +523,11 @@ def test_deterministic_procedure_uses_explorer_and_keeps_current_aggregate(drive
 
 
 @pytest.mark.parametrize("kind", ["manual", "behavioral"])
-def test_semantic_procedure_requires_task_verifier(kind):
+def test_semantic_checks_are_rejected_for_every_role(kind):
     from lib.explorer_assignments import procedure_role
     task = {"plan": {"id": "TASK-one"}}
     check = {"execution_kind": kind, "run": {"procedure": "eval.md"}}
-    state = {"roles": {name: {"kind": name, "task_id": "TASK-one", "status": "active"}
-                       for name in ("explorer", "verifier")}}
-    with pytest.raises(ValueError, match="task verifier"):
-        procedure_role(state, task, "explorer", "independent", check)
-    assert procedure_role(state, task, "verifier", "independent", check)["kind"] == "verifier"
+    for role in ("explorer", "reviewer"):
+        state = {"roles": {role: {"kind": role, "task_id": "TASK-one", "status": "active"}}}
+        with pytest.raises(ValueError, match="deterministic checks only"):
+            procedure_role(state, task, role, "independent", check)

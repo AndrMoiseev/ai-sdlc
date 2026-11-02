@@ -25,7 +25,7 @@ def executed(execution_checkpoint):
 
 
 @pytest.mark.parametrize("operation,checkpoint", [
-    ("review_start", "verified"), ("transfer", "worktree-reviewed"),
+    ("transfer", "worktree-reviewed"),
     ("commit", "reviewed"), ("accept", "reviewed")])
 @pytest.mark.parametrize("conclusion", ["missing", "failed", "unavailable"])
 def test_every_task_gate_requires_positive_conclusion(execution_checkpoint, operation, checkpoint, conclusion):
@@ -33,10 +33,6 @@ def test_every_task_gate_requires_positive_conclusion(execution_checkpoint, oper
     driver = execution_checkpoint(checkpoint, memory_worktree=True)
     state = driver.state
     task = state["tasks"]["TASK-one"]
-    if operation == "review_start":
-        driver.role("gate-reviewer", "reviewer")
-        state = driver.state
-        task = state["tasks"]["TASK-one"]
     if conclusion == "missing":
         task["verification_results"] = []
     else:
@@ -86,14 +82,16 @@ def test_conclusion_rejects_incomplete_foreign_and_stale_inputs(execution_checkp
     assert driver.task["verification_results"] == []
 
 
-@pytest.mark.parametrize("kind", ["executor", "explorer", "reviewer", "foreign-verifier"])
-def test_only_active_independent_task_verifier_can_conclude(execution_checkpoint, kind):
+@pytest.mark.parametrize("kind", ["executor", "explorer", "code", "foreign-verifier"])
+def test_only_active_independent_verification_lens_can_conclude(execution_checkpoint, kind):
     from lib.verification_results import transition
     driver = executed(execution_checkpoint)
     state = driver.state
     role = state["roles"]["verifier"]
     if kind == "foreign-verifier":
         role["task_id"] = "TASK-other"
+    elif kind == "code":
+        role["lens_id"] = "code"
     else:
         role["kind"] = kind
     with pytest.raises(Rejected) as error:
@@ -118,15 +116,17 @@ def test_verifier_identity_is_checked_at_submission(execution_checkpoint, damage
 
 def test_role_result_and_self_do_not_supply_conclusion(execution_checkpoint):
     driver = execution_checkpoint("frozen")
-    driver.role("verifier", "verifier")
+    driver.verification_reviewer("verifier")
     assert driver.run_checks("self")["outcome"] == "passed"
     with pytest.raises(Rejected, match="Every required"):
-        driver.send("verification_result", payload(driver))
+        driver.send("review_start", {"role_id": "verifier"})
     assert driver.run_checks("independent")["outcome"] == "passed"
+    driver.send("review_start", {"role_id": "verifier"})
     driver.send("role_result", {"role_id": "verifier", "result": "passed", "trace": "unit"})
     driver.role("reviewer", "reviewer")
-    with pytest.raises(Rejected, match="verifier conclusion"):
-        driver.send("review_start", {"role_id": "reviewer"})
+    driver.send("review_start", {"role_id": "reviewer"})
+    with pytest.raises(Rejected, match="verification lens conclusion"):
+        require_passed(driver.state, driver.task, driver.directory)
 
 
 @pytest.mark.parametrize("outcome", ["failed", "unavailable"])
@@ -136,7 +136,8 @@ def test_negative_conclusion_preserves_green_execution_and_budgets(execution_che
     result = driver.conclude(outcome=outcome, check_request="Check subtraction at the public API")
     assert result["verification_result"]["outcome"] == outcome
     assert driver.task["evidence"] == before["evidence"]
-    assert driver.task["test_repair_cycles_started"] == driver.task["review_rounds_started"] == 0
+    assert driver.task["test_repair_cycles_started"] == 0
+    assert driver.task["review_rounds_started"] == 1
     assert driver.task["last_check_failed"] is False
     assert driver.state["status"] == "active"
     with pytest.raises(Rejected, match="passed conclusion"):
@@ -175,13 +176,14 @@ def test_new_failed_attempt_cannot_select_old_pass(execution_checkpoint, monkeyp
 def test_unavailable_report_can_receive_negative_conclusion_while_run_is_blocked(execution_checkpoint):
     driver = execution_checkpoint("verified")
     gap = driver.conclude(outcome="unavailable", check_request="Capture the required structured report")
+    driver.review(verdict="more_checks")
     driver.send("checks_extend", {"verification_result": gap["verification_result"]["id"], "additional": [
         {"id": "report", "source": "gap", "criteria": ["AC-one"], "run": driver.task["checks"][0]["run"],
          "configuration": {"structured_reports": [{"format": "pytest-junit", "path": "missing.xml", "required": True}]}}]})
     assert driver.run_checks("independent")["outcome"] == "unavailable"
     assert driver.state["status"] == "blocked"
-    conclusion = driver.conclude(outcome="unavailable")
-    assert conclusion["verification_result"]["outcome"] == "unavailable"
+    with pytest.raises(Rejected):
+        driver.send("review_start", {"role_id": "reviewer"})
     assert driver.task["test_repair_cycles_started"] == 0
     with pytest.raises(Rejected, match="Latest required check"):
         require_passed(driver.state, driver.task, driver.directory)

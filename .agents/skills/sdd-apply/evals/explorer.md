@@ -16,9 +16,9 @@ The sample JUnit reports are synthetic preparation data, never execution evidenc
 
 | Case | Expected observation |
 |---|---|
-| ordinary-success | Explorer runs the registered set; the orchestrator passes its machine summary and evidence references to a separate verifier. The verifier inspects AC and sources, concludes passed, and does not rerun commands or automatically load the full log. |
-| verbose-failure | The nonzero exit blocks progress. The compact excerpt remains bounded, and the full raw artifact retains both markers and every diagnostic line. The verifier reads the necessary referenced failure detail. No repair/retry happens without its reservation. |
-| mandatory-skip | Exit zero and a passing smoke test coexist with one required skipped test. The verifier maps that skip to AC-order-ids, records unavailable and blocks review/acceptance pending sufficient coverage. |
+| ordinary-success | Explorer runs the full registered project set. After it passes, the orchestrator launches both review lenses in separate fresh contexts. Verification inspects AC, tests and saved evidence; code inspects architecture and code quality. Reviewers execute no checks. |
+| verbose-failure | The nonzero exit blocks progress. The compact excerpt remains bounded, and the full raw artifact retains both markers and every diagnostic line. The orchestrator reads the necessary referenced failure detail; reviewers are not launched. No repair/retry happens without its reservation. |
+| mandatory-skip | Exit zero and a passing smoke test coexist with one required skipped test. The verification lens maps that skip to AC-order-ids, records unavailable and prevents acceptance pending sufficient coverage. Both review results are collected before the orchestrator assigns the next work. |
 
 ## Freeze and isolate
 
@@ -79,11 +79,12 @@ source bytes, model and conditions equal except for the named version difference
 
 For the candidate, observe the Explorer launch, registered independent check run,
 and orchestrator handoff of check-run identity, scope/stage, basis, registry revision,
-check IDs, summary and primary evidence references. Keep the verifier independent
-of the author and Explorer. Read raw objects through the supported API when needed;
-reading evidence must not produce a hidden second command execution. Record the
-separate criterion conclusion. Stop at the requested decision, before actual repair,
-integration or acceptance; the fixture asks for review eligibility, not delivery.
+check IDs, summary and primary evidence references. After a passing check set,
+launch both lenses in parallel with separate fresh contexts and no peer reports.
+Read raw objects through the supported API when needed; reviewers execute no checks.
+Record the verification lens's criterion conclusion and both review results. Failed
+checks prevent reviewer launch and have no criterion conclusion. Stop at the
+requested decision, before actual repair, integration or acceptance.
 
 Measure the whole selected skill evaluation set, including fixture preparation,
 launches, waits, grading and retries. Apply the current project limit and any explicit
@@ -107,7 +108,7 @@ including text outside the compact excerpt. Preserve failures and missing artifa
 Grade each expectation from actual actions and primary evidence with conductor's
 `text`, `passed`, `evidence` fields. Text matching an instruction, a synthetic report,
 a fixture test pass, or an agent's claim does not establish behavior. Record who
-executed each command, which raw objects the verifier read, any rerun and its reason,
+executed each command, which raw objects each reviewer read, any rerun and its reason,
 and whether a mandatory skip blocked progress. Unavailable or contaminated runs
 stay explicitly unconfirmed. Save actual wall time and available token/cost metrics;
 unknown metrics are null. Compare candidate and old-skill outcomes, disclose shared

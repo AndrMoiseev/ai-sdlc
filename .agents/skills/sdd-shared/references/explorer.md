@@ -69,13 +69,14 @@ are unavailable evidence. Apply uses the existing role packets/results and store
 Return assignment ID, scope, kind, basis, status, selection/actual launch evidence,
 capability limitations and artifact references. Research adds the answer, cited
 sources, inspected scope, gaps, assumptions and questions. Checks adds the machine
-summary/raw-artifact references and separate diagnosis. Keep full logs outside the
-message; a verifier can inspect referenced evidence without rerunning a check.
+summary/raw-artifact references and factual observations. Keep full logs outside the
+message; the verification review lens inspects referenced evidence without rerunning
+a check. Explorer executes the orchestrator's exact assignment and reports its result;
+it does not choose or narrow checks, decide acceptance, repairs or the next stage.
 Unknown counts remain null. Neither result type substitutes for a verification
 result, approval or acceptance.
 
-An explorer context stays separate from authors and substantive verifiers or
-reviewers. The same task may reuse it for research, baseline, self, independent
+An explorer context stays separate from authors and reviewers. The same task may reuse it for research, baseline, self, independent
 and integration assignments with the same profile and a new current basis. Changed
 inputs require new check evidence. Another task or a changed profile requires a fresh explorer.
 The calling workflow enforces these boundaries and retains existing repair/retry

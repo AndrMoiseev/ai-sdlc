@@ -1,7 +1,7 @@
 """Complete the plan from accepted tasks; no final execution or agent assessment."""
 from .repository import repository
 from .common import now, require
-from .commits import confirm
+from .commits import confirm, reviewed
 from .state import snapshot, clean_source
 from .verification import local_criteria
 from .review_policy import technical_debt
@@ -34,7 +34,7 @@ def finalize(state, payload, directory):
             result = next((r for r in reversed(task.get("verification_results", []))
                            if r["stage"] in {"independent", "integration"}), None)
             require(result and result["outcome"] == "passed", "verification_missing", "Accepted task must retain its passed conclusion")
-            require(task["reviews"] and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Accepted task must retain its review")
+            reviewed(state, task)
             accepted.extend(criteria)
             evidence.extend(e for e in task["evidence"] if e["stage"] == result["stage"])
             conclusions.append({"task_id": key, **result})

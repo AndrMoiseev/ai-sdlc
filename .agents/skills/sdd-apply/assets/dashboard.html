@@ -88,7 +88,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 ui-monospace,monos
     if(t.status==='pending'&&!t.waiting.length&&s.next.includes(t.id))
       body.append(node('p','Dependencies satisfied; awaiting launch checks and executor capacity.','launch'));
     if(t.cannot_parallel_with.length)body.append(node('p','Cannot run alongside: '+t.cannot_parallel_with.join(', '),'muted'));
-    body.append(node('p','Review '+t.review+' · Test repairs '+t.repair),node('p','Attempt '+t.attempt,'muted'));
+    body.append(node('p','Review '+t.review+' · Failed independent checks '+t.repair),node('p','Attempt '+t.attempt,'muted'));
     if(t.commits.length)body.append(node('pre',t.commits.join('\n')));
     if(t.blockers.length)body.append(node('pre',JSON.stringify(t.blockers,null,2),'blocked'));
     let details=card.querySelector('.evidence');

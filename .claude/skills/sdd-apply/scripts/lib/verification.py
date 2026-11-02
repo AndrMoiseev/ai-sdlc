@@ -117,7 +117,7 @@ def valid_evidence(state, task, directory, stage=None):
             output = next((output for output in log_data.get("outputs", []) if output.get("check_id") == item["check_id"]), None)
             require(check and output and output["outcome"] == item["outcome"], "evidence_basis", "Evidence must contain its registered check")
             run = check["setup"] or check["run"]
-            if "command" in run and explorer.execution_kind(check) == "deterministic":
+            if "command" in run:
                 require(output.get("command") == run["command"] and output.get("exit_code") == 0
                         and output.get("criteria") == check["criteria"], "evidence_command",
                         "An unrelated successful command cannot establish a registered criterion")
@@ -125,7 +125,7 @@ def valid_evidence(state, task, directory, stage=None):
             check_evidence.validate(state, log_data, checks, directory)
             validated.add(item["log_hash"])
         check = next((check for check in checks if check["id"] == item["check_id"]), None)
-        if check and ("procedure" in (check["setup"] or check["run"]) or explorer.execution_kind(check) != "deterministic"):
+        if check and "procedure" in (check["setup"] or check["run"]):
             latest = procedure_evidence(state, task, check, item["stage"], log_data["before"], directory)
             output = next((value for value in log_data["outputs"] if value["check_id"] == check["id"]), {})
             require(latest["outcome"] == "passed" and all(output.get(key) == latest.get(key)
@@ -208,17 +208,19 @@ def transition(state, task, event, directory):
         return {"checks": checks}
     if kind == "checks_extend":
         require(task["status"] == "verifying" and not task["active_review"],
-                "extension_phase", "Extend checks before review or after reviewer more_checks")
+                "extension_phase", "Extend checks after both review lenses finish")
         current(state, task)
         additions = p.get("additional", [])
         require(bool(p.get("verification_result")) != bool(p.get("review_round")),
-                "extension_evidence", "Reference either a verifier conclusion or reviewer more_checks round")
+                "extension_evidence", "Reference the verification lens conclusion or its more_checks round")
         if p.get("verification_result"):
             from .verification_results import extension
             extension(state, task, p, directory)
         else:
-            require(task["reviews"] and task["reviews"][-1]["verdict"] == "more_checks"
-                    and additions and p.get("review_round") == task["reviews"][-1]["round_id"],
+            from .review_policy import round_results
+            review = round_results(task).get("verification", {})
+            require(review.get("verdict") == "more_checks"
+                    and additions and p.get("review_round") == review.get("round_id"),
                     "extension_evidence", "Reference the review requesting additional checks")
         require_new_ids(state, task, additions)
         for check in additions:
@@ -243,8 +245,7 @@ def transition(state, task, event, directory):
         registry_current(state, task)
         check = next((c for c in task["checks"] if c["id"] == p.get("check_id")), None)
         require(check and ("setup_required" in check["run"] or "procedure" in check["run"]) and check["setup"] is None, "setup_not_planned", "Only planned, unresolved setup or procedure may be registered")
-        require("setup_required" in check["run"] or explorer.execution_kind(check) == "deterministic",
-                "setup_not_planned", "A semantic procedure cannot be replaced with a deterministic command")
+        explorer.execution_kind(check)
         require(task["status"] in {"running", "repairing"}, "setup_phase", "Prepare checks within their task")
         require(p.get("command") and p.get("description") and task.get("baseline_checks"), "setup_evidence", "Need baseline check inventory and preparation description")
         require_command(p["command"])
@@ -268,14 +269,15 @@ def transition(state, task, event, directory):
         stage = p.get("stage")
         require(stage in {"baseline", "self", "independent", "integration"}, "procedure_stage", "Unknown stage")
         check = next((c for c in selected(state, task) if c["id"] == p.get("check_id")), None)
-        require(check and ("procedure" in check["run"] and not check["setup"]
-                          or explorer.execution_kind(check) != "deterministic"),
+        require(check and "procedure" in check["run"] and not check["setup"],
                 "procedure_check", "Use the registered procedure without replacing it")
         role = explorer.procedure_role(state, task, p.get("role_id"), stage, check)
         require(not task.get("last_check_failed") or task["active_repair"], "repair_cycle_required", "A retry after failure must reserve a repair cycle")
         previous = next((item for item in reversed(task["evidence"]) if item.get("procedure")
                          and item["check_id"] == check["id"] and item["stage"] == stage), None)
-        require(not previous or previous["outcome"] in {"passed", "abandoned"} or task["active_repair"],
+        require(stage == "self" or not previous
+                or previous["head"] != repository(root_for(state, task)).head()
+                or previous["outcome"] in {"passed", "abandoned"} or task["active_repair"],
                 "repair_cycle_required", "A failed procedure retry must reserve a repair cycle")
         if stage != "baseline":
             current(state, task)
@@ -344,6 +346,7 @@ def transition(state, task, event, directory):
     locations = None
     checks = selected(state, task)
     for check in checks:
+        explorer.execution_kind(check)
         if deadline.remaining() <= 0:
             outputs.append(explorer.expired(check))
             continue
@@ -358,8 +361,8 @@ def transition(state, task, event, directory):
             if not (location.is_file() or location.is_dir()):
                 outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "Required verification location is missing", "location": check["location"]})
                 continue
-        if "command" not in run or explorer.execution_kind(check) != "deterministic":
-            if "procedure" in run or explorer.execution_kind(check) != "deterministic":
+        if "command" not in run:
+            if "procedure" in run:
                 outputs.append({"check_id": check["id"], **procedure_evidence(state, task, check, stage, before, directory)})
                 continue
             outputs.append({"check_id": check["id"], "outcome": "unavailable", "description": "No executable command for required procedure"})
@@ -391,11 +394,12 @@ def transition(state, task, event, directory):
             return {"outcome": "baseline_recorded", "log": relative, "summary": summary}
         state["status"] = "blocked"
         state["blockers"].append({"reason": "baseline_failed", "task_id": task["plan"]["id"], "resume_condition": "Resolve or explicitly scope the pre-existing failure", "log": relative})
+        task["failure"] = {"budget": "baseline", "outcome": outcome}
     for result in outputs:
         task["evidence"].append({"check_id": result["check_id"], "stage": stage, "role_id": role_id, "outcome": (result["outcome"] if result["evidence_complete"] else "unavailable") if before == after else "stale", "log": relative, "log_hash": digest(artifacts.read_bytes(path)), "time": now(), "head": repository(root).head()})
-    if stage != "self" or outcome != "passed":
+    if stage == "independent":
         task["last_check_failed"] = outcome != "passed"
-        if task["active_repair"] and outcome != "unavailable" and stage in {"independent", "integration"}:
+        if task["active_repair"] and outcome != "unavailable":
             task["repair_cycles"].append({"id": task["active_repair"], "outcome": outcome, "log": relative})
             task["active_repair"] = None
         if outcome != "passed":

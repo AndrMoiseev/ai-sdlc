@@ -15,11 +15,11 @@ def settings(driver, roles):
     return root
 
 
-def register(driver, kind, ident, context, selection):
+def register(driver, kind, ident, context, selection, lens_id="code"):
     return driver.send("role_register", {"role_id": ident, "kind": kind,
         "context_id": context, "fresh": True, "host": selection["host"],
         "launch_ref": "synthetic-selection-test", "capabilities": {"fresh_context": True},
-        "agent_selection": selection})
+        "agent_selection": selection, **({"lens_id": lens_id} if kind == "reviewer" else {})})
 
 
 def selection(driver, kind, **kwargs):
@@ -36,10 +36,13 @@ def test_configured_registration_requires_selection(driver):
     assert packet["role"]["agent_selection"] == selected
 
 
-def test_matching_fallback_roles_may_share_context(driver):
+def test_review_lenses_require_distinct_contexts_even_with_matching_profiles(driver):
     settings(driver, {})
-    register(driver, "verifier", "v", "ctx", selection(driver, "verifier"))
-    register(driver, "reviewer", "r", "ctx", selection(driver, "reviewer"))
+    selected = selection(driver, "reviewer")
+    register(driver, "reviewer", "v", "ctx", selected, "verification")
+    with pytest.raises(ValueError, match="every reviewer starts fresh"):
+        register(driver, "reviewer", "r", "ctx", selected)
+    register(driver, "reviewer", "r", "other-ctx", selected)
     assert len(driver.state["roles"]) == 2
 
 
@@ -49,9 +52,9 @@ def test_distinct_models_require_distinct_contexts(driver):
     catalog.mkdir(parents=True)
     (catalog / "r.toml").write_text('name="reviewer"\ndescription="Review"\n'
         'developer_instructions="Review"\nmodel="other-model"\n')
-    register(driver, "verifier", "v", "ctx", selection(driver, "verifier"))
+    register(driver, "reviewer", "v", "ctx", selection(driver, "reviewer"), "verification")
     selected = selection(driver, "reviewer")
-    with pytest.raises(ValueError, match="separate fresh contexts"):
+    with pytest.raises(ValueError, match="every reviewer starts fresh"):
         register(driver, "reviewer", "r", "ctx", selected)
     register(driver, "reviewer", "r2", "different", selected)
 
@@ -81,12 +84,12 @@ def test_existing_run_missing_sibling_has_actionable_error(driver, tmp_path, mon
 
 
 def test_native_claude_definitions_do_not_share_context_from_name_only(driver):
-    settings(driver, {"sdd-apply.verifier": "native", "sdd-apply.reviewer": "native"})
+    settings(driver, {"sdd-apply.reviewer": "native"})
     def native(kind):
         return resolve(driver.state, kind, host="claude-code", parent_model="parent",
                        available_agents=["native"])
-    register(driver, "verifier", "v", "ctx", native("verifier"))
-    with pytest.raises(ValueError, match="separate fresh contexts"):
+    register(driver, "reviewer", "v", "ctx", native("reviewer"), "verification")
+    with pytest.raises(ValueError, match="every reviewer starts fresh"):
         register(driver, "reviewer", "r", "ctx", native("reviewer"))
 
 

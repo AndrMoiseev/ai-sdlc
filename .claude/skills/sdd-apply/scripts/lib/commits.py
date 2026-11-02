@@ -64,7 +64,11 @@ def freeze(state, task, event, directory):
 
 
 def reviewed(state, task):
-    require(task["reviews"] and task["reviews"][-1]["verdict"] == "pass", "review_missing", "Independent passing review required")
+    from .review_policy import LENSES, round_results
+    reviews = round_results(task)
+    require(not task["active_review"] and set(reviews) == set(LENSES)
+            and all(review["verdict"] == "pass" for review in reviews.values()),
+            "review_missing", "Every required independent review lens must pass")
 
 
 def index_tree(root, paths, base):

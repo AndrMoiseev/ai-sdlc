@@ -74,7 +74,6 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     d, old = prepare(basis, tmp_path)
     d.send("candidate")
     d.verify()
-    d.send("role_result", {"role_id": "verifier", "result": "checked", "trace": "test-host"})
     d.review()
     d.send("transfer")
     evidence, reviews = deepcopy(d.task["evidence"]), deepcopy(d.task["reviews"])
@@ -103,7 +102,6 @@ def test_refresh_preserves_changes_and_can_accept(basis, tmp_path):
     accept_source(d)
     d.send("candidate")  # New external file must not trip candidate_scope.
     d.verify("verifier-new")
-    d.send("role_result", {"role_id": "verifier-new", "result": "checked", "trace": "test-host"})
     d.review("reviewer-new")
     d.send("transfer")
     d.send("integrate")
@@ -230,7 +228,7 @@ def test_refresh_rejects_without_deleting_source(refresh_checkpoint, hazard):
 def test_baseline_failure_resumes_on_fixed_base_with_same_budget(basis, tmp_path):
     fix_base(basis, "check.py", "assert False\n")
     d, old = prepare(basis, tmp_path)
-    assert d.state["status"] == "blocked" and d.task["last_check_failed"]
+    assert d.state["status"] == "blocked" and not d.task.get("last_check_failed")
     fix_base(basis, "check.py", "assert True\n")
     resumed = d.send("resume", {"host_trace": "all roles stopped", "live_contexts": [],
                      "resolutions": [{"reason": "baseline_failed", "task_id": "TASK-one", "evidence": "Fix SHA; original failure passes"},
@@ -241,25 +239,33 @@ def test_baseline_failure_resumes_on_fixed_base_with_same_budget(basis, tmp_path
     apply(d.directory, refresh_event(d))
     assert d.send("resume", {"host_trace": "all stopped", "live_contexts": []}, task_id=None)["stale_worktrees"] == []
     d.send("repair", {"reason": "Retry after external base fix"})
-    assert d.task["test_repair_cycles_started"] == 1
+    assert d.task["test_repair_cycles_started"] == 0
     d.send("role_result", {"role_id": "author", "result": "Changes ready", "trace": "test-host"})
     d.send("candidate")
     assert d.verify()["outcome"] == "passed"
-    assert d.task["test_repair_cycles_started"] == 1 and d.task["active_repair"] is None
+    assert d.task["test_repair_cycles_started"] == 0 and d.task["active_repair"] is None
     assert d.task["baseline_checks"] == d.task["worktree_history"][0]["baseline_checks"]
 
 
 def test_repeat_refresh_preserves_active_repair_and_reviews(refresh_checkpoint):
     d, old, basis = refresh_checkpoint
-    d.send("repair", {"reason": "Test defect", "defect_evidence": "failure trace", "test_failure": True})
-    d.send("role_result", {"role_id": "author", "result": "partial", "trace": "test-host"})
-    d.send("candidate")
+    d.send("repair", {"reason": "Prepare the candidate", "defect_evidence": "Unfinished task"})
+    (old / "check.py").write_text("assert False, 'first rejected candidate'\n")
+    d.freeze()
+    assert d.verify()["outcome"] == "failed"
+    d.send("repair", {"reason": "Fix the independently observed defect"})
+    (old / "check.py").write_text("assert True\n")
+    d.freeze()
     d.verify()
-    d.send("role_result", {"role_id": "verifier", "result": "checked", "trace": "test-host"})
     d.role("reviewer", "reviewer")
     d.send("review_start", {"role_id": "reviewer"})
     d.send("role_result", {"role_id": "reviewer", "result": "interrupted", "trace": "test-host"})
-    d.send("repair", {"reason": "Another failure", "defect_evidence": "failure trace", "test_failure": True})
+    d.send("role_result", {"role_id": "verifier", "result": "interrupted", "trace": "test-host"})
+    d.send("repair", {"reason": "Prepare another candidate", "defect_evidence": "Interrupted review"})
+    (old / "check.py").write_text("assert False, 'second rejected candidate'\n")
+    d.freeze()
+    assert d.verify()["outcome"] == "failed"
+    d.send("repair", {"reason": "Fix the second independently observed defect"})
     d.send("role_result", {"role_id": "author", "result": "partial", "trace": "test-host"})
     fix_base(basis)
     first = apply(d.directory, refresh_event(d))
@@ -344,7 +350,6 @@ def test_unresolved_integration_is_not_refreshed(refresh_checkpoint):
     d, old, basis = refresh_checkpoint
     d.send("candidate")
     d.verify()
-    d.send("role_result", {"role_id": "verifier", "result": "checked", "trace": "test-host"})
     d.review()
     d.send("transfer")
     fix_base(basis, "result.txt", "conflicting root result")

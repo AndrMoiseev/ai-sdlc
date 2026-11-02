@@ -29,7 +29,7 @@
 Прочитай [формат рефакторинга](../../sdd-shared/references/document-format-refactoring.md).
 Создай [proposal](../templates/refactoring-proposal.md) и
 [design](../templates/refactoring-design.md). Specs и искусственные REQ не нужны.
-Журнал, вопросы, премортем, state и review веди относительно выбранного корня по
+Журнал, вопросы, state и review веди относительно выбранного корня по
 общим правилам. Шаблоны показывают форму: замени пример реальными источниками,
 областями и проверяемыми результатами проекта.
 
@@ -90,7 +90,7 @@ Snapshot documents содержит proposal/design; plan добавляет tas
 Рецензент проверяет сохранение поведения и целевую структуру отдельно, достаточность
 baseline, полноту областей и групп тестов. Отсутствие specs, requirements у DEC
 или единственного владельца сквозного result не является дефектом этого маршрута.
-На стадии документов встроены consistency и simplicity, на стадии плана — plan
+На стадии документов встроены consistency, simplicity и premortem, на стадии плана — plan
 и simplicity; у каждой линзы свой независимый контекст и отчёт по [review](../flows/review.md).
 Авторскую проверку простоты выполняй при подготовке design и tasks по
 [общим критериям](simplicity.md), сохраняя result/preservation.

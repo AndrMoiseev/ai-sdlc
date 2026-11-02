@@ -23,12 +23,12 @@ registered `worktree.base` differs from the execution branch's current HEAD:
 3. Use the returned worktree path for all subsequent roles. The script replaces
    the task's source baseline and invalidates its candidate and transfer package.
    Old reviews/checks remain historical and budgets retain their usage. Continue
-   an active repair cycle; if the previous mandatory check failed and no cycle is
-   active, reserve `repair` before retrying, using an available executor or a fresh
+   an active repair cycle; if the previous independent check failed and no cycle is
+   active, submit `repair` before retrying, using an available executor or a fresh
    successor. Otherwise finish implementation with the assigned executor.
 4. Record executor completion and freeze a new candidate. Give the task explorer
    the current replacement basis and full registry; obtain fresh independent
-   evidence, a separate verifier conclusion and reserved review. Historical `baseline_checks`
+   evidence followed by a new round of both review lenses and a criterion conclusion. Historical `baseline_checks`
    remain the record of the original start, not proof that the new base passes.
    Do not repeat the initial baseline stage after transferring implementation.
    Continue the selected execution flow through integration, checks and acceptance.

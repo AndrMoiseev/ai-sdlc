@@ -276,8 +276,13 @@ class Driver:
         state = self._view()
         return apply(self.directory, {"event_id": f"event-{self.number}", "run_id": state["run_id"], "expected_revision": state["revision"], "type": kind, "task_id": task_id, "payload": payload or {}})
 
-    def role(self, ident, kind, context=None):
-        return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}})
+    def role(self, ident, kind, context=None, **fields):
+        if kind == "reviewer":
+            fields.setdefault("lens_id", "code")
+        return self.send("role_register", {"role_id": ident, "kind": kind, "context_id": context or ident, "fresh": True, "host": "codex", "launch_ref": "synthetic-unit-test", "capabilities": {"fresh_context": True}, **fields})
+
+    def verification_reviewer(self, ident, context=None):
+        return self.role(ident, "reviewer", context, lens_id="verification")
 
     def explorer(self, ident, stage=None, task_id="current", context=None, **fields):
         from lib.explorer_assignments import basis
@@ -321,19 +326,24 @@ class Driver:
         self.send("candidate")
 
     def verify(self, role="verifier"):
-        if role not in self.state["roles"]:
-            self.role(role, "verifier")
         result = self.run_checks("independent")
         if result["outcome"] == "passed":
+            if role in self.state["roles"] and self.state["roles"][role]["status"] != "active":
+                role = f"{role}-{self.number}"
+            if role not in self.state["roles"]:
+                self.verification_reviewer(role)
+            if self.task.get("active_reviewers", {}).get("verification") != role or not self.task["active_review"]:
+                self.send("review_start", {"role_id": role})
             self.conclude(role=role)
         return result
 
-    def conclude(self, role="verifier", stage=None, outcome="passed", check_request=None, task_id="current"):
+    def conclude(self, role=None, stage=None, outcome="passed", check_request=None, task_id="current"):
         """Explicit synthetic criterion assessment, separate from the runner."""
         from lib.verification_results import packet
         selected_task = getattr(self, "task_id", "TASK-one") if task_id == "current" else task_id
         state = self._view()
         task = state["tasks"].get(selected_task)
+        role = role or task["active_reviewers"]["verification"]
         context = packet(state, task, self.directory, stage)
         criteria_results = [{"criterion_id": criterion, "outcome": outcome,
                              "reason": "Synthetic fixture criterion and test source inspected",
@@ -350,9 +360,17 @@ class Driver:
 
 
     def review(self, role="reviewer", verdict="pass"):
-        self.role(role, "reviewer")
-        self.send("review_start", {"role_id": role})
-        return self.send("review_result", {"role_id": role, "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
+        if role in self.state["roles"] and self.state["roles"][role]["status"] != "active":
+            role = f"{role}-{self.number}"
+        if role not in self.state["roles"]:
+            self.role(role, "reviewer")
+        if self.task.get("active_reviewers", {}).get("code") != role or not self.task["active_review"]:
+            self.send("review_start", {"role_id": role})
+        from lib.review_policy import round_results
+        if "verification" not in round_results(self.task):
+            self.send("review_result", {"role_id": self.task["active_reviewers"]["verification"],
+                "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
+        return self.send("review_result", {"role_id": role, "verdict": "pass", "findings": [], "trace": "unit-test"})
 
     def integrate(self, prefix=""):
         self.send("transfer")
@@ -383,22 +401,24 @@ def execution_checkpoints(project_template, basis_template, repository_seeds, tm
         (driver.root / "result.txt").write_text("verified result\n")
         driver.freeze()
         yield "frozen", driver
-        driver.role("verifier", "verifier")
         assert driver.run_checks("independent")["outcome"] == "passed"
+        driver.verification_reviewer("verifier")
+        driver.send("review_start", {"role_id": "verifier"})
         yield "executed", driver
         driver.conclude()
         yield "verified", driver
         driver.role("reviewer", "reviewer")
         driver.send("review_start", {"role_id": "reviewer"})
+        driver.send("review_result", {"role_id": "verifier", "verdict": "pass", "findings": [],
+            "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
         yield "reviewing", driver
         driver.send("review_result", {"role_id": "reviewer",
-            "verdict": "pass", "findings": [], "test_integrity": "Fixture assertions preserved", "trace": "unit-test"})
+            "verdict": "pass", "findings": [], "trace": "unit-test"})
         yield "worktree-reviewed", driver
         driver.integrate()
         yield "reviewed", driver
         driver.send("commit")
         assert driver.send("accept")["status"] == "accepted"
-        driver.send("role_result", {"role_id": "verifier", "result": "DONE", "trace": "unit-test"})
         yield "accepted", driver
     return LazyCheckpoints(workspace, backend, steps())
 

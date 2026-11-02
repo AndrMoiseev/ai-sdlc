@@ -185,11 +185,13 @@ def test_execution_and_conclusion_are_visible_separately_without_raw_logs(execut
     assert proof["conclusion"]["status"] == "missing"
     role = next(item for item in view["explorer_assignments"] if item["stage"] == "independent")
     assert role["scope"]["task"] == "TASK-one" and role["status"] == "finished"
-    driver.role("assessment", "verifier")
+    driver.verification_reviewer("assessment")
+    driver.send("review_start", {"role_id": "assessment"})
     driver.conclude(role="assessment")
     original = artifact_storage.read_bytes
     def no_raw_logs(path):
-        assert "/runs/" not in str(path).replace("\\", "/"), "Projection opened an execution log"
+        relative = Path(path).relative_to(driver.directory)
+        assert relative.parts[0] != "runs", "Projection opened an execution log"
         return original(path)
     monkeypatch.setattr(artifact_storage, "read_bytes", no_raw_logs)
     view = compact(driver)

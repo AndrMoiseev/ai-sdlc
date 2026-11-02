@@ -23,8 +23,11 @@ def failure(state, task, budget, outcome):
     task["failure"] = {"budget": budget, "outcome": outcome}
     if budget == "review" and task["review_rounds_started"] >= task["review_limit"]:
         block(state, task, "review_limit_reached")
-    if budget == "test" and task["test_repair_cycles_started"] >= task["test_repair_limit"] and not task["active_repair"]:
-        block(state, task, "test_repair_limit_reached")
+    if budget == "test" and outcome == "failed":
+        # Only the completed independent check batch calls this branch.
+        task["test_repair_cycles_started"] += 1
+        if task["test_repair_cycles_started"] >= task["test_repair_limit"]:
+            block(state, task, "test_repair_limit_reached")
     if outcome == "unavailable":
         item = {"reason": "required_check_unavailable", "task_id": task["plan"]["id"], "resume_condition": "Restore required runner"}
         if item not in state["blockers"]:
@@ -33,17 +36,18 @@ def failure(state, task, budget, outcome):
 
 
 def repair(state, task, p):
+    require(set(p) <= {"reason", "defect_evidence", "executor", "paths"}, "repair_schema",
+            "Repair accepts evidence and executor assignment; independent checks record failures")
     require(task and task["status"] != "pending" and p.get("reason"), "repair_reason", "Repair requires a started task and reason")
     require(task.get("failure") or p.get("defect_evidence"), "repair_evidence", "Provide reproducible defect evidence")
     if task["review_rounds_started"] >= task["review_limit"]:
         block(state, task, "review_limit_reached")
         return {"blocked": "review_limit_reached"}
-    if task.get("last_check_failed") or p.get("test_failure"):
+    if task.get("last_check_failed"):
         require(not task["active_repair"], "repair_active", "Resume existing repair cycle")
         if task["test_repair_cycles_started"] >= task["test_repair_limit"]:
             block(state, task, "test_repair_limit_reached")
             return {"blocked": "test_repair_limit_reached"}
-        task["test_repair_cycles_started"] += 1
         task["active_repair"] = f"cycle-{task['test_repair_cycles_started']}"
     role = state["roles"].get(p.get("executor", task.get("executor")))
     require(role and role["kind"] == "executor" and role["task_id"] == task["plan"]["id"] and role["status"] in {"active", "finished"}, "executor_missing", "Use the available assigned author or registered successor")

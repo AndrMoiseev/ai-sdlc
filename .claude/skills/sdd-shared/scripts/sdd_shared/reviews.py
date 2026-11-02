@@ -9,7 +9,7 @@ from .checkpoints import inspect
 from .checkpoint_git import Git, GitError
 
 STAGES = {"documents": "document_review", "plan": "plan_review"}
-DOCUMENT_LENSES = ("consistency", "simplicity")
+DOCUMENT_LENSES = ("consistency", "simplicity", "premortem")
 PLAN_LENSES = ("plan", "simplicity")
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
 COMMON = {"schema_version", "change_id", "document_type", "language", "work_kind"}
