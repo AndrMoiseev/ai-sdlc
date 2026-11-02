@@ -140,7 +140,7 @@ def test_refactoring_acceptance_real_pipeline_preserves_local_contract(project, 
 
 def test_refactoring_acceptance_packets_have_real_local_and_architectural_context(acceptance_checkpoint):
     driver = acceptance_checkpoint("frozen")
-    packet = json.loads(artifacts.read_text(driver.role("verifier", "verifier")["packet"]))
+    packet = json.loads(artifacts.read_text(driver.verification_reviewer("verifier")["packet"]))
     context = packet["refactoring"]
     assert context["scope"] == driver.task["plan"]["scope"]
     assert [record["id"] for record in context["acceptance"]] == ["AC-local"]

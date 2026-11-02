@@ -38,7 +38,7 @@ def static_waves(data):
                                for stage, proof in t["verification"].items())
             waiting += "".join(f'<p>Explorer {escape(role["role_id"])} · {escape(role["kind"])} · {escape(role["stage"] or "research")} · {escape(role["status"])}</p>'
                                for role in data["explorer_assignments"] if role["scope"]["task"] == key)
-            cards.append(f'<article id="{escape("task-" + key, quote=True)}" tabindex="-1"><h3>{escape(key)}</h3><p class="badge">{escape(t["status"])}</p>{waiting}<p>Review {escape(t["review"])} · Test repairs {escape(t["repair"])}</p></article>')
+            cards.append(f'<article id="{escape("task-" + key, quote=True)}" tabindex="-1"><h3>{escape(key)}</h3><p class="badge">{escape(t["status"])}</p>{waiting}<p>Review {escape(t["review"])} · Failed independent checks {escape(t["repair"])}</p></article>')
         blocks.append(f'<section class="wave" data-wave="{wave["id"]}"><div class="wave-heading"><h2>Wave {wave["number"]}</h2><span class="badge">{wave["label"]}</span><span class="muted">{wave["accepted"]} / {len(wave["tasks"])} accepted</span></div><div class="dependencies">After acceptance: {dependencies or "No dependencies"}</div><div class="wave-tasks">{"".join(cards)}</div></section>')
     return "".join(blocks)
 
@@ -53,7 +53,7 @@ def render(directory):
         summary.append(f"- Wave {wave['number']}: {', '.join(wave['tasks'])}; after acceptance: {', '.join(wave['depends_on']) or 'none'}; {wave['label']}; accepted {wave['accepted']}/{len(wave['tasks'])}")
     summary.append("")
     for task in data["tasks"]:
-        summary.append(f"- {task['id']}: {task['status']}; review {task['review']}; test repairs {task['repair']}; commits {', '.join(task['commits']) or 'none'}")
+        summary.append(f"- {task['id']}: {task['status']}; review {task['review']}; failed independent checks {task['repair']}; commits {', '.join(task['commits']) or 'none'}")
         summary.extend(f"  - {reason}" for reason in task["waiting_text"])
         summary.extend(f"  - {stage}: execution {proof['execution']['status']}; conclusion {proof['conclusion']['status']}"
                        for stage, proof in task["verification"].items())

@@ -17,7 +17,7 @@ task worktrees. After transfer, `candidate` freezes the recorded integration tre
 and advances the task to `committing`. `commit` confirms that integration commit
 and `accept` records task acceptance. These gates validate the unchanged worktree
 evidence and transfer integrity; they do not execute checks or request another
-verifier conclusion or code review. Keep evidence bound to its original commit.
+criterion conclusion or lens reviews. Keep evidence bound to its original commit.
 Use [candidate identity](api-checks.md#candidate-identity) for the commit transition and its scope.
 
 For an approved refactoring check replacement, use the staged registry contract

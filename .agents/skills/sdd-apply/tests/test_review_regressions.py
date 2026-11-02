@@ -19,8 +19,6 @@ def accepted_worktree(basis, tmp_path):
     d.send('candidate')
     d.send('commit')
     d.send('accept')
-    for name in ['verifier']:
-        d.send('role_result', {'role_id': name, 'result': 'finished', 'trace': 'synthetic'})
     return d, wt
 
 
@@ -120,9 +118,9 @@ def test_lost_reviewer_successor_finishes_reserved_round(execution_checkpoint):
     import pytest
     driver = execution_checkpoint("reviewing")
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['verifier']}, task_id=None)
-    driver.send('role_register', {'role_id': 'replacement', 'kind': 'reviewer', 'context_id': 'replacement', 'fresh': True, 'host': 'codex', 'launch_ref': 'synthetic', 'capabilities': {'fresh_context': True}, 'successor_of': 'reviewer'})
+    driver.send('role_register', {'role_id': 'replacement', 'kind': 'reviewer', 'lens_id': 'code', 'context_id': 'replacement', 'fresh': True, 'host': 'codex', 'launch_ref': 'synthetic', 'capabilities': {'fresh_context': True}, 'successor_of': 'reviewer'})
     driver.send('resume', {'host_trace': 'synthetic', 'live_contexts': ['replacement', 'verifier'], 'resolutions': [{'reason': 'lost_role', 'task_id': 'TASK-one', 'successor': 'replacement', 'evidence': 'registered'}]}, task_id=None)
     with pytest.raises(ValueError, match='existing review'):
         driver.send('review_start', {'role_id': 'replacement'})
-    result = driver.send('review_result', {'role_id': 'replacement', 'verdict': 'pass', 'findings': [], 'test_integrity': 'inspected', 'trace': 'synthetic'})
+    result = driver.send('review_result', {'role_id': 'replacement', 'verdict': 'pass', 'findings': [], 'trace': 'synthetic'})
     assert result['status'] == 'integrating'

@@ -35,7 +35,7 @@ kind USER. При resume учитывай этот выбор: предложе�
 
 1. Обрабатывай русскую авторскую прозу в proposal, specs, design, tasks, checkpoint,
    questions.md, журнале decisions.md
-   и производных сводках, premortem.md, explanation.md, документах explanation/, авторской
+   и производных сводках, explanation.md, документах explanation/, авторской
    прозе archify/index.md и archify/preview-handoff.md. Неизменённые документы
    читай только для контекста.
    Для нерусских документов отметь «humanizer-ru неприменим: язык документа»;

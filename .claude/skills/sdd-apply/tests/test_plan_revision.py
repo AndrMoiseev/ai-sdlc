@@ -48,7 +48,6 @@ def accepted(driver, project):
     prepared(driver, project)
     driver.send("commit")
     driver.send("accept")
-    driver.send("role_result", {"role_id": "verifier", "result": "DONE", "trace": "unit-test"})
 
 
 def revised(driver):

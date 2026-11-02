@@ -82,7 +82,7 @@ def test_state_never_authorizes_and_broken_state_recovers(tmp_path):
     assert result["warnings"][0]["code"] == "state_recovery"
 
 
-@pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("plan", "plan_approval", "plan")])
+@pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("documents", "document_approval", "premortem"), ("plan", "plan_approval", "plan")])
 def test_durable_approval_and_review_remain_independent(tmp_path, stage, kind, lens):
     # Exercise real review and authorization parsing with an injected Git observation.
     root = project(tmp_path)
@@ -163,7 +163,7 @@ def test_approval_survives_accepted_commit_transition(tmp_path, checkpoint_obser
 @pytest.mark.parametrize("kind", ["review_consent", "review_waiver"])
 @pytest.mark.parametrize("lenses,valid", [
     (["plan"], True), (["plan", "simplicity"], True), (["simplicity"], True),
-    (["consistency"], False), (["security"], False), (["simplicity", "simplicity"], False),
+    (["consistency"], False), (["premortem"], False), (["security"], False), (["simplicity", "simplicity"], False),
 ])
 def test_plan_review_authorization_lenses_in_memory(kind, lenses, valid):
     from pathlib import Path

@@ -17,13 +17,14 @@ def test_third_success_and_fourth_blocks(driver):
     assert task["test_repair_limit"] == 5
 
 
-def test_five_repairs_last_success(execution_checkpoint):
+def test_fifth_independent_failure_exhausts_budget(execution_checkpoint):
     driver = execution_checkpoint("started")
     state = driver.state
     task = state["tasks"]["TASK-one"]
     task["last_check_failed"] = True
-    failure(state, task, "test", "failed")
-    for i in range(5):
+    for i in range(4):
+        failure(state, task, "test", "failed")
+        assert task["test_repair_cycles_started"] == i + 1
         repair(state, task, {"reason": "fix"})
         assert task["test_repair_cycles_started"] == i + 1
         with pytest.raises(ValueError, match="existing"):
@@ -31,8 +32,12 @@ def test_five_repairs_last_success(execution_checkpoint):
         task["active_repair"] = None
     assert state["status"] == "active"
     failure(state, task, "test", "failed")
+    assert task["test_repair_cycles_started"] == 5
     assert state["blockers"][0]["reason"] == "test_repair_limit_reached"
     extend(state, task, {"budget": "test", "limit": 6, "source": "msg", "text": "Extra cycle"})
+    repair(state, task, {"reason": "Use the authorized continuation"})
+    assert task["test_repair_cycles_started"] == 5
+    assert state["status"] == "active"
     assert task["review_limit"] == 3
 
 
@@ -90,6 +95,7 @@ def test_failed_retry_replacement_and_event_replay_preserve_budget(execution_che
              "type": "check_run", "task_id": "TASK-one", "payload": {"role_id": "first-explorer", "stage": "independent"}}
     failed = apply(driver.directory, event)
     assert failed["outcome"] == "failed"
+    assert driver.task["test_repair_cycles_started"] == 1
     def unexpected(*args):
         pytest.fail("Event replay executed a command")
     with monkeypatch.context() as patch:
@@ -98,13 +104,61 @@ def test_failed_retry_replacement_and_event_replay_preserve_budget(execution_che
     driver.explorer("replacement-explorer", "independent")
     with pytest.raises(ValueError, match="reserve"):
         driver.send("check_run", {"role_id": "replacement-explorer", "stage": "independent"})
-    assert driver.task["test_repair_cycles_started"] == 0
+    assert driver.task["test_repair_cycles_started"] == 1
     driver.send("repair", {"reason": "Repair the observed defect"})
+    assert driver.task["test_repair_cycles_started"] == 1
     (driver.root / "check.py").write_text("assert True\n")
     driver.freeze()
     assert driver.run_checks("independent")["outcome"] == "passed"
     assert driver.task["test_repair_cycles_started"] == 1
     assert driver.task["active_repair"] is None
+
+
+def test_self_check_failures_can_repeat_without_repair(execution_checkpoint):
+    driver = execution_checkpoint("started")
+    (driver.root / "check.py").write_text("assert False, 'work in progress'\n")
+    driver.freeze()
+    for _ in range(7):
+        assert driver.run_checks("self")["outcome"] == "failed"
+        assert driver.task["test_repair_cycles_started"] == 0
+        assert driver.task["active_repair"] is None
+        assert not driver.task.get("last_check_failed")
+        assert driver.state["status"] == "active"
+
+
+def test_executor_cannot_report_local_failure_as_budget_charge(execution_checkpoint):
+    from lib.common import Rejected
+    driver = execution_checkpoint("started")
+    before = driver.state
+    assert before["roles"]["author"]["status"] == "active"
+    assert not driver.task.get("candidate_commit")
+    with pytest.raises(Rejected):
+        driver.send("repair", {"reason": "Local test failed", "defect_evidence": "local output",
+                               "test_failure": True})
+    assert driver.state == before
+    driver.explorer("premature-explorer", "independent")
+    with pytest.raises(Rejected) as error:
+        driver.send("check_run", {"role_id": "premature-explorer", "stage": "independent"})
+    assert error.value.code == "check_phase"
+    assert driver.task["test_repair_cycles_started"] == 0
+
+
+def test_independent_batch_counts_once_when_several_checks_fail(execution_checkpoint):
+    driver = execution_checkpoint("pending")
+    driver.worktree()
+    command = driver.task["plan"]["verification"][0]["run"]["command"]
+    driver.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": [
+        {"id": "second-check", "source": "fixture", "criteria": ["AC-one"],
+         "run": {"command": command}}]})
+    driver.role("author", "executor")
+    driver.send("start", {"role_id": "author", "paths": ["result.txt", "check.py"]})
+    driver.run_checks("baseline")
+    (driver.root / "check.py").write_text("assert False, 'both checks reject this candidate'\n")
+    driver.freeze()
+    assert driver.run_checks("independent")["outcome"] == "failed"
+    failures = [item for item in driver.task["evidence"] if item["stage"] == "independent"]
+    assert len(failures) == 2 and all(item["outcome"] == "failed" for item in failures)
+    assert driver.task["test_repair_cycles_started"] == 1
 
 
 def procedure_deadline_setup(execution_checkpoint):
@@ -187,7 +241,7 @@ def test_expired_assignment_cannot_begin_procedure(execution_checkpoint, monkeyp
     assert storage(driver.directory).read() == before
 
 
-def test_reserved_procedure_repair_receives_new_attempt_budget(execution_checkpoint, monkeypatch):
+def test_procedure_recovery_gets_new_deadline_without_failure_charge(execution_checkpoint, monkeypatch):
     from lib import explorer_assignments
     from lib.common import Rejected
     driver, task_id, stage = procedure_deadline_setup(execution_checkpoint)
@@ -205,15 +259,15 @@ def test_reserved_procedure_repair_receives_new_attempt_budget(execution_checkpo
     with pytest.raises(Rejected) as error:
         driver.send("procedure_begin", {**payload, "role_id": "replacement-procedure"})
     assert error.value.code == "repair_cycle_required"
-    driver.send("repair", {"reason": "Restore procedure timing", "defect_evidence": result["log"], "test_failure": True})
+    driver.send("repair", {"reason": "Restore procedure timing", "defect_evidence": result["log"]})
     driver.freeze()
     timed_explorer(driver, task_id, stage, "repaired-procedure")
     fresh = driver.send("procedure_begin", {**payload, "role_id": "repaired-procedure"})
     assert fresh["remaining_timeout"] == 10
-    assert driver.task["test_repair_cycles_started"] == 1
+    assert driver.task["test_repair_cycles_started"] == 0
     result = driver.send("procedure_result", {"role_id": "repaired-procedure", "check_id": "timed-procedure",
         "outcome": "passed", "steps": ["Completed within new allowance"], "trace": "fake-clock adapter"})
     assert result["outcome"] == "passed"
     assert driver.send("check_run", {"role_id": "repaired-procedure", "stage": stage})["outcome"] == "passed"
-    assert driver.task["test_repair_cycles_started"] == 1
+    assert driver.task["test_repair_cycles_started"] == 0
     assert driver.task["active_repair"] is None

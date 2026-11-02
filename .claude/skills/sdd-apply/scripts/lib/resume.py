@@ -263,7 +263,8 @@ def transition(state, task, event, directory):
             require(predecessor and successor["successor_of"] == lost_role
                     and predecessor["status"] == "lost"
                     and predecessor["task_id"] == successor["task_id"]
-                    and predecessor["kind"] == successor["kind"],
+                    and predecessor["kind"] == successor["kind"]
+                    and predecessor.get("lens_id") == successor.get("lens_id"),
                     "successor_required", "Successor must replace the named lost role with the same task and kind")
             require(any(b["reason"] == reason and b.get("task_id") == resolution.get("task_id")
                         and b.get("role_id") == lost_role for b in state["blockers"]),
@@ -281,8 +282,10 @@ def transition(state, task, event, directory):
         if t:
             if reason == "lost_role" and successor["kind"] == "executor":
                 t["executor"] = successor["role_id"]
-            if reason == "lost_role" and successor["kind"] == "reviewer" and t.get("active_reviewer") == lost_role and t["active_review"]:
-                t["active_reviewer"] = successor["role_id"]
+            if reason == "lost_role" and successor["kind"] == "reviewer" and t["active_review"]:
+                lens = successor["lens_id"]
+                if t.get("active_reviewers", {}).get(lens) == lost_role:
+                    t["active_reviewers"][lens] = successor["role_id"]
             t["blockers"] = [b for b in t["blockers"] if not resolved(b)]
             if not t["blockers"] and t["status"] == "blocked":
                 target = t.get("before_block", "running")

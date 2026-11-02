@@ -79,7 +79,6 @@ class AcceptanceDriver(Driver):
         if self.state["basis"].get("work_kind") == "refactoring":
             owned.append("check_local.py")
         self.send("start", {"role_id": "author", "paths": paths or owned})
-        self.role("baseline-verifier", "verifier")
         return self.run_checks("baseline")
 
     def implement(self):
@@ -161,8 +160,6 @@ class RegistryDriver(AcceptanceDriver):
         self.send("checks_register", {"inventory": {"instructions": [], "ci": []}, "additional": additional or []})
         self.role(self.author, "executor")
         self.send("start", {"role_id": self.author, "paths": paths})
-        verifier = self.task_id + "-baseline"
-        self.role(verifier, "verifier")
         return self.run_checks("baseline")
 
     def implement(self):

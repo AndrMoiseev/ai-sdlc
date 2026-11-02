@@ -19,7 +19,7 @@ disable-model-invocation: true
 Перед запуском explorer, рецензента, редактора или слепого проверяющего примени
 [проектный выбор субагентов](../sdd-shared/references/subagents.md): роль выбирает определение
 агента из `.sdd/settings.json`; отсутствие настройки сохраняет модель родителя.
-В согласованном ревью документов обязательны consistency и simplicity плюс проектные
+В согласованном ревью документов обязательны consistency, simplicity и premortem плюс проектные
 линзы; в ревью плана — plan и simplicity, каждая в отдельном чистом контексте.
 Для simplicity после выбора модели подготовь [инструкции](references/simplicity-instructions.md).
 

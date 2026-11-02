@@ -11,9 +11,11 @@ linters and validators require a checks assignment.
 
 For checks, execute the complete registered set on the assigned basis through the
 calling workflow. Preserve exact commands, limits and full raw artifacts. Return
-the machine summary reference and separate diagnosis; report actual failures,
-skips, missing checks and unavailable metrics. An exit code or diagnosis does not
-decide acceptance criteria. The independent verifier makes that assessment.
+the machine summary reference and factual observations; report actual failures,
+skips, missing checks and unavailable metrics. Execute exactly what the orchestrator
+assigned. Do not select or narrow checks, decide whether evidence is sufficient,
+choose repairs, accept work or launch reviewers. Return execution facts to the
+orchestrator; the assigned review lens assesses acceptance criteria.
 
 Keep the assignment identity, observed capabilities, selection and actual launch
 trace with the result. Stop on a permission failure or exhausted limit and report

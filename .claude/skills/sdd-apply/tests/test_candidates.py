@@ -11,7 +11,7 @@ def test_execution_records_no_candidate_artifacts_or_references(execution_checkp
     for item in driver.task["evidence"]:
         log = json.loads(artifacts.read_text(driver.directory / item["log"]))
         assert "candidate" not in log
-    packet = json.loads(artifacts.read_text(driver.role("observer", "verifier")["packet"]))
+    packet = json.loads(artifacts.read_text(driver.verification_reviewer("observer")["packet"]))
     assert "candidate" not in packet
     assert all("candidate" not in item for item in packet["prior_commits"])
 

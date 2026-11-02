@@ -1,9 +1,34 @@
 # Review findings and technical debt
 
+## Review lenses
+
+After the full project tests and static checks pass, run both required lenses in
+parallel against the same frozen commit. Each reviewer has one `lens_id` and a
+separate fresh context. A round completes only after both results arrive; every
+lens must pass before integration. Reviewers execute no checks or procedures.
+
+| Lens | Exclusive responsibility | Result |
+| --- | --- | --- |
+| [verification](verification-lens.md) | REQ/AC compliance, observable behavior, test sufficiency and integrity, evidence freshness, project testing rules | `verification_result` and `review_result` with `test_integrity`; may request `more_checks` |
+| [code](code-lens.md) | Accepted architecture, source structure, dependencies, maintainability and project code rules | `review_result`; no criterion verdicts, test-integrity assessment or check execution |
+
+Assign a question by the property being assessed, not by filename. A test's
+assertion strength belongs to verification; its source structure belongs to code.
+For project rules, testing/evidence rules belong to verification and implementation
+rules to code. Send out-of-scope observations to the orchestrator, naming the owning
+lens. Do not duplicate findings or read another lens's report during independent work.
+
+## Finding policy
+
 Apply this policy to task code reviews. Accept a finding
 for repair only when evidence demonstrates a violation of at least one approved
 acceptance criterion, accepted architecture decision, or applicable project rule.
 This keeps implementation within the agreed scope while preserving useful ideas.
+
+When another design skill is explicitly active, use its heuristics within this
+policy's review roles, check-execution limits, verdicts and repair scope. Treat
+heuristics as questions for investigation; a heuristic alone is not an applicable
+project rule or proof of a violation.
 
 For each finding, identify the affected code and observable behavior. For a
 contractual defect, include `proof: {kind, source, violation}`:
@@ -25,7 +50,7 @@ project rule. Keep mandatory checks and their failure handling unchanged.
 
 ## Tests at changed module boundaries
 
-For refactoring, read the packet's `test_evolution`: approved `test_changes`
+In the verification lens, read the packet's `test_evolution`: approved `test_changes`
 groups, applicable checks, and the exact pending registry transition. Match each
 actual test addition, adaptation, move or removal to its group and criteria;
 identify the accepted DEC for a cancelled structural restriction. Inspect the
@@ -44,8 +69,9 @@ coverage percentage and a green run do not establish this sufficiency. Record
 the old guarantee, its disposition, actual replacement tests where needed,
 registry IDs and remaining evidence gaps in `test_integrity`.
 
-Use `more_checks` for a specific unresolved contractual evidence gap. Use a
-proven blocker when a preserved guarantee or accepted architecture is violated.
+Use `more_checks` for a specific unresolved evidence gap in this lens. Use a
+proven blocker when a preserved guarantee or testing rule is violated. Architectural
+violations belong to the code lens.
 Do not block a justified structural retirement merely because a test was deleted.
 Changing the preservation obligation or architecture requires `spec_conflict`,
 not a weaker oracle. Apply registry changes through `checks_revise`; state edits
@@ -58,8 +84,9 @@ using the proof and generates `execution/technical-debt.md` from recorded review
 If only recommendations remain and mandatory verification is sufficient, return
 `pass`: continue the plan without editing code for those recommendations, asking
 for approval mid-plan, or starting another repair/review cycle solely for them.
-Use `more_checks` only to resolve a specific gap in evidence for an AC,
-architecture decision, or project rule; explain that gap in `test_integrity`.
+Only verification uses `more_checks`, for a specific gap in criterion or test
+evidence; explain that gap in `test_integrity`. Code findings concern accepted
+architecture and implementation rules and use `pass` or `changes`.
 
 After accepting all plan tasks, finalize with debt deferred by
 default. A nonempty journal does not prevent completion. Present a brief summary

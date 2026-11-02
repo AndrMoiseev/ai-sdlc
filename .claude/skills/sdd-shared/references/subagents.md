@@ -12,13 +12,12 @@ again for permission to use it within authorized work.
 |---|---|
 | `sdd-spec.explorer` | Bounded source research and document/plan check execution |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
-| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency and simplicity |
+| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency, simplicity and premortem |
 | `sdd-spec.plan_reviewer` | Separate fresh reviewers for plan and simplicity lenses |
 | `sdd-spec.editor` | Authorized humanizer editing pass |
 | `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
-| `sdd-apply.verifier` | Independent criterion assessment and behavioral/manual attestations for task and integration evidence |
-| `sdd-apply.reviewer` | Implementation review |
+| `sdd-apply.reviewer` | One fresh reviewer per required verification or code lens, launched in parallel after successful project checks |
 
 Use [settings.example.json](../templates/settings.example.json) as an optional template.
 Version 1 maps role IDs to nonempty agent names under `subagents.roles`. Omit roles
@@ -115,10 +114,9 @@ snapshots: edits can invalidate candidate checks or violate task scope. Change s
 between tasks or reconcile it through the existing recovery/check procedure; do not
 exclude configuration from source checks to bypass those protections.
 A new review still follows existing consent rules.
-Verifier and reviewer may share a context only when their resolved launch identities
-match and the original independence rules permit it; otherwise use separate fresh agents.
-For Claude Code custom agents, always use separate verifier/reviewer contexts: the
-catalog names alone do not prove that the native definition stayed unchanged.
+Every sdd-apply review lens uses a separate fresh context even when launch identities
+match. The verification and code lenses both resolve `sdd-apply.reviewer`; neither
+can use an author's or another reviewer's context.
 Refresh the actual Claude catalog immediately before launch. Re-resolution in scripts
 checks Codex definition precedence and missing-agent recovery; it cannot query a live
 Claude host or prove that an attested catalog is current.

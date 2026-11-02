@@ -25,8 +25,8 @@ Before coordinating workers, read the [shared coordination contract](../sdd-shar
 ## Skill development acceptance
 
 Use deterministic tests for task acceptance when changing skills. Run behavioral,
-trigger and pressure evals only when explicitly authorized and assigned to a task
-or a separate evaluation request. There is no automatic final evaluation phase.
+trigger and pressure evals only as separately authorized evaluation work outside
+this task flow. There is no automatic final evaluation phase.
 
 ## Route
 
@@ -34,7 +34,7 @@ or a separate evaluation request. There is no automatic final evaluation phase.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
 3. Execute independent tasks in parallel using isolated task worktrees. Invoking sdd-apply authorizes this execution without a separate parallel request. Unavailable isolation blocks execution. Unsupported legacy execution states must be reconciled with their original skill version; do not rewrite their mode.
 4. Read [execute-parallel](flows/execute-parallel.md).
-5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed check or proven review violation, read [repair](flows/repair.md). For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
+5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed independent check after executor completion or proven review violation, read [repair](flows/repair.md). Executor self-checks remain within implementation and do not consume the failure budget. For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 
 Authorization to execute includes local task commits; delivery beyond those commits requires its own instruction.
 
@@ -43,8 +43,12 @@ When refactoring changes module boundaries and their tests, apply the
 
 ## Execution and assessment
 
-Delegate bounded research and deterministic checks to explorer under
-[role coordination](references/role-coordination.md#explorer-dispatch). Send its
-saved summary and evidence references through the orchestrator to the verifier
-for criterion assessment. Read [execution ownership](references/api-checks.md#execution-ownership-and-one-batch-deadline)
-for explicitly typed behavioral/manual procedures and commands. Complete the plan from accepted tasks using [finalize](flows/finalize.md).
+After the executor reports completion, freeze its commit and direct Explorer to
+execute the full project test and static-check set under
+[role coordination](references/role-coordination.md#explorer-dispatch). Explorer
+executes the exact assignment and reports results; the orchestrator selects and
+registers the complete set. Only after it passes, launch the required
+[review lenses](references/review-policy.md#review-lenses) in parallel, each in its
+own fresh context. Reviewers inspect sources and saved evidence without executing
+checks. Manual and behavioral checks are outside this task flow. Complete the plan
+from accepted tasks using [finalize](flows/finalize.md).

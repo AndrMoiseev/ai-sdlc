@@ -9,8 +9,14 @@ from .common import digest, require
 from .inputs import spec_modules, document_paths
 from .state import snapshot
 
-execution_kind = spec_modules("check_kinds").execution_kind
 STAGES = {"baseline", "self", "independent", "integration"}
+
+
+def execution_kind(check):
+    kind = spec_modules("check_kinds").execution_kind(check)
+    require(kind == "deterministic", "check_kind",
+            "sdd-apply executes deterministic checks only; manual and behavioral checks are outside task review")
+    return kind
 
 
 def basis(state, task, kind="research", stage=None):
@@ -62,15 +68,8 @@ def authorize(state, task, role_id, stage, active=True, current_basis=True):
 
 
 def procedure_role(state, task, role_id, stage, check, active=True, current_basis=True):
-    kind = execution_kind(check)
-    if kind == "deterministic":
-        return authorize(state, task, role_id, stage, active=active, current_basis=current_basis)
-    role = state["roles"].get(role_id)
-    expected = "verifier"
-    require(role and role["kind"] == expected and role["task_id"] == (task["plan"]["id"] if task else None)
-            and role["status"] in ({"active"} if active else {"active", "finished"}),
-            "procedure_role", "Semantic procedures require their independent task verifier")
-    return role
+    execution_kind(check)
+    return authorize(state, task, role_id, stage, active=active, current_basis=current_basis)
 
 
 def research_result(result):
@@ -127,8 +126,7 @@ def attempt_deadline(state, task, role, timeout=300):
 
 
 def procedure_budget(state, task, role, check, timeout=300):
-    if execution_kind(check) != "deterministic":
-        return {}
+    execution_kind(check)
     deadline = attempt_deadline(state, task, role, timeout)
     require(deadline.remaining() > 0, "check_deadline", "The assigned check attempt deadline expired")
     return {"check_deadline": deadline.record, "remaining_timeout": deadline.remaining()}
