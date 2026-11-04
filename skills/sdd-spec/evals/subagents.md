@@ -14,6 +14,9 @@ uv run --locked --script "<sdd-apply-root>/scripts/test.py" tests/test_subagents
 ```
 
 These tests cover both hosts' selection logic with synthetic catalogs/attestations.
+The shared suite includes `sdd-spec.architect` profile selection and observed-catalog
+selection; setup checks its inherited model/effort preset. Authoring and continuation
+cases are listed separately in [architect scenarios](architect.md).
 They do not demonstrate Claude Code or Codex launch behavior. The Claude cases can
 run without Claude Code installed. Native Claude evaluations below remain separate.
 

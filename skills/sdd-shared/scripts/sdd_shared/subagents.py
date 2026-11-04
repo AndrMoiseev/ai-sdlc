@@ -7,6 +7,7 @@ import tomllib
 
 
 ROLES = (
+    "sdd-spec.architect",
     "sdd-spec.explorer", "sdd-apply.explorer",
     "sdd-spec.document_reviewer", "sdd-spec.plan_reviewer",
     "sdd-spec.editor", "sdd-spec.editorial_reviewer",
