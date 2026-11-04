@@ -1,4 +1,4 @@
-from lib.reviews import review_status, _validate_user
+from lib.reviews import review_status, _validate_user, _reuse_decisions
 from lib.documents import ValidationError
 
 from test_review_records import checkpoint, project, report, write, finding
@@ -6,8 +6,29 @@ import pytest
 import yaml
 
 
+@pytest.mark.parametrize("declared", [{}, {"repeat": "original"}, {"last": "repeat", "repeat": "original"}])
+def test_decision_reuse_chains_in_memory(declared):
+    source = {"original": {"action": "defer"}}
+    decisions_by_finding, origins = _reuse_decisions(source, declared)
+    assert source == {"original": {"action": "defer"}}
+    assert set(decisions_by_finding) == {"original", *declared}
+    assert set(origins.values()) == {"original"}
+
+
+def test_reuse_does_not_restore_missing_decisions_or_override_a_direct_choice():
+    assert _reuse_decisions({}, {"repeat": "cancelled"}) == ({}, {})
+    original = {"original": {"action": "reject"}}
+    assert _reuse_decisions(original, {"repeat": "original"}, {"repeat"}) == (original, {"original": "original"})
+    direct = {"original": {"action": "reject"}, "repeat": {"action": "fix"}}
+    decisions_by_finding, origins = _reuse_decisions(direct, {"repeat": "original"})
+    assert decisions_by_finding == direct
+    assert origins["repeat"] == "repeat"
+    with pytest.raises(ValidationError, match="Cyclic"):
+        _reuse_decisions({}, {"first": "second", "second": "first"})
+
+
 def user(tmp_path, kind, **extra):
-    return dict(sdd_record="user", work_kind="change", change_id="demo", id="USER-" + kind.replace("_", "-"), kind=kind, scope={"stage": "document_review"}, response="Explicit instruction", date="2026-01-01T01:00:00Z", basis_commit="a" * 40, **extra)
+    return dict(sdd_record="user", work_kind="change", change_id="demo", id="USER-" + kind.replace("_", "-"), kind=kind, scope={"stage": "review"}, response="Explicit instruction", date="2026-01-01T01:00:00Z", basis_commit="a" * 40, **extra)
 
 
 def decisions(root, records):
@@ -30,19 +51,21 @@ def test_version_approval_vs_durable_work(tmp_path):
 def test_historical_plan_without_tasks_does_not_block_documents(tmp_path):
     root = project(tmp_path)
     report(tmp_path, root, lens="plan", stage="plan")
-    approval = user(tmp_path, "plan_approval")
-    approval["scope"]["stage"] = "plan_review"
+    approval = user(tmp_path, "document_approval")
+    approval["scope"]["stage"] = "review"
     approval["basis_commit"] = "a" * 40
     decisions(root, [approval])
     (root / "tasks.md").unlink()
     result = review_status(tmp_path, root, "documents")
     assert not result["errors"]
     assert result["review_status"]["reports"]["run-one/plan"]["evidence"] == "current"
-    assert result["approval_status"]["applicability"]["USER-plan-approval"] is True
-    assert not result["approval_status"]["approved"]
+    assert result["approval_status"]["applicability"]["USER-document-approval"] is True
+    assert result["approval_status"]["approved"]
+    assert not result["approval_status"]["ready"]
+    assert "plan" not in result["review_status"]["required_lenses"]
 
 
-def test_related_findings_never_inherit_disposition(tmp_path):
+def test_repeated_findings_reuse_only_explicitly_verified_decisions(tmp_path):
     root = project(tmp_path)
     report(tmp_path, root, records=[finding()])
     disposition = user(tmp_path, "finding_disposition", action="fix", completion=[])
@@ -53,18 +76,29 @@ def test_related_findings_never_inherit_disposition(tmp_path):
     status = review_status(tmp_path, root, "documents")["review_status"]
     assert status["unresolved_findings"] == ["run-two/consistency/FIND-example"]
     assert status["unfinished_fixes"] == ["run-one/consistency/FIND-example"]
+    write(root / "review/summary.md", {"schema_version": 1, "findings": [{
+        "finding": "run-two/consistency/FIND-example", "related_to": [],
+        "duplicates": ["run-one/consistency/FIND-example"],
+        "decision_from": "run-one/consistency/FIND-example",
+        "decision_basis": "Same issue, grounds and scope; the requested fix is still pending.",
+    }]})
+    status = review_status(tmp_path, root, "documents")["review_status"]
+    assert not status["unresolved_findings"]
+    assert status["reused_decisions"] == {"run-two/consistency/FIND-example": "run-one/consistency/FIND-example"}
+    assert status["unfinished_fixes"] == ["run-one/consistency/FIND-example", "run-two/consistency/FIND-example"]
     disposition["completion"] = [{"finding": "run-one/consistency/FIND-example", "path": "design.md"}]
     decisions(root, [disposition])
     assert not review_status(tmp_path, root, "documents")["review_status"]["unfinished_fixes"]
 
 
-def test_deferred_requires_return_and_cancelled_work_not_active(tmp_path):
+@pytest.mark.parametrize("action", ["reject", "defer"])
+def test_optional_recommendation_needs_no_reason_or_return_and_cancelled_work_not_active(tmp_path, action):
     root = project(tmp_path)
     report(tmp_path, root, records=[finding()])
-    disposition = user(tmp_path, "finding_disposition", action="defer", reason="Later")
+    disposition = user(tmp_path, "finding_disposition", action=action)
     disposition["scope"]["findings"] = ["run-one/consistency/FIND-example"]
     decisions(root, [disposition])
-    assert review_status(tmp_path, root, "documents")["errors"]
+    assert not review_status(tmp_path, root, "documents")["errors"]
     disposition.update(action="fix", status="cancelled")
     decisions(root, [disposition])
     status = review_status(tmp_path, root, "documents")
@@ -75,19 +109,19 @@ def test_deferred_requires_return_and_cancelled_work_not_active(tmp_path):
 def test_state_never_authorizes_and_broken_state_recovers(tmp_path):
     root = project(tmp_path)
     meta = checkpoint(root)
-    meta.update(phase="plan_approved", approval_refs=["USER-missing"])
+    meta.update(phase="approved", approval_refs=["USER-missing"])
     (root / "state.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
     result = review_status(tmp_path, root, "documents")
     assert not result["approval_status"]["approved"]
     assert result["warnings"][0]["code"] == "state_recovery"
 
 
-@pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("documents", "document_approval", "premortem"), ("plan", "plan_approval", "plan")])
+@pytest.mark.parametrize("stage,kind,lens", [("documents", "document_approval", "consistency"), ("documents", "document_approval", "premortem"), ("plan", "document_approval", "plan")])
 def test_durable_approval_and_review_remain_independent(tmp_path, stage, kind, lens):
     # Exercise real review and authorization parsing with an injected Git observation.
     root = project(tmp_path)
     approval = user(tmp_path, kind)
-    approval["scope"]["stage"] = "document_review" if stage == "documents" else "plan_review"
+    approval["scope"]["stage"] = "review" if stage == "documents" else "review"
     approval["basis_commit"] = "a" * 40
     decisions(root, [approval])
     result = review_status(tmp_path, root, stage)
@@ -163,12 +197,12 @@ def test_approval_survives_accepted_commit_transition(tmp_path, checkpoint_obser
 @pytest.mark.parametrize("kind", ["review_consent", "review_waiver"])
 @pytest.mark.parametrize("lenses,valid", [
     (["plan"], True), (["plan", "simplicity"], True), (["simplicity"], True),
-    (["consistency"], False), (["premortem"], False), (["security"], False), (["simplicity", "simplicity"], False),
+    (["consistency"], True), (["premortem"], True), (["security"], True), (["simplicity", "simplicity"], False),
 ])
 def test_plan_review_authorization_lenses_in_memory(kind, lenses, valid):
     from pathlib import Path
     record = user(None, kind)
-    record["scope"] = {"stage": "plan_review", "lenses": lenses}
+    record["scope"] = {"stage": "review", "lenses": lenses}
     if kind == "review_consent":
         record["scope"]["run_id"] = "plan-run"
     if valid:

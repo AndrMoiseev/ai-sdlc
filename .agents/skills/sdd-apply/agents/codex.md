@@ -1,6 +1,6 @@
 # Codex adapter
 
-Apply [role coordination](../references/role-coordination.md). Invocation or a verified sdd-spec plan-approval handoff is allowed by `agents/openai.yaml` with `allow_implicit_invocation: true`.
+Apply [role coordination](../references/role-coordination.md). `agents/openai.yaml` allows routing with `allow_implicit_invocation: true`; execution still requires an explicit user instruction, directly or in a verified sdd-spec handoff. Plan approval alone does not authorize execution.
 
 Discover the native tools actually exposed by this host. Resolve [project subagent selection](../references/subagents.md) before the waiting launch. Pass its `launch` parameters to `spawn_agent`, including `fork_turns="none"`, plus role, task paths, file boundaries and the waiting handshake. Record the returned identity and launch trace, register it with `agent_selection`, then deliver the generated packet using the host's messaging tool. The selected TOML supplies only model/effort; the role supplies instructions. Report unapplied definition fields.
 

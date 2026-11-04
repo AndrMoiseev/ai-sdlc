@@ -72,10 +72,11 @@ def independent(state, task, role_id, kinds):
     return role
 
 
-def valid_evidence(state, task, directory, stage=None):
+def valid_evidence(state, task, directory, stage=None, check_ids=None):
     source = current(state, task)
     checks = selected(state, task)
-    required = {check["id"] for check in checks}
+    required = {check["id"] for check in checks} if check_ids is None else set(check_ids)
+    require(required <= {check["id"] for check in checks}, "required_checks", "Unknown required check")
     if state["basis"].get("work_kind", "change") != "refactoring":
         recorded = {item["check_id"] for item in task["evidence"]
                     if item["stage"] in ({stage} if stage else {"independent", "integration"})}
@@ -86,6 +87,8 @@ def valid_evidence(state, task, directory, stage=None):
             continue
         if item["stage"] not in ({stage} if stage else {"independent", "integration"}):
             continue
+        if item["check_id"] not in required:
+            continue
         if item["check_id"] in seen:
             continue
         seen.add(item["check_id"])
@@ -95,6 +98,14 @@ def valid_evidence(state, task, directory, stage=None):
         raw = artifacts.read_bytes(path)
         require(digest(raw) == item["log_hash"], "evidence_corrupt", item["log"])
         log_data = json.loads(raw)
+        recorded_checks = check_evidence.registered_checks(state, log_data)
+        registered = next((c for c in recorded_checks if c["id"] == item["check_id"]), None)
+        check = next(c for c in checks if c["id"] == item["check_id"])
+        require(registered and check_evidence.same_execution(registered, check),
+                "evidence_basis", "Evidence must use the current check command, configuration and dependencies")
+        output = next((output for output in log_data.get("outputs", []) if output.get("check_id") == item["check_id"]), None)
+        require(output and output["outcome"] == item["outcome"] and output.get("evidence_complete"),
+                "evidence_incomplete", "The required check needs complete passing evidence")
         if not item.get("procedure"):
             require(log_data.get("task_id") == task["plan"]["id"]
                     and log_data.get("role_id") == item["role_id"]
@@ -110,8 +121,7 @@ def valid_evidence(state, task, directory, stage=None):
                     and log_data.get("task_id") == task["plan"]["id"]
                     and log_data.get("stage") == item["stage"]
                     and log_data.get("role_id") == item["role_id"]
-                    and log_data.get("registry_revision") == task["check_registry"]["revision"]
-                    and log_data.get("registered_checks") == checks,
+                    and registered in recorded_checks,
                     "evidence_basis", "Evidence must name this task and registry revision")
             check = next((check for check in checks if check["id"] == item["check_id"]), None)
             output = next((output for output in log_data.get("outputs", []) if output.get("check_id") == item["check_id"]), None)
@@ -119,10 +129,10 @@ def valid_evidence(state, task, directory, stage=None):
             run = check["setup"] or check["run"]
             if "command" in run:
                 require(output.get("command") == run["command"] and output.get("exit_code") == 0
-                        and output.get("criteria") == check["criteria"], "evidence_command",
+                        and output.get("criteria") == registered["criteria"], "evidence_command",
                         "An unrelated successful command cannot establish a registered criterion")
         if not item.get("procedure") and item["log_hash"] not in validated:
-            check_evidence.validate(state, log_data, checks, directory)
+            check_evidence.validate(state, log_data, recorded_checks, directory, require_complete=False)
             validated.add(item["log_hash"])
         check = next((check for check in checks if check["id"] == item["check_id"]), None)
         if check and "procedure" in (check["setup"] or check["run"]):
@@ -146,6 +156,42 @@ def valid_evidence(state, task, directory, stage=None):
     return matches
 
 
+def reusable_evidence(state, task, directory, stage, source, checks):
+    """Keep successful executions by reference, without reporting a new execution."""
+    latest = {}
+    for item in task["evidence"]:
+        if item["stage"] == stage and not item.get("procedure"):
+            latest[item["check_id"]] = item
+    reusable = set()
+    logs = {}
+    for check in checks:
+        item = latest.get(check["id"])
+        if not item or item["outcome"] != "passed":
+            continue
+        if item["log"] not in logs:
+            path = artifacts.contained(directory, item["log"])
+            require(artifacts.is_file(path), "evidence_corrupt", item["log"])
+            raw = artifacts.read_bytes(path)
+            require(digest(raw) == item["log_hash"], "evidence_corrupt", item["log"])
+            logs[item["log"]] = json.loads(raw)
+        record = logs[item["log"]]
+        original = next((c for c in record.get("registered_checks", []) if c["id"] == check["id"]), None)
+        if (record.get("run_id") != state["run_id"] or record.get("before") != source
+                or record.get("after") != source or not original
+                or not check_evidence.same_execution(original, check)):
+            continue
+        if "procedure" in (check["setup"] or check["run"]):
+            procedure = procedure_evidence(state, task, check, stage, source, directory)
+            output = next(o for o in record["outputs"] if o["check_id"] == check["id"])
+            if procedure["outcome"] != "passed" or any(output.get(key) != procedure.get(key)
+                    for key in ("procedure_log", "procedure_log_hash")):
+                continue
+        reusable.add(check["id"])
+    if reusable:
+        valid_evidence(state, task, directory, stage, reusable)
+    return [latest[check["id"]] for check in checks if check["id"] in reusable]
+
+
 def require_command(command):
     require(check_runner.valid_command(command), "command_format", check_runner.COMMAND_FORMAT)
 
@@ -167,7 +213,8 @@ def procedure_evidence(state, task, check, stage, before, directory):
             and record.get("stage") == stage and record.get("outcome") == latest["outcome"],
             "evidence_basis", "Procedure evidence must name its exact check, role, stage and outcome")
     explorer.procedure_role(state, task, latest["role_id"], stage, check, active=False, current_basis=False)
-    unchanged = record["before"] == before == record["after"] and record.get("registered_check") == check
+    unchanged = (record["before"] == before == record["after"]
+                 and check_evidence.same_execution(record["registered_check"], check))
     return {"outcome": latest["outcome"] if unchanged else "stale", "procedure_log": latest["log"],
             "procedure_log_hash": latest["log_hash"]}
 
@@ -345,7 +392,10 @@ def transition(state, task, event, directory):
     outputs = []
     locations = None
     checks = selected(state, task)
-    for check in checks:
+    reused = reusable_evidence(state, task, directory, stage, before, checks) if stage != "baseline" else []
+    reused_ids = {item["check_id"] for item in reused}
+    executed = [check for check in checks if check["id"] not in reused_ids]
+    for check in executed:
         explorer.execution_kind(check)
         if deadline.remaining() <= 0:
             outputs.append(explorer.expired(check))
@@ -376,14 +426,15 @@ def transition(state, task, event, directory):
             result.update(outcome="unavailable", limitation="check_deadline")
         outputs.append(result)
     after = snapshot(state, root)
-    record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], "task_id": task["plan"]["id"], "role_id": role_id, "stage": stage, "before": before, "after": after, "outputs": outputs}
+    record = {"schema_version": 1, "change_id": state["change_id"], "run_id": state["run_id"], "task_id": task["plan"]["id"], "role_id": role_id, "stage": stage, "before": before, "after": after, "outputs": outputs,
+              "registry_revision": task["check_registry"]["revision"], "registered_checks": deepcopy(executed)}
     if state["basis"].get("work_kind", "change") == "refactoring":
-        record.update(work_kind="refactoring", registry_revision=task["check_registry"]["revision"],
-                      registered_checks=deepcopy(checks))
+        record.update(work_kind="refactoring")
     relative = f"runs/{state['run_id']}/tasks/{task['plan']['id']}/{task['attempt']}/{event['event_id']}.json"
     path = artifacts.contained(directory, relative)
-    summary = check_evidence.persist(state, record, checks, directory, event["event_id"])
-    write_json(path, record)
+    summary = check_evidence.persist(state, record, executed, directory, event["event_id"]) if executed else None
+    if executed:
+        write_json(path, record)
     outcome = "passed" if all(r["outcome"] == "passed" for r in outputs) and before == after else "failed"
     if any(r["outcome"] == "unavailable" or not r["evidence_complete"] for r in outputs):
         outcome = "unavailable"
@@ -405,4 +456,16 @@ def transition(state, task, event, directory):
         if outcome != "passed":
             from .budgets import failure
             failure(state, task, "test", outcome)
-    return {"outcome": outcome, "log": relative, "summary": summary}
+    if reused:
+        from .state_objects import StateObjects
+        objects = StateObjects(directory)
+        references = {output["check_id"]: output["summary"] for output in outputs}
+        for item in reused:
+            original = json.loads(artifacts.read_text(artifacts.contained(directory, item["log"])))
+            references[item["check_id"]] = next(o["summary"] for o in original["outputs"] if o["check_id"] == item["check_id"])
+        refs = [references[check["id"]] for check in checks]
+        summary = {**check_evidence.summary.aggregate([check["id"] for check in checks],
+                    [objects.get(ref) for ref in refs], before == after),
+                   "checks": refs, "reused_check_ids": sorted(reused_ids)}
+    return {"outcome": outcome, "log": relative if executed else None, "summary": summary,
+            "executed_check_ids": [check["id"] for check in executed], "reused_evidence": reused}

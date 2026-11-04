@@ -32,20 +32,20 @@ def test_two_capabilities_and_filled_review_templates(tmp_path):
     assert not validate_documents(tmp_path, change, 'plan')['errors']
     reviewed_commit = 'a' * 40
     report = read_document(SKILL / 'templates/review-report.md').meta
-    report.update(stage='plan_review', lens_id='plan', result='completed_no_findings',
+    report.update(stage='review', lens_id='plan', result='completed_no_findings',
                   limitations=[], reviewed_commit=reviewed_commit)
-    write_frontmatter(change / f'review/{report["run_id"]}/plan.md', report)
-    write_frontmatter(change / f'review/{report["run_id"]}/simplicity.md', {**report, 'lens_id': 'simplicity'})
+    for lens in ('consistency', 'simplicity', 'premortem', 'plan'):
+        write_frontmatter(change / f'review/{report["run_id"]}/{lens}.md', {**report, 'lens_id': lens})
     summary = read_document(SKILL / 'templates/review-summary.md').meta
     write_frontmatter(change / 'review/summary.md', summary)
     decision_meta = read_document(SKILL / 'templates/decisions.md').meta
-    decision = dict(sdd_record='user', id='USER-approve-plan', kind='plan_approval',
-                    scope={'stage': 'plan_review'}, response='Согласован именно этот комплект',
+    decision = dict(sdd_record='user', id='USER-approve-plan', kind='document_approval',
+                    scope={'stage': 'review'}, response='Согласован именно этот комплект',
                     date='2026-01-01T01:00:00Z', basis_commit=reviewed_commit, work_kind='change', change_id='sample-change')
     write_frontmatter(change / 'review/decisions.md', decision_meta,
                       '\n### Согласование\n\n```yaml\n' + yaml.safe_dump(decision, allow_unicode=True) + '```\n')
     state = yaml.safe_load((SKILL / 'templates/state.yaml').read_text(encoding='utf-8'))
-    state.update(phase='plan_approved', awaiting='none', document_links=['proposal.md', 'tasks.md'],
+    state.update(phase='approved', awaiting='none', document_links=['proposal.md', 'tasks.md'],
                  approval_refs=['USER-approve-plan'], review_links=[f'review/{report["run_id"]}/plan.md'])
     (change / 'state.yaml').write_text(yaml.safe_dump(state), encoding='utf-8')
     (change / 'state.md').write_bytes((SKILL / 'templates/state.md').read_bytes())

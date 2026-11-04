@@ -8,9 +8,8 @@ from .paths import contained, change_root as resolve_work
 from .checkpoints import inspect
 from .checkpoint_git import Git, GitError
 
-STAGES = {"documents": "document_review", "plan": "plan_review"}
+CHECK_STAGES = {"documents", "plan"}
 DOCUMENT_LENSES = ("consistency", "simplicity", "premortem")
-PLAN_LENSES = ("plan", "simplicity")
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
 COMMON = {"schema_version", "change_id", "document_type", "language", "work_kind"}
 
@@ -32,6 +31,30 @@ def text(value):
 
 def strings(value):
     return isinstance(value, list) and all(text(v) for v in value) and len(value) == len(set(value))
+
+
+def _reuse_decisions(dispositions, declarations, cancelled=()):
+    """Follow explicit equivalence declarations, never similarity or related_to."""
+    decisions = dict(dispositions)
+    origins = {key: key for key in decisions}
+    pending = {key: source for key, source in declarations.items() if key not in cancelled}
+    while pending:
+        progress = False
+        for key, source in list(pending.items()):
+            if key in decisions:
+                del pending[key]
+            elif source in decisions:
+                decisions[key] = decisions[source]
+                origins[key] = origins[source]
+                del pending[key]
+            elif source not in pending:
+                # A cancelled or missing decision cannot be recovered from a link.
+                del pending[key]
+            else:
+                continue
+            progress = True
+        require(progress, "Cyclic decision reuse")
+    return decisions, origins
 
 
 def identity(meta, kind, change_id, work_kind="change"):
@@ -100,7 +123,7 @@ def _questions(document, root, questions):
 
 
 def review_status(project_root: Path, change_root: Path, stage: str, work_kind="change") -> dict:
-    require(stage in STAGES, "Unknown review stage")
+    require(stage in CHECK_STAGES, "Unknown structural check stage")
     root = Path(change_root).resolve()
     project_root = Path(project_root)
     require(root == resolve_work(project_root, root.name, work_kind), "Review root disagrees with work identity")
@@ -136,7 +159,8 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
     except (ValidationError, TypeError, KeyError) as exc:
         diagnose(project_root / "sdd/arch-lenses/index.md", exc, "lens_index")
         lenses = list(DOCUMENT_LENSES)
-    required = lenses if stage == "documents" else list(PLAN_LENSES)
+    has_plan = (root / "tasks.md").is_file()
+    required = [*lenses, *(["plan"] if has_plan else [])]
     review_root = contained(root, "review")
     for path in sorted(review_root.glob("*/*.md")):
         try:
@@ -145,12 +169,11 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
             meta = doc.meta
             identity(meta, "review", root.name, work_kind)
             fields(meta, {"schema_version", "run_id", "stage", "lens_id", "result", "started_at", "finished_at", "reviewed_commit", "limitations"}, COMMON)
-            require(meta["stage"] in STAGES.values(), "Invalid report stage")
+            require(meta["stage"] == "review", "Invalid report stage")
             require(meta.get("change_id", root.name) == root.name, "Report change mismatch")
             require(meta["run_id"] == path.parent.name and meta["lens_id"] == path.stem, "Report identity disagrees with path")
             require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", meta["run_id"]), "Invalid run id")
             require(SLUG.fullmatch(meta["lens_id"]) is not None, "Invalid lens id")
-            require(meta["lens_id"] in PLAN_LENSES if meta["stage"] == "plan_review" else meta["lens_id"] != "plan", "Lens/stage mismatch")
             require(meta["result"] in {"completed_no_findings", "completed_with_findings", "incomplete"}, "Invalid report result")
             if meta["reviewed_commit"] is not None or meta["result"] != "incomplete":
                 commit_oid(meta["reviewed_commit"], oid_length)
@@ -192,6 +215,7 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
         run_commits[run] = report["reviewed_commit"]
 
     summary = contained(root, "review/summary.md")
+    decision_reuse = {}
     if summary.exists():
         try:
             doc = read_document(summary, work_kind)
@@ -199,9 +223,15 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
             fields(doc.meta, {"schema_version", "findings"}, COMMON)
             require(isinstance(doc.meta["findings"], list), "Summary findings must be a list")
             for entry in doc.meta["findings"]:
-                fields(entry, {"finding", "related_to", "duplicates"})
+                fields(entry, {"finding", "related_to", "duplicates"}, {"decision_from", "decision_basis"})
                 require(strings(entry["related_to"]) and strings(entry["duplicates"]), "Summary links must be lists")
                 require(all(k in findings for k in [entry["finding"], *entry["related_to"], *entry["duplicates"]]), "Unknown full finding key")
+                if "decision_from" in entry or "decision_basis" in entry:
+                    source = entry.get("decision_from")
+                    require(text(source) and source in entry["duplicates"] and source != entry["finding"], "Reused decision must identify a distinct duplicate finding")
+                    require(text(entry.get("decision_basis")), "Explain why meaning, grounds and scope of the repeated finding are unchanged")
+                    require(entry["finding"] not in decision_reuse, "Duplicate decision reuse declaration")
+                    decision_reuse[entry["finding"]] = source
         except (ValidationError, TypeError, KeyError) as exc:
             diagnose(summary, exc)
 
@@ -241,23 +271,29 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
                 if key in dispositions:
                     diagnose(decisions, ValidationError("authorization_structure", "Conflicting active dispositions require supersedes"), "authorization_structure")
                 dispositions[key] = record
+    decision_origins = {key: key for key in dispositions}
+    cancelled_findings = {key for ident, record in users.items()
+                          if ident not in superseded and record["kind"] == "finding_disposition"
+                          and record.get("status") == "cancelled"
+                          for key in record["scope"]["findings"]}
+    try:
+        dispositions, decision_origins = _reuse_decisions(dispositions, decision_reuse, cancelled_findings)
+    except ValidationError as exc:
+        diagnose(summary, exc, "authorization_structure")
     unresolved, unfinished = [], []
     for key in findings:
-        if reports["/".join(key.split("/")[:2])]["stage"] != STAGES[stage]:
-            continue
         decision = dispositions.get(key)
         if decision is None:
             unresolved.append(key)
-        elif decision["action"] == "fix" and key not in {c["finding"] for c in decision.get("completion", [])}:
+        elif decision["action"] == "fix" and decision_origins[key] not in {c["finding"] for c in decision.get("completion", [])}:
             unfinished.append(key)
 
     coverage = {}
     for lens in required:
-        matches = [r for r in reports.values() if r["stage"] == STAGES[stage] and r["lens_id"] == lens]
-        waived = any(applicable[i] and r["kind"] == "review_waiver" and r["scope"]["stage"] == STAGES[stage] and lens in r["scope"]["lenses"] for i, r in active.items())
+        matches = [r for r in reports.values() if r["lens_id"] == lens]
+        waived = any(applicable[i] and r["kind"] == "review_waiver" and lens in r["scope"]["lenses"] for i, r in active.items())
         coverage[lens] = "completed" if any(r["result"] != "incomplete" for r in matches) else "waived" if waived else "incomplete" if matches else "missing"
-    approved_kind = "document_approval" if stage == "documents" else "plan_approval"
-    approved = any(applicable[i] and r["kind"] == approved_kind for i, r in active.items())
+    approved = any(applicable[i] and r["kind"] == "document_approval" for i, r in active.items())
     complete = all(v in {"completed", "waived"} for v in coverage.values())
     work = {i: r["scope"] for i, r in active.items() if r["kind"] in {"planning_command", "finding_disposition"} and r.get("status", "active") == "active" and (r["kind"] == "planning_command" or r["action"] == "fix")}
     for ident in list(work):
@@ -287,7 +323,7 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
         state = checkpoint.path
         identity(checkpoint.meta, "state", root.name, work_kind)
         require(checkpoint.meta["change_id"] == root.name, "State change mismatch")
-        require(checkpoint.meta["phase"] in {"discovery", "drafting", "document_review", "user_review", "planning", "plan_review", "plan_approved"}, "Invalid state phase")
+        require(checkpoint.meta["phase"] in {"discovery", "drafting", "review", "user_review", "planning", "approved"}, "Invalid state phase")
         require(checkpoint.meta["awaiting"] in {"none", "clarification", "review_consent", "planning_command", "final_approval"}, "Invalid awaiting value")
         timestamp(checkpoint.meta["updated_at"])
         for field in ("document_links", "review_links"):
@@ -311,9 +347,9 @@ def review_status(project_root: Path, change_root: Path, stage: str, work_kind="
         warnings.append({"code": "state_recovery", "path": getattr(exc, "path", "") or str(state), "element_id": getattr(exc, "element_id", None), "message": str(exc)})
     open_questions = sorted(i for i, question in questions.items() if question["status"] == "open")
     blocking_questions = [i for i in open_questions if questions[i]["blocking"]]
-    discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not blocking_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}
+    discussion_status = {"open_questions": open_questions, "blocking_questions": blocking_questions, "complete": discussion_valid and not open_questions, "provenance": "Structural checks of available question records only; decision journal authorship and semantic completeness are not verified."}
     # Review evidence remains visible independently of the user's authorization.
-    return {"errors": errors, "warnings": warnings, "checkpoint_status": checkpoint_status, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished}, "approval_status": {"approved": approved, "ready": approved and discussion_status["complete"] and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
+    return {"errors": errors, "warnings": warnings, "checkpoint_status": checkpoint_status, "discussion_status": discussion_status, "review_status": {"required_lenses": required, "coverage": coverage, "reports": reports, "complete": complete, "unresolved_findings": unresolved, "unfinished_fixes": unfinished, "reused_decisions": {key: source for key, source in decision_origins.items() if key != source}}, "approval_status": {"approved": approved, "ready": approved and has_plan and discussion_status["complete"] and not errors, "applicability": applicable, "work_authorizations": work, "provenance": "Recorded decisions; user authorship and change provenance are not verified."}}
 
 
 def _validate_user(record, root, findings, work_kind="change", oid_length=None):
@@ -322,7 +358,7 @@ def _validate_user(record, root, findings, work_kind="change", oid_length=None):
     require(record.get("change_id", root.name if work_kind == "change" else None) == root.name, "Authorization change identity mismatch")
     require(record["sdd_record"] == "user", "Expected USER record")
     require(valid_id(record["id"], "USER"), "Invalid USER id")
-    kinds = {"review_consent", "finding_disposition", "review_waiver", "document_approval", "planning_command", "plan_approval", "state_acceptance"}
+    kinds = {"review_consent", "finding_disposition", "review_waiver", "document_approval", "planning_command", "state_acceptance"}
     require(record["kind"] in kinds, "Invalid authorization kind")
     require(text(record["response"]), "Explicit response required")
     require("message" not in record or text(record["message"]), "Message reference must be text")
@@ -341,16 +377,11 @@ def _validate_user(record, root, findings, work_kind="change", oid_length=None):
     commit_oid(record.get("basis_commit"), oid_length)
     expected = {"review_consent": {"run_id", "lenses"}, "review_waiver": {"lenses"}, "finding_disposition": {"findings"}, "planning_command": {"work"}}.get(kind, set())
     fields(scope, {"stage"} | expected)
-    require(scope["stage"] in STAGES.values(), "Invalid authorization stage")
-    if kind in {"document_approval", "planning_command"}:
-        require(scope["stage"] == "document_review", "Document authorization requires document_review")
-    if kind == "plan_approval":
-        require(scope["stage"] == "plan_review", "Plan approval requires plan_review")
+    require(scope["stage"] == "review", "Invalid authorization stage")
 
     if "lenses" in scope:
         require(strings(scope["lenses"]) and scope["lenses"], "Explicit lenses required")
         require(all(SLUG.fullmatch(lens) for lens in scope["lenses"]), "Invalid lens id")
-        require(all(lens in PLAN_LENSES for lens in scope["lenses"]) if scope["stage"] == "plan_review" else "plan" not in scope["lenses"], "Authorization lens/stage mismatch")
     if "run_id" in scope:
         require(text(scope["run_id"]) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", scope["run_id"]), "Explicit run required")
     if "work" in scope:
@@ -359,10 +390,9 @@ def _validate_user(record, root, findings, work_kind="change", oid_length=None):
         require(strings(scope["findings"]) and scope["findings"], "Explicit findings required")
         require(all(k in findings for k in scope["findings"]), "Unknown full finding key")
         require(record.get("action") in {"fix", "reject", "defer"}, "Invalid disposition")
-        if record["action"] in {"reject", "defer"}:
-            require(text(record.get("reason")), "Disposition reason required")
-        if record["action"] == "defer":
-            require(text(record.get("return_at")), "Deferred finding needs return_at")
+        for optional in ("reason", "return_at"):
+            if optional in record:
+                require(text(record[optional]), f"{optional} must be text when supplied")
         require(isinstance(record.get("completion", []), list), "completion must be a list")
         completed = set()
         for completion in record.get("completion", []):

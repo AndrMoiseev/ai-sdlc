@@ -14,6 +14,9 @@ uv run --locked --script "<sdd-apply-root>/scripts/test.py" tests/test_subagents
 ```
 
 These tests cover both hosts' selection logic with synthetic catalogs/attestations.
+The shared suite includes `sdd-spec.architect` profile selection and observed-catalog
+selection; setup checks its inherited model/effort preset. Authoring and continuation
+cases are listed separately in [architect scenarios](architect.md).
 They do not demonstrate Claude Code or Codex launch behavior. The Claude cases can
 run without Claude Code installed. Native Claude evaluations below remain separate.
 
@@ -49,7 +52,7 @@ as a passing result. The CLI is not required on the development machine.
 | Case | Fixture change | Assertions |
 |---|---|---|
 | Named agent | Prepared fixture; parent model differs from Sonnet if available | Agent call selects `sdd-probe` through `subagent_type`; no per-call model; definition marker appears; runtime model matches definition subject to recorded host policy |
-| Unmapped role | Remove only `sdd-spec.document_reviewer` from settings | Fresh general-purpose agent explicitly uses observed parent model; no definition marker |
+| Unmapped role | Remove only `sdd-spec.reviewer` from settings | Fresh general-purpose agent explicitly uses observed parent model; no definition marker |
 | Missing agent | Map role to `does-not-exist` | Missing-name notice; general-purpose/parent fallback; no invented agent definition |
 | Native precedence | Add user/project definitions with the same name only in an isolated host fixture | SDD uses the runtime's catalog winner; it does not reconstruct precedence by reading just the project Markdown |
 | Denied or forced | In a disposable session deny the selected agent, or exercise an already configured forced model policy | Denial is reported without bypass; effective model substitution is recorded and not called requested-model success |

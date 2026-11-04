@@ -134,7 +134,8 @@ class StateObjects:
         # history and source snapshots always live outside the current manifest.
         external = field in {"prior_result", "baseline", "start_snapshot", "freeze_base",
             "snapshot", "working_patch", "index_patch", "evidence", "reviews", "commits",
-            "repair_cycles", "budget_decisions", "worktree_history", "check_registry", "roles", "verification_results"}
+            "repair_cycles", "budget_decisions", "worktree_history", "check_registry", "roles", "verification_results",
+            "scope_history", "reused_reviews"}
         external = external or field == "source" and isinstance(result, dict) and {"files", "digest"} <= result.keys()
         control = field in {"basis", "tasks"} or isinstance(field, str) and field.startswith("TASK-")
         if not root and not control and isinstance(result, (dict, list, str)) and result and (external or size > 4096):

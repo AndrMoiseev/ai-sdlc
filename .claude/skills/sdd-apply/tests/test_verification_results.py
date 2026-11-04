@@ -144,7 +144,7 @@ def test_negative_conclusion_preserves_green_execution_and_budgets(execution_che
         require_passed(driver.state, driver.task, driver.directory)
 
 
-def test_latest_conclusion_and_new_attempt_invalidate_old_pass(execution_checkpoint):
+def test_latest_conclusion_replaces_old_pass_and_unchanged_execution_is_reused(execution_checkpoint):
     driver = execution_checkpoint("verified")
     first = driver.task["verification_results"][-1]
     driver.conclude(outcome="failed", check_request="Add the missing boundary assertion")
@@ -152,17 +152,22 @@ def test_latest_conclusion_and_new_attempt_invalidate_old_pass(execution_checkpo
         require_passed(driver.state, driver.task, driver.directory)
     driver.conclude()
     assert require_passed(driver.state, driver.task, driver.directory)
-    assert driver.run_checks("independent")["outcome"] == "passed"
-    with pytest.raises(Rejected, match="attempt changed"):
-        require_passed(driver.state, driver.task, driver.directory)
-    driver.conclude()
+    evidence = driver.task["evidence"]
+    result = driver.run_checks("independent")
+    assert result["outcome"] == "passed"
+    assert result["log"] is None
+    assert driver.task["evidence"] == evidence
     assert require_passed(driver.state, driver.task, driver.directory)
     assert driver.task["verification_results"][0] == first
 
 
 def test_new_failed_attempt_cannot_select_old_pass(execution_checkpoint, monkeypatch):
     from lib import verification
+    from repository_support import write_file
     driver = execution_checkpoint("verified")
+    driver.send("repair", {"reason": "Changed implementation", "defect_evidence": "New candidate"})
+    write_file(driver.root, "result.txt", b"changed result\n")
+    driver.freeze()
     original = verification.check_runner.run_command
     def failed(*args):
         return {**original(*args), "outcome": "failed", "exit_code": 7}

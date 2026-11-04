@@ -26,7 +26,7 @@ checks-пакета; основной агент сохраняет запрос
 uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage documents
 uv run --locked --script "<skill-root>/scripts/check.py" --project-root "<repo>" --change <id> --stage plan
 uv run --locked --script "<skill-root>/scripts/test.py" -q
-uv run --locked --script "<skill-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.document_reviewer --host codex --parent-model "<observed-model>"
+uv run --locked --script "<skill-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.reviewer --host codex --parent-model "<observed-model>"
 uv run --locked --script "<skill-root>/scripts/simplicity.py" --model "<selected-or-observed-model>"
 ```
 
@@ -43,17 +43,18 @@ plan добавляет покрытие AC, граф и проверки зад
 
 `review_status` сохраняет покрытие, актуальность и находки опционального ревью;
 его `complete` не является условием `approval_status.ready`. Для передачи
-согласованного плана в реализацию нужен установленный sdd-apply. Если он
+согласованного плана в реализацию нужны явное разрешение выполнения и установленный sdd-apply. Если он
 недоступен, сохрани согласование и сообщи о недостающем скилле; повторного
-разрешения пользователя после восстановления зависимости не требуется.
+разрешения пользователя после восстановления зависимости не требуется, если оно уже было явно дано и остаётся действующим.
 
 discussion_status показывает открытые и блокирующие Q-ID только из questions.md.
 Открытый блокирующий вопрос препятствует approval_status.ready, сохраняя
 само свидетельство согласования. Смысловую полноту вопросов и авторство журнала
 агент проверяет по [правилам обсуждения](discussion.md).
 
-При ошибках сообщи причину. Исправь однозначную структуру с сохранением
-смысла и повтори проверку; развилку поведения или объёма вынеси пользователю.
+При ошибках сообщи причину. Передай архитектору исправление однозначной структуры
+авторских документов с сохранением смысла, затем повтори проверку; ошибки
+состояния исправляет оркестратор. Развилку поведения или объёма вынеси пользователю.
 Структурные исключения не предусмотрены. Недоступную проверку не считай
 успешной; доступное исследование и сохранение черновиков допустимы.
 

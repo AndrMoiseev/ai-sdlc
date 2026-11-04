@@ -112,6 +112,32 @@ def completed_followups(state, plans, payload):
     return removed
 
 
+def accepted_scope(state, plans, payload):
+    """A user decision changes the live task contract, never its historical result."""
+    decisions = payload.get("accepted_scope", [])
+    require(isinstance(decisions, list), "scope_decision", "accepted_scope must list explicit user decisions")
+    selected = {}
+    for decision in decisions:
+        require(isinstance(decision, dict) and set(decision) == {"task_id", "text", "source"}
+                and all(isinstance(value, str) and value.strip() for value in decision.values()),
+                "scope_decision", "Record the actual user acceptance text, source and task ID")
+        key = decision["task_id"]
+        task = state["tasks"].get(key)
+        require(key not in selected and task and key in plans and task["status"] != "accepted"
+                and task.get("candidate_commit") and task.get("worktree")
+                and not task["worktree"].get("integrated") and not task["worktree"].get("removed"),
+                "scope_candidate", "Freeze and retain the unfinished task result in its worktree before revising its scope")
+        require(not task.get("procedures") and task["plan"] != plans[key],
+                "scope_decision", "Finish pending checks and reformulate the task for the accepted scope")
+        source = snapshot(state, task["worktree"]["path"])
+        from .state import clean_source
+        clean_source(source)
+        require(source["commit"] == task["candidate_commit"]["sha"],
+                "scope_candidate", "The recorded current result must remain unchanged")
+        selected[key] = decision
+    return selected
+
+
 def transition(state, task, event, directory):
     p, kind = event["payload"], event["type"]
     if kind == "spec_conflict":
@@ -129,6 +155,7 @@ def transition(state, task, event, directory):
                          work_kind=state["basis"].get("work_kind", "change"))
         require(basis["head"] != state["basis"]["head"], "plan_unchanged", "Use resume when the approved basis is unchanged")
         plans = {plan["id"]: plan for plan in basis["tasks"]}
+        scope = accepted_scope(state, plans, p)
         completed = [key for key, old in state["tasks"].items() if old["status"] == "accepted"]
         for key in completed:
             require(plans.get(key) == state["tasks"][key]["plan"], "completed_task_changed",
@@ -155,10 +182,13 @@ def transition(state, task, event, directory):
         previous_run = state["run_id"]
         from .state_objects import StateObjects
         objects = StateObjects(directory)
-        write_json(artifacts.contained(directory, f"runs/{previous_run}/superseded-state.json"), objects.pack(state, root=True))
+        archive = (f"runs/{previous_run}/plan-revisions/{event['event_id']}/state.json" if scope
+                   else f"runs/{previous_run}/superseded-state.json")
+        write_json(artifacts.contained(directory, archive), objects.pack(state, root=True))
         previous_tasks = deepcopy(state["tasks"])
-        state["run_id"] = uuid.uuid4().hex
-        state["previous_run"] = previous_run
+        if not scope:
+            state["run_id"] = uuid.uuid4().hex
+            state["previous_run"] = previous_run
         state["basis"] = basis
         if basis.get("work_kind", "change") == "refactoring":
             state.update(work_kind="refactoring", **{kind: {record["id"]: record for record in basis[kind]}
@@ -176,6 +206,15 @@ def transition(state, task, event, directory):
             old = previous_tasks.get(plan["id"])
             if old and old["status"] == "accepted":
                 state["tasks"][plan["id"]] = old
+                continue
+            if plan["id"] in scope:
+                fresh = retained[plan["id"]]
+                fresh.setdefault("scope_history", []).append({"decision": deepcopy(scope[plan["id"]]),
+                    "prior_result": {"$object": objects.put(objects.pack(old, root=True))}, "archive": archive})
+                fresh.update(plan=plan, status="verifying", active_review=None, last_check_failed=False)
+                for field in ("transfer", "active_reviewers", "review_basis"):
+                    fresh.pop(field, None)
+                state["tasks"][plan["id"]] = fresh
                 continue
             fresh = new_task(plan)
             if old:
@@ -195,11 +234,15 @@ def transition(state, task, event, directory):
         state["status"] = "blocked" if state["blockers"] else "active"
         state["baseline"] = snapshot(state)
         state["final"] = None
-        write_json(artifacts.contained(directory, f"runs/{state['run_id']}/input.json"), objects.pack(basis, root=True))
+        input_path = (f"runs/{previous_run}/plan-revisions/{event['event_id']}/input.json" if scope
+                      else f"runs/{state['run_id']}/input.json")
+        write_json(artifacts.contained(directory, input_path), objects.pack(basis, root=True))
         return {"run_id": state["run_id"], "previous_run": previous_run, "preserved_tasks": completed,
+                "accepted_scope": sorted(scope), "archive": archive,
                 **({"resolved_completed_repairs": {"mapping": deepcopy(p["completed_followups"]),
                     "removed_blockers": resolved, "authorization": deepcopy(p["instruction"])}} if resolved else {}),
-                "reassessment": "Completed tasks preserved; unfinished tasks require reassessment"}
+                "reassessment": "User-selected current results retain execution evidence; revised criteria require fresh assessment" if scope
+                                else "Completed tasks preserved; unfinished tasks require reassessment"}
     require(kind == "resume", "resume_operation", kind)
     from .check_registry import recovery
     registries = recovery(state)
@@ -217,7 +260,7 @@ def transition(state, task, event, directory):
                        "resume_condition": "Preserve changes; obtain the user's commit or discard decision and restore a clean main tree"})
     if observed_source["head"] != state["execution_head"]:
         issues.append({"reason": "execution_head_changed", "head": observed_source["head"], "expected_head": state["execution_head"],
-                       "resume_condition": "Inspect the new HEAD and record explicit current-state acceptance; new task scope requires revised_plan"})
+                       "resume_condition": "Inspect the new HEAD and record compatibility with the execution instruction; changed scope requires revised_plan"})
     if repository(root).branch() != state["basis"]["branch"]:
         issues.append({"reason": "branch_changed", "resume_condition": "Restore execution branch"})
     require(p.get("host_trace") and isinstance(p.get("live_contexts"), list), "host_observation", "Supply actual host role liveness observation")
@@ -246,10 +289,9 @@ def transition(state, task, event, directory):
         reason = resolution["reason"]
         require(reason != "execution_dirty", "resume_resolution", "A dirty main tree must be reconciled before resuming")
         if reason == "execution_head_changed":
-            instruction = resolution.get("instruction", {})
             require(not observed_source["dirty_paths"] and resolution.get("head") == observed_source["head"]
-                    and instruction.get("text") and instruction.get("source"),
-                    "resume_acceptance", "Record the actual user response and source for this exact clean HEAD")
+                    and resolution.get("compatible") is True,
+                    "resume_acceptance", "Record inspected evidence and compatibility for this exact clean HEAD")
             state["execution_head"] = observed_source["head"]
             issues = [item for item in issues if item["reason"] != reason]
         lost_role = None

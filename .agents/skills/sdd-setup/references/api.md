@@ -31,7 +31,7 @@ uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root 
 
 Запиши request с `inspection_file` (абсолютный путь или путь относительно
 request) и `inspection_sha256` из inspect. Добавь `roles` с решением для каждой
-из восьми ролей и `agents` с моделью/effort каждого уникального выбранного имени:
+роли из inspect и `agents` с моделью/effort каждого уникального выбранного имени:
 
 ```json
 {

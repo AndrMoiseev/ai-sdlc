@@ -57,7 +57,7 @@ def test_full_check_set_shares_deadline_including_report_capture(execution_check
     command = driver.task["checks"][0]["run"]["command"]
     driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"],
         "additional": [{"id": name, "source": "review", "criteria": ["AC-one"], "run": {"command": command}}
-                       for name in ("second", "third")]})
+                       for name in ("second", "third", "fourth")]})
     clock, timeouts = [0.0], []
     original = verification.check_runner.run_command
     capture = check_evidence.capture_reports
@@ -166,7 +166,9 @@ def procedure_deadline_setup(execution_checkpoint):
     check = {"id": "timed-procedure", "source": "fixture", "criteria": ["AC-one"],
              "execution_kind": "deterministic", "run": {"procedure": "check.py"}}
     driver.review(verdict="more_checks")
-    driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [check]})
+    driver.send("checks_extend", {"review_round": driver.task["reviews"][-1]["round_id"], "additional": [check,
+        {"id": "timed-command", "source": "fixture", "criteria": ["AC-one"],
+         "run": driver.task["checks"][0]["run"]}]})
     return driver, "TASK-one", "independent"
 
 

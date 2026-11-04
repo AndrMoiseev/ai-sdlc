@@ -10,12 +10,11 @@ again for permission to use it within authorized work.
 
 | Role | Assignment |
 |---|---|
+| `sdd-spec.architect` | Primary author of the specification bundle, plan and derived explanations; continues one work's author context |
 | `sdd-spec.explorer` | Bounded source research and document/plan check execution |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
-| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency, simplicity and premortem |
-| `sdd-spec.plan_reviewer` | Separate fresh reviewers for plan and simplicity lenses |
-| `sdd-spec.editor` | Authorized humanizer editing pass |
-| `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
+| `sdd-spec.reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity, premortem and plan when tasks exist; reads all available documents |
+| `sdd-spec.editor` | Authorized humanizer editing pass and blind review of the edited prose; use a separate fresh context for the review |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
 | `sdd-apply.reviewer` | One fresh reviewer per required verification or code lens, launched in parallel after successful project checks |
 
@@ -29,6 +28,13 @@ Both explorer presets select one `sdd-explorer` profile with inherited model and
 effort. Projects may select separate profiles for the two roles. Before dependent
 work, follow the [explorer assignment and capability contract](explorer.md);
 selection alone proves neither available tools nor an actual successful launch.
+
+The architect preset uses `sdd-architect` with inherited model and effort. Apply
+the [architect contract](../../sdd-spec/references/architect.md) for its writing scope,
+handoffs and continuation. A parent's model selection still launches a separate
+author context; it does not move authoring back to the orchestrator. Reviewers
+remain independent of that context. A resumed author keeps its existing selection;
+a new model/profile requires a fresh successor after the previous writer stops.
 
 Missing settings, an unmapped role, or a missing selected agent uses the parent's
 model. Report a missing named agent once per affected selection. Malformed settings,
@@ -44,7 +50,7 @@ If the host cannot reveal the parent model, use only a confirmed native inherita
 mechanism; otherwise record the capability gap and stop the dependent launch.
 
 ```text
-uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.document_reviewer --host codex --parent-model "<observed-model>" --parent-effort "<observed-effort>"
+uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.reviewer --host codex --parent-model "<observed-model>" --parent-effort "<observed-effort>"
 ```
 
 Follow [runtime setup](runtime-setup.md). The resolver only reads files and prints

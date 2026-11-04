@@ -82,16 +82,16 @@ def ordinary(tmp_path):
              conditions="Numbers are added", expected="The sum is preserved"),
     ], capability="demo")
     users = []
-    for stage, approval in (("documents", "document_approval"), ("plan", "plan_approval")):
+    for stage, approval in (("plan", "document_approval"),):
         for kind in (approval, "review_waiver"):
-            scope = {"stage": "document_review" if stage == "documents" else "plan_review"}
+            scope = {"stage": "review"}
             if kind == "review_waiver":
                 scope["lenses"] = ["consistency" if stage == "documents" else "plan"]
             users.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
                               work_kind="change", change_id="demo", kind=kind, scope=scope,
                               response="Synthetic test approval only", date=STAMP, basis_commit=BASE))
     write_document(root, "review/decisions.md", "decisions", users)
-    write_document(root, "state.yaml", "state", phase="plan_approved", awaiting="none",
+    write_document(root, "state.yaml", "state", phase="approved", awaiting="none",
                    updated_at=STAMP, document_links=["tasks.md"],
                    review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     (project / "check.py").write_bytes(b"assert 2 + 3 == 5\n")
@@ -136,7 +136,7 @@ def test_refactoring_compatibility_default_apis_preserve_bytes_and_approvals(ord
         approval = reviews.review_status(project, root, stage)["approval_status"]
         assert approval["approved"] is True and approval["ready"] is True
         for user in users:
-            if user["scope"]["stage"] == reviews.STAGES[stage]:
+            if user["scope"]["stage"] == "review":
                 assert approval["applicability"][user["id"]] is True
     assert documents.read_document(root / "tasks.md").records == [task]
     assert "work_kind" not in documents.read_document(root / "tasks.md").meta

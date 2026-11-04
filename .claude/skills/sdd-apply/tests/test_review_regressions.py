@@ -81,15 +81,12 @@ def test_cleanup_crash_reconciles_removed_worktree(cleanup_checkpoint, monkeypat
     assert d.state['revision'] == before['revision'] + 1
     assert repository(project).worktree(wt) is None
 
-def test_failed_latest_run_blocks_acceptance(execution_checkpoint, monkeypatch):
+def test_failed_latest_run_blocks_acceptance(execution_checkpoint):
+    from repository_support import write_file
     driver = execution_checkpoint("verified")
-    from lib import verification
-    original = verification.check_runner.run_command
-    def failure(*args):
-        result = original(*args)
-        result.update(outcome='failed', exit_code=1)
-        return result
-    monkeypatch.setattr(verification.check_runner, 'run_command', failure)
+    driver.send("repair", {"reason": "Changed implementation", "defect_evidence": "New candidate"})
+    write_file(driver.root, "check.py", b"raise SystemExit(1)\n")
+    driver.freeze()
     assert driver.verify()['outcome'] == 'failed'
     assert driver.task['last_check_failed']
     with pytest.raises(ValueError, match='Latest required'):

@@ -215,7 +215,7 @@ def test_refactoring_acceptance_stale_source_blocks_review_and_accept(acceptance
     assert storage(driver.directory).read() == before
 
 
-def test_refactoring_acceptance_registry_extension_requires_new_checks_and_review(acceptance_checkpoint):
+def test_refactoring_acceptance_registry_extension_reuses_unchanged_evidence(acceptance_checkpoint):
     driver = acceptance_checkpoint("verified")
     old_logs = {item["log"]: artifacts.read_bytes(driver.directory / item["log"]) for item in driver.task["evidence"]}
     driver.review(verdict="more_checks")
@@ -225,11 +225,16 @@ def test_refactoring_acceptance_registry_extension_requires_new_checks_and_revie
     driver.role("next-reviewer", "reviewer")
     with pytest.raises(Rejected) as error:
         driver.send("review_start", {"role_id": "next-reviewer"})
-    assert error.value.code == "evidence_basis"
-    assert driver.verify()["outcome"] == "passed"
-    driver.send("review_start", {"role_id": "next-reviewer"})
+    assert error.value.code == "required_checks"
+    execution = driver.verify()
+    assert execution["outcome"] == "passed"
+    assert execution["executed_check_ids"] == ["review-local"]
+    assert execution["reused_evidence"]
+    with pytest.raises(Rejected, match="reuse the existing"):
+        driver.send("review_start", {"role_id": "next-reviewer"})
+    verification_role = driver.task["active_reviewers"]["verification"]
     with pytest.raises(Rejected) as error:
-        driver.send("review_result", {"role_id": "next-reviewer", "candidate": {"path": "retired-reference"}, "verdict": "pass",
+        driver.send("review_result", {"role_id": verification_role, "candidate": {"path": "retired-reference"}, "verdict": "pass",
                                       "findings": [], "test_integrity": "Inspected", "trace": "synthetic-unit-test"})
     assert error.value.code == "review_schema"
     assert driver.task["review_rounds_started"] == 2

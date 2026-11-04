@@ -8,10 +8,13 @@ Collect both lens results before repair or extending checks. For `more_checks`,
 submit `checks_extend` with the verification lens's `review_round` ID and additional
 commands, sources and AC, or its current
 [conclusion basis](../references/api-checks.md#criterion-conclusions).
-Keep existing checks. Assign any new assertions to the executor, freeze the updated
-candidate and direct Explorer to run the full project test and static-check set.
-Only after all required checks pass, launch both review lenses in parallel in new,
-separate fresh contexts. Each lens retains its assigned responsibility.
+Keep existing checks. For an evidence-only addition on the unchanged candidate,
+Explorer runs missing checks and retains applicable original executions. Start a
+fresh verification lens and reuse the passing code verdict in the next round.
+If code, tests, configuration or dependencies change, assign the work to the
+executor, freeze the updated candidate, run the full project test and static-check
+set and launch both review lenses in separate fresh contexts. See
+[review reuse](../references/review-policy.md#review-lenses) for the exact boundary.
 
 During implementation and repair, the executor runs local tests and fixes failures as often as needed. Self-checks do not consume the orchestrator's budget or require `repair`.
 
@@ -36,7 +39,7 @@ There are three review rounds per TASK-ID, counting the first and reviews of rep
 
 Before handing work back, confirm `repair` succeeded. Reuse the task's executor while its context is available; otherwise register a fresh successor with partial work, remaining AC, decisions and rejected approaches. End writing with `role_result`, submit `candidate` to commit the repaired result, then obtain current checks and review. Keep previous candidate commits and logs as history. A passing old review cannot accept a changed candidate.
 
-For `review_limit_reached` or `test_repair_limit_reached`, preserve active work and reconcile effects already in flight. Report TASK-ID, limit/usage, remaining errors or findings, changes attempted, raw check evidence and the rest of the plan's state. Request one concrete option: a stated finite extension, return to sdd-spec, or stop with a partial result. Explain that this skill's approved budget contract requires that decision. Only `budget_extend` with the user's recorded source/text and increased finite limit permits additional work; general autonomy and elapsed time do not extend a budget.
+For `review_limit_reached` or `test_repair_limit_reached`, preserve active work and reconcile effects already in flight. Report TASK-ID, limit/usage, remaining errors or findings, changes attempted, raw check evidence and the rest of the plan's state. Request one concrete option: a stated finite extension, return to sdd-spec, or stop with a partial result. Explain that this skill's approved budget contract requires that decision. The user may choose to accept the current scope through the [revision contract](resume.md#revision-contract); this preserves the result and does not reset spent budgets or waive required assessment. Only `budget_extend` with the user's recorded source/text and increased finite limit permits additional work; general autonomy and elapsed time do not extend a budget.
 
 ## Boundary-test findings
 

@@ -84,7 +84,7 @@ def reduce(state, event, directory):
     if kind in {"worktree_refresh", "worktree_refresh_resolve"}:
         from .worktree_refresh import transition
         return transition(state, task, event, directory)
-    if kind in {"integrate", "transfer", "integration_resolve"}:
+    if kind in {"integrate", "transfer"}:
         from .integration import transition
         return transition(state, task, event, directory)
     if kind == "finalize":

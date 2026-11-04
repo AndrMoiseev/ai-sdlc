@@ -32,27 +32,10 @@ def transition(state, task, event, directory):
     require_passed(state, task, directory)
     root = state["basis"]["project_root"]
     require(repository(root).head() == state["execution_head"], "execution_reconciliation",
-            "Resume and explicitly accept the external HEAD before integration")
+            "Inspect and reconcile the external HEAD before integration")
     worktree = task["worktree"]
     source_repo = repository(worktree["path"])
     require(source_repo.head() == task["candidate_commit"]["sha"], "commit_candidate", "Transfer the verified local commit")
-    if event["type"] == "integration_resolve":
-        p = event["payload"]
-        require(p.get("intent_id") and p.get("resolution") and p.get("role_id"), "resolution_evidence", "Reference the failed integration and actual resolver result")
-        effect = artifacts.contained(directory, f"runs/{state['run_id']}/effects/{p['intent_id']}.json")
-        journal = json.loads(artifacts.read_text(effect))
-        require(journal["request"]["operation"] == "integrate" and journal["request"]["task_id"] == task["plan"]["id"] and journal["phase"] == "prepared", "resolution_intent", "Unresolved integration intent required")
-        role = state["roles"].get(p["role_id"])
-        require(role and role["task_id"] == task["plan"]["id"] and role["kind"] == "executor" and role["status"] == "finished" and role.get("trace"), "resolution_role", "A registered resolver must finish writing and return its host trace")
-        require(not repository(root).has_conflicts(), "unresolved_conflicts", "Resolve and stage conflicted task paths first")
-        require(repository(root).head() == journal["request"]["precondition"]["head"], "integration_head", "Execution HEAD changed during conflict resolution")
-        observed(effect, journal, {"before": journal["request"]["precondition"]["before"], "after": snapshot(state, root), "resolution": p, "head": repository(root).head()})
-        worktree["integrated"] = True
-        worktree["integration_tree"] = index_tree(root, task["paths"], repository(root).head())
-        task["integration_active"] = True
-        task["freeze_base"] = journal["request"]["precondition"]["before"]
-        task["executor"] = p["role_id"]
-        return {"resolved": p["intent_id"], "next": "candidate; commit; accept"}
     if event["type"] == "transfer":
         changed = source_repo.changed_paths(worktree["base"])
         require(changed <= set(task["paths"]), "transfer_ownership", "Changed files outside task ownership require explicit accounting")
@@ -82,6 +65,12 @@ def transition(state, task, event, directory):
     if "expected_tree" not in journal:
         journal["expected_tree"] = repository(root).preview_patch(expected["head"], patch)
         write_json(effect, journal)
+    if journal["expected_tree"] is None:
+        # Preview uses a private index. Keep the execution tree clean and resolve
+        # only in the task's replacement worktree, followed by checks and review.
+        require(before == expected["before"], "integration_drift", "Execution source changed during conflict preview")
+        return observed(effect, journal, {"status": "conflict", "before": before,
+            "after": before, "head": expected["head"], "next": "worktree_refresh"})
     if journal["phase"] == "observed":
         require(before == journal["result"]["after"], "integration_drift", "Observed integration changed")
     elif before != expected["before"]:

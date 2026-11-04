@@ -8,7 +8,7 @@ import pytest
 from lib.subagents import ConfigurationError, ROLES, resolve, validate_selection
 
 
-ROLE = "sdd-spec.document_reviewer"
+ROLE = "sdd-spec.reviewer"
 
 
 def configure(root, roles=None, **extra):
