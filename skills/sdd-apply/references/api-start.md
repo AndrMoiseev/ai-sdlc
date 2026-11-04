@@ -12,8 +12,9 @@ Approval and permission to execute may appear in one message. Verify the instruc
 scope and latest cancellations or pauses before calling `initialize`; reuse existing
 applicable permission without asking again. The API checks that instruction text and
 source are present; the agent verifies that the user's words actually authorize execution.
-Validation checks both document and plan approval through shared
-API v2 check/checkpoint interfaces. Select an ambiguous change; return missing approval
+Validation checks the single approval of the document bundle including its plan
+through shared API v2 check/checkpoint interfaces, using the plan structural check.
+Select an ambiguous change; return missing approval
 or a missing plan to sdd-spec.
 
 Admission requires `checkpoint_status.status: ready`. Check reports are consumed

@@ -150,11 +150,11 @@ def project_template(tmp_path_factory):
         document(change / (name + ".md"), {**meta, "document_type": name}, [task] if name == "tasks" else [])
     document(change / "specs/demo/spec.md", {**meta, "document_type": "spec", "capability": "demo"}, [dict(sdd_record="requirement", id="REQ-one", operation="add"), dict(sdd_record="acceptance", id="AC-one", requirement="REQ-one", conditions="Numbers", expected="Sum")])
     records = []
-    for stage, kind in (("document_review", "document_approval"), ("plan_review", "plan_approval")):
+    for stage, kind in (("review", "document_approval"),):
         for decision in (kind, "review_waiver"):
-            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, work_kind="change", change_id="demo", scope={"stage": stage, **({"lenses": ["plan" if stage == "plan_review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", basis_commit="a" * 40))
+            records.append(dict(sdd_record="user", id="USER-" + stage.replace("_", "-") + "-" + decision.replace("_", "-"), kind=decision, work_kind="change", change_id="demo", scope={"stage": stage, **({"lenses": ["plan" if stage == "review" else "consistency"]} if decision == "review_waiver" else {})}, response="Approved fixture", date="2026-10-08T00:00:00Z", basis_commit="a" * 40))
     document(change / "review/decisions.md", {"schema_version": 2, "document_type": "decisions", "work_kind": "change", "change_id": "demo"}, records)
-    document(change / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
+    document(change / "state.yaml", {**meta, "document_type": "state", "phase": "approved", "awaiting": "none", "updated_at": "2026-10-08T00:00:00Z", "document_links": ["tasks.md"], "review_links": ["review/decisions.md"], "approval_refs": [r["id"] for r in records]})
     (root / "check.py").write_text("assert 2 + 3 == 5\n")
     # Contract tests install the hooks they exercise. Git's sample hooks and
     # default template files otherwise get copied into every native fixture.

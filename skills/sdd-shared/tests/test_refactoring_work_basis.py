@@ -56,14 +56,14 @@ def approved_refactoring(project):
     document(root, "design.md", "design", [criterion])
     document(root, "tasks.md", "tasks", [task, local, whole])
     users = []
-    for stage, approval in (("documents", "document_approval"), ("plan", "plan_approval")):
+    for stage, approval in (("plan", "document_approval"),):
         for kind in (approval, "review_waiver"):
             users.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
                               work_kind="refactoring", change_id="demo", kind=kind,
-                              scope=dict(stage=reviews.STAGES[stage], **({"lenses": ["plan" if stage == "plan" else "consistency"]} if kind == "review_waiver" else {})),
+                              scope=dict(stage="review", **({"lenses": ["plan" if stage == "plan" else "consistency"]} if kind == "review_waiver" else {})),
                               response="Approved synthetic fixture", date="2026-10-24T00:00:00Z", basis_commit=BASE))
     document(root, "review/decisions.md", "decisions", users)
-    document(root, "state.yaml", "state", phase="plan_approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
+    document(root, "state.yaml", "state", phase="approved", awaiting="none", updated_at="2026-10-24T00:00:00Z",
              document_links=["proposal.md", "design.md", "tasks.md"], review_links=["review/decisions.md"], approval_refs=[u["id"] for u in users])
     document(root, "questions.md", "questions")
     document(root, "review/summary.md", "summary", findings=[])
@@ -134,7 +134,7 @@ def test_refactoring_work_basis_ancillary_route_identity(tmp_path, kind):
 def test_refactoring_work_basis_review_diagnostics_preserve_approval(tmp_path, monkeypatch):
     root, _, _ = approved_refactoring(tmp_path)
     monkeypatch.setattr(reviews, "inspect", lambda *args: {"head": BASE, "status": "accepted"})
-    document(root, "review/run/consistency.md", "review", run_id="run", stage="document_review", lens_id="consistency",
+    document(root, "review/run/consistency.md", "review", run_id="run", stage="review", lens_id="consistency",
              result="completed_no_findings", started_at="2026-10-24T00:00:00Z", finished_at="2026-10-24T00:01:00Z",
              reviewed_commit=BASE, limitations=[])
     result = reviews.review_status(tmp_path, root, "documents", "refactoring")

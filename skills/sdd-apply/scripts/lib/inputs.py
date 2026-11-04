@@ -71,12 +71,10 @@ def validate(project_root, change=None, instruction=None, work_kind="change"):
         dependency = locate(work_kind=work_kind)
     directory = paths.change_root(project, change, work_kind)
     require((directory / "tasks.md").is_file(), "missing_plan", "Return to sdd-spec for an approved plan")
-    checks = {}
-    for stage in ("documents", "plan"):
-        checks[stage] = spec_call(dependency, project, change, stage, "check.py", work_kind)
-        require(checks[stage].get("schema_version") == 2 and checks[stage].get("approval_status", {}).get("ready") is True, "approval_missing", f"{stage}: {checks[stage]}")
-        require(checks[stage].get("checkpoint_status", {}).get("status") == "ready", "checkpoint_not_ready", f"{stage}: accept a clean checkpoint before execution: {checks[stage].get('checkpoint_status')}")
-        require(not any(w["code"] == "state_recovery" for w in checks[stage].get("warnings", [])), "state_recovery", "Recover sdd-spec checkpoint first")
+    check = spec_call(dependency, project, change, "plan", "check.py", work_kind)
+    require(check.get("schema_version") == 2 and check.get("approval_status", {}).get("ready") is True, "approval_missing", f"Document bundle including the plan: {check}")
+    require(check.get("checkpoint_status", {}).get("status") == "ready", "checkpoint_not_ready", f"accept a clean checkpoint before execution: {check.get('checkpoint_status')}")
+    require(not any(w["code"] == "state_recovery" for w in check.get("warnings", [])), "state_recovery", "Recover sdd-spec checkpoint first")
     docs = spec_modules()
     docs.read_checkpoint(directory, work_kind)
     records = docs.read_document(directory / "tasks.md", work_kind).records
@@ -87,5 +85,5 @@ def validate(project_root, change=None, instruction=None, work_kind="change"):
                         for kind in ("acceptance", "verification")}
     excluded = (directory / "execution").relative_to(project).as_posix()
     source = repository(project).inspect(exclude=[excluded])
-    require(source["head"] == checks["plan"]["checkpoint_status"]["head"] and not source["dirty_paths"], "checkpoint_changed", "Checkpoint changed during admission; inspect and retry")
+    require(source["head"] == check["checkpoint_status"]["head"] and not source["dirty_paths"], "checkpoint_changed", "Checkpoint changed during admission; inspect and retry")
     return {"schema_version": 2, "project_root": str(project), "work_kind": work_kind, "change_id": change, "change_root": str(directory), "instruction": instruction, "tasks": tasks, **plan_records, "head": source["head"], "branch": source["branch"]}

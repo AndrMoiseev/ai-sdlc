@@ -12,8 +12,8 @@ again for permission to use it within authorized work.
 |---|---|
 | `sdd-spec.explorer` | Bounded source research and document/plan check execution |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
-| `sdd-spec.document_reviewer` | One fresh reviewer per document lens, including consistency, simplicity and premortem |
-| `sdd-spec.plan_reviewer` | Separate fresh reviewers for plan and simplicity lenses |
+| `sdd-spec.document_reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity and premortem; reads all available documents |
+| `sdd-spec.plan_reviewer` | Separate fresh reviewer for the plan lens when tasks exist, within the same bundle review |
 | `sdd-spec.editor` | Authorized humanizer editing pass |
 | `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
