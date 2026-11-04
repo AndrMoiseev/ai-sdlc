@@ -19,8 +19,8 @@ work_kind: change
 change_id: sample-change
 kind: planning_command
 scope:
-  stage: document_review
-  work: Подготовить план согласованного sample-change
+  stage: review
+  work: Подготовить план sample-change после закрытия вопросов
 response: Точный ответ пользователя
 date: '2026-01-01T00:00:00Z'
 basis_commit: <полный OID существующего коммита>

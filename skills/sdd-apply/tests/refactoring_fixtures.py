@@ -44,16 +44,16 @@ def approved_basis(project, work_kind="refactoring", configure=None):
             document(root / (name + ".md"), {**meta, "document_type": name}, records)
         approvals = []
 
-        for stage, approval in (("documents", "document_approval"), ("plan", "plan_approval")):
+        for stage, approval in (("plan", "document_approval"),):
 
             for kind in (approval, "review_waiver"):
                 approvals.append(dict(sdd_record="user", id="USER-" + stage + "-" + kind.replace("_", "-"),
                                       work_kind=work_kind, change_id="demo", kind=kind,
-                                      scope=dict(stage="document_review" if stage == "documents" else "plan_review",
+                                      scope=dict(stage="review",
                                                  **({"lenses": ["consistency" if stage == "documents" else "plan"]} if kind == "review_waiver" else {})),
                                       response="Approved synthetic test fixture", date="2026-10-24T00:00:00Z", basis_commit=repository(project).head()))
         document(root / "review/decisions.md", {**meta, "schema_version": 2, "document_type": "decisions"}, approvals)
-        document(root / "state.yaml", {**meta, "document_type": "state", "phase": "plan_approved", "awaiting": "none",
+        document(root / "state.yaml", {**meta, "document_type": "state", "phase": "approved", "awaiting": "none",
                                     "updated_at": "2026-10-24T00:00:00Z", "document_links": ["tasks.md"],
                                     "review_links": ["review/decisions.md"], "approval_refs": [a["id"] for a in approvals]})
         stage_files(project, ".")
