@@ -19,7 +19,7 @@ def prepare(output, host):
     settings = project / ".sdd/settings.json"
     settings.parent.mkdir(parents=True)
     settings.write_text(json.dumps({"schema_version": 1, "subagents": {"roles": {
-        "sdd-spec.document_reviewer": "sdd-probe"}}}, indent=2), encoding="utf-8")
+        "sdd-spec.reviewer": "sdd-probe"}}}, indent=2), encoding="utf-8")
     if host == "codex":
         path = project / ".codex/agents/arithmetic.toml"
         content = ('name = "sdd-probe"\ndescription = "Temporary arithmetic probe"\n'
@@ -34,7 +34,7 @@ def prepare(output, host):
     path.write_text(content, encoding="utf-8")
     prompt = f'''Run a narrowly scoped SDD subagent selection probe in {project}.
 Read and follow the selection contract at {skill / "references/subagents.md"}.
-Resolve role sdd-spec.document_reviewer for host {host}, using the actual parent
+Resolve role sdd-spec.reviewer for host {host}, using the actual parent
 model metadata and the project's settings. Use the bundled resolver at
 {skill / "scripts/resolve_agent.py"} through uv with its lockfile.
 For Claude Code, obtain the real available agent catalog from your tool schema;

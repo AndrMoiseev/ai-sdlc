@@ -10,6 +10,10 @@ implements it, and [sdd-sync](https://github.com/AndrMoiseev/ai-sdlc/blob/main/s
 promotes completed requirements. Shared contracts define what each result means.
 In sdd-spec, a separate architect authors the document bundle and explanations.
 The orchestrator handles user decisions, assignments and workflow state.
+One reviewer role serves every bundle review lens, including plan checks when
+tasks exist; each lens retains its own independent context. An authorized prose
+editing pass uses one editor role for editing and checking, with the check in a
+separate fresh context.
 Explorer gathers assigned source facts or runs the exact checks selected by the
 orchestrator. In sdd-apply, the full project tests and static checks must pass before
 two reviewers start in parallel, each in a separate fresh context. The verification

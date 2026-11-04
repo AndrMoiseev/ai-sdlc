@@ -52,7 +52,7 @@ as a passing result. The CLI is not required on the development machine.
 | Case | Fixture change | Assertions |
 |---|---|---|
 | Named agent | Prepared fixture; parent model differs from Sonnet if available | Agent call selects `sdd-probe` through `subagent_type`; no per-call model; definition marker appears; runtime model matches definition subject to recorded host policy |
-| Unmapped role | Remove only `sdd-spec.document_reviewer` from settings | Fresh general-purpose agent explicitly uses observed parent model; no definition marker |
+| Unmapped role | Remove only `sdd-spec.reviewer` from settings | Fresh general-purpose agent explicitly uses observed parent model; no definition marker |
 | Missing agent | Map role to `does-not-exist` | Missing-name notice; general-purpose/parent fallback; no invented agent definition |
 | Native precedence | Add user/project definitions with the same name only in an isolated host fixture | SDD uses the runtime's catalog winner; it does not reconstruct precedence by reading just the project Markdown |
 | Denied or forced | In a disposable session deny the selected agent, or exercise an already configured forced model policy | Denial is reported without bypass; effective model substitution is recorded and not called requested-model success |
