@@ -10,6 +10,7 @@ again for permission to use it within authorized work.
 
 | Role | Assignment |
 |---|---|
+| `sdd-spec.architect` | Primary author of the specification bundle, plan and derived explanations; continues one work's author context |
 | `sdd-spec.explorer` | Bounded source research and document/plan check execution |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
 | `sdd-spec.document_reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity and premortem; reads all available documents |
@@ -29,6 +30,13 @@ Both explorer presets select one `sdd-explorer` profile with inherited model and
 effort. Projects may select separate profiles for the two roles. Before dependent
 work, follow the [explorer assignment and capability contract](explorer.md);
 selection alone proves neither available tools nor an actual successful launch.
+
+The architect preset uses `sdd-architect` with inherited model and effort. Apply
+the [architect contract](../../sdd-spec/references/architect.md) for its writing scope,
+handoffs and continuation. A parent's model selection still launches a separate
+author context; it does not move authoring back to the orchestrator. Reviewers
+remain independent of that context. A resumed author keeps its existing selection;
+a new model/profile requires a fresh successor after the previous writer stops.
 
 Missing settings, an unmapped role, or a missing selected agent uses the parent's
 model. Report a missing named agent once per affected selection. Malformed settings,

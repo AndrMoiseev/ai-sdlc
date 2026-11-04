@@ -72,12 +72,13 @@ def test_settings_schema_roles_match_runtime():
     assert 'sdd-apply.final_verifier' not in roles
     assert 'sdd-apply.verifier' not in roles
     example = json.loads((ROOT / 'templates/settings.example.json').read_text())
+    assert example['subagents']['roles']['sdd-spec.architect'] == 'sdd-architect'
     assert example['subagents']['roles']['sdd-spec.explorer'] == 'sdd-explorer'
     assert example['subagents']['roles']['sdd-apply.explorer'] == 'sdd-explorer'
 
 
-@pytest.mark.parametrize('role', ['sdd-spec.explorer', 'sdd-apply.explorer'])
-def test_explorer_resolver_preserves_lookup_fallback_and_errors(monkeypatch, role):
+@pytest.mark.parametrize('role', ['sdd-spec.architect', 'sdd-spec.explorer', 'sdd-apply.explorer'])
+def test_author_and_explorer_resolver_preserves_lookup_fallback_and_errors(monkeypatch, role):
     resolver = bootstrap().load(ROOT, 'subagents')
     project = ROOT.resolve()
     user = project / 'memory-user-agents'
@@ -124,8 +125,8 @@ def test_explorer_resolver_preserves_lookup_fallback_and_errors(monkeypatch, rol
         resolve()
 
 
-@pytest.mark.parametrize('role', ['sdd-spec.explorer', 'sdd-apply.explorer'])
-def test_explorer_claude_selection_uses_live_catalog(monkeypatch, role):
+@pytest.mark.parametrize('role', ['sdd-spec.architect', 'sdd-spec.explorer', 'sdd-apply.explorer'])
+def test_author_and_explorer_claude_selection_uses_live_catalog(monkeypatch, role):
     resolver = bootstrap().load(ROOT, 'subagents')
     monkeypatch.setattr(resolver, 'settings', lambda project: ({role: 'sdd-explorer'}, None, 'role_unmapped'))
     selected = resolver.resolve(ROOT, role, 'claude-code', 'parent-model',
@@ -150,7 +151,7 @@ def test_setup_runs_without_spec_from_relocated_install(tmp_path):
                         '--host', 'codex', '--user-agent-dir', tmp_path / 'empty-agents', cwd=consumer)
         assert result.returncode == 0, result.stderr + result.stdout
         inspection = json.loads(result.stdout)['result']
-        assert len(inspection['roles']) == 8
+        assert len(inspection['roles']) == 9
         assert inspection['inputs']['sdd_shared'] == str((collection / 'sdd-shared').resolve())
     assert inventory(consumer) == before
     assert inventory(collection) == packages
