@@ -1,0 +1,21 @@
+schema_version: 2
+work_kind: change
+document_type: state
+change_id: sdd-simple-task-flow
+language: ru
+phase: discovery
+flow: explore
+awaiting: clarification
+updated_at: '2026-11-04T15:04:00Z'
+document_links:
+  - research.md
+  - decisions.md
+  - questions.md
+  - review/decisions.md
+  - verification.md
+review_links: []
+approval_refs:
+  - USER-accept-start
+next_question: Q-preparation-depth
+checks:
+  structure: not_run
