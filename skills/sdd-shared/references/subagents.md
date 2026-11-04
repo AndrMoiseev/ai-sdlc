@@ -13,10 +13,8 @@ again for permission to use it within authorized work.
 | `sdd-spec.architect` | Primary author of the specification bundle, plan and derived explanations; continues one work's author context |
 | `sdd-spec.explorer` | Bounded source research and document/plan check execution |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
-| `sdd-spec.document_reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity and premortem; reads all available documents |
-| `sdd-spec.plan_reviewer` | Separate fresh reviewer for the plan lens when tasks exist, within the same bundle review |
-| `sdd-spec.editor` | Authorized humanizer editing pass |
-| `sdd-spec.editorial_reviewer` | Separate blind review of edited prose |
+| `sdd-spec.reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity, premortem and plan when tasks exist; reads all available documents |
+| `sdd-spec.editor` | Authorized humanizer editing pass and blind review of the edited prose; use a separate fresh context for the review |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
 | `sdd-apply.reviewer` | One fresh reviewer per required verification or code lens, launched in parallel after successful project checks |
 
@@ -52,7 +50,7 @@ If the host cannot reveal the parent model, use only a confirmed native inherita
 mechanism; otherwise record the capability gap and stop the dependent launch.
 
 ```text
-uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.document_reviewer --host codex --parent-model "<observed-model>" --parent-effort "<observed-effort>"
+uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.reviewer --host codex --parent-model "<observed-model>" --parent-effort "<observed-effort>"
 ```
 
 Follow [runtime setup](runtime-setup.md). The resolver only reads files and prints
