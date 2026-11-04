@@ -360,13 +360,17 @@ class Driver:
 
 
     def review(self, role="reviewer", verdict="pass"):
+        from lib.review_policy import round_results
+        reused = "code" in self.task.get("reused_reviews", {}).get(self.task["active_review"], {})
+        if reused:
+            return self.send("review_result", {"role_id": self.task["active_reviewers"]["verification"],
+                "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})
         if role in self.state["roles"] and self.state["roles"][role]["status"] != "active":
             role = f"{role}-{self.number}"
         if role not in self.state["roles"]:
             self.role(role, "reviewer")
         if self.task.get("active_reviewers", {}).get("code") != role or not self.task["active_review"]:
             self.send("review_start", {"role_id": role})
-        from lib.review_policy import round_results
         if "verification" not in round_results(self.task):
             self.send("review_result", {"role_id": self.task["active_reviewers"]["verification"],
                 "verdict": verdict, "findings": [], "test_integrity": "Assertions and skips inspected (unit fixture)", "trace": "unit-test"})

@@ -50,5 +50,8 @@ executes the exact assignment and reports results; the orchestrator selects and
 registers the complete set. Only after it passes, launch the required
 [review lenses](references/review-policy.md#review-lenses) in parallel, each in its
 own fresh context. Reviewers inspect sources and saved evidence without executing
-checks. Manual and behavioral checks are outside this task flow. Complete the plan
+checks. Reuse applicable checks and code verdicts for evidence-only additions as
+specified by the review policy; changed candidates require the full set again.
+Resolve integration conflicts in task worktrees, then repeat checks and both
+review lenses. Manual and behavioral checks are outside this task flow. Complete the plan
 from accepted tasks using [finalize](flows/finalize.md).

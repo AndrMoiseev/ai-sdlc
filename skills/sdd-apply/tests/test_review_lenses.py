@@ -85,6 +85,75 @@ def test_findings_from_both_lenses_have_distinct_journal_ids(execution_checkpoin
     assert {entry["lens_id"] for entry in entries} == {"verification", "code"}
 
 
+def test_more_evidence_reuses_code_review_and_existing_check_execution(execution_checkpoint, monkeypatch):
+    from copy import deepcopy
+    from lib import verification
+    from lib.review_policy import round_results
+    driver = execution_checkpoint("executed", memory_worktree=True)
+    start_code(driver)
+    driver.conclude(outcome="unavailable", check_request="Exercise the additional case")
+    result(driver, "code")
+    result(driver, "verification", verdict="more_checks")
+    code = deepcopy(round_results(driver.task)["code"])
+    prior = deepcopy(driver.task["evidence"])
+    calls = []
+    original = verification.check_runner.run_command
+    def run(command, cwd, timeout):
+        calls.append(command)
+        return original(command, cwd, timeout)
+    monkeypatch.setattr(verification.check_runner, "run_command", run)
+    driver.send("checks_extend", {"review_round": code["round_id"], "additional": [{
+        "id": "additional", "source": "verification request", "criteria": ["AC-one"],
+        "run": {"command": [sys.executable, "-B", "-c", "assert 3 + 3 == 6"]}}]})
+    executed = driver.run_checks("independent")
+    assert executed["executed_check_ids"] == ["additional"] and len(calls) == 1
+    assert executed["reused_evidence"] == [e for e in prior if e["stage"] == "independent"]
+    driver.verification_reviewer("new-verification")
+    start = driver.send("review_start", {"role_id": "new-verification"})
+    assert start["reused_lenses"] == ["code"]
+    driver.conclude(role="new-verification")
+    assert driver.review()["status"] == "integrating"
+    assert round_results(driver.task)["code"] == code
+    assert len([r for r in driver.task["reviews"] if r["lens_id"] == "code"]) == 1
+    assert driver.task["review_rounds_started"] == driver.task["review_rounds_completed"] == 2
+
+
+def test_changed_candidate_requires_both_review_lenses(execution_checkpoint):
+    from repository_support import write_file
+    driver = execution_checkpoint("executed", memory_worktree=True)
+    start_code(driver)
+    driver.conclude(outcome="unavailable", check_request="Add the missing assertion")
+    result(driver, "code")
+    result(driver, "verification", verdict="more_checks")
+    driver.send("repair", {"reason": "Add the requested assertion", "defect_evidence": "Missing assertion"})
+    write_file(driver.root, "result.txt", b"changed candidate\n")
+    driver.freeze()
+    execution = driver.run_checks("independent")
+    assert execution["executed_check_ids"] == [check["id"] for check in driver.task["checks"]]
+    assert execution["reused_evidence"] == []
+    driver.verification_reviewer("new-verification")
+    start = driver.send("review_start", {"role_id": "new-verification"})
+    assert start["reused_lenses"] == []
+    driver.conclude(role="new-verification")
+    verdict = driver.send("review_result", {"role_id": "new-verification", "verdict": "pass",
+        "findings": [], "test_integrity": "New assertions inspected", "trace": "synthetic"})
+    assert verdict["pending_lenses"] == ["code"]
+
+
+def test_repeating_unchanged_checks_preserves_original_conclusion(execution_checkpoint, monkeypatch):
+    from lib import verification
+    from lib.verification_results import applicable
+    driver = execution_checkpoint("verified", memory_worktree=True)
+    original = driver.task["verification_results"][-1]
+    def unexpected_run(*args, **kwargs):
+        raise AssertionError("An unchanged passed check must not execute again")
+    monkeypatch.setattr(verification.check_runner, "run_command", unexpected_run)
+    result = driver.run_checks("independent")
+    assert result["outcome"] == "passed" and result["executed_check_ids"] == []
+    assert result["log"] is None and result["reused_evidence"]
+    assert applicable(driver.state, driver.task, driver.directory) == original
+
+
 def test_static_check_failure_blocks_reviews_even_when_task_tests_pass(driver):
     driver.worktree()
     driver.send("checks_register", {"inventory": {"instructions": ["project rules"], "ci": ["lint"]},

@@ -28,7 +28,7 @@ def test_help_covers_event_schema_without_accessing_execution_state(monkeypatch)
 def test_resume_help_explains_specific_loss_and_legacy_resolution():
     result = describe(event="resume")
     assert set(result["required"]) == {"host_trace", "live_contexts"}
-    assert {"role_id", "successor", "task_id", "reason", "evidence", "head", "instruction", "abandon_procedures"} == set(result["resolution"])
+    assert {"role_id", "successor", "task_id", "reason", "evidence", "head", "compatible", "abandon_procedures"} == set(result["resolution"])
     assert any("successor_of" in rule for rule in result["rules"])
 
 
@@ -40,6 +40,8 @@ def test_completion_help_preserves_task_acceptance_and_followup_budgets():
     revision = describe(event="revised_plan")
     assert "completed_followups" in revision["optional"]
     assert set(revision["completed_followups"][0]) == {"completed_task", "followup_task"}
+    assert "accepted_scope" in revision["optional"]
+    assert set(revision["accepted_scope"][0]) == {"task_id", "text", "source"}
     assert any("counters and unrelated blockers remain" in rule for rule in revision["rules"])
     assert any("Retain checks" in rule for rule in revision["rules"])
 

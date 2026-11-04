@@ -15,7 +15,7 @@ def test_resume_requires_clean_main_tree_and_preserves_document_edits(driver, pr
     assert driver.send("resume", {"host_trace": "unit-observation", "live_contexts": []}, task_id=None)["status"] == "active"
 
 
-def test_resume_external_head_needs_exact_explicit_acceptance(driver, project):
+def test_resume_external_head_uses_inspected_compatibility_without_user_approval(driver, project):
     from repository_support import stage, commit
     from lib.repository import repository
     admitted = driver.state["basis"]
@@ -25,9 +25,11 @@ def test_resume_external_head_needs_exact_explicit_acceptance(driver, project):
     payload = {"host_trace": "unit-observation", "live_contexts": []}
     assert driver.send("resume", payload, task_id=None)["issues"][0]["reason"] == "execution_head_changed"
     resolution = dict(reason="execution_head_changed", head=repository(project).head(),
-                      evidence="Inspected external commit", instruction={"text": "Accept this source state", "source": "synthetic-user"})
-    with pytest.raises(ValueError, match="actual user response"):
+                      evidence="Inspected external commit: no changed task requirements", compatible=True)
+    with pytest.raises(ValueError, match="exact clean HEAD"):
         driver.send("resume", {**payload, "resolutions": [{**resolution, "head": "0" * 40}]}, task_id=None)
+    with pytest.raises(ValueError, match="compatibility"):
+        driver.send("resume", {**payload, "resolutions": [{**resolution, "compatible": False}]}, task_id=None)
     assert driver.send("resume", {**payload, "resolutions": [resolution]}, task_id=None)["status"] == "active"
     assert driver.state["basis"] == admitted
 

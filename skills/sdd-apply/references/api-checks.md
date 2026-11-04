@@ -97,7 +97,7 @@ representation needs fresh checks against the updated registry.
 
 ## Running checks
 
-`check_run` executes the complete applicable registry for the assigned `role_id` and stage
+`check_run` reconciles the complete applicable registry for the assigned `role_id` and stage
 (`baseline`, `self`, `independent`), with optional timeout. The API also
 retains the legacy `integration` stage; ordinary transfer does not dispatch it.
 For a registered procedure, use `procedure_begin` with check/role/stage, execute
@@ -108,13 +108,25 @@ a role attestation, not an exit code. Stop writers for the entire check. Ignored
 files may hold generated output or disposable environments; test inputs and
 source code must be tracked.
 
+Before executing, the runtime reuses applicable passing evidence for the same
+task/run, stage, clean source and exact execution definition. The command or
+procedure, working directory, configuration, setup and execution kind must match.
+A new required check runs; an unchanged passing check does not. Preserve the
+original log, check-run ID, role, registry revision and summary reference.
+New logs name only their executed subset in `registered_checks`; the full set
+remains mandatory. The result lists `executed_check_ids` and `reused_evidence`;
+when every check is reused, `log` is null and no execution evidence is appended.
+Failed, unavailable, stale or superseded attempts cannot supply a passing result.
+
 After collecting both lens results, `checks_extend` accepts exactly one basis:
 the current verification conclusion's event ID in `verification_result`, or the
 verification reviewer's `more_checks` `review_round`. Neither path runs during an
 active review round; see
 [criterion conclusions](#criterion-conclusions). Existing checks stay mandatory;
 registration, setup and extension advance the registry revision. New registry
-contents invalidate prior execution and conclusions. Apply
+contents invalidate the criterion conclusion. Unchanged execution definitions on
+the same source retain their original evidence; changed definitions need new
+execution. Criterion mappings require fresh assessment. Apply
 [repair](../flows/repair.md) before fixes or retries after failure.
 
 ## Candidate identity
@@ -160,12 +172,15 @@ bind each exact command or explicitly typed procedure to the requested criteria.
 The request and extension preserve review/test-repair counters. If preparation
 needs source edits, reopen the executor through `repair` with the recorded gap
 as `defect_evidence`; this does not increase the independent-check failure count. Run the
-whole expanded registry and obtain a new conclusion. Changing requirements
+missing checks for an evidence-only addition; after candidate edits run the
+whole expanded registry. Obtain a new conclusion in either case. Changing requirements
 requires `spec_conflict`; insufficient tests within an approved AC do not.
 
-`review_start` requires the successful full mandatory worktree run; no criterion
+`review_start` requires applicable passing evidence for the full mandatory worktree set; no criterion
 conclusion is required before the lenses start. The two lenses use the same frozen
-commit and check run, in parallel and in separate fresh contexts. `transfer` requires
+commit, in parallel and in separate fresh contexts. Evidence-only continuation
+uses [the review reuse rule](review-policy.md#review-lenses): a fresh verification
+lens and the original passing code verdict. `transfer` requires
 both lens verdicts and the latest criterion conclusion to pass. `commit` and `accept`
 validate that retained worktree evidence and the recorded integration tree.
 Source, normative basis, registry, configuration or a newer applicable attempt
@@ -180,8 +195,10 @@ Retain command, stdout/stderr, exit status, duration, tested commit SHA, Git
 cleanliness observations, current-change document hashes, launch
 trace and log hash. Inspect whether expected tests ran; a later successful
 command cannot repair an earlier failure. Unknown dependency scope needs rechecking.
-Repeat affected checks after changes to bytes, configuration, registry or normative
-basis. The orchestrator enforces this ordering; task evidence has no saved candidate
+Repeat the full required set after candidate changes, including conflict resolution.
+Registry-only additions require missing executions; a revised task contract
+requires new assessment, with unchanged executions retained only through the
+explicit current-scope revision. The orchestrator enforces this ordering; task evidence has no saved candidate
 comparison. A required unavailable check blocks; omission cannot make it green.
 
 ## Plan completion
