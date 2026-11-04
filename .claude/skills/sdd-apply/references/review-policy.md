@@ -4,8 +4,17 @@
 
 After the full project tests and static checks pass, run both required lenses in
 parallel against the same frozen commit. Each reviewer has one `lens_id` and a
-separate fresh context. A round completes only after both results arrive; every
+separate fresh context. A round completes only with both results; every
 lens must pass before integration. Reviewers execute no checks or procedures.
+
+Reuse applicable results when their basis is unchanged. After a verification
+`more_checks` result, evidence-only additions require a fresh verification lens
+in the next round; retain a passing code verdict by reference to its original
+round. This is valid only while the source, approved task and owned paths remain
+unchanged. New code, tests, configuration, dependencies, resolved conflicts or a
+revised task contract require both lenses again. Preserve the original reviewer,
+commit and trace when reusing a verdict; never present it as a new review. An
+unchanged passing result needs neither another round nor another check run.
 
 | Lens | Exclusive responsibility | Result |
 | --- | --- | --- |
@@ -91,10 +100,10 @@ architecture and implementation rules and use `pass` or `changes`.
 After accepting all plan tasks, finalize with debt deferred by
 default. A nonempty journal does not prevent completion. Present a brief summary
 of the debt, its consequences, and proposed fixes, with a link to the journal.
-Ask which items the user explicitly approves for correction, then wait before
-changing any of them. Approval of the plan, general autonomy, silence, or a
-reviewer's recommendation is not approval to fix technical debt. Preserve the
-completed result if the user declines or does not reply.
+Report that the recommendations are available; do not add a mandatory follow-up
+question. Fix them only after an explicit user request. Approval of the plan,
+general autonomy, silence, or a reviewer's recommendation is not such a request.
+Preserve the completed result when no correction is requested.
 
 Record any explicit follow-up decision against the journal's finding IDs, with
 the user's message source and text. Implement only the approved items as scoped

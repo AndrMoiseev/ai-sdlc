@@ -6,6 +6,7 @@ from test_review_records import project, report, write
 
 def test_default_and_added_lens(tmp_path):
     root = project(tmp_path)
+    (root / "tasks.md").unlink()
     assert required_lenses(tmp_path) == ["consistency", "simplicity", "premortem"]
     index = tmp_path / "sdd/arch-lenses/index.md"
     write(index, {"schema_version": 1, "lenses": []})
@@ -25,6 +26,8 @@ def test_default_and_added_lens(tmp_path):
     write(index, {"schema_version": 1, "lenses": [{"id": "security", "title": "Security", "path": "security.md"}]})
     result = review_status(tmp_path, root, "documents")["review_status"]
     assert result["coverage"] == {"consistency": "completed", "simplicity": "completed", "premortem": "completed", "security": "missing"}
+    (root / "tasks.md").write_text("normative\n")
+    assert review_status(tmp_path, root, "documents")["review_status"]["required_lenses"] == ["consistency", "simplicity", "premortem", "security", "plan"]
 
 
 @pytest.mark.parametrize("lens", ["consistency", "simplicity", "premortem", "plan"])
@@ -39,27 +42,25 @@ def test_reserved_lens_ids_in_memory(monkeypatch, lens):
         required_lenses(Path.cwd())
 
 
-def test_simplicity_coverage_is_separate_for_each_stage(tmp_path):
-    # Persisted report paths/stages must route independently; reuse the existing
-    # filesystem fixture and injected Git adapter instead of another CLI/Git run.
+def test_one_bundle_review_includes_plan_and_one_simplicity(tmp_path):
+    # Existing file/parser fixture verifies that structural check modes consume
+    # the same persisted review instead of demanding a second simplicity report.
     root = project(tmp_path)
-    report(tmp_path, root, run="documents", lens="consistency")
-    report(tmp_path, root, run="documents", lens="simplicity")
-    report(tmp_path, root, run="documents", lens="premortem")
-    report(tmp_path, root, run="plan", lens="plan", stage="plan")
-    before = (root / "review/documents/simplicity.md").read_bytes()
+    for lens in ("consistency", "simplicity", "premortem", "plan"):
+        report(tmp_path, root, run="bundle", lens=lens)
+    before = (root / "review/bundle/simplicity.md").read_bytes()
     result = review_status(tmp_path, root, "plan")
     assert result["errors"] == []
-    assert result["review_status"]["required_lenses"] == ["plan", "simplicity"]
-    assert result["review_status"]["coverage"] == {"plan": "completed", "simplicity": "missing"}
-    report(tmp_path, root, run="plan", lens="simplicity", stage="plan", result="incomplete")
+    assert result["review_status"]["required_lenses"] == ["consistency", "simplicity", "premortem", "plan"]
+    assert result["review_status"]["coverage"] == dict.fromkeys(("consistency", "simplicity", "premortem", "plan"), "completed")
+    report(tmp_path, root, run="bundle", lens="simplicity", result="incomplete")
     assert review_status(tmp_path, root, "plan")["review_status"]["coverage"]["simplicity"] == "incomplete"
-    report(tmp_path, root, run="plan", lens="simplicity", stage="plan")
+    report(tmp_path, root, run="bundle", lens="simplicity")
     for stage in ("documents", "plan"):
         result = review_status(tmp_path, root, stage)
         assert result["errors"] == []
         assert result["review_status"]["complete"]
-    assert (root / "review/documents/simplicity.md").read_bytes() == before
+    assert (root / "review/bundle/simplicity.md").read_bytes() == before
 
 
 @pytest.mark.parametrize("lenses", [None, [{"id": "consistency", "title": "Bad", "path": "index.md"}], [{"id": "security", "title": "Bad", "path": "../outside.md"}], [{"id": "security", "title": "Bad", "path": "missing.md"}]])

@@ -1,12 +1,12 @@
 ---
 name: sdd-apply
-description: Execute an approved sdd-spec plan on explicit invocation or after the user approves the current plan in sdd-spec. Supports starting, resuming, and accepting implementation work. Not for drafting specifications or OpenSpec workflows.
+description: Execute an approved sdd-spec plan when the user explicitly authorizes implementation. Supports starting, resuming, and accepting implementation work. Plan approval alone does not authorize execution. Not for drafting specifications or OpenSpec workflows.
 disable-model-invocation: false
 ---
 
 # SDD Apply
 
-Start on explicit invocation or a verified current plan approval handed off by sdd-spec. Plan approval authorizes execution unless the user explicitly withheld it; follow the [shared approval contract](../sdd-shared/references/document-format-review.md#опциональное-ревью-и-разрешение-на-реализацию). Keep normative SDD documents unchanged.
+Start only when the user explicitly authorizes execution of the approved plan, either directly or through a verified handoff from sdd-spec. Plan approval alone does not authorize execution. An invocation to inspect progress also grants no execution permission. Reuse an existing applicable execution instruction without asking again; follow the [shared approval contract](../sdd-shared/references/document-format-review.md#опциональное-ревью-и-разрешение-на-реализацию). Keep normative SDD documents unchanged.
 
 Before starting or resuming, exclude transient execution files from Git using
 the [runtime setup policy](references/runtime-setup.md#transient-execution-files).
@@ -32,7 +32,7 @@ this task flow. There is no automatic final evaluation phase.
 
 1. Before execution, read [runtime setup](references/runtime-setup.md), [API contract](references/api.md), and the host adapter: [Codex](agents/codex.md), [Claude Code](agents/claude-code.md), or [arbitrary agent](agents/generic.md) when neither host is established.
 2. For an existing execution, read [resume](flows/resume.md). For a new execution, read [start](flows/start.md).
-3. Execute independent tasks in parallel using isolated task worktrees. Invoking sdd-apply authorizes this execution without a separate parallel request. Unavailable isolation blocks execution. Unsupported legacy execution states must be reconciled with their original skill version; do not rewrite their mode.
+3. Execute independent tasks in parallel using isolated task worktrees. Explicit permission to execute the plan covers parallel workers without a separate parallel request. Unavailable isolation blocks execution. Unsupported legacy execution states must be reconciled with their original skill version; do not rewrite their mode.
 4. Read [execute-parallel](flows/execute-parallel.md).
 5. Before acting on code-review findings, read [review policy](references/review-policy.md). For a failed independent check after executor completion or proven review violation, read [repair](flows/repair.md). Executor self-checks remain within implementation and do not consume the failure budget. For a normative conflict, use [resume](flows/resume.md). After all tasks are accepted, read [finalize](flows/finalize.md).
 
@@ -50,5 +50,8 @@ executes the exact assignment and reports results; the orchestrator selects and
 registers the complete set. Only after it passes, launch the required
 [review lenses](references/review-policy.md#review-lenses) in parallel, each in its
 own fresh context. Reviewers inspect sources and saved evidence without executing
-checks. Manual and behavioral checks are outside this task flow. Complete the plan
+checks. Reuse applicable checks and code verdicts for evidence-only additions as
+specified by the review policy; changed candidates require the full set again.
+Resolve integration conflicts in task worktrees, then repeat checks and both
+review lenses. Manual and behavioral checks are outside this task flow. Complete the plan
 from accepted tasks using [finalize](flows/finalize.md).

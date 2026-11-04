@@ -77,7 +77,7 @@ def transition(state, task, event, directory):
     root = state["basis"]["project_root"]
     require(repository(root).branch() == state["basis"]["branch"], "branch_changed", "Restore execution branch")
     require(repository(root).head() == state["execution_head"], "execution_reconciliation",
-            "Resume and explicitly accept the clean external HEAD before refreshing task work")
+            "Inspect and reconcile the clean external HEAD before refreshing task work")
     p = event["payload"]
     resolving = event["type"] == "worktree_refresh_resolve"
     original = p.get("intent_id") if resolving else event["event_id"]

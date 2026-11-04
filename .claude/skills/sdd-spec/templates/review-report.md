@@ -5,7 +5,7 @@ document_type: review
 change_id: sample-change
 language: ru
 run_id: 20260101T000000Z-example
-stage: document_review
+stage: review
 lens_id: consistency
 result: incomplete
 started_at: '2026-01-01T00:00:00Z'
@@ -15,7 +15,7 @@ limitations: ['Шаблон: замените метаданные реальн�
 ---
 # Отчет независимого ревью
 
-Сохраните как review/<run-id>/<lens-id>.md, не перезаписывая прежние отчеты. Для документов stage: document_review, встроенные lens_id: consistency, simplicity и premortem плюс проектные линзы. Для плана stage: plan_review, отдельные отчёты lens_id: plan и simplicity. Используйте разные run-id для запусков разных стадий. Укажите полный OID коммита, неизменяемое дерево которого прочитали рецензенты, в reviewed_commit. Если основание не установлено, оставьте null и result: incomplete; не подставляйте текущий HEAD.
+Сохраните как review/<run-id>/<lens-id>.md, не перезаписывая прежние отчёты. Stage всегда review. В одном запуске весь текущий комплект читают consistency, simplicity, premortem и проектные линзы; при наличии задач добавляется plan. Simplicity выполняется один раз. Для нового запуска используйте новый run-id. Укажите полный OID единого прочитанного коммита в reviewed_commit. Если основание не установлено, оставьте null и result: incomplete; не подставляйте текущий HEAD.
 
 ### Найденная проблема
 

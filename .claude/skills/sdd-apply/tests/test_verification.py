@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 @pytest.mark.parametrize("addition_kind", ["command", "procedure"])
-def test_verification_lens_gap_reruns_complete_set_before_next_review(execution_checkpoint, addition_kind):
+def test_verification_lens_gap_executes_only_missing_checks_before_next_review(execution_checkpoint, addition_kind):
     from copy import deepcopy
     import sys
     driver = execution_checkpoint("pending")
@@ -49,9 +49,14 @@ def test_verification_lens_gap_reruns_complete_set_before_next_review(execution_
     result = driver.run_checks(stage)
     assert result["outcome"] == "passed"
     assert result["summary"]["requested_check_ids"] == ["plan-1", "B", "C"]
-    assert driver.send("review_start", {"role_id": "gap-reviewer"})["round"] == previous["review_rounds_started"] + 1
+    assert result["executed_check_ids"] == ["C"]
+    assert {e["check_id"] for e in result["reused_evidence"]} == {"plan-1", "B"}
+    with pytest.raises(ValueError, match="Reuse the unchanged code verdict"):
+        driver.send("review_start", {"role_id": "gap-reviewer"})
     driver.verification_reviewer("next-verification")
-    driver.send("review_start", {"role_id": "next-verification"})
+    next_round = driver.send("review_start", {"role_id": "next-verification"})
+    assert next_round["round"] == previous["review_rounds_started"] + 1
+    assert next_round["reused_lenses"] == ["code"]
     driver.conclude(role="next-verification")
 
 
@@ -69,6 +74,10 @@ def test_verifier_extension_rejects_invalid_basis(execution_checkpoint, damage):
     if damage == "foreign":
         value["verification_result"] = "another-task-conclusion"
     elif damage == "stale":
+        from repository_support import write_file
+        driver.send("repair", {"reason": "Changed implementation", "defect_evidence": "New candidate"})
+        write_file(driver.root, "result.txt", b"changed result\n")
+        driver.freeze()
         driver.run_checks("independent")
     elif damage == "foreign_criterion":
         addition["criteria"] = ["AC-another-task"]
@@ -159,7 +168,10 @@ def test_additional_review_checks_invalidate_previous_pass(execution_checkpoint)
     with pytest.raises(ValueError, match="Every required"):
         driver.send("review_start", {"role_id": "new-reviewer"})
     assert driver.verify()["outcome"] == "passed"
-    assert driver.send("review_start", {"role_id": "new-reviewer"})["round"] == 2
+    assert driver.task["review_rounds_started"] == 2
+    assert driver.task["reused_reviews"][driver.task["active_review"]] == {"code": driver.task["reviews"][-1]["round_id"]}
+    with pytest.raises(ValueError, match="reuse the existing"):
+        driver.send("review_start", {"role_id": "new-reviewer"})
 
 
 @pytest.mark.native_process

@@ -2,7 +2,7 @@
 from .common import digest, now, require, write_json
 from .verification import current, independent, local_criteria, valid_evidence
 from .verification_results import require_passed
-from .review_policy import LENSES, proven, round_results, test_change_context
+from .review_policy import LENSES, code_basis, reusable_code_review, proven, round_results, test_change_context
 from .inputs import read_plan_document, document_paths
 import re
 from . import artifact_storage as artifacts
@@ -141,15 +141,21 @@ def transition(state, task, event, directory):
         from .budgets import reserve_review
         if task["active_review"]:
             require(task["review_basis"] == basis, "review_stale", "Review lenses require the same check run and source")
-            require(lens not in task["active_reviewers"], "review_active", "Resume the existing review lens instead of reserving twice")
+            require(lens not in task["active_reviewers"] and lens not in round_results(task),
+                    "review_active", "Resume or reuse the existing review lens instead of reserving twice")
         else:
+            reusable = reusable_code_review(state, task)
+            require(not reusable or lens == "verification", "review_reusable", "Reuse the unchanged code verdict and start the verification lens")
             if not reserve_review(state, task, event["event_id"]):
                 return {"blocked": "review_limit_reached"}
+            if reusable:
+                task.setdefault("reused_reviews", {})[task["active_review"]] = {"code": reusable["round_id"]}
             task["active_reviewers"] = {}
             task["review_basis"] = basis
         task["active_reviewers"][lens] = p["role_id"]
         task["status"] = "reviewing"
-        return {"round": task["review_rounds_started"], "lens_id": lens}
+        return {"round": task["review_rounds_started"], "lens_id": lens,
+                "reused_lenses": sorted(task.get("reused_reviews", {}).get(task["active_review"], {}))}
     require(kind == "review_result", "role_operation", kind)
     role = independent(state, task, p.get("role_id"), {"reviewer"})
     lens = role["lens_id"]
@@ -190,6 +196,8 @@ def transition(state, task, event, directory):
                and (lens == "code" or conclusion["outcome"] == "passed") else p["verdict"])
     result = {**p, "lens_id": lens, "verdict": verdict, "reported_verdict": p["verdict"], "findings": findings,
               "round_id": task["active_review"], "round": task["review_rounds_started"]}
+    if lens == "code":
+        result["basis"] = code_basis(state, task)
     task["reviews"].append(result)
     state["roles"][p["role_id"]]["status"] = "finished"
     results = round_results(task)

@@ -3,8 +3,9 @@
 Keep the execution blocked while a proven pre-existing defect remains unresolved.
 Once its fix is committed on the execution branch and verified, resolve that
 specific blocker through `resume` with the fix SHA and check evidence. For an external
-HEAD, first obtain explicit acceptance of the clean main tree using the exact-head
-resolution in [resume](../flows/resume.md#source-reconciliation). Keep budget,
+HEAD, first inspect and reconcile the clean main tree through
+[resume](../flows/resume.md#source-reconciliation). Compatible changes need no
+additional user approval. Keep budget,
 normative, mode and other unresolved blockers in force.
 
 Inspect `resume.stale_worktrees`. For each unfinished, unintegrated task whose
@@ -41,6 +42,12 @@ for legacy snapshot-based execution; old evidence remains historical even when
 the execution branch's base has not changed.
 
 ## Interrupted transfer or conflict
+
+An `integrate` conflict is detected before the main tree is changed. Its observed
+result directs `worktree_refresh`; use that operation to bring the task into a
+replacement worktree at current execution HEAD. Resolve every conflict there,
+then freeze and obtain the full required checks and both review lenses again.
+Ordinary conflict-free integration retains its original evidence without repeats.
 
 Retry a lost response with the identical event. The durable effect under
 `runs/<run-id>/effects/<event-id>.json` records the source, replacement, patch and

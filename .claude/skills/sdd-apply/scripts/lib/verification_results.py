@@ -36,10 +36,12 @@ def attempts(task, stage):
                            if value.get("stage", "final") == stage}}
 
 
-def evidence_refs(task, stage, directory):
+def evidence_refs(state, task, stage, directory):
+    from .check_registry import selected
+    required = {check["id"] for check in selected(state, task)}
     latest = {}
     for item in task["evidence"]:
-        if item.get("stage", "final") == stage and not item.get("procedure"):
+        if item.get("stage", "final") == stage and not item.get("procedure") and item["check_id"] in required:
             latest[item["check_id"]] = item
     refs = []
     for check_id, item in sorted(latest.items()):
@@ -57,11 +59,11 @@ def packet(state, task, directory, stage=None):
     stage = stage or stage_for(task)
     return {"stage": stage, "basis": basis(state, task, "checks", stage),
             "criteria": sorted(local_criteria(state, task)),
-            "evidence_refs": evidence_refs(task, stage, directory)}
+            "evidence_refs": evidence_refs(state, task, stage, directory)}
 
 
 def validate_refs(state, task, stage, refs, directory):
-    from .check_evidence import validate
+    from .check_evidence import registered_checks, same_execution, validate
     from .check_registry import selected
     checks = selected(state, task)
     expected = basis(state, task, "checks", stage)
@@ -79,12 +81,17 @@ def validate_refs(state, task, stage, refs, directory):
                 and record.get("after") == source,
                 "verification_basis", "Conclusion evidence must belong to this task, stage and unchanged source")
         from .explorer_assignments import authorize
-        role = authorize(state, task, record.get("role_id"), stage, active=False)
+        role = authorize(state, task, record.get("role_id"), stage, active=False, current_basis=False)
         authors = {value["context_id"] for value in state["roles"].values()
                    if value["kind"] == "executor" and value["task_id"] == task["plan"]["id"]}
         require(role["fresh"] is True and role["context_id"] not in authors,
                 "role_not_independent", "Conclusion evidence must come from an independent explorer")
-        validate(state, record, checks, directory, require_complete=False)
+        original = registered_checks(state, record)
+        for check in checks:
+            prior = next((item for item in original if item["id"] == check["id"]), None)
+            if prior:
+                require(same_execution(prior, check), "verification_basis", "Check execution inputs changed")
+        validate(state, record, original, directory, require_complete=False)
         for output in record["outputs"]:
             if output.get("procedure_log"):
                 path = artifacts.contained(directory, output["procedure_log"])
@@ -103,7 +110,7 @@ def applicable(state, task, directory, stage=None):
     require(result["basis"] == basis(state, task, "checks", stage)
             and result["attempts_hash"] == digest(attempts(holder, stage)),
             "verification_stale", "Source, registry or applicable check attempt changed after the conclusion")
-    require(result["evidence_refs"] == evidence_refs(holder, stage, directory),
+    require(result["evidence_refs"] == evidence_refs(state, holder, stage, directory),
             "verification_stale", "Conclusion must reference the latest exact evidence")
     reviewer(state, task, result["role_id"], stage, active=False)
     validate_refs(state, task, stage, result["evidence_refs"], directory)
@@ -149,7 +156,7 @@ def transition(state, task, event, directory):
     holder = task
     require(p.get("basis") == basis(state, task, "checks", stage),
             "verification_basis", "Use the current source, manifest and complete registry basis")
-    refs = evidence_refs(holder, stage, directory)
+    refs = evidence_refs(state, holder, stage, directory)
     require(isinstance(p.get("evidence_refs"), list) and p["evidence_refs"] == refs,
             "verification_evidence", "Reference the latest exact check runs, log digests and summaries")
     validate_refs(state, task, stage, refs, directory)

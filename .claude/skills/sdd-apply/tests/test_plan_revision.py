@@ -149,6 +149,51 @@ def test_revision_keeps_acceptance_for_completion(execution_checkpoint):
     assert proof["execution"]["status"] == proof["conclusion"]["status"] == "passed"
 
 
+def test_user_accepts_current_scope_preserving_result_and_execution_evidence(execution_checkpoint, monkeypatch):
+    from lib import verification
+    from lib.verification_results import applicable
+    driver = execution_checkpoint("worktree-reviewed")
+    project = Path(driver.state["basis"]["project_root"])
+    original, run_id = deepcopy(driver.task), driver.state["run_id"]
+    revise(project, ["one", "two"], lambda tasks: tasks[0]["verification"][0].update(
+        test_description="Accept the delivered scope; remaining work belongs to TASK-two"))
+    instruction = {"text": "Accept TASK-one as delivered and execute the revised remaining plan", "source": "fixture-user"}
+    decision = {"task_id": "TASK-one", **instruction}
+    response = driver.send("revised_plan", {"instruction": instruction, "accepted_scope": [decision]}, task_id=None)
+    assert response["accepted_scope"] == ["TASK-one"] and driver.state["run_id"] == run_id
+    assert driver.task["status"] == "verifying"
+    assert driver.task["candidate_commit"] == original["candidate_commit"]
+    assert driver.task["evidence"] == original["evidence"]
+    history = driver.task["scope_history"][-1]
+    assert history["decision"] == decision and history["prior_result"]["plan"] == original["plan"]
+    assert artifacts.exists(driver.directory / response["archive"])
+    assert driver.task["review_rounds_started"] == original["review_rounds_started"]
+    assert driver.task["test_repair_cycles_started"] == original["test_repair_cycles_started"]
+    with pytest.raises(ValueError, match="Source, registry"):
+        applicable(driver.state, driver.task, driver.directory)
+    def unexpected_run(*args, **kwargs):
+        raise AssertionError("Reformulating the task must not repeat unchanged execution")
+    monkeypatch.setattr(verification.check_runner, "run_command", unexpected_run)
+    assert driver.verify("scope-verification")["executed_check_ids"] == []
+    assert driver.task.get("reused_reviews", {}).get(driver.task["active_review"], {}) == {}
+    driver.review("scope-code")
+    driver.integrate()
+    driver.send("commit")
+    assert driver.send("accept")["status"] == "accepted"
+    assert "TASK-two" in driver.state["tasks"]
+
+
+def test_current_scope_requires_recorded_user_decision_before_any_revision(execution_checkpoint):
+    driver = execution_checkpoint("worktree-reviewed")
+    project = Path(driver.state["basis"]["project_root"])
+    revise(project, ["one"], lambda tasks: tasks[0]["verification"][0].update(test_description="Current scope"))
+    before = storage(driver.directory).read()
+    with pytest.raises(Rejected, match="actual user acceptance"):
+        driver.send("revised_plan", {"instruction": {"text": "Execute", "source": "fixture"},
+            "accepted_scope": [{"task_id": "TASK-one", "text": "Assumed acceptance", "source": ""}]}, task_id=None)
+    assert storage(driver.directory).read() == before
+
+
 def stopped_completed_task(driver):
     """Seed consumed historical rounds; the real repair reducer produces the stop."""
     from lib.state import seal, save

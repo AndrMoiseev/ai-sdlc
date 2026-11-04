@@ -38,7 +38,7 @@ def accept_source(d):
     if head != d.state["execution_head"]:
         d.send("resume", {"host_trace": "synthetic fixture", "live_contexts": [r["context_id"] for r in d.state["roles"].values() if r["status"] == "active"],
             "resolutions": [{"reason": "execution_head_changed", "head": head, "evidence": "Inspected external fix",
-                             "instruction": {"text": "Accept fixed source", "source": "synthetic-user"}}]}, task_id=None)
+                             "compatible": True}]}, task_id=None)
 
 
 def refresh_event(d):
@@ -233,7 +233,7 @@ def test_baseline_failure_resumes_on_fixed_base_with_same_budget(basis, tmp_path
     resumed = d.send("resume", {"host_trace": "all roles stopped", "live_contexts": [],
                      "resolutions": [{"reason": "baseline_failed", "task_id": "TASK-one", "evidence": "Fix SHA; original failure passes"},
                                      {"reason": "execution_head_changed", "head": repository(basis["project_root"]).head(),
-                                      "evidence": "Inspected external fix", "instruction": {"text": "Accept fixed source", "source": "synthetic-user"}}]}, task_id=None)
+                                      "evidence": "Inspected external fix", "compatible": True}]}, task_id=None)
     assert resumed["stale_worktrees"][0]["task_id"] == "TASK-one"
     assert resumed["stale_worktrees"][0]["next"] == "worktree_refresh"
     apply(d.directory, refresh_event(d))
@@ -346,7 +346,8 @@ def test_recovery_does_not_adopt_unrecorded_destination_edits(refresh_checkpoint
     assert old.exists() and new.exists()
 
 
-def test_unresolved_integration_is_not_refreshed(refresh_checkpoint):
+def test_unresolved_integration_is_not_refreshed(refresh_checkpoint, monkeypatch):
+    from lib import integration
     d, old, basis = refresh_checkpoint
     d.send("candidate")
     d.verify()
@@ -354,8 +355,14 @@ def test_unresolved_integration_is_not_refreshed(refresh_checkpoint):
     d.send("transfer")
     fix_base(basis, "result.txt", "conflicting root result")
     accept_source(d)
-    with pytest.raises(ValueError):
+    # An interrupted observation leaves a prepared intent; an observed conflict
+    # instead permits worktree_refresh without changing the main tree.
+    def crash_before_observation(*args, **kwargs):
+        raise RuntimeError("interrupted integration observation")
+    monkeypatch.setattr(integration, "observed", crash_before_observation)
+    with pytest.raises(RuntimeError, match="interrupted integration"):
         d.send("integrate")
+    assert not repository(basis["project_root"]).dirty()
     with pytest.raises(ValueError, match="pending integration"):
         apply(d.directory, refresh_event(d))
     assert old.exists()

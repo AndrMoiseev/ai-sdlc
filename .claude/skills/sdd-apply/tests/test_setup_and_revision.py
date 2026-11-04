@@ -115,7 +115,7 @@ def reapprove(project, modify):
     document(change / "tasks.md", doc.meta, doc.records)
     decisions = parser.read_document(change / "review/decisions.md")
     for record in decisions.records:
-        if record["scope"]["stage"] == "plan_review":
+        if record["scope"]["stage"] == "review":
             record["basis_commit"] = repository(project).head()
     document(change / "review/decisions.md", decisions.meta, decisions.records)
     stage_files(project, "sdd")

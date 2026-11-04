@@ -47,9 +47,26 @@ def context(state, record, checks, objects, check_run_id, persist=True, expected
                            ("context_id", "host", "launch_ref", "agent_selection", "model_observation")},
             "basis_before": put(record.get("before", record.get("basis"))),
             "basis_after": put(record["after"]),
-            "registry_revision": (task.get("check_registry", {}).get("revision", 0) if task else
-                                  record["basis"].get("registry_revision", 0)),
+            "registry_revision": record["registry_revision"],
             "registry": put(checks)}
+
+
+def same_execution(before, after):
+    """Criterion mappings are assessed separately; execution inputs must match."""
+    return ({key: value for key, value in before.items() if key not in {"criteria", "source"}}
+            == {key: value for key, value in after.items() if key not in {"criteria", "source"}})
+
+
+def registered_checks(state, record):
+    """Recover the executed subset from its original complete assignment."""
+    checks = record.get("registered_checks")
+    role = state["roles"].get(record.get("role_id"), {})
+    assignment = role.get("assignment", {})
+    require(isinstance(checks, list) and checks and len({c["id"] for c in checks}) == len(checks)
+            and all(check in assignment.get("basis", {}).get("checks", []) for check in checks)
+            and record.get("registry_revision") == assignment.get("registry_revision"),
+            "evidence_basis", "Recorded checks must belong to the original complete Explorer assignment")
+    return checks
 
 
 def capture_reports(output, read_reports=True):

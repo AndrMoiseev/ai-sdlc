@@ -45,7 +45,7 @@ def finding():
 
 def report(tmp_path, root, run="run-one", lens="consistency", records=(), result=None, after=None, stage="documents"):
 
-    meta = dict(schema_version=2, work_kind="change", document_type="review", change_id="demo", language="en", run_id=run, stage="document_review" if stage == "documents" else "plan_review", lens_id=lens, result=result or ("completed_with_findings" if records else "completed_no_findings"), started_at="2026-01-01T00:00:00Z", finished_at="2026-01-01T00:01:00Z", reviewed_commit="a" * 40 if after is None else after, limitations=[])
+    meta = dict(schema_version=2, work_kind="change", document_type="review", change_id="demo", language="en", run_id=run, stage="review" if stage == "documents" else "review", lens_id=lens, result=result or ("completed_with_findings" if records else "completed_no_findings"), started_at="2026-01-01T00:00:00Z", finished_at="2026-01-01T00:01:00Z", reviewed_commit="a" * 40 if after is None else after, limitations=[])
     write(root / f"review/{run}/{lens}.md", meta, records)
     return meta
 
@@ -86,7 +86,7 @@ def test_summary_requires_full_resolvable_keys(tmp_path):
     assert review_status(tmp_path, root, "documents")["errors"]
 
 
-@pytest.mark.parametrize("field,value", [("stage", []), ("stage", "plan_review"), ("run_id", []), ("limitations", 3), ("reviewed_commit", {}), ("lens_id", None), ("extra", True)])
+@pytest.mark.parametrize("field,value", [("stage", []), ("stage", "unknown"), ("run_id", []), ("limitations", 3), ("reviewed_commit", {}), ("lens_id", None), ("extra", True)])
 def test_bad_report_shapes_are_diagnostics(tmp_path, field, value):
     root = project(tmp_path)
     meta = report(tmp_path, root)

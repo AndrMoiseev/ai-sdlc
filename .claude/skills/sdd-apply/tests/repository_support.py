@@ -59,13 +59,13 @@ def accept_checkpoint(root, work_kind="change"):
 
 
 def accept_execution_source(driver):
-    """Record synthetic user acceptance for an explicitly arranged external fix."""
+    """Record the orchestrator's compatibility assessment of an external fix."""
     state = driver.state
     head = repository(state["basis"]["project_root"]).head()
     return driver.send("resume", {"host_trace": "synthetic fixture", "live_contexts": [
         role["context_id"] for role in state["roles"].values() if role["status"] == "active"],
         "resolutions": [{"reason": "execution_head_changed", "head": head, "evidence": "Inspected fixture source change",
-                         "instruction": {"text": "Accept fixture source", "source": "synthetic-user"}}]}, task_id=None)
+                         "compatible": True}]}, task_id=None)
 
 
 def set_mode(root, path, executable):

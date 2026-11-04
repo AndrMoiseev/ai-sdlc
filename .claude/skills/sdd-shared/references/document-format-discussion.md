@@ -16,7 +16,7 @@ checkpoint и resume. При проверке сохранённых отчёт�
 В `state.yaml` сохраняй общие поля schema_version: 2, document_type: state,
 change_id, language и явный work_kind: change|refactoring.
 Дополнительные поля: phase, awaiting, updated_at (quoted ISO UTC), document_links,
-review_links, approval_refs. Phase: discovery/drafting/document_review/user_review/planning/plan_review/plan_approved.
+review_links, approval_refs. Phase: discovery/drafting/review/user_review/planning/approved.
 Awaiting: none/clarification/review_consent/planning_command/final_approval.
 Пути относительны изменению; approval_refs содержит ссылки USER-ID на согласования
 и поручения, содержание и действительность которых проверяются в review/decisions.md.
@@ -57,8 +57,12 @@ blocking и status; открытая неблокирующая требует r
 Путь остаётся внутри изменения; внешний источник сначала зафиксируй
 в локальном исследовании со ссылкой и результатом проверки. Скрипт проверяет
 файл и форму ссылки; наличие якоря и смысл основания проверяет агент.
-Для существенного выбора resolution ведёт к отдельному ответу пользователя
-именно об этом выборе. Исследование может подтвердить факт, но его принятие
-или общее согласование комплекта не заменяет такой ответ.
+Для существенного выбора resolution ведёт к ответу пользователя именно об этом
+выборе либо к решению агента по явному поручению решить показанный список Q-ID.
+Сохрани список, точный текст поручения, источник, автора и обоснование решения.
+Новые Q в прежнее делегирование не входят. Исследование может подтвердить факт,
+но его принятие или общее согласование комплекта не заменяет такое основание.
+Все открытые Q препятствуют финальному утверждению, независимо от blocking.
+Необязательные рекомендации хранятся в ревью и сами по себе не создают Q.
 Каждый Q-ID уникален в `questions.md`; закрытый вопрос всегда требует resolution.
 Восстановление обсуждения выполняй по [discussion](../../sdd-spec/references/discussion.md).

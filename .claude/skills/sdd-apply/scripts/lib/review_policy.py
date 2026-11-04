@@ -6,7 +6,28 @@ LENSES = ("verification", "code")
 
 def round_results(task, round_id=None):
     round_id = round_id or task.get("active_review") or (task["reviews"][-1]["round_id"] if task["reviews"] else None)
-    return {review["lens_id"]: review for review in task["reviews"] if review["round_id"] == round_id}
+    results = {review["lens_id"]: review for review in task["reviews"] if review["round_id"] == round_id}
+    for lens, original in task.get("reused_reviews", {}).get(round_id, {}).items():
+        review = next((r for r in task["reviews"] if r["round_id"] == original and r["lens_id"] == lens), None)
+        if review and lens not in results:
+            results[lens] = review
+    return results
+
+
+def code_basis(state, task):
+    from .explorer_assignments import basis
+    return {"source": basis(state, task), "plan": deepcopy(task["plan"]), "paths": list(task["paths"])}
+
+
+def reusable_code_review(state, task):
+    """Only evidence-only continuation may reuse a genuine earlier code verdict."""
+    results = round_results(task)
+    previous = results.get("code")
+    verification = results.get("verification")
+    if (previous and verification and previous["verdict"] == "pass"
+            and verification["verdict"] == "more_checks" and previous.get("basis") == code_basis(state, task)):
+        return previous
+    return None
 
 
 def test_change_context(state, task):

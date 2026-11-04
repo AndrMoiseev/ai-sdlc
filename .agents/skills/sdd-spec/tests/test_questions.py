@@ -95,14 +95,14 @@ def test_open_blocker_prevents_readiness_without_revoking_approval(tmp_path):
     assert not result["discussion_status"]["complete"]
 
 
-def test_deferred_question_remains_open_without_blocking(tmp_path):
+def test_deferred_question_still_prevents_final_approval(tmp_path):
     root = approved_bundle(tmp_path)
     record = {**question(), "blocking": False, "reason": "Outside current scope", "return_at": "Before rollout"}
     discussion_file(root, [record])
     result = review_status(tmp_path, root, "documents")
     assert result["discussion_status"]["open_questions"] == ["Q-mode"]
     assert result["discussion_status"]["blocking_questions"] == []
-    assert result["approval_status"]["ready"]
+    assert not result["approval_status"]["ready"]
     del record["return_at"]
     discussion_file(root, [record])
     result = review_status(tmp_path, root, "documents")
@@ -193,6 +193,7 @@ def test_discussion_files_do_not_change_review_snapshots(tmp_path):
     root = approved_bundle(tmp_path)
     report(tmp_path, root, lens="simplicity")
     report(tmp_path, root, lens="premortem")
+    report(tmp_path, root, lens="plan")
     before = review_status(tmp_path, root, "documents")["review_status"]["reports"]
     discussion_file(root, [question()])
     checkpoint(root)

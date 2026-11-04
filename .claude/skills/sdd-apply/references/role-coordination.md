@@ -21,6 +21,9 @@ reserve its `review_start`, then send the generated packet and lens instructions
 Both reservations belong to one round and the same frozen source/check run. Keep
 role IDs active through their last API operation. Collect both results before
 repair, extending checks or transfer. One passing lens cannot replace another.
+For evidence-only continuation after `more_checks`, reuse the original passing
+code verdict and launch only a fresh verification lens under the
+[review reuse rule](review-policy.md#review-lenses).
 
 Packets identify task, original REQ/AC/design/instructions, files/interfaces,
 checks, commits, blockers and rejected approaches. Send paths
@@ -58,7 +61,8 @@ within one task, with the same launch identity, during task work.
 After the executor reports completion, stop writers and freeze the candidate.
 The orchestrator inventories project instructions, CI and configuration, registers
 all required tests and static checks, and supplies their exact IDs and commands.
-Explorer executes that complete assignment through the check API. It neither
+Explorer reconciles that complete assignment through the check API, which retains
+applicable original executions and runs only missing checks. Explorer neither
 selects checks nor judges sufficiency, acceptance, repairs or the next workflow
 action. Return its machine summary and raw artifact references to the orchestrator.
 Manual and behavioral checks are not supported by this task flow.
@@ -69,6 +73,8 @@ references. It reads needed raw artifacts through `read_object` and submits the
 separate `verification_result` within its reserved round, followed by `review_result`.
 The code lens receives its own task packet without the verification reviewer's
 conclusions. Keep Explorer conversation and all peer-review conclusions out of both
-contexts. After a new run, launch fresh reviewers with current packets for both lenses.
+contexts. After a changed candidate, launch fresh reviewers with current packets
+for both lenses. Evidence-only additions use a fresh verification lens and the
+original passing code review reference.
 Transfer requires current passed execution, criterion conclusion and both lens
 verdicts. Commit and acceptance retain that worktree evidence without another handoff.
