@@ -9,9 +9,11 @@ Own project rules about testing and verification. Architecture, source-code desi
 and maintainability belong to the code lens.
 
 Read the original criteria, implementation and actual test sources. Receive the
-complete explorer run's machine summary and raw evidence references from the
-orchestrator. Check that the full project test and static-check inventory ran on
-the frozen commit, with the declared configuration and unchanged source/documents.
+complete registry's machine summary and raw evidence references from the
+orchestrator. Check that the full project test and static-check inventory has
+applicable execution evidence for the frozen commit and declared configuration.
+Reused evidence retains its original role, run and registry identity; assess it
+against the current criteria without relabeling the original execution.
 Inspect assertions, negative cases, skip/xfail/only, fixtures and narrowed commands.
 An empty suite or exit zero from an unrelated command does not prove a criterion.
 Read required raw objects through `read_object`; do not rerun checks.
@@ -31,8 +33,11 @@ reason and inspected source/evidence references. Record limitations and actual t
 For a missing assertion, record a concrete `check_request` against the unconfirmed
 criterion and return `more_checks`. Report a demonstrated contractual defect with
 proof and `changes`. The orchestrator waits for the other lens, assigns any required
-preparation to the executor, and directs Explorer to rerun the complete expanded
-set. Fresh reviewers then assess the new evidence. A gap does not fabricate a test
+preparation to the executor, and directs Explorer to execute missing checks.
+A changed candidate requires the complete set and both fresh review lenses;
+evidence-only additions require a fresh verification lens and retain the passing
+code verdict under the [review reuse rule](review-policy.md#review-lenses).
+A gap does not fabricate a test
 failure or consume a test-repair cycle; each review round retains its actual cost.
 
 Your `review_result` contains `test_integrity`: original guarantees, actual tests,

@@ -59,6 +59,13 @@ objects; do not hydrate and nest past attempts. Exclude the execution directory
 from dirty-path lists, status and document snapshots, including
 already tracked execution artifacts.
 
+For explicit acceptance of an unfinished task's current scope, `revised_plan`
+keeps its run and candidate and appends `scope_history` with the user decision,
+original task object and archived manifest. Revised criteria need fresh assessment.
+Execution reuse retains the original log and registry identity. `reused_reviews`
+maps a new round's code lens to its original passing round; it does not add a
+second review record or duplicate findings.
+
 ## Source identity
 
 Use the local candidate commit SHA and clean Git state to identify source code.
@@ -81,8 +88,9 @@ sorted object keys, equal timestamps and wall-clock changes. Task
 `verification_results` are separate immutable history collections. Schema 3 stores
 them through the same object adapter as evidence; no conversion is performed.
 Resume preserves these histories. Accepted tasks retain their original proof;
-revised unfinished work needs new evidence without
-rewriting historical outcomes or synthesizing conclusions from successful logs.
+revised unfinished work needs new assessment. Current-scope revisions may reuse
+unchanged executions without rewriting historical outcomes or synthesizing
+conclusions from successful logs.
 
 Use `read` with `view: "compact"` for control decisions and `view: "full"` to see
 the manifest's references. Use `read_object` for one descriptor at a time. It

@@ -20,7 +20,7 @@ one. The replacement shares the existing deadline and lifetime repair counters.
 A missing research answer stays unfinished. The role's `DONE` result never supplies
 a verification conclusion.
 
-Resume and new task worktree creation require a clean main source tree; execution artifacts remain separately managed. Preserve dirty changes and ask for the user's commit or discard decision. A clean unexpected HEAD produces `execution_head_changed`. After showing its changes and receiving actual user acceptance, submit a resolution with that reason, the exact observed `head`, `evidence`, and `instruction: {text, source}`. It advances only `execution_head`; it preserves admitted tasks and document records. It does not move the shared specification checkpoint ref or approve a revised plan. Known apply commits advance the execution source automatically. Worktree refresh requires the main HEAD to have already been reconciled. In-flight task worktree edits remain preserved.
+Resume and new task worktree creation require a clean main source tree; execution artifacts remain separately managed. Preserve dirty changes and ask for the user's commit or discard decision. A clean unexpected HEAD produces `execution_head_changed`. Inspect the changes and their compatibility with the saved execution instruction, task scope and dependencies. When compatible, reconcile autonomously with that reason, the exact observed `head`, inspection `evidence`, and `compatible: true`; report the reconciliation without requesting renewed approval. A substantive conflict with user intent needs the user's decision or `revised_plan`. The resolution advances only `execution_head`; it preserves admitted tasks and document records. It does not move the shared specification checkpoint ref or approve a revised plan. Known apply commits advance the execution source automatically. Worktree refresh requires the main HEAD to have already been reconciled. In-flight task worktree edits remain preserved.
 
 ## Revision contract
 
@@ -44,7 +44,18 @@ The operation removes only that task's obsolete budget stop, preserving its full
 record and spent counters. Unfinished-task budget stops and unrelated blockers
 remain; this mapping cannot authorize another repair of the completed task.
 
-Unfinished tasks return to `pending` for reassessment against the revised basis;
+The user may accept an unfinished task's current scope. A retained partial result
+is not a cancellation. Preserve and freeze it in its task worktree, reformulate
+the task and acceptance criteria through sdd-spec, and revise the remaining plan
+where needed. Record the explicit decision in `revised_plan.accepted_scope` as
+`{task_id, text, source}`. This retains the candidate, original evidence and review
+history with their identities and spent budgets. The revised task enters
+`verifying`; it is not automatically accepted. Reuse unchanged check executions,
+obtain fresh assessment against the revised contract and both review lenses,
+then follow normal integration and acceptance. Any changed candidate needs the
+full required checks again. Existing budget stops still apply.
+
+Other unfinished tasks return to `pending` for reassessment against the revised basis;
 their prior results, commits and continuing budgets remain linked. Preserve run
 history. Accepted tasks retain their original evidence and conclusions for completion.
 Only unfinished or revised task work needs new execution and assessment.
@@ -54,7 +65,9 @@ reassessment. Approved changes to plan-owned check definitions append a registry
 snapshot while retaining project-added obligations. A plan incompatible with a
 pending transition is rejected before archival effects: reconcile that transition
 at a valid basis or adjust the approved plan. Existing conclusions remain history;
-obtain new execution evidence and a separate conclusion for unfinished or revised task work.
+obtain a separate conclusion for revised task work. A user-selected current scope
+may retain applicable execution evidence; other unfinished tasks require new
+execution evidence.
 
 After reconciliation, inspect compact `explorer_assignments` and the separate
 execution/conclusion statuses in `tasks[id].verification`. Resolve relevant evidence through `read_object`. A saved

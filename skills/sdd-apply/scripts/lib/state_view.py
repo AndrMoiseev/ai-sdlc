@@ -72,10 +72,14 @@ def check_progress(state, task, stage):
             status, reason = "missing", "evidence_missing"
         else:
             role = state["roles"].get(item["role_id"], {})
+            assignment = role.get("assignment", {}).get("basis", {})
+            assigned_check = next((value for value in assignment.get("checks", []) if value["id"] == check["id"]), None)
+            from .check_evidence import same_execution
             status = item["outcome"]
             if role.get("status") == "lost":
                 status = "unavailable"
-            elif role.get("assignment", {}).get("basis", item.get("basis")) != current:
+            elif (assignment.get("source") != current["source"] or assignment.get("run_id") != current["run_id"]
+                  or not assigned_check or not same_execution(assigned_check, check)):
                 status = "stale"
             # A standalone procedure is not a complete check_run aggregate.
             elif item.get("procedure") and status == "passed":
