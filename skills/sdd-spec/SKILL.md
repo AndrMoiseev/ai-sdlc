@@ -41,6 +41,11 @@ disable-model-invocation: true
 необходимости; documents/plan check выполняет explorer. Сохраняй внешние request/result
 и фактический launch, затем ссылки и digest в checkpoint.
 
+До исследования источников, сохранения его результатов или resume прочитай
+[контракт исследования](references/research.md). Архитектор сохраняет значимые
+результаты в `research.md` выбранного изменения; оркестратор включает документ
+в checkpoint. Для первой устойчивой записи определи change-id уже в explore.
+
 Перед работой с субагентами прочитай [общие правила координации](../sdd-shared/references/coordination.md).
 
 ## Выбор флоу
