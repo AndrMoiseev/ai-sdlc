@@ -6,8 +6,13 @@ constructing a request.
 `validate` accepts `project_root`, optional `change` and `work_kind`, and
 `instruction: {text, source}`. The critical dependency `sdd-shared` must be in
 the sibling directory next to `sdd-apply`; a missing dependency stops execution.
-Preserve the
-returned basis. Use the actual plan approval text and its message or saved USER-record source as instruction; no additional execution question is needed. Honor explicit user restrictions on starting. Validation checks both document and plan approval through shared
+Preserve the returned basis. Use the actual explicit execution instruction and its
+message or saved source; plan approval alone is not an execution instruction.
+Approval and permission to execute may appear in one message. Verify the instruction's
+scope and latest cancellations or pauses before calling `initialize`; reuse existing
+applicable permission without asking again. The API checks that instruction text and
+source are present; the agent verifies that the user's words actually authorize execution.
+Validation checks both document and plan approval through shared
 API v2 check/checkpoint interfaces. Select an ambiguous change; return missing approval
 or a missing plan to sdd-spec.
 
@@ -26,17 +31,18 @@ Execution
 naturally advances HEAD; ongoing transitions preserve the admitted task scope
 and use current Git state checks. Checkpoint acceptance
 does not authorize new tasks. Use `revised_plan` to reconcile changed scope while
-preserving work. Its `instruction` records the revised plan approval's actual text
-and source; it is evidence of that approval, not a second user approval. An explicit
-pause still requires a later instruction to start.
+preserving work. Its `instruction` records explicit permission to execute the revised
+scope and its source. Revised plan approval alone does not grant that permission.
+An existing instruction may be reused only while it still covers the revised scope
+and has not been cancelled, replaced or paused.
 
 `initialize` takes validation arguments plus optional `isolation`.
 It validates, records a run and generates the
 initial dashboard. Existing state requires [resume](../flows/resume.md).
 
 Set `isolation: true` only after verifying task worktrees. Initialization stores the
-execution instruction in `basis.instruction`; it needs no separate permission
-question. Revised plans replace the basis with the new execution instruction.
+execution instruction in `basis.instruction`; recording it does not create permission.
+Revised plans replace the basis with the verified applicable execution instruction.
 Unsupported legacy execution states are rejected without rewriting them.
 
 For read/progress operations use installed help: `read`, `available`, `dashboard`,

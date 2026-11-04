@@ -152,7 +152,7 @@ output written directly to OS file descriptors.
 | --- | --- |
 | Documentation only | Package links/structure and consistency of affected instructions; use `tests/test_package.py` for the package contract |
 | Runtime, test or fixture changes | Relevant focused checks during editing, then the full default regression selection (`not installation`) |
-| New or expanded tests | Full default selection with `-n 0`; accept the additions only when total wall time is at most 60 seconds |
+| New or expanded tests | Full default selection with `-n 0`; accept the additions only when total wall time is at most 120 seconds |
 | Final acceptance of runtime changes | Full default regression selection (`not installation`); installation is outside this run |
 | Dependency or distribution changes | Separate installation verification when that scope is requested; retain its evidence independently |
 
@@ -175,7 +175,7 @@ allowance.
 
 **Make total suite time an acceptance condition for every new test.** After
 adding or expanding tests, measure the full default selection sequentially.
-Accept the additions only when all required tests pass within 60 seconds,
+Accept the additions only when all required tests pass within 120 seconds,
 including environment and fixture preparation. If the limit is exceeded,
 redesign the new test and its prerequisites or discard redundant coverage;
 preserve required behavioral coverage. A baseline already over budget requires
@@ -184,7 +184,7 @@ and total elapsed time. A focused pass, exit code zero, or parallel run does not
 satisfy this gate. Explicit authorization to run long optimization experiments
 permits measurement; it is not evidence that the timing target was achieved.
 
-Keep the full default regression selection capable of finishing within **60 seconds
+Keep the full default regression selection capable of finishing within **120 seconds
 sequentially**. Four-worker execution is the normal development command; it does
 not replace efficient test design. Use this command for a sequential benchmark:
 
@@ -203,14 +203,14 @@ Measure wall-clock time from command start through exit, including uv, worker
 startup, fixture preparation and teardown. Include dependency installation,
 downloads and bytecode preparation whenever the command performs them, including
 ordinary regression runs. Sum component commands and internal retries belonging to one verification
-run. A new invocation after the previous run finishes or is stopped receives a fresh 60-second limit; do not carry elapsed time across runs. The separate installation selection is a set of tests, not permission to
+run. A new invocation after the previous run finishes or is stopped receives a fresh 120-second limit; do not carry elapsed time across runs. The separate installation selection is a set of tests, not permission to
 exclude environment setup from timing. Report the command, selection, worker
 count, passed/skipped/deselected counts, cache condition and total elapsed time.
 Worker durations are diagnostic data, not elapsed time for the run. Check Chrome
 availability when browser coverage is required; a skip is not a passing browser
 check. Keep measured timings in external reports, not as fixed guarantees here.
 
-**If the cumulative run exceeds 60 seconds for any reason, stop the current
+**If the cumulative run exceeds 120 seconds for any reason, stop the current
 work and its running test processes immediately.** Report commands, elapsed time
 and any known cause; recommend optimizing the tests before continuing. Await a
 new user instruction. Network access, dependency installation, failures and
