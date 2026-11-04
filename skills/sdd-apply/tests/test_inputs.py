@@ -12,7 +12,8 @@ def call(project):
 
 def test_approved_and_preserves_dirty(project):
     # Reuse the existing admission fixture and shared CLI adapter: a valid
-    # approval must admit execution without reports or legacy review waivers.
+    # approval plus an explicit execution instruction must admit execution
+    # without reports or legacy review waivers.
     change = project / "sdd/changes/demo"
     docs = spec_modules()
     decisions = docs.read_document(change / "review/decisions.md")
@@ -21,8 +22,7 @@ def test_approved_and_preserves_dirty(project):
     checkpoint = docs.read_checkpoint(change)
     checkpoint.meta["approval_refs"] = [record["id"] for record in approvals]
     document(change / "state.yaml", checkpoint.meta)
-    approval = next(record for record in approvals if record["kind"] == "plan_approval")
-    instruction = {"text": approval["response"], "source": f"review/decisions.md#{approval['id']}"}
+    instruction = {"text": "Implement the approved plan", "source": "execution-request-message"}
     (project / "foreign.txt").write_bytes(b"staged")
     stage_files(project, "foreign.txt")
     (project / "foreign.txt").write_bytes(b"unstaged")
