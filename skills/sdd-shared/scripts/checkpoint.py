@@ -2,7 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Inspect, accept, or create a reviewed Git checkpoint. Inputs are JSON files."""
+"""Inspect, initialize, accept, or create a Git checkpoint. Inputs are JSON files."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +21,7 @@ def _json(path):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("inspect", "accept", "create"))
+    parser.add_argument("operation", choices=("inspect", "initialize", "accept", "create"))
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--work-kind", required=True, choices=("change", "refactoring"))
     parser.add_argument("--change", required=True)
@@ -39,6 +39,10 @@ def main(argv=None):
             result = checkpoints.inspect(*identity)
             if args.review_changes and result["exit_code"] == 0 and result["status"] not in ("unborn_head", "git_operation_in_progress"):
                 result["reviewed_changes"] = checkpoints.capture_changes(args.project_root)
+        elif args.operation == "initialize":
+            if not args.expected_head or not args.instruction:
+                parser.error("initialize requires --expected-head and --instruction JSON file")
+            result = checkpoints.initialize(*identity, args.expected_head, _json(args.instruction))
         else:
             if not args.expected_head or args.expected_accepted is None:
                 parser.error("write operations require --expected-head and --expected-accepted (OID or null)")
