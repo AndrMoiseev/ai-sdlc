@@ -34,7 +34,7 @@ uv run --locked --script "<skill-root>/scripts/simplicity.py" --model "<selected
 pytest нужен тестовому runner. simplicity только читает поставляемые инструкции:
 [правила подготовки](simplicity-instructions.md). Модель неизвестна — опусти `--model`.
 
-Check только читает проект; JSON идёт в stdout. Для Git-входа и завершения перехода используй inspect/accept/create по [общему API](../../sdd-shared/references/api.md). Записи выполняет основной агент; snapshot сообщает о миграции и не создаёт нормативный манифест.
+Check только читает проект; JSON идёт в stdout. Для Git-входа и завершения перехода используй inspect/initialize/accept/create по [общему API](../../sdd-shared/references/api.md). Вход выбирает операцию по [новой или существующей работе](entry.md). Записи выполняет основной агент; snapshot сообщает о миграции и не создаёт нормативный манифест.
 Check разделяет errors/warnings, checkpoint_status, discussion_status, review_status и approval_status:
 exit 0 — структура корректна, 1 — структурные ошибки, 2 — проверка
 не выполнена. Ошибка запуска uv также означает, что проверка не выполнена.

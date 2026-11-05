@@ -60,7 +60,7 @@ def test_required_resources_ship_together():
                "document-format-discussion", "document-format-review", "discussion",
                "runtime-setup", "codex", "claude-code", "openspec-origin", "consistency", "premortem",
                "reviewer-documents", "reviewer-plan", "editorial-pass", "explanation",
-               "resume-recovery", "checkpoint", "simplicity", "simplicity-instructions", "simplicity-origin")]
+               "entry", "resume-recovery", "checkpoint", "simplicity", "simplicity-instructions", "simplicity-origin")]
     for file in files:
         assert (ROOT / file).is_file(), file
 

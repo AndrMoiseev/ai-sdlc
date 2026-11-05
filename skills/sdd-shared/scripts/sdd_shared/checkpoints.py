@@ -1,4 +1,4 @@
-"""Inspect, explicitly accept, and create Git checkpoint transitions."""
+"""Inspect, initialize new work, accept recovery, and create Git checkpoints."""
 from __future__ import annotations
 
 import re
@@ -40,6 +40,8 @@ def _fail(result, code, message, exit_code=1):
 def _observe(git, result):
     head, accepted, changes = git.head(), git.accepted(result["checkpoint_ref"]), git.changes()
     status = classify(head, accepted, changes, git.operation_in_progress())
+    if status == "acceptance_required" and not git.work_exists(result["work_kind"], result["change_id"]):
+        status = "initialization_required"
     result.update(head=head, accepted_commit=accepted, changes=changes, dirty=bool(changes), status=status)
     return result
 
@@ -91,7 +93,7 @@ def _finish(git, result, oid, old, message):
     _observe(git, result)
     if not _clean_at(result, oid) or result["accepted_commit"] != oid:
         return _fail(result, "concurrent_change", "Repository changed after checkpoint reference update")
-    result["status"] = "accepted" if result["operation"] == "accept" else "created"
+    result["status"] = {"initialize": "initialized", "accept": "accepted", "create": "created"}[result["operation"]]
     return result
 
 
@@ -107,6 +109,29 @@ def _write_error(git, result, exc):
     elif result["created_commit"]:
         code = "commit_created_unaccepted"
     return _fail(result, code, str(exc), 2 if code in {"git_error", "git_unavailable", "not_repository", "invalid_checkpoint_ref", "unsupported_index_flags"} else 1)
+
+
+def _instruction(instruction):
+    if not isinstance(instruction, dict) or not all(isinstance(instruction.get(k), str) and instruction[k].strip() for k in ("text", "source")):
+        raise GitError("instruction_required", "An explicit work instruction with text and source is required")
+
+
+def initialize(project_root, work_kind, change_id, expected_head, instruction):
+    """Record a new work's clean starting HEAD without inventing user acceptance."""
+    result = _write_result("initialize", work_kind, change_id, None)
+    git = None
+    try:
+        git = _open(project_root, work_kind, change_id, result)
+        _expected(result, expected_head, None)
+        _instruction(instruction)
+        if result["status"] == "acceptance_required":
+            raise GitError("work_exists", "The work root or a checkpoint already exists; inspect and resume that work, or choose a free ID")
+        if result["status"] != "initialization_required":
+            raise GitError(result["status"], "Initialize only a new work at a clean, unchanged HEAD before creating its directory")
+        message = f"SDD initialization: {instruction['source']}".replace("\n", " ")
+        return _finish(git, result, expected_head, None, message)
+    except (GitError, OSError) as exc:
+        return _write_error(git, result, exc)
 
 
 def accept(project_root, work_kind, change_id, expected_head, expected_accepted, decision):
@@ -169,8 +194,7 @@ def create(project_root, work_kind, change_id, expected_head, expected_accepted,
         _expected(result, expected_head, expected_accepted)
         if expected_head != expected_accepted:
             raise GitError("acceptance_required", "Creation requires HEAD to equal the accepted checkpoint")
-        if not isinstance(instruction, dict) or not all(isinstance(instruction.get(k), str) and instruction[k].strip() for k in ("text", "source")):
-            raise GitError("instruction_required", "An explicit work instruction with text and source is required")
+        _instruction(instruction)
         if not isinstance(message, str) or not message.strip():
             raise GitError("message_required", "Supply a nonempty commit message")
         reviewed = _reviewed(git, reviewed_changes)
