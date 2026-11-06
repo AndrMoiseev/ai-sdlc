@@ -43,7 +43,7 @@ Save these fields before dispatch; the calling workflow owns persistence:
 |---|---|
 | `id` | Stable assignment identity; apply uses role_id, spec uses the external request/result pair name |
 | `kind` | `research` or `checks` |
-| `scope` | `project`, `work`, `task` identities; each may be null before it exists |
+| `scope` | Object with exactly `project`, `work`, `task`; each value is a nonempty string identity or null before it exists. Nested objects and arrays are invalid. |
 | `basis` | Nonempty object identifying the actual source/documents/configuration basis |
 | `read_scope` | Nonempty list of allowed source paths, object references or search bounds |
 | `outputs` | Nonempty list of allowed artifact destinations; grants no source-edit authority |
