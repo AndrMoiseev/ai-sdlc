@@ -46,12 +46,28 @@ top-level project settings. Do not create settings or agent definitions during n
 
 Read the actual parent's model ID and, when exposed, reasoning effort from host metadata.
 Do not guess them from an agent's answer or substitute a CLI's configured default.
-If the host cannot reveal the parent model, use only a confirmed native inheritance
-mechanism; otherwise record the capability gap and stop the dependent launch.
+Choose one model source: an observed ID with `--parent-model`, or confirmed native
+inheritance with `--native-inheritance`. Use the latter only when the current host's
+tool contract and effective settings confirm that omitting `model` inherits the parent.
+Check native model defaults, selected agent definitions and environment/policy overrides;
+omission alone is not proof. Save that capability evidence with the actual launch.
+If neither source is available, record the capability gap and stop the dependent launch.
 
 ```text
 uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.reviewer --host codex --parent-model "<observed-model>" --parent-effort "<observed-effort>"
 ```
+
+When the exact ID is unavailable but inheritance is confirmed:
+
+```text
+uv run --locked --script "<shared-root>/scripts/resolve_agent.py" --project-root "<repo>" --role sdd-spec.reviewer --host codex --native-inheritance
+```
+
+`resolution.parent_model` remains `null` and `resolution.native_inheritance` records
+the caller's confirmation. Copy the returned `launch` exactly: an inherited model is
+omitted, not `null` or the literal `inherit`. A selected explicit model profile still
+overrides inheritance. Pass `--parent-effort` only when observed. This attestation does
+not prove the child's effective model; record runtime observations separately.
 
 Follow [runtime setup](runtime-setup.md). The resolver only reads files and prints
 `{ok, result}` JSON; it does not launch agents or write project settings. A nonzero exit
@@ -70,7 +86,8 @@ to avoid a real project's settings. Identity comes from `name`, not the filename
 Use the resolver's `launch` fields as actual native `spawn_agent` arguments, together
 with task name and role assignment. Keep `fork_turns: none`. `task_name` is not a
 native agent selector. Translate `model_reasoning_effort` to `reasoning_effort`.
-When the definition omits `model` or uses `inherit`, pass the observed parent model.
+When the definition omits `model` or uses `inherit`, the resolver passes the observed
+parent model or omits `model` under confirmed native inheritance.
 An omitted effort inherits the known parent effort for the same model; for a different
 model leave it out to request that model's native default. Check the exposed API's
 supported model/effort combinations before launch; the resolver has no fixed model catalog.
@@ -95,9 +112,9 @@ the Agent tool. Omit a per-call model so the definition controls it. Start a fre
 non-fork agent. Check that its instructions and tools can satisfy the assigned contract;
 a read-only reviewer definition cannot serve as an executor.
 
-For `mode: parent`, use the available `general-purpose` agent and explicitly request
-the parent's exact model through the supported invocation parameter. If that fallback
-type or model parameter is unavailable, report a capability gap. A denied agent or
+For `mode: parent`, use the available `general-purpose` agent. Pass the returned model
+only if the invocation parameter supports that value; with confirmed native inheritance,
+omit it. If neither supported path is available, report a capability gap. A denied agent or
 failed launch is not a missing definition: preserve the failure rather than bypassing it.
 Environment overrides such as `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` and managed policies
 may prevent the requested model. Record the actual substitution or limitation; never
