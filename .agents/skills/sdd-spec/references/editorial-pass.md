@@ -41,7 +41,7 @@ kind USER. При resume учитывай этот выбор: предложе�
 ## Область и подготовка
 
 1. Обрабатывай русскую авторскую прозу в proposal, specs, design, tasks, checkpoint,
-   questions.md, журнале decisions.md
+   questions.md, журнале decisions.md, research.md
    и производных сводках, explanation.md, документах explanation/, авторской
    прозе archify/index.md и archify/preview-handoff.md. Неизменённые документы
    читай только для контекста.

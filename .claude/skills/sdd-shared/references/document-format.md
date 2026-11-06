@@ -12,6 +12,13 @@
 
 Рабочий корень — `sdd/changes/<change-id>/`: proposal.md, design.md, specs/<capability>/spec.md, tasks.md, state.yaml, state.md, decisions.md, questions.md и review/. Capability может иметь несколько kebab-case сегментов через `/`. Proposal и design общие для изменения; tasks появляется только по разрешенному переходу. Журнал и вопросы создаются при наличии соответствующего содержания по [правилам обсуждения](../../sdd-spec/references/discussion.md).
 
+Исследование конкретного изменения хранится в `research.md` по
+[контракту исследования](../../sdd-spec/references/research.md). Это обычный Markdown
+без frontmatter, document_type и новых машинных записей; добавляй существующий
+файл в state.yaml.document_links. Правило действует и для refactoring.
+В discovery каталог может содержать исследование и пару state до подготовки
+нормативного комплекта. При архивировании research.md остаётся внутри изменения.
+
 Необязательные производные материалы: explanation.md, дополнительные документы
 в explanation/ и все сохраняемые артефакты диаграмм в archify/. Их размещение,
 индекс и актуальность определяет [контракт пояснения](../../sdd-spec/references/explanation.md).

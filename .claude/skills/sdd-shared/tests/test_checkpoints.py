@@ -10,12 +10,14 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from sdd_shared import checkpoints as cp
 from sdd_shared.checkpoint_git import Git, GitError, parse_status
+import checkpoint as checkpoint_cli
 
 BASE = "a" * 40
 NEW = "b" * 40
 TREE = "c" * 40
 DECISION = dict(id="USER-1", response="Accept this state", source="conversation", date="2026-10-27", accepted_commit=BASE)
 INSTRUCTION = dict(text="Implement the assigned task", source="conversation USER-2")
+NEW_WORK = dict(text="Start a new specification for example", source="conversation")
 
 
 class FakeGit:
@@ -35,12 +37,16 @@ class FakeGit:
         self.staged = []
         self.commits = 0
         self.updates = 0
+        self.existing_work = False
 
     def head(self):
         return self.current
 
     def accepted(self, ref):
         return self.ref
+
+    def work_exists(self, work_kind, change_id):
+        return self.existing_work or self.ref is not None
 
     def changes(self):
         return self.changed
@@ -136,13 +142,103 @@ def test_regular_index_flags_allow_status_observation(monkeypatch):
     assert adapter.changes() == [{"status": " M", "path": "tracked.txt"}]
 
 
-def test_inspect_missing_ref_is_read_only(fake):
+@pytest.mark.parametrize("existing_work,status", [
+    (False, "initialization_required"), (True, "acceptance_required"),
+])
+def test_inspect_missing_ref_distinguishes_new_work_and_recovery(fake, existing_work, status):
     fake.ref = None
+    fake.existing_work = existing_work
     result = cp.inspect(".", "change", "example")
-    assert result["status"] == "acceptance_required"
+    assert result["status"] == status
     assert result["exit_code"] == 0
     assert fake.updates == fake.commits == 0
     assert cp.inspect(".", "refactoring", "example")["checkpoint_ref"] != result["checkpoint_ref"]
+
+
+@pytest.mark.parametrize("work_kind", ["change", "refactoring"])
+def test_initialize_new_work_uses_instruction_without_user_acceptance(fake, work_kind):
+    fake.ref = None
+    result = cp.initialize(".", work_kind, "example", BASE, NEW_WORK)
+    assert result["status"] == "initialized"
+    assert result["head"] == result["accepted_commit"] == BASE
+    assert result["previous_accepted"] is result["created_commit"] is None
+    assert result["ref_updated"] is True
+    assert fake.updates == 1 and fake.commits == 0 and fake.staged == []
+
+
+@pytest.mark.parametrize("mutation,status", [
+    ("existing_work", "work_exists"), ("ref", "concurrent_change"),
+    ("dirty", "dirty"), ("operation", "git_operation_in_progress"),
+    ("head", "concurrent_change"), ("unborn", "concurrent_change"),
+    ("instruction", "instruction_required"), ("acceptance", "instruction_required"),
+])
+def test_initialize_refuses_recovery_or_invalid_start(fake, mutation, status):
+    fake.ref = None
+    instruction = NEW_WORK.copy()
+    if mutation == "existing_work":
+        fake.existing_work = True
+    elif mutation == "ref":
+        fake.ref = BASE
+    elif mutation == "dirty":
+        fake.changed = [{"status": "??", "path": "external.txt"}]
+    elif mutation == "operation":
+        fake.active_operation = True
+    elif mutation == "head":
+        fake.current = NEW
+    elif mutation == "unborn":
+        fake.current = None
+    elif mutation == "instruction":
+        instruction.pop("source")
+    else:
+        instruction = DECISION
+    result = cp.initialize(".", "change", "example", BASE, instruction)
+    assert result["status"] == status
+    assert result["exit_code"] == 1
+    assert fake.updates == fake.commits == 0
+
+
+@pytest.mark.parametrize("failure,status,updated", [
+    ("cas", "git_error", False), ("post", "concurrent_change", True),
+])
+def test_initialize_reports_reference_races_without_retry(fake, failure, status, updated):
+    fake.ref = None
+    fake.cas_failure = failure == "cas"
+    fake.after_update_dirty = failure == "post"
+    result = cp.initialize(".", "change", "example", BASE, NEW_WORK)
+    assert result["status"] == status
+    assert result["ref_updated"] is updated
+    assert fake.updates == 1 and fake.commits == 0
+
+
+@pytest.mark.parametrize("work_kind,directory", [("change", "changes"), ("refactoring", "refactoring")])
+@pytest.mark.parametrize("artifact,reference", [(False, False), (True, False), (False, True)])
+def test_work_exists_checks_work_root_and_other_worktree_refs(monkeypatch, work_kind, directory, artifact, reference):
+    # The filesystem/Git boundary is simulated: empty or ignored work roots and
+    # refs in another worktree must never be classified as a fresh change.
+    adapter = object.__new__(Git)
+    adapter.root = Path("project")
+    monkeypatch.setattr(os.path, "lexists", lambda path: artifact and path == adapter.root / "sdd" / directory / "example")
+    calls = []
+
+    def run(*args):
+        calls.append(args)
+        return f"refs/sdd/checkpoints/{work_kind}/example/other-worktree\n" if reference else ""
+
+    monkeypatch.setattr(adapter, "run", run)
+    assert adapter.work_exists(work_kind, "example") is (artifact or reference)
+    if not artifact:
+        assert calls == [("for-each-ref", "--format=%(refname)", f"refs/sdd/checkpoints/{work_kind}/example/")]
+
+
+def test_initialize_cli_needs_only_head_and_new_work_instruction(fake, monkeypatch, capsys):
+    fake.ref = None
+    monkeypatch.setattr(checkpoint_cli, "_json", lambda path: NEW_WORK if path == Path("instruction.json") else None)
+    code = checkpoint_cli.main(["initialize", "--project-root", ".", "--work-kind", "change",
+                                "--change", "example", "--expected-head", BASE,
+                                "--instruction", "instruction.json"])
+    assert code == 0
+    assert '"status": "initialized"' in capsys.readouterr().out
+    assert fake.ref == BASE
 
 
 @pytest.mark.parametrize("mutation,expected", [
@@ -253,9 +349,9 @@ def test_real_git_checkpoint_index_hooks_and_cas(tmp_path):
     git("add", "--", "old.txt", "remove.txt")
     git("commit", "-qm", "initial")
     base = git("rev-parse", "HEAD")
-    decision = dict(DECISION, accepted_commit=base)
-    accepted = cp.accept(tmp_path, "change", "example", base, None, decision)
-    assert accepted["status"] == "accepted", accepted
+    assert cp.inspect(tmp_path, "change", "example")["status"] == "initialization_required"
+    accepted = cp.initialize(tmp_path, "change", "example", base, NEW_WORK)
+    assert accepted["status"] == "initialized", accepted
     # Reuse this native fixture: only real Git proves that the index flag hides
     # an edit from porcelain and that inspection leaves the flag and bytes intact.
     git("update-index", "--assume-unchanged", "--", "old.txt")

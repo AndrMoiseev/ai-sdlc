@@ -15,7 +15,7 @@ parent model described in [subagent selection](subagents.md).
 | Interface | Contract |
 |---|---|
 | `check.py` | JSON document, discussion, review and approval diagnostics; exits 0 for valid structure, 1 for structural errors, 2 for an unperformed check |
-| `checkpoint.py` | inspect/accept/create; Git checkpoint observation and guarded writes; JSON schema v2 |
+| `checkpoint.py` | inspect/initialize/accept/create; Git checkpoint observation and guarded writes; JSON schema v2 |
 | `snapshot.py` | Migration diagnostic directing callers to checkpoint inspect; no normative byte manifest |
 | `resolve_agent.py` | `{ok, result}` or error JSON; resolves selection without launching or writing settings |
 | `sdd_shared.module(name)` | Imports one public domain module, leaving unrelated dependencies unloaded |
@@ -150,15 +150,31 @@ pending tasks and local criteria; read verifies the selected execution root.
 ## Git checkpoint operations
 
 Run `uv run --python "<python>" --locked --script "<shared-root>/scripts/checkpoint.py"`
-with `inspect|accept|create --project-root "<repo>" --work-kind change|refactoring --change <id>`.
+with `inspect|initialize|accept|create --project-root "<repo>" --work-kind change|refactoring --change <id>`.
 Resolve Python and external runtime storage by [runtime setup](runtime-setup.md).
 
 The ref is `refs/sdd/checkpoints/<work_kind>/<change-id>/<worktree-key>`.
 The key is SHA-256 of the canonical absolute worktree Git directory (realpath,
 platform normcase, UTF-8); it identifies location, not document contents.
 Use Git APIs, including compare-and-swap update-ref, rather than editing .git.
-Clone/push do not automatically transfer this ref. Missing ref requires explicit
-acceptance; a symbolic ref or a non-commit target is an error.
+Clone/push do not automatically transfer this ref. A missing ref for existing work
+requires explicit acceptance; a symbolic ref or a non-commit target is an error.
+
+Initialization establishes the starting point of an explicitly requested new work.
+With a clean HEAD and no current ref, `inspect` returns `initialization_required`
+only if the work path (`sdd/changes/<id>` or `sdd/refactoring/<id>`) does not exist
+and no ref under `refs/sdd/checkpoints/<work_kind>/<id>/` exists in any worktree.
+An empty/ignored directory or dangling symlink occupies the ID too. Existing work
+without its current ref returns `acceptance_required`; missing artifacts alone do
+not authorize a new work. The calling workflow determines new versus resume intent.
+
+`initialize` requires --expected-head OID and --instruction JSON_FILE with text/source
+of the request to start the new work. It rechecks the unused identity and clean HEAD,
+then creates the ref with compare-and-swap expecting no previous ref and the same HEAD.
+It returns `initialized`, writes no working files and creates no commit. Run it before
+creating the work directory. Keep the starting HEAD and instruction source in the
+first state.md; initialization does not invent a USER state_acceptance decision.
+A repeated initialization is not recovery: inspect and resume the now existing work.
 
 `inspect --review-changes` adds reviewed_changes with paths, tree and index_tree.
 Review the complete repository diff and staged index before using that observation.
@@ -176,7 +192,8 @@ accepted_commit, dirty, changes, diagnostics; writes also include previous_accep
 created_commit and ref_updated. Inspect exit 0 means observation succeeded, even
 when status is dirty or head_mismatch. Write exit 0 means completed/unchanged;
 exit 1 means unmet transition condition; exit 2 means tool/check failure.
-A no-change transition creates no empty commit. Hooks run normally.
+A no-change transition creates no empty commit. Hooks run normally. Initialization
+also reports partial ref writes and post-write races; do not blindly retry it.
 
 Checkpoint creation requires HEAD still at the accepted point, exact reviewed
 content and clean completion. Hook mutation, external HEAD changes or failed ref
