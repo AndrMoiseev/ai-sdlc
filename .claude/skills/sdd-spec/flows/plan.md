@@ -10,6 +10,9 @@ Documents и plan check выполняет [explorer](../references/explorer.md)
 передать research-поручением. Exit 0 сохраняет только результат структуры;
 условия planning_command и document_approval проверяет основной агент.
 
+Значимые результаты исследования зависимостей сохраняй в research.md по
+[контракту исследования](../references/research.md) и ссылайся на них из плана.
+
 ## Вход
 
 До новых правок выполни Git-вход по [resume](resume.md). Принятие текущего коммита не заменяет planning_command или утверждение комплекта.

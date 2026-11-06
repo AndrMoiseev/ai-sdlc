@@ -83,6 +83,14 @@ class Git:
             raise GitError("invalid_checkpoint_ref", "Checkpoint reference does not identify a commit")
         return oid
 
+    def work_exists(self, work_kind, change_id):
+        directory = "changes" if work_kind == "change" else "refactoring"
+        # An empty/ignored directory or a dangling symlink still occupies the ID.
+        # A ref in another worktree also identifies existing work, not a new start.
+        return os.path.lexists(self.root / "sdd" / directory / change_id) or bool(
+            self.run("for-each-ref", "--format=%(refname)",
+                     f"refs/sdd/checkpoints/{work_kind}/{change_id}/").strip())
+
     def commit_exists(self, oid):
         if not isinstance(oid, str) or not re.fullmatch(r"[0-9a-f]{%d}" % self.oid_length, oid):
             return False
