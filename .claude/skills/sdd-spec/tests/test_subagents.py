@@ -159,11 +159,16 @@ def test_settings_and_definition_changes_detected_before_registration(tmp_path):
 
 def test_cli_runs_without_import_side_effects(tmp_path):
     script = Path(__file__).resolve().parents[1] / "scripts/resolve_agent.py"
+    # Exercise the existing real CLI boundary: a unit call cannot catch a required
+    # argparse model option or a consumer wrapper that drops native inheritance.
     result = subprocess.run([sys.executable, "-B", str(script), "--project-root", str(tmp_path),
-                             "--host", "codex", "--role", ROLE, "--parent-model", "parent"],
+                             "--host", "codex", "--role", ROLE, "--native-inheritance"],
                             cwd=tmp_path, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)["result"]["launch"]["model"] == "parent"
+    selection = json.loads(result.stdout)["result"]
+    assert selection["launch"] == {"fork_turns": "none"}
+    assert selection["resolution"]["parent_model"] is None
+    validate_selection(selection, tmp_path, ROLE, "codex")
     assert list(tmp_path.iterdir()) == []
 
 

@@ -143,6 +143,77 @@ def test_author_and_explorer_claude_selection_uses_live_catalog(monkeypatch, rol
         resolver.resolve(ROOT, role, 'claude-code', 'parent-model', available_agents=[])
 
 
+@pytest.mark.parametrize('host', ['codex', 'claude-code'])
+@pytest.mark.parametrize('mapped', [False, True])
+def test_confirmed_native_inheritance_resolves_and_validates_without_model(monkeypatch, host, mapped):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    role = 'sdd-spec.architect'
+    monkeypatch.setattr(resolver, 'settings', lambda project: (
+        {role: 'missing'} if mapped else {}, None, 'role_unmapped'))
+    monkeypatch.setattr(resolver, 'codex_definition', lambda *args: (None, None))
+    selected = resolver.resolve(ROOT, role, host, native_inheritance=True,
+                                available_agents=['general-purpose'])
+    assert selected['launch'] == ({'fork_turns': 'none'} if host == 'codex'
+                                  else {'subagent_type': 'general-purpose'})
+    assert selected['resolution']['parent_model'] is None
+    assert selected['resolution']['native_inheritance'] is True
+    assert bool(selected['warnings']) == mapped
+    resolver.validate_selection(selected, ROOT, role, host)
+    # Revalidation must reject a forged model, not infer it from a host default.
+    selected['launch']['model'] = 'guessed-model'
+    with pytest.raises(resolver.ConfigurationError, match='selection changed'):
+        resolver.validate_selection(selected, ROOT, role, host)
+
+
+@pytest.mark.parametrize('profile,parent_effort,expected', [
+    ({}, None, {}),
+    ({'model': 'inherit'}, 'high', {'reasoning_effort': 'high'}),
+    ({'model_reasoning_effort': 'low'}, None, {'reasoning_effort': 'low'}),
+    ({'model': 'other-model'}, 'high', {'model': 'other-model'}),
+    ({'model': 'other-model', 'model_reasoning_effort': 'low'}, 'high',
+     {'model': 'other-model', 'reasoning_effort': 'low'}),
+])
+def test_native_inheritance_preserves_profile_overrides(monkeypatch, profile, parent_effort, expected):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    role = 'sdd-spec.architect'
+    monkeypatch.setattr(resolver, 'settings', lambda project: ({role: 'author'}, None, 'role_unmapped'))
+    # Selection and attestation combinations need no real catalog files.
+    path = ROOT / 'memory-author.toml'
+    content = b'profile evidence'
+    definition = {**resolver.evidence(path, content), 'name': 'author'}
+    monkeypatch.setattr(resolver, 'codex_definition', lambda *args: (profile, definition.copy()))
+    monkeypatch.setattr(Path, 'read_bytes', lambda self: content)
+    selected = resolver.resolve(ROOT, role, 'codex', parent_effort=parent_effort,
+                                native_inheritance=True)
+    assert selected['launch'] == {'fork_turns': 'none', **expected}
+    resolver.validate_selection(selected, ROOT, role, 'codex')
+
+
+@pytest.mark.parametrize('arguments', [
+    {}, {'parent_model': 'inherit'}, {'native_inheritance': 'yes'},
+    {'parent_model': 'known-model', 'native_inheritance': True},
+])
+def test_unknown_parent_requires_explicit_inheritance_confirmation(arguments):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    with pytest.raises(resolver.ConfigurationError):
+        resolver.resolve(ROOT, 'sdd-spec.architect', 'codex', **arguments)
+
+
+def test_native_inheritance_attestation_and_claude_catalog_are_rechecked(monkeypatch):
+    resolver = bootstrap().load(ROOT, 'subagents')
+    role = 'sdd-spec.architect'
+    monkeypatch.setattr(resolver, 'settings', lambda project: ({role: 'author'}, None, 'role_unmapped'))
+    selected = resolver.resolve(ROOT, role, 'claude-code', native_inheritance=True,
+                                available_agents=['author'])
+    assert selected['launch'] == {'subagent_type': 'author'}
+    resolver.validate_selection(selected, ROOT, role, 'claude-code')
+    selected['resolution']['native_inheritance'] = False
+    with pytest.raises(resolver.ConfigurationError, match='confirm native_inheritance'):
+        resolver.validate_selection(selected, ROOT, role, 'claude-code')
+    with pytest.raises(resolver.ConfigurationError, match='No selected agent'):
+        resolver.resolve(ROOT, role, 'claude-code', native_inheritance=True, available_agents=[])
+
+
 def test_setup_runs_without_spec_from_relocated_install(tmp_path):
     collection = install(tmp_path, ('sdd-setup',))
     consumer = tmp_path / 'unrelated project'
