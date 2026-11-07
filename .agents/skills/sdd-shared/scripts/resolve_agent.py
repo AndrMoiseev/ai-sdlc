@@ -16,7 +16,10 @@ def main():
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--role", required=True, choices=ROLES)
     parser.add_argument("--host", required=True, choices=("codex", "claude-code"))
-    parser.add_argument("--parent-model", required=True)
+    model_source = parser.add_mutually_exclusive_group(required=True)
+    model_source.add_argument("--parent-model", help="Observed exact parent model ID")
+    model_source.add_argument("--native-inheritance", action="store_true",
+                              help="Host confirms that omitting model inherits the parent model")
     parser.add_argument("--parent-effort")
     parser.add_argument("--user-agent-dir", type=Path)
     parser.add_argument("--available-agents", type=Path,

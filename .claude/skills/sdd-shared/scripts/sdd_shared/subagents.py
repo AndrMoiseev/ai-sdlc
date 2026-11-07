@@ -94,8 +94,8 @@ def codex_definition(project, name, user_agent_dir):
     return None, None
 
 
-def resolve(project_root, role, host, parent_model, parent_effort=None,
-            user_agent_dir=None, available_agents=None):
+def resolve(project_root, role, host, parent_model=None, parent_effort=None,
+            user_agent_dir=None, available_agents=None, native_inheritance=False):
     """Return requested parameters and provenance, not proof of runtime settings.
 
     Claude's available_agents must come from the actual host catalog. It is not
@@ -105,8 +105,13 @@ def resolve(project_root, role, host, parent_model, parent_effort=None,
     require(project.is_dir(), "project_root must be a directory")
     require(role in ROLES, f"Unknown SDD role: {role}")
     require(host in {"codex", "claude-code"}, f"Unsupported host: {host}")
-    require(nonempty_string(parent_model) and parent_model != "inherit",
-            "Provide the observed parent's exact model ID, not 'inherit'")
+    require(type(native_inheritance) is bool, "native_inheritance must be a boolean")
+    if native_inheritance:
+        require(parent_model is None,
+                "Choose observed parent_model or confirmed native_inheritance, not both")
+    else:
+        require(nonempty_string(parent_model) and parent_model != "inherit",
+                "Provide the observed parent's exact model ID or confirm native_inheritance")
     require(parent_effort is None or nonempty_string(parent_effort), "Invalid parent_effort")
     roles, source, reason = settings(project)
     name = roles.get(role)
@@ -117,6 +122,7 @@ def resolve(project_root, role, host, parent_model, parent_effort=None,
               "reason": reason, "settings": source, "definition": None,
               "launch": {}, "warnings": [],
               "resolution": {"parent_model": parent_model, "parent_effort": parent_effort,
+                             "native_inheritance": native_inheritance,
                              "user_agent_dir": str(user_root.resolve()) if host == "codex" else None,
                              "available_agents": available_agents if host == "claude-code" else None}}
     if host == "claude-code":
@@ -129,9 +135,13 @@ def resolve(project_root, role, host, parent_model, parent_effort=None,
             return result
         require("general-purpose" in available_agents,
                 "No selected agent or general-purpose fallback is available; restore host capability")
-        result["launch"] = {"subagent_type": "general-purpose", "model": parent_model}
+        result["launch"] = {"subagent_type": "general-purpose"}
+        if parent_model is not None:
+            result["launch"]["model"] = parent_model
     else:
-        result["launch"] = {"fork_turns": "none", "model": parent_model}
+        result["launch"] = {"fork_turns": "none"}
+        if parent_model is not None:
+            result["launch"]["model"] = parent_model
         if parent_effort is not None:
             result["launch"]["reasoning_effort"] = parent_effort
         if name:
@@ -143,10 +153,11 @@ def resolve(project_root, role, host, parent_model, parent_effort=None,
                 require(effort is None or nonempty_string(effort),
                         "Agent model_reasoning_effort must be a nonempty string")
                 # Support future host model IDs/efforts without a stale allowlist.
-                result["launch"]["model"] = parent_model if model == "inherit" else model
+                if model != "inherit":
+                    result["launch"]["model"] = model
                 if effort is not None:
                     result["launch"]["reasoning_effort"] = effort
-                elif result["launch"]["model"] != parent_model:
+                elif result["launch"].get("model") != parent_model:
                     result["launch"].pop("reasoning_effort", None)
                 definition["ignored_fields"] = sorted(set(data) - {
                     "name", "description", "model", "model_reasoning_effort"})
@@ -182,16 +193,22 @@ def validate_selection(selection, project_root, role, host):
             "Agent settings changed before registration; reconcile the launch before proceeding")
     launch = selection.get("launch")
     require(isinstance(launch, dict), "Agent selection requires launch parameters")
+    resolution = selection.get("resolution")
+    require(isinstance(resolution, dict) and set(resolution) == {
+        "parent_model", "parent_effort", "native_inheritance", "user_agent_dir", "available_agents"},
+        "Agent selection requires its resolution inputs")
+    model_selected = (nonempty_string(launch.get("model")) if "model" in launch
+                      else resolution["native_inheritance"] is True)
     mode = selection.get("mode")
     if host == "codex":
         require(mode in {"parent", "model-profile"} and launch.get("fork_turns") == "none"
-                and nonempty_string(launch.get("model")), "Invalid Codex launch selection")
+                and model_selected, "Invalid Codex launch selection")
     else:
         require(mode in {"parent", "native-agent"} and nonempty_string(launch.get("subagent_type")),
                 "Invalid Claude Code launch selection")
         if mode == "parent":
             require(launch["subagent_type"] == "general-purpose"
-                    and nonempty_string(launch.get("model")), "Invalid parent fallback")
+                    and model_selected, "Invalid parent fallback")
         else:
             require(launch["subagent_type"] == roles.get(role) and "model" not in launch,
                     "Native agent selection must preserve the definition's model")
@@ -202,10 +219,6 @@ def validate_selection(selection, project_root, role, host):
         path = Path(definition["path"])
         require(evidence(path, path.read_bytes())["sha256"] == definition.get("sha256"),
                 "Agent definition changed before registration; reconcile the launch")
-    resolution = selection.get("resolution")
-    require(isinstance(resolution, dict) and set(resolution) == {
-        "parent_model", "parent_effort", "user_agent_dir", "available_agents"},
-        "Agent selection requires its resolution inputs")
     current = resolve(project, role, host, **resolution)
     require(selection == current,
             "Agent catalog or launch selection changed before registration; reconcile the launch")

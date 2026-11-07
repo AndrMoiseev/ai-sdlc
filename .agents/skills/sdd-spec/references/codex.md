@@ -14,8 +14,9 @@ Read-only профиль рецензента ниже не доказывает
 затем проверяй доступность контекста через инструменты хоста при resume.
 
 Перед запуском роли примени [проектный выбор субагентов](../../sdd-shared/references/subagents.md).
-Передай `launch` из resolver в настоящий `spawn_agent`: `model`, при наличии
-`reasoning_effort` и `fork_turns: none`. Имя задачи не выбирает TOML-агента.
+Передай `launch` из resolver в настоящий `spawn_agent`: `fork_turns: none` и только
+присутствующие `model` и `reasoning_effort`. При подтверждённом native inheritance
+не добавляй отсутствующий `model`. Имя задачи не выбирает TOML-агента.
 Этот адаптер использует только профиль модели; задание и ограничения задаёт роль SDD.
 
 Явный вход — `$sdd-spec` либо выбор скилла. Поставляй весь каталог вместе с `agents/openai.yaml`, где `policy.allow_implicit_invocation: false`. Для проектного подключения используй `.agents/skills/sdd-spec/`, для личного — `~/.agents/skills/sdd-spec/`; существующую установку и настройки сначала проверь.

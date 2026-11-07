@@ -18,10 +18,12 @@ cannot_parallel_with: []
 status: pending
 verification:
   - criteria: [AC-sample-result]
-    test_description: Проверьте наблюдаемый результат в указанных условиях
+    test_description: >-
+      Проверьте наблюдаемый результат в указанных условиях
     location: tests/test_sample.py
     run:
-      setup_required: В этой задаче создайте tests/test_sample.py и подготовьте запуск pytest tests/test_sample.py
+      setup_required: >-
+        В этой задаче создайте tests/test_sample.py и подготовьте запуск pytest tests/test_sample.py
 ```
 
 Опишите реализацию и необходимые тесты, включая интеграционные. Назначьте каждый AC ровно одной задаче; следующие задачи могут использовать результат через depends_on. Общие файлы требуют оценки совместимости: распределите разделы либо задайте cannot_parallel_with. Номера — отображение, ссылки — стабильные ID.
