@@ -1,0 +1,121 @@
+{
+    "schema_version":  1,
+    "created_at_utc":  "2026-11-07T13:18:36.0898661Z",
+    "originals_modified":  false,
+    "sources":  [
+                    {
+                        "file":  "decoupling-level-icse2016.pdf",
+                        "title":  "Decoupling Level: A New Metric for Architectural Maintenance Complexity",
+                        "url":  "https://ranmo.github.io/papers/icse2016-DL.pdf",
+                        "edition":  "ICSE 2016",
+                        "retrieved_at_utc":  "2026-11-07T13:03:45.1970204Z",
+                        "bytes":  751929,
+                        "sha256":  "cc4d22253a7e7ba446ee4e9c30cc096c09363429080b38e43f55f20ef1d2ad00",
+                        "text_file":  "decoupling-level-icse2016.txt",
+                        "text_sha256":  "4bf78071c19a466cec00a5c1ec06e68ea2928ff3c510d17982153ce93792a5ce",
+                        "text_extractor":  "pypdf 7.0.0 + fonttools 4.68.0"
+                    },
+                    {
+                        "file":  "archdrh-qosa2013.pdf",
+                        "title":  "Leveraging design rules to improve software architecture recovery",
+                        "url":  "https://www.cs.drexel.edu/~yc349/papers/2013/QoSA2013.pdf",
+                        "edition":  "QoSA 2013",
+                        "retrieved_at_utc":  "2026-11-07T13:04:41.0942949Z",
+                        "bytes":  1361521,
+                        "sha256":  "63442ae743f925be4b9d60dabfd0c7667d7b9331061e22bf83ce12f075017fc8",
+                        "text_file":  "archdrh-qosa2013.txt",
+                        "text_sha256":  "038d76807c354afa698fe4c622cd40104b1b6471383d950aefd6deee13bc7f50",
+                        "text_extractor":  "pypdf 7.0.0 + fonttools 4.68.0"
+                    },
+                    {
+                        "file":  "cognitive-complexity-sonarsource-2023.pdf",
+                        "title":  "Cognitive Complexity: A new way of measuring understandability",
+                        "url":  "https://www.sonarsource.com/docs/CognitiveComplexity.pdf",
+                        "edition":  "Version 1.7, 29 August 2023",
+                        "retrieved_at_utc":  "2026-11-07T13:04:33.0635494Z",
+                        "bytes":  866052,
+                        "sha256":  "d1bbd47a0c48500bfeafa5dfada42ecddfe1c3e75b7adebe11cb7a037fa4cb77",
+                        "text_file":  "cognitive-complexity-sonarsource-2023.txt",
+                        "text_sha256":  "af4196e2e360ace67d7781657bd9ea2ce81a7120ef097c8d410a83554c5c5485",
+                        "text_extractor":  "pypdf 7.0.0 + fonttools 4.68.0"
+                    },
+                    {
+                        "file":  "sig-maintainability-model-2007.pdf",
+                        "title":  "A Practical Model for Measuring Maintainability",
+                        "url":  "https://softwareimprovementgroup.com/wp-content/uploads/APracticalModelForMeasuringMaintainability.pdf",
+                        "edition":  "QUATIC 2007 preliminary report",
+                        "retrieved_at_utc":  "2026-11-07T13:04:44.4230531Z",
+                        "bytes":  388767,
+                        "sha256":  "b7d5187455335499cd41d1a57734df7abce481b01ac5f9b8739a1419c5dcaf20",
+                        "text_file":  "sig-maintainability-model-2007.txt",
+                        "text_sha256":  "ae89a2603fc453e1637b51256202795e69b72fad6d11470298ac1491f068505c",
+                        "text_extractor":  "pypdf 7.0.0 + fonttools 4.68.0"
+                    },
+                    {
+                        "file":  "jacoco-coverage-counters.html",
+                        "title":  "JaCoCo Coverage Counters",
+                        "url":  "https://www.jacoco.org/jacoco/trunk/doc/counters.html",
+                        "edition":  "trunk snapshot; footer version preserved",
+                        "retrieved_at_utc":  "2026-11-07T13:04:45.8717741Z",
+                        "bytes":  6792,
+                        "sha256":  "cd81c62a4f9e299e819a0e1842836cd87e75838ef786ebf637a251099219d0c8",
+                        "text_file":  "jacoco-coverage-counters.txt",
+                        "text_sha256":  "d853ead95b2ae8684a0645e0e8272b286b9f5c07775cc986788010beda6f5589",
+                        "text_extractor":  "Python 3.14 html.parser; script/style/noscript omitted; whitespace normalized"
+                    },
+                    {
+                        "file":  "crap-alberto-savoia-2011.html",
+                        "title":  "This Code is CRAP",
+                        "url":  "https://testing.googleblog.com/2011/02/this-code-is-crap.html",
+                        "edition":  "Alberto Savoia, 22 February 2011",
+                        "retrieved_at_utc":  "2026-11-07T13:04:49.3195454Z",
+                        "bytes":  183043,
+                        "sha256":  "de682c1a2110a0ce27c2ba70bb116580e1340fe6068cd72df5c123050b6d9020",
+                        "text_file":  "crap-alberto-savoia-2011.txt",
+                        "text_sha256":  "bc288506c9a991f9e53afe469d840b4bb13c09484d99f530558a10d0e8505984",
+                        "text_extractor":  "Python 3.14 html.parser; script/style/noscript omitted; whitespace normalized"
+                    },
+                    {
+                        "file":  "detekt-1.23.8-complexity.html",
+                        "title":  "detekt Complexity Rule Set",
+                        "url":  "https://detekt.dev/docs/1.23.8/rules/complexity/",
+                        "edition":  "1.23.8",
+                        "retrieved_at_utc":  "2026-11-07T13:04:51.7216809Z",
+                        "bytes":  86747,
+                        "sha256":  "5d4dd738f7e6393e2353c074b4cfc05a0d220a9a247cfae3c70b2f2a0ac581d0",
+                        "text_file":  "detekt-1.23.8-complexity.txt",
+                        "text_sha256":  "fefbe9f17cd3756d13f6c45c645090a1e6d713084a57f286a6d61b8f9f266b3a",
+                        "text_extractor":  "Python 3.14 html.parser; script/style/noscript omitted; whitespace normalized"
+                    },
+                    {
+                        "file":  "detekt-1.23.8-CognitiveComplexMethod.kt",
+                        "title":  "detekt CognitiveComplexMethod rule",
+                        "url":  "https://raw.githubusercontent.com/detekt/detekt/v1.23.8/detekt-rules-complexity/src/main/kotlin/io/gitlab/arturbosch/detekt/rules/complexity/CognitiveComplexMethod.kt",
+                        "edition":  "tag v1.23.8",
+                        "retrieved_at_utc":  "2026-11-07T13:04:52.6467467Z",
+                        "bytes":  3093,
+                        "sha256":  "92e772c488e04c2e0c94d516b285a81b723a632180cc5e7c443a4b78fa44416e"
+                    },
+                    {
+                        "file":  "detekt-1.23.8-CognitiveComplexity.kt",
+                        "title":  "detekt CognitiveComplexity implementation",
+                        "url":  "https://raw.githubusercontent.com/detekt/detekt/v1.23.8/detekt-metrics/src/main/kotlin/io/github/detekt/metrics/CognitiveComplexity.kt",
+                        "edition":  "tag v1.23.8",
+                        "retrieved_at_utc":  "2026-11-07T13:04:53.5117004Z",
+                        "bytes":  8153,
+                        "sha256":  "36eee43198489779c4434dd0a980ffd3dff1842c136f76bf9fc87ab0f6928c62"
+                    },
+                    {
+                        "file":  "nist-modified-condition-decision-coverage.html",
+                        "title":  "NIST Modified condition decision coverage",
+                        "url":  "https://csrc.nist.gov/glossary/term/modified_condition_decision_coverage",
+                        "edition":  "Glossary snapshot",
+                        "retrieved_at_utc":  "2026-11-07T13:07:30.1805834Z",
+                        "bytes":  47354,
+                        "sha256":  "68db86ad7524419451611f3ff3ba91d128abca9408234d7efcad8d9265849e76",
+                        "text_file":  "nist-modified-condition-decision-coverage.txt",
+                        "text_sha256":  "a857dd72bf46f6e8eb613c5fece33fe248114a71cac75f2277211d6f08483e2b",
+                        "text_extractor":  "Python 3.14 html.parser; script/style/noscript omitted; whitespace normalized"
+                    }
+                ]
+}
