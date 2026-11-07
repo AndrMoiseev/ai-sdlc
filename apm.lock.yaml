@@ -7,7 +7,7 @@ dependencies:
   package_type: apm_package
   source: local
   local_path: ./packages/aisdlc-core
-  content_hash: sha256:88e49d7a17c2c7fadca242f898754914030b2690ba78124e8650c6bc11a5f9aa
+  content_hash: sha256:faa711fb9731a6d73992f64b6b650ece84bddad0239eab1a356a519762646a73
 - repo_url: _local/aisdlc-experimental
   name: aisdlc-experimental
   version: 0.1.0
@@ -636,6 +636,17 @@ dependencies:
   declaring_parent: ./packages/aisdlc-core
   anchored_local_path: skills/sdd-apply
   content_hash: sha256:e680b6f167edd21c0ac48fe26ce5705231d475ac70212062d7bb865dc8cb7ba3
+- repo_url: _local/sdd-architect
+  name: sdd-architect
+  version: unknown
+  depth: 2
+  resolved_by: _local/aisdlc-core
+  package_type: claude_skill
+  source: local
+  local_path: ../../skills/sdd-architect
+  declaring_parent: ./packages/aisdlc-core
+  anchored_local_path: skills/sdd-architect
+  content_hash: sha256:b5bdbdebf02e8e36a597e20ffdadc49621863b84f143ec622cc5af222385132e
 - repo_url: _local/sdd-code-design
   name: sdd-code-design
   version: unknown

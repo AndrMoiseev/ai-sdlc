@@ -54,7 +54,7 @@
 
 | Пакет | Состав |
 |---|---|
-| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-shared`, `sdd-setup`, `sdd-spec`, `sdd-apply`, `sdd-sync`, `sdd-code-design`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
+| [aisdlc-core](packages/aisdlc-core/apm.yml) | `sdd-shared`, `sdd-setup`, `sdd-architect`, `sdd-spec`, `sdd-apply`, `sdd-sync`, `sdd-code-design`, `sdd-doc`, `sdd-implement`, пакет `common-dependencies` |
 | [aisdlc-skills](packages/aisdlc-skills/apm.yml) | `sdd-skill-conductor`, пакет `common-dependencies` |
 | [aisdlc-experimental](packages/aisdlc-experimental/apm.yml) | `sdd-kb`, [ubiquitous-language](https://github.com/CodeAlive-AI/ai-driven-development/tree/79d911b773d83986bee7ac4170d09a972e61fe31/skills/ubiquitous-language), [fpf-problem-solving](https://github.com/CodeAlive-AI/ai-driven-development/tree/abac3b368d3a45749a7eb71c31034ff4aefbb7df/skills/fpf-problem-solving) |
 | [common-dependencies](packages/common-dependencies/apm.yml) | [humanizer-ru](https://github.com/smixs/humanizer-ru), [Archify 3.0.1](https://github.com/tt-a1i/archify/tree/v3.0.1/archify) |
@@ -234,6 +234,9 @@ apm install AndrMoiseev/ai-sdlc/packages/aisdlc-experimental --target codex,clau
   Рабочая копия установлена в `.agents/skills/sdd-skill-conductor/`;
   порядок её обновления описан в [AGENTS.md](AGENTS.md).
   [Результаты проверок исходной версии](skill-workspaces/sdd-skill-conductor/validation.md).
+
+- [sdd-architect](skills/sdd-architect/README.md) — сбор метрик и конкретные рекомендации
+  по рефакторингу Kotlin/JVM-проектов на Gradle по явному вызову `$sdd-architect` или `/sdd-architect`.
 
 - [sdd-spec](skills/sdd-spec/SKILL.md) — исследование, спецификации, дизайн и согласованный
   план изменения по явному вызову `$sdd-spec` или `/sdd-spec`.

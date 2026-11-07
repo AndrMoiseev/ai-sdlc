@@ -1,0 +1,988 @@
+Google Testing Blog: This Code is CRAP
+Testing Blog
+This Code is CRAP
+Tuesday, February 22, 2011
+Google
+Labels:
+Alberto Savoia
+7 comments
+:
+UnknownFebruary 22, 2011 at 6:35:00 PM PST
+Hi,
+I found CRAP and the video interesting.
+I wanted to run it on my project and check the amount of CRAP currently in there.But, the links for downloads do not work.
+I tried to get the Eclipse Plugin.
+But I get the Repository not found error.
+-Panna
+ReplyDelete
+Replies
+Reply
+saschaFebruary 28, 2011 at 7:27:00 AM PST
+Sorry, but your CRAP4j-Plugin is crap :-).
+I got "gateway timeout" (Update site) or many "Unable to find feature.xml in directory": ...\features\org.crap4j.eclipse.feature_1.1.6.jar
+ReplyDelete
+Replies
+Reply
+gregMarch 2, 2011 at 9:53:00 AM PST
+Ha, finally people will understand why I print-and-paste testing-related articles in the office's toilets !
+ReplyDelete
+Replies
+Reply
+UnknownMarch 9, 2011 at 10:43:00 AM PST
+I found the idea and the process you described to get to the final formula very interesting. Did you write that up as research paper somewhere? I'd love to get more details on that.
+ReplyDelete
+Replies
+Reply
+תומר גלנץMarch 13, 2011 at 3:05:00 AM PDT
+Thanks for the post!
+ReplyDelete
+Replies
+Reply
+UnknownMarch 20, 2012 at 11:11:00 PM PDT
+We are using Crap4J for years now within our JAVA projects and it's the only tool which identifies "dangerous" code. Even the Jenkins/Hudson integration is nice!
+All code coverage tools will deliver lot's of false positives.
+I don't have to test a method like:
+public Value getValue()
+{
+return value;
+}
+That's common sense, but a tool like CodePro or JaCoCo forces me to write dumb tests.
+Only Crap4J rocks that way, even it has not been modified since a couple of years.
+Now it's time to do something, because JAVA7 code is not running with Crap4J!
+ReplyDelete
+Replies
+UnknownMay 13, 2014 at 5:36:00 AM PDT
+Hi, there is a simple hint to make Crap4J work with JAVA7!
+See: http://devophuman.blogspot.de/2014/05/running-crap4j-out-of-box-with-java7.html
+Delete
+Replies
+Reply
+Reply
+Add comment
+Load more...
+New comments are not allowed.
+
+
+
+Labels
+
+TotT
+114
+GTAC
+61
+James Whittaker
+42
+Misko Hevery
+32
+Code Health
+31
+Anthony Vallone
+27
+Patrick Copeland
+23
+Jobs
+18
+Andrew Trenk
+13
+C++
+11
+Patrik Höglund
+8
+JavaScript
+7
+Allen Hutchison
+6
+George Pirocanac
+6
+Zhanyong Wan
+6
+Harry Robinson
+5
+Java
+5
+Julian Harty
+5
+Adam Bender
+4
+Alberto Savoia
+4
+Ben Yu
+4
+Erik Kuefler
+4
+Philip Zembrod
+4
+Shyam Seshadri
+4
+Chrome
+3
+Dillon Bly
+3
+John Thomas
+3
+Lesley Katzen
+3
+Marc Kaplan
+3
+Markus Clermont
+3
+Max Kanat-Alexander
+3
+Sonal Shah
+3
+APIs
+2
+Abhishek Arya
+2
+Alan Myrvold
+2
+Alek Icev
+2
+Android
+2
+April Fools
+2
+Chaitali Narla
+2
+Chris Lewis
+2
+Chrome OS
+2
+Diego Salas
+2
+Dori Reuveni
+2
+Jason Arbon
+2
+Jochen Wuttke
+2
+Kostya Serebryany
+2
+Marc Eaddy
+2
+Marko Ivanković
+2
+Mobile
+2
+Oliver Chang
+2
+Simon Stewart
+2
+Stefan Kennedy
+2
+Test Flakiness
+2
+Titus Winters
+2
+Tony Voellm
+2
+WebRTC
+2
+Yiming Sun
+2
+Yvette Nameth
+2
+Zuri Kemp
+2
+Aaron Jacobs
+1
+Adam Porter
+1
+Adam Raider
+1
+Adel Saoud
+1
+Alan Faulkner
+1
+Alex Eagle
+1
+Amy Fu
+1
+Anantha Keesara
+1
+Antoine Picard
+1
+App Engine
+1
+Arham Jain
+1
+Ari Shamash
+1
+Arif Sukoco
+1
+Bartosz Papis
+1
+Benjamin Pick
+1
+Bob Nystrom
+1
+Bruce Leban
+1
+Carlos Arguelles
+1
+Carlos Israel Ortiz García
+1
+Cathal Weakliam
+1
+Chris Kennelly
+1
+Christopher Semturs
+1
+Clay Murphy
+1
+Dagang Wei
+1
+Dan Maksimovich
+1
+Dan Shi
+1
+Dan Willemsen
+1
+Dave Chen
+1
+Dave Gladfelter
+1
+David Bendory
+1
+David Mandelberg
+1
+Derek Snyder
+1
+Diego Cavalcanti
+1
+Dmitry Vyukov
+1
+Eduardo Bravo Ortiz
+1
+Ekaterina Kamenskaya
+1
+Elliott Karpilovsky
+1
+Elliotte Rusty Harold
+1
+Espresso
+1
+Felipe Sodré
+1
+Francois Aube
+1
+Gene Volovich
+1
+Google+
+1
+Goran Petrovic
+1
+Goranka Bjedov
+1
+Hank Duan
+1
+Havard Rast Blok
+1
+Hongfei Ding
+1
+Jason Elbaum
+1
+Jason Huggins
+1
+Jay Han
+1
+Jeff Hoy
+1
+Jeff Listfield
+1
+Jessica Tomechak
+1
+Jim Reardon
+1
+Joe Allan Muharsky
+1
+Joel Hynoski
+1
+John Micco
+1
+John Penix
+1
+Jonathan Rockway
+1
+Jonathan Velasquez
+1
+Josh Armour
+1
+Julie Ralph
+1
+Kai Kent
+1
+Kanu Tewary
+1
+Karin Lundberg
+1
+Kaue Silveira
+1
+Kevin Bourrillion
+1
+Kevin Graney
+1
+Kirkland
+1
+Kurt Alfred Kluever
+1
+Kyle Freeman
+1
+Manjusha Parvathaneni
+1
+Marek Kiszkis
+1
+Marius Latinis
+1
+Mark Ivey
+1
+Mark Manley
+1
+Mark Striebeck
+1
+Matt Lowrie
+1
+Meredith Whittaker
+1
+Michael Bachman
+1
+Michael Klepikov
+1
+Mike Aizatsky
+1
+Mike Wacker
+1
+Mona El Mahdy
+1
+Nimit Khandelwal
+1
+Noel Yap
+1
+Palak Bansal
+1
+Patricia Legaspi
+1
+Per Jacobsson
+1
+Peter Arrenbrecht
+1
+Peter Spragins
+1
+Phil Norman
+1
+Phil Rollet
+1
+Pooja Gupta
+1
+Project Showcase
+1
+Radion Khait
+1
+Radoslav Vasilev
+1
+Rahul Singal
+1
+Rajat Dewan
+1
+Rajat Jain
+1
+Rich Martin
+1
+Richard Bustamante
+1
+Roman Govsheev
+1
+Roshan Sembacuttiaratchy
+1
+Ruslan Khamitov
+1
+Saicharan Nimmala
+1
+Sam Lee
+1
+Sean Jordan
+1
+Sebastian Dörner
+1
+Shahar Roth
+1
+Sharon Zhou
+1
+Shiva Garg
+1
+Siddartha Janga
+1
+Simran Basi
+1
+Stan Chan
+1
+Stephen Ng
+1
+Tejas Shah
+1
+Test Analytics
+1
+Test Engineer
+1
+Tim Lyakhovetskiy
+1
+Tom O'Neill
+1
+Vojta Jína
+1
+Zhe Lu
+1
+automation
+1
+dead code
+1
+iOS
+1
+mutation testing
+1
+
+Archive
+
+►
+2026
+(8)
+►
+Oct
+(1)
+►
+Jul
+(1)
+►
+Jun
+(1)
+►
+May
+(2)
+►
+Apr
+(1)
+►
+Mar
+(2)
+►
+2025
+(3)
+►
+Oct
+(1)
+►
+Sep
+(1)
+►
+Jan
+(1)
+►
+2024
+(13)
+►
+Dec
+(1)
+►
+Oct
+(1)
+►
+Sep
+(1)
+►
+Aug
+(1)
+►
+Jul
+(1)
+►
+May
+(3)
+►
+Apr
+(3)
+►
+Mar
+(1)
+►
+Feb
+(1)
+►
+2023
+(14)
+►
+Dec
+(2)
+►
+Nov
+(2)
+►
+Oct
+(5)
+►
+Sep
+(3)
+►
+Aug
+(1)
+►
+Apr
+(1)
+►
+2022
+(2)
+►
+Feb
+(2)
+►
+2021
+(3)
+►
+Jun
+(1)
+►
+Apr
+(1)
+►
+Mar
+(1)
+►
+2020
+(8)
+►
+Dec
+(2)
+►
+Nov
+(1)
+►
+Oct
+(1)
+►
+Aug
+(2)
+►
+Jul
+(1)
+►
+May
+(1)
+►
+2019
+(4)
+►
+Dec
+(1)
+►
+Nov
+(1)
+►
+Jul
+(1)
+►
+Jan
+(1)
+►
+2018
+(7)
+►
+Nov
+(1)
+►
+Sep
+(1)
+►
+Jul
+(1)
+►
+Jun
+(2)
+►
+May
+(1)
+►
+Feb
+(1)
+►
+2017
+(17)
+►
+Dec
+(1)
+►
+Nov
+(1)
+►
+Oct
+(1)
+►
+Sep
+(1)
+►
+Aug
+(1)
+►
+Jul
+(2)
+►
+Jun
+(2)
+►
+May
+(3)
+►
+Apr
+(2)
+►
+Feb
+(1)
+►
+Jan
+(2)
+►
+2016
+(15)
+►
+Dec
+(1)
+►
+Nov
+(2)
+►
+Oct
+(1)
+►
+Sep
+(2)
+►
+Aug
+(1)
+►
+Jun
+(2)
+►
+May
+(3)
+►
+Apr
+(1)
+►
+Mar
+(1)
+►
+Feb
+(1)
+►
+2015
+(14)
+►
+Dec
+(1)
+►
+Nov
+(1)
+►
+Oct
+(2)
+►
+Aug
+(1)
+►
+Jun
+(1)
+►
+May
+(2)
+►
+Apr
+(2)
+►
+Mar
+(1)
+►
+Feb
+(1)
+►
+Jan
+(2)
+►
+2014
+(24)
+►
+Dec
+(2)
+►
+Nov
+(1)
+►
+Oct
+(2)
+►
+Sep
+(2)
+►
+Aug
+(2)
+►
+Jul
+(3)
+►
+Jun
+(3)
+►
+May
+(2)
+►
+Apr
+(2)
+►
+Mar
+(2)
+►
+Feb
+(1)
+►
+Jan
+(2)
+►
+2013
+(16)
+►
+Dec
+(1)
+►
+Nov
+(1)
+►
+Oct
+(1)
+►
+Aug
+(2)
+►
+Jul
+(1)
+►
+Jun
+(2)
+►
+May
+(2)
+►
+Apr
+(2)
+►
+Mar
+(2)
+►
+Jan
+(2)
+►
+2012
+(11)
+►
+Dec
+(1)
+►
+Nov
+(2)
+►
+Oct
+(3)
+►
+Sep
+(1)
+►
+Aug
+(4)
+▼
+2011
+(39)
+►
+Nov
+(2)
+►
+Oct
+(5)
+►
+Sep
+(2)
+►
+Aug
+(4)
+►
+Jul
+(2)
+►
+Jun
+(5)
+►
+May
+(4)
+►
+Apr
+(3)
+►
+Mar
+(4)
+▼
+Feb
+(5)
+This Code is CRAP
+How Google Tests Software - A Brief Interlude
+Who reads this blog?
+How Google Tests Software - Part Three
+How Google Tests Software - Part Two
+►
+Jan
+(3)
+►
+2010
+(37)
+►
+Dec
+(3)
+►
+Nov
+(3)
+►
+Oct
+(4)
+►
+Sep
+(8)
+►
+Aug
+(3)
+►
+Jul
+(3)
+►
+Jun
+(2)
+►
+May
+(2)
+►
+Apr
+(3)
+►
+Mar
+(3)
+►
+Feb
+(2)
+►
+Jan
+(1)
+►
+2009
+(54)
+►
+Dec
+(3)
+►
+Nov
+(2)
+►
+Oct
+(3)
+►
+Sep
+(5)
+►
+Aug
+(4)
+►
+Jul
+(15)
+►
+Jun
+(8)
+►
+May
+(3)
+►
+Apr
+(2)
+►
+Feb
+(5)
+►
+Jan
+(4)
+►
+2008
+(75)
+►
+Dec
+(6)
+►
+Nov
+(8)
+►
+Oct
+(9)
+►
+Sep
+(8)
+►
+Aug
+(9)
+►
+Jul
+(9)
+►
+Jun
+(6)
+►
+May
+(6)
+►
+Apr
+(4)
+►
+Mar
+(4)
+►
+Feb
+(4)
+►
+Jan
+(2)
+►
+2007
+(41)
+►
+Oct
+(6)
+►
+Sep
+(5)
+►
+Aug
+(3)
+►
+Jul
+(2)
+►
+Jun
+(2)
+►
+May
+(2)
+►
+Apr
+(7)
+►
+Mar
+(5)
+►
+Feb
+(5)
+►
+Jan
+(4)
+Feed
+Google
+Privacy
+Terms
