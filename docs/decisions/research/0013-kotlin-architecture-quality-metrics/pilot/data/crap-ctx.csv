@@ -1,0 +1,11 @@
+context,files,sum_crap,mean_crap,crap_over_30,sum_mcc
+legacy,101,8584.2,85.0,22,970
+ctx:matching,61,1433.1,23.5,10,720
+ctx:settings,50,848.2,17.0,3,512
+ctx:orchestration,35,726.8,20.8,10,423
+ctx:offline,17,697.7,41.0,1,99
+ctx:catalog,33,601.1,18.2,6,238
+ctx:categorization,26,446.5,17.2,3,221
+ctx:deduplication,26,361.1,13.9,2,252
+ctx:groupidReconcile,12,169.7,14.1,2,141
+ctx:brand,3,11.0,3.7,0,11
