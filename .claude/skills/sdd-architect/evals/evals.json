@@ -1,0 +1,63 @@
+{
+  "skill_name": "sdd-architect",
+  "evals": [
+    {
+      "id": 1,
+      "name": "source-free-signals",
+      "category": "limited-evidence",
+      "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Приоритеты: модульность, риск регрессий, скорость. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Ревизия отчётов неизвестна. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
+      "expected_output": "Bounded investigation queue, no implementation-ready cards or Gradle split.",
+      "expectations": [
+        "Unknown revision and absent sources prevent implementation readiness.",
+        "Missing coverage is not replaced by zero or a computed CRAP.",
+        "No recommendation to create or split Gradle projects.",
+        "Coupling average-revs is not treated as exact shared support.",
+        "StableId is not refactored only for centrality or Martin distance.",
+        "No new build-time metric or numerical speed benefit is added."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "source-grounded-boundary",
+      "category": "core",
+      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по snapshot/snapshot.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Артефакты отчёта сохрани вне fixture. Приоритеты: модульность, риск регрессий, скорость.",
+      "expected_output": "Run analysis; inspect both sides; propose concrete responsibility transfer and ArchUnit acceptance, validated ordering.",
+      "files": ["evals/prepare_fixture.py"],
+      "expectations": [
+        "Uses the supplied script for arithmetic and recommendation validation.",
+        "Inspects actual declarations and identifies tax rule ownership crossing pricing/order.",
+        "Names a concrete transformation and affected consumers rather than only splitting a class.",
+        "Keeps package boundaries and specifies ArchUnit scope including consumers.",
+        "Preserves tax/rounding behavior and names a meaningful acceptance check.",
+        "Does not claim real-project validation from this synthetic fixture."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "priority-and-uncertainty",
+      "category": "priority",
+      "prompt": "Для того же проекта упорядочи предложения: A устраняет подтверждённые совместные изменения двух ответственностей (модульность существенная, риск локальный, скорость локальная); B отделяет чистый расчёт от I/O (все эффекты локальные); C закрывает значимый непроверенный сценарий (модульность не показана, риск существенный, скорость не показана); D имеет возможный большой выигрыш модульности, но механизм ещё не установлен. Затраты A/B/C сопоставимы. Для C MCC=12, покрытие изменится с 20% до 80%. Дай порядок, корректный расчёт CRAP_file и следующий шаг для D; не выдумывай недостающие пути исходников.",
+      "expected_output": "A>B>C, D as a check, CRAP file 85.728 to 13.152 as conditional arithmetic.",
+      "expectations": [
+        "Uses lexicographic priority A above B above C without summed metric weights.",
+        "Keeps D in an investigation queue instead of treating unknown as no effect.",
+        "Computes CRAP_file as 85.728 and 13.152 without relabeling it a method metric.",
+        "Does not infer a modularity or speed improvement from reduced CRAP.",
+        "Treats supplied effects as scenario assumptions, not inspected source evidence."
+      ]
+    }
+  ],
+  "micro_test": {
+    "repetitions_per_arm": 5,
+    "prompt": "Kotlin/Gradle-аудит по отчётам без исходников: ревизия неизвестна, MCC файла 12, покрытия нет, coupling 50% average-revs 20, D=0.9 у стабильного DTO; всё в одном Gradle-проекте. Нужен короткий следующий шаг и конкретная рекомендация. Ответ до 160 слов.",
+    "focus": "Missing data stays unknown, scope stays package-based, no implementation readiness without sources."
+  },
+  "discovery": [
+    {"prompt": "Составь очередь рефакторинга Kotlin-проекта по detekt и зависимостям пакетов.", "should_trigger": true},
+    {"prompt": "В Kotlin одни и те же файлы меняются вместе. Какие границы стоит проверить?", "should_trigger": true},
+    {"prompt": "Разбери граф JVM-зависимостей и покрытие, предложи архитектурные изменения.", "should_trigger": true},
+    {"prompt": "Ускорь Gradle configuration cache без изменения архитектуры приложения.", "should_trigger": false},
+    {"prompt": "Примени уже утверждённое переименование метода в Kotlin.", "should_trigger": false},
+    {"prompt": "Проверь форматирование Kotlin по ktlint.", "should_trigger": false}
+  ]
+}

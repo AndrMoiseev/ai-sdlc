@@ -1,0 +1,27 @@
+{
+  "repository": "/absolute/path/to/checkout",
+  "source_roots": ["app/src/main/kotlin", "app/src/main/java"],
+  "measurement_inputs": ["settings.gradle.kts", "app/build.gradle.kts"],
+  "exclude_paths": ["**/generated/**"],
+  "package_prefixes": ["example"],
+  "exclude_classes": ["example.generated.*"],
+  "modules": {"orders": ["example.orders"], "pricing": ["example.pricing"]},
+  "class_directories": ["app/build/classes/kotlin/main", "app/build/classes/java/main"],
+  "bytecode_source_state": null,
+  "scope": {"gradle_projects": [":app"], "source_sets": ["main"], "variant": "JVM", "test_tasks": []},
+  "artifacts": {
+    "dependencies": {"collect": true},
+    "history": {"collect": true, "since": "2026-01-01"},
+    "sizes": {"collect": true},
+    "complexity": {
+      "path": "/absolute/path/to/detekt.sarif", "format": "detekt-sarif",
+      "source_root": "/absolute/path/to/checkout", "revision": null, "source_state": null,
+      "tool": "detekt", "version": null, "command": [], "complete_mcc": false
+    },
+    "coverage": {
+      "path": "/absolute/path/to/jacoco.xml", "format": "jacoco",
+      "source_root": "/absolute/path/to/checkout", "revision": null, "source_state": null,
+      "tool": "JaCoCo", "version": null, "command": []
+    }
+  }
+}

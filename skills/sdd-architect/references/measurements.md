@@ -123,10 +123,18 @@ All speed weights are ≤1 because this metric set contains no speed measurement
 
 Start with 8–12 groups: structural candidates, then risk, then supporting views
 that could change a diagnosis. New/changed cycles and graph plus substantive
-co-change deserve early investigation; an important cold candidate remains eligible.
+co-change deserve early investigation. Include candidates justified by a known
+incident, critical contract or upcoming change even without historical activity.
+Unknown or absent history is not evidence of safety. A hotspot's cause can be in
+a cold dependency, which remains eligible for the same scoped investigation.
 Merge SCC, visibility and hotspot signals for the same area. Near a boundary
 (29/30%, 9/10 revisions), inspect the neighboring case instead of inventing a
 health cliff. Explain shortlist omissions as budget limits, not absence of problems.
+
+Send selected source-available groups to [focused diagnosis](diagnosis.md).
+Signals guide where to look; the source mechanism and feasible change
+determine whether a recommendation is justified. Report the inspected scope
+rather than treating the selected groups as a complete architecture assessment.
 
 Keep the catalog bounded: no added nesting, duplication, mutation, diff coverage,
 build-duration, Decoupling Level or architecture-rule-count metrics. Source review

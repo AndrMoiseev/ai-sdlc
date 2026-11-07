@@ -2,6 +2,10 @@
 
 End-to-end process for reviewing a pull request or a diff, grounded in the book's heuristics.
 
+For a selected candidate's refactoring diagnosis, including a request from
+`sdd-architect`, use [focused code diagnosis](diagnose-code.md). That request does
+not require PR approval or the complete review checklist below.
+
 ## Table of Contents
 
 - [When to Use](#when-to-use)

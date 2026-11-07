@@ -6,13 +6,14 @@ Cross-agent skill for keeping software understandable and inexpensive to change.
 
 The skill is based on Mark Seemann's *Code That Fits in Your Head: Heuristics for Software Engineering* (2021), with clearly labelled editorial amendments for agent-driven development.
 
-Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. Automatic invocation is disabled in both environments.
+Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. A sibling APM skill can also explicitly instruct the agent to read `../sdd-code-design/SKILL.md`, relative to its own directory, and apply it to a named task. Implicit invocation remains disabled; task relevance or a passing mention alone does not activate it.
 
 Use it when a task is about:
 
 - designing complex code, APIs, domain types, validation boundaries, and invariants
 - decomposing tangled functions, classes, workflows, or subsystems
 - reviewing code for readability, cohesion, coupling, encapsulation, and testability
+- diagnosing a selected hotspot, contract, or change scenario before choosing a refactoring
 - adding features outside-in with tests and a walking skeleton
 - debugging defects with reproducible tests, bisection, and tighter verification loops
 - evolving legacy systems with feature flags, Strangler-style migration, reversible stages, and explicit verification
@@ -27,7 +28,24 @@ Large tasks are not rejected because they are large. Agents can successfully imp
 
 Code examples include the original C# material and Kotlin/JVM and Go counterparts; every rule and the tooling tables are language-neutral. Use [Examples by Stack](guidelines.md#examples-by-stack) to select the matching language and dependencies.
 
-The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. When a rule proves repeatedly useful in a repository, operationalize it (`workflows/operationalize-finding.md`) so it persists as a gate and in project agent instructions.
+The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. Focused diagnosis returns findings. Tasks that authorize lasting gates or project-instruction edits can operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
+
+### Focused code diagnosis
+
+[sdd-architect](../sdd-architect/README.md) uses this route after selecting candidates
+from metrics or a known risk/change scenario. The diagnosis follows the relevant
+contracts, consumers and tests, including a rarely changed dependency that may
+own the cause. It returns evidence, applicable heuristics, mechanisms, feasible
+options and acceptance checks. The architect decides recommendation readiness and
+priority across candidates. A diagnosis can also conclude that no change is justified.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Diagnose a hotspot | `$sdd-code-design Diagnose the frequently changed OrderService and its contracts. Check the risk of mixing customer and order IDs. Return findings without editing code.` | A scoped diagnosis with source evidence, existing protection, options and checks |
+| Diagnose an upcoming change | `$sdd-code-design Diagnose the pricing contract before we add regional rounding rules. Inspect its consumers even though the contract rarely changes.` | An explanation of change risks and feasible improvements, with uncertainty stated |
+
+Diagnosis does not require a PR or a high metric value. Its result covers the
+inspected area; it does not certify the whole codebase or start implementation.
 
 ## Structure
 
@@ -39,7 +57,7 @@ references/              # Focused reference packs by theme
 references/tooling/      # Executable measurement commands (complexity, cycles, dead code, …)
 ```
 
-Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover review, outside-in features, debugging, threat modelling, and operationalizing findings into gates.
+Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, debugging, threat modelling, and operationalizing findings into gates.
 
 ## Source Boundaries
 
@@ -66,6 +84,7 @@ Most reference folders summarize or operationalize ideas from Seemann's book. Th
 
 ## Changes from Upstream
 
+- Added focused code diagnosis for selected refactoring candidates and an explicit handoff from `sdd-architect`; this workflow is a fork addition.
 - Moved the five standalone example documents into per-topic `examples/` directories, with filenames identifying the language and relevant framework. The original C# files retain their exact contents.
 - Added idiomatic Kotlin/JVM counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Framework-independent, JUnit 5, and Ktor examples are separated for selective loading.
 - Added Go counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Go 1.22+ examples separate domain code, standard-library `testing` tests, and `net/http` / `httptest` boundaries. Adaptations explain zero-value limits, explicit errors, composition, and migration without method overloading.
