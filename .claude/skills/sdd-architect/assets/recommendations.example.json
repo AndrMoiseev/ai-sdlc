@@ -1,0 +1,14 @@
+{
+  "revision": "replace-with-snapshot-revision",
+  "source_state": "replace-with-snapshot-source-state",
+  "recommendations": [
+    {
+      "id": "R1",
+      "status": "needs_check",
+      "question": "Does the observed dependency expose a changing implementation detail to consumers?",
+      "next_action": "Inspect the exact source and target declarations, their consumers and one representative joint commit.",
+      "decision_if_yes": "Compare moving the responsibility to its owner with the smallest contract change.",
+      "decision_if_no": "Reject the metric-only refactoring and retain the acceptable boundary explanation."
+    }
+  ]
+}

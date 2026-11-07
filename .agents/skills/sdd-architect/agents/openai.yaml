@@ -1,0 +1,6 @@
+interface:
+  display_name: "SDD Architect"
+  short_description: "Метрики архитектуры и рекомендации по рефакторингу"
+  default_prompt: "Используй $sdd-architect для полного цикла в текущем проекте: собери метрики, проанализируй их и исходники, затем выдай конкретные рекомендации по рефакторингу."
+policy:
+  allow_implicit_invocation: false

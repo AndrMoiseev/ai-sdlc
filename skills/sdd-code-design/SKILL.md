@@ -1,6 +1,6 @@
 ---
 name: sdd-code-design
-description: Software design and review heuristics based on Mark Seemann's Code That Fits in Your Head (2021), with agent-driven development amendments. Use only when the user explicitly invokes sdd-code-design; do not invoke automatically for coding, review, refactoring, or debugging tasks.
+description: Software design and review heuristics based on Mark Seemann's Code That Fits in Your Head (2021), with agent-driven development amendments. Use only when the user explicitly invokes sdd-code-design or an active skill explicitly instructs you to invoke it. Do not select it implicitly for coding, review, refactoring, or debugging tasks.
 disable-model-invocation: true
 ---
 
@@ -37,15 +37,17 @@ See `references/foundations/` for more on sustainability, readability, and brain
 
 ## Invocation
 
-Apply this skill only when the user explicitly invokes sdd-code-design. Automatic invocation, including invocation by another skill, is prohibited.
+Apply this skill when the user explicitly invokes it or an active skill explicitly instructs you to invoke `sdd-code-design` for the current task. Follow the calling skill's requested scope. Task relevance, a catalog entry, or a passing mention of the skill is not an invocation; do not select it implicitly.
+
+For an explicit call from a sibling APM skill, read `../sdd-code-design/SKILL.md` relative to the calling skill's directory and apply it within the requested scope. Resolve this skill's references relative to its own directory. This file-based call does not require automatic skill selection or the Skill tool.
 
 ## How to Use This Skill
 
-1. Identify the user's task (writing, reviewing, debugging, security review, setting up, etc.)
+1. Identify the requested task (focused diagnosis, writing, reviewing, debugging, security review, setting up, etc.)
 2. Read `guidelines.md` — it maps tasks and symptoms to specific reference files
 3. Load only the reference files relevant to the current task (progressive disclosure)
 4. Apply the rules; when in doubt, consult `references/practices-glossary/` for cross-references
-5. When a rule proves repeatedly useful in a repository, operationalize it (`workflows/operationalize-finding.md`) so it persists as a gate and in project agent instructions.
+5. For focused diagnosis, return the findings to the caller. When the task authorizes persistent gates or project-instruction edits, operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
 
 ## Chapter Index
 
@@ -80,6 +82,7 @@ Composite step-by-step processes live in `workflows/`:
 
 | Task | Workflow |
 |------|----------|
+| Diagnose a selected candidate for a refactoring decision | [Focused code diagnosis](workflows/diagnose-code.md) |
 | Review a pull request / piece of code | `workflows/review-code.md` |
 | Add a new feature from scratch | `workflows/add-feature-outside-in.md` |
 | Investigate and fix a defect | `workflows/debug-defect.md` |

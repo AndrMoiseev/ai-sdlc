@@ -5,6 +5,10 @@ when they are outside the diff. Collect separate snapshots through the same
 configuration. Read a particular graph at its own level; a package cycle is not a
 class cycle. Use the same package map unless the change explicitly revises it.
 
+For source-available diff candidates or a reopened diagnosis, use the explicit
+`sdd-code-design` call and return contract in [diagnosis](diagnosis.md). Limit the
+questions to the affected contracts, mechanisms and consumers.
+
 Before comparing values, compare tool versions, configurations, source sets,
 variants, exclusions, history windows, mapping, graph node normalization and row
 populations. Changed definitions require recalculating both revisions or separate
@@ -14,7 +18,9 @@ not automate a semantic comparison between configurations.
 After implementation of a selected recommendation:
 
 1. Check the acceptance scenario: what change became more local, what consumer
-   knowledge was removed, or which unwanted dependency disappeared?
+   knowledge was removed, which contract misuse became impossible, or which
+   unwanted dependency disappeared? Contract protection can improve while graph
+   and complexity measurements stay unchanged.
 2. Run relevant existing/new behavior checks, compilation of affected code and
    consumers, and a wiring integration scenario when wiring materially changed.
    Select tasks from the actual Gradle build. Do not require new tests for already
