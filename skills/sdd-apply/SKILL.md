@@ -43,10 +43,10 @@ When refactoring changes module boundaries and their tests, apply the
 
 ## Execution and assessment
 
-For ordinary changes affecting software, the [executor](agents/executor.md) and
+For ordinary changes and refactoring affecting software, the [executor](agents/executor.md) and
 [code lens](references/code-lens.md) explicitly apply `sdd-code-design` within
 their existing roles. Pass its entry point and selected workflow through
-[role coordination](references/role-coordination.md). Refactoring is excluded.
+[role coordination](references/role-coordination.md).
 
 After the executor reports completion, freeze its commit and direct Explorer to
 execute the full project test and static-check set under

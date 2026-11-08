@@ -85,6 +85,7 @@ Composite step-by-step processes live in `workflows/`:
 | Diagnose a proposed design or implemented code within a named scope | [Focused diagnosis](workflows/diagnose-code.md) |
 | Review a pull request / piece of code | `workflows/review-code.md` |
 | Design or implement a new or changed feature | [Outside-in](workflows/add-feature-outside-in.md), selecting the work product |
+| Design or implement a structural change with preserved behavior | [Refactoring](workflows/refactor-code.md), selecting the work product |
 | Investigate and fix a defect | `workflows/debug-defect.md` |
 | Threat-model a new endpoint | `workflows/threat-model.md` |
 | Turn a recurring finding into an executable gate and persist it in project memory | `workflows/operationalize-finding.md` |

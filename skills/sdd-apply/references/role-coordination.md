@@ -30,15 +30,22 @@ checks, commits, blockers and rejected approaches. Send paths
 and a bounded summary; exclude author conversation, grading answers and unrelated
 task histories. Workers read their contract and task material, not execution algorithms.
 
-For ordinary changes affecting software, also send executors and code reviewers
-the absolute sibling `sdd-code-design/SKILL.md` path and their selected workflow:
-`workflows/add-feature-outside-in.md` for implementation, or
-`workflows/diagnose-code.md` for implemented-code diagnosis. Resolve these through
+For ordinary changes and refactoring affecting software, also send executors and
+code reviewers the absolute sibling `sdd-code-design/SKILL.md` path and the absolute
+path of their selected workflow:
+
+- Executor, ordinary change: `workflows/add-feature-outside-in.md`, **implementation**.
+- Executor, refactoring: `workflows/refactor-code.md`, **implementation**.
+- Code reviewer, either work kind: `workflows/diagnose-code.md`, **implemented code**.
+
+For refactoring, include the accepted structural target, original behavior sources,
+local acceptance, `contributes_to`, `preserves` and approved test changes.
+Resolve the skill and workflow paths through
 their [executor](../agents/executor.md) or [code lens](code-lens.md) instructions,
 verify the files are readable, and explicitly assign that use in the fresh context.
 Reading them in the orchestrator does not apply them in a worker. Missing files
-block the dependent assignment; report the dependency gap. Exclude `refactoring`,
-Explorer and verification reviewers from these calls. Existing packets and result
+block the dependent assignment; report the dependency gap. Explorer and verification
+reviewers use their own contracts without these calls. Existing packets and result
 formats remain the authority; no extra role or review round is required.
 
 Use actual fresh-context and messaging capabilities. Busy slots require waiting;
