@@ -57,7 +57,7 @@ For an explicit call from a sibling APM skill, read `../sdd-code-design/SKILL.md
 | `references/codebase-setup/` | Starting or inheriting a code base — git, build automation, warnings-as-errors |
 | `references/outside-in-tdd/` | Writing new features test-first; walking skeleton, AAA, triangulation, devil's advocate, editing tests |
 | `references/encapsulation/` | Designing types with invariants; DTO vs Domain Model, always-valid, Postel's law, parse-don't-validate |
-| `references/decomposition/` | Controlling method and system complexity; cyclomatic complexity, cohesion, coupling, feature envy, fractal architecture |
+| `references/decomposition/` | Method and system complexity; cyclomatic complexity, cohesion, coupling, feature envy, fractal architecture, semantic layers, and effect ordering |
 | `references/api-design/` | Designing a public API; affordance, poka-yoke, CQS, hierarchy of communication, naming over comments |
 | `references/separation-of-concerns/` | Adding cross-cutting concerns; Decorator pattern, logging, what to log, performance vs legibility |
 | `references/teamwork-git/` | Writing commits, reviewing changes, continuous integration, collective ownership |
@@ -66,7 +66,7 @@ For an explicit call from a sibling APM skill, read `../sdd-code-design/SKILL.md
 | `references/security/` | Threat modelling; STRIDE (spoofing, tampering, repudiation, info disclosure, DoS, elevation) |
 | `references/code-navigation/` | Onboarding to a code base; big picture, file organisation, cycles, property-based testing, behavioural code analysis |
 | `references/tooling/` | Executable measurement commands: complexity, cycles, duplication, dead code, hotspots, mutation testing |
-| `references/practices-glossary/` | Looking up a named book practice and its current status |
+| `references/practices-glossary/` | Looking up a named design practice and its current status |
 
 ### ⚠️ Editorial amendments (NOT from the book)
 

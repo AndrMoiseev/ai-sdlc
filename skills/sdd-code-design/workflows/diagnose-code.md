@@ -61,10 +61,12 @@ only when needed to establish a feasible option.
 | --- | --- | --- |
 | Branching, interacting state or mixed responsibilities | Which reasons for change and effects are entangled? | [Decomposition rules](../references/decomposition/rules.md), [smells](../references/decomposition/smells.md) |
 | Coordinated edits across responsibilities | Which rule or implementation detail has multiple owners or leaks to consumers? | [Decomposition smells](../references/decomposition/smells.md), [encapsulation](../references/encapsulation/rules.md) |
+| Domain operations expose storage or transport representation | Would a business-rule change and a representation change affect different owners and consumers? | [Stratified Design](../references/decomposition/stratified-design.md) |
 | Forwarding chains or suspected redundant abstractions | What disappears, moves to consumers or loses an owner if the abstraction is removed? | [Hypothetical removal](../references/decomposition/rules.md#12-mentally-remove-a-suspected-indirection) |
 | Interchangeable primitive parameters or implicit contract conditions | Which misuse is representable, and where would stronger types actually prevent it? | [API design](../references/api-design/rules.md), [encapsulation](../references/encapsulation/rules.md) |
 | Repeated or bypassed validation | Where should validity be established and maintained? | [Encapsulation](../references/encapsulation/rules.md) |
 | Hidden effects or infrastructure mixed with domain decisions | Which effects surprise consumers or force unrelated changes? | [API design](../references/api-design/rules.md), [separation of concerns](../references/separation-of-concerns/rules.md) |
+| A proposed extraction moves reads, writes or resource boundaries | Which required ordering, failure handling or resource lifetime could change? | [Preserve behavior when moving effects](../references/decomposition/patterns.md#preserve-behavior-when-moving-effects) |
 | Existing tests appear to miss the concrete failure | Which assertion or invariant would distinguish correct and incorrect behavior? | [Outside-in testing](../references/outside-in-tdd/rules.md) |
 
 Preserve supplied measurements and their qualification. Heuristic thresholds in

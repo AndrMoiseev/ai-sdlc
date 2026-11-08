@@ -99,6 +99,8 @@ separate route below.
 | A long/complex function | `references/decomposition/rules.md`, `references/decomposition/patterns.md` |
 | A class that has feature envy | `references/decomposition/smells.md`, `references/decomposition/examples/` |
 | Splitting monolithic logic | `references/decomposition/patterns.md`, `references/separation-of-concerns/patterns.md` |
+| Separating domain policy from storage or transport representation | [Stratified Design](references/decomposition/stratified-design.md) |
+| Extracting calculations while moving reads, writes or resource boundaries | [Preserve behavior when moving effects](references/decomposition/patterns.md#preserve-behavior-when-moving-effects) |
 | Replacing a legacy subsystem | `references/evolution/patterns.md` (Strangler), `references/evolution/examples/` |
 | Tests without touching prod code | `references/outside-in-tdd/rules.md` (separate-refactor section) |
 | Hardening validation | `references/encapsulation/rules.md` (parse-don't-validate) |
@@ -153,6 +155,8 @@ separate route below.
 | Unused helpers / leftover parallel implementations | `references/decomposition/smells.md` (D9) |
 | Method envies another object's data | `references/decomposition/smells.md` (D4 feature envy) |
 | Vocabulary drift between layers | `references/decomposition/smells.md` (D5 lost in translation) |
+| Domain decisions expose storage fields or transport encoding | [Stratified Design](references/decomposition/stratified-design.md) |
+| A proposed pure pipeline still reads a database, clock or mutable external state | [Sequential Composition](references/decomposition/patterns.md#pattern-sequential-composition) |
 | Boolean `IsValid()` scattered everywhere | `references/encapsulation/rules.md` (parse-don't-validate) |
 | Invariants checked in many places | `references/encapsulation/rules.md`, `references/encapsulation/examples/` |
 | `null!` or `?` sprinkled to silence compiler | `references/encapsulation/rules.md` |
@@ -195,6 +199,7 @@ For any retained practice referenced by name (for example Strangler or CQS), fir
 | Reproduce Defects as Tests | `references/troubleshooting/patterns.md` |
 | Semantic Versioning | `references/evolution/rules.md` |
 | Strangler | `references/evolution/patterns.md` |
+| Stratified Design | [Semantic layers and change comparison](references/decomposition/stratified-design.md) |
 | STRIDE / Threat Model | `references/security/knowledge.md`, `references/security/checklist.md` |
 | Transformation Priority Premise | `references/encapsulation/rules.md` |
 | X Out Names | `references/api-design/rules.md` |
