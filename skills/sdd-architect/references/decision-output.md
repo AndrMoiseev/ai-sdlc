@@ -4,6 +4,11 @@ Separate the investigation queue from implementation priority. Metrics and
 thresholds explain why a candidate was examined. Only an established mechanism
 and a feasible transformation justify an effect category.
 
+The fresh integration architect owns this work in the
+[final-report phase](workflow.md#phase-4-final-report). It reconciles bounded
+diagnoses, resolves shared causes and contradictions, and checks dependencies
+across the whole recommendation set before authoring cards.
+
 Use this ordinal profile relative to the current system:
 
 | Category | Modularity | Regression risk reduction | Development speed |
@@ -48,6 +53,11 @@ Unresolved cards use `status: "needs_check"`, `question`, `next_action`,
 `decision_if_yes` and `decision_if_no`. Observation/rejection cards use `reason`
 and `revisit`. Keep costs as a supported range or unknown, never invented days.
 
+The orchestrator assigns `rank` to explorer through the shared checks contract,
+using the exact cards and snapshot as its basis. Explorer returns command outcomes
+and full artifact references. The integration architect assesses failures and
+changes the cards; a changed input requires new assigned check evidence.
+
 `rank` checks completeness, source identity, duplicate causes, effect categories,
 boundary acceptance and prerequisite cycles. It sorts ready profiles
 lexicographically M→R→S and emits equal-profile priority groups. It cannot verify
@@ -61,7 +71,9 @@ M/R/S effects, basis/confidence, cost/dependencies. Follow with their compact ca
 the short investigation queue, observations and important rejections. Zero ready
 recommendations is a valid result. Save the finished report as `<report-dir>/report.md`
 and link the snapshot, analysis, diagnosis notes and authored cards with relative
-paths. Reply with the report link and a brief summary of the recommendations.
+paths. State the inspected scope and material collection/diagnosis gaps, preserving
+the source references behind each recommendation. The orchestrator replies with
+the report link and a brief summary of the recommendations.
 
 For every strict priority difference state “above the next because …”, referring
 to the scenario and value order. Equal effects remain tied; explain effort,
@@ -80,6 +92,8 @@ script emits execution order separately from priority. If the first five cards
 depend on another card, include that prerequisite explicitly in their preparation
 and link its retained JSON card.
 
-The Markdown renderer is a mechanical starting point. Render lists and citations
+Save generated Markdown separately from `report.md`; the integration architect
+authors the final report after receiving the ranking result. The Markdown renderer
+is a mechanical starting point. Render lists and citations
 legibly in the user's language, preserving the validated order, all critical
 conditions and uncertainty. Do not replace measured values while editing prose.

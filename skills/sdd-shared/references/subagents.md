@@ -10,13 +10,13 @@ again for permission to use it within authorized work.
 
 | Role | Assignment |
 |---|---|
-| `sdd-spec.architect` | Primary author of the specification bundle, plan and derived explanations; continues one work's author context |
-| `sdd-spec.explorer` | Bounded source research and document/plan check execution |
+| `sdd-spec.architect` | Architectural synthesis and authorship within the assigned scope |
+| `sdd-spec.explorer` | Bounded source research and assigned deterministic checks |
 | `sdd-apply.explorer` | Bounded source research and registered deterministic check execution |
-| `sdd-spec.reviewer` | One fresh reviewer per bundle lens, including consistency, simplicity, premortem and plan when tasks exist; reads all available documents |
-| `sdd-spec.editor` | Authorized humanizer editing pass and blind review of the edited prose; use a separate fresh context for the review |
+| `sdd-spec.reviewer` | Independent assessment under the assigned review lens |
+| `sdd-spec.editor` | Authorized prose editing or assessment of edited prose |
 | `sdd-apply.executor` | Implementation, repair and conflict resolution |
-| `sdd-apply.reviewer` | One fresh reviewer per required verification or code lens, launched in parallel after successful project checks |
+| `sdd-apply.reviewer` | Independent assessment under the assigned review lens |
 
 Use [settings.example.json](../templates/settings.example.json) as an optional template.
 Version 1 maps role IDs to nonempty agent names under `subagents.roles`. Omit roles
@@ -29,12 +29,11 @@ effort. Projects may select separate profiles for the two roles. Before dependen
 work, follow the [explorer assignment and capability contract](explorer.md);
 selection alone proves neither available tools nor an actual successful launch.
 
-The architect preset uses `sdd-architect` with inherited model and effort. Apply
-the [architect contract](../../sdd-spec/references/architect.md) for its writing scope,
-handoffs and continuation. A parent's model selection still launches a separate
-author context; it does not move authoring back to the orchestrator. Reviewers
-remain independent of that context. A resumed author keeps its existing selection;
-a new model/profile requires a fresh successor after the previous writer stops.
+The architect preset uses `sdd-architect` with inherited model and effort. Pass
+the [shared architect instructions](../agents/architect.md) with the calling
+workflow's assignment. Role instructions define the work and its quality; the
+workflow defines phases, documents, checks and context policy under
+[workflow ownership](coordination.md#workflow-ownership).
 
 Missing settings, an unmapped role, or a missing selected agent uses the parent's
 model. Report a missing named agent once per affected selection. Malformed settings,
@@ -84,8 +83,12 @@ is an explicit alternate user catalog, useful for isolated tests; do not invent 
 to avoid a real project's settings. Identity comes from `name`, not the filename.
 
 Use the resolver's `launch` fields as actual native `spawn_agent` arguments, together
-with task name and role assignment. Keep `fork_turns: none`. `task_name` is not a
-native agent selector. Translate `model_reasoning_effort` to `reasoning_effort`.
+with task name and role assignment. The current Codex adapter returns
+`fork_turns: none`; preserve that launch parameter. The workflow decides when a
+new launch is required or a live instance may continue. Check that the adapter's
+launch can satisfy that workflow's context policy; report an unsupported combination
+instead of dropping either requirement. `task_name` is not a native agent selector.
+Translate `model_reasoning_effort` to `reasoning_effort`.
 When the definition omits `model` or uses `inherit`, the resolver passes the observed
 parent model or omits `model` under confirmed native inheritance.
 An omitted effort inherits the known parent effort for the same model; for a different
@@ -108,9 +111,9 @@ Definitions normally live in `.claude/agents/` or `~/.claude/agents/`; let Claud
 resolve their precedence and apply their model, system instructions and tool restrictions.
 
 For `mode: native-agent`, pass the returned `subagent_type` and the SDD assignment to
-the Agent tool. Omit a per-call model so the definition controls it. Start a fresh,
-non-fork agent. Check that its instructions and tools can satisfy the assigned contract;
-a read-only reviewer definition cannot serve as an executor.
+the Agent tool. Omit a per-call model so the definition controls it. Apply the
+calling workflow's context policy. Check that its instructions and tools can satisfy
+the assigned contract; a read-only reviewer definition cannot serve as an executor.
 
 For `mode: parent`, use the available `general-purpose` agent. Pass the returned model
 only if the invocation parameter supports that value; with confirmed native inheritance,
@@ -125,21 +128,14 @@ defaults; use `model: inherit` in the definition when parent inheritance is inte
 
 Record the resolver result, actual launch arguments, launch identity/trace and any
 runtime-reported model/effort. Requested parameters are not proof of the effective model;
-use `null` for unobserved values. Keep this evidence with the review run or editorial
-checkpoint. For sdd-apply, retain it as `agent_selection` in `role_register`; retain
-observations separately as `model_observation` with their source trace.
+use `null` for unobserved values. Keep this evidence in the calling workflow's
+saved launch record, separate from the requested selection.
 
-Keep a running agent's selection fixed, including executor repair and resume. A new
-selection applies to a new launch; changing an existing executor requires a fresh
-successor and handoff. Settings changes are included in the repository-wide Git checkpoint review.
-In sdd-apply, tracked/nonignored configuration files participate in ordinary source
-snapshots: edits can invalidate candidate checks or violate task scope. Change selection
-between tasks or reconcile it through the existing recovery/check procedure; do not
-exclude configuration from source checks to bypass those protections.
-A new review still follows existing consent rules.
-Every sdd-apply review lens uses a separate fresh context even when launch identities
-match. The verification and code lenses both resolve `sdd-apply.reviewer`; neither
-can use an author's or another reviewer's context.
+Keep a running agent's selection fixed. A new selection applies to a new launch;
+the workflow determines when replacement is allowed and how to hand off its work.
+Before transferring write authority, follow the [single-writer contract](coordination.md#writing-and-handoff).
+Settings changes remain subject to the calling workflow's ordinary source,
+scope, checkpoint and evidence checks.
 Refresh the actual Claude catalog immediately before launch. Re-resolution in scripts
 checks Codex definition precedence and missing-agent recovery; it cannot query a live
 Claude host or prove that an attested catalog is current.

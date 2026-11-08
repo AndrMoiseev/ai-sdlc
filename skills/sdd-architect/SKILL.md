@@ -21,9 +21,10 @@ splitting Gradle projects is outside this method.
 
 ## Project configuration and report directory
 
-For every run with a project checkout, load and refresh
-`.sdd/architect/collection.json` through
+For every run with a project checkout, the orchestrator saves the researched
+configuration in `.sdd/architect/collection.json` through
 [project configuration maintenance](references/collection.md#maintain-project-configuration).
+Explorer proposes the configuration; the orchestrator owns its persistence.
 
 Before producing any materials, establish
 `<project-root>/docs/reports/{report-name}/` using the
@@ -34,57 +35,55 @@ analysis and reassessment. Finish with a link to its `report.md`.
 ## Default route: full cycle
 
 A bare `$sdd-architect`, `/sdd-architect`, or skill selection without additional
-task text starts the full working sequence: **collect metrics → analyze metrics
-and source code → deliver concrete recommendations**. General audit and refactoring
+task text starts all four phases: **configuration → evidence → analysis → final
+report**. General audit and refactoring
 requests use the same route. Start from the current project's checkout and discover
 its scope and build configuration; an omitted prompt is not a request to choose a mode.
 
-Read Collection first, then load the later references as their stages begin.
-Carry the task through the final recommendation report, linking the snapshot,
-analysis and cards. Record unavailable measurements as gaps and qualify the
-recommendations accordingly. Existing reports are inputs to qualify within this
-cycle; their presence does not select a reports-only route.
+Read the [four-phase workflow](references/workflow.md) before starting. Before
+dispatch, continuation or handoff, read
+[assignments and context](references/orchestration.md) for saved requests/results,
+current input basis, fresh contexts and single-writer ownership.
+The orchestrator runs the phases sequentially through `report.md`, without
+intermediate user approvals for the already requested audit. Existing reports are
+inputs to qualify within this cycle; their presence does not select a reports-only route.
 
-Use a focused route only when the user explicitly asks for one, such as analyzing
-supplied reports, comparing given proposals, reviewing a diff or reassessing a
-completed change. Ask for a project location only when the working context does
-not identify a suitable Kotlin/Gradle checkout.
+| Phase | Assigned work | Completion artifact |
+| --- | --- | --- |
+| 1. Configuration | Explorer researches scope and proposes configuration; orchestrator saves it before identity capture | Project configuration and `collection-plan.md` |
+| 2. Evidence | Fresh explorer executes exact assigned checks and reports measurement results or gaps | Raw reports, immutable snapshot and deterministic analysis views |
+| 3. Analysis | Architect makes an 8–12 group shortlist; a fresh architect diagnoses each related group | Shortlist and source-grounded diagnoses with alternatives and uncertainty |
+| 4. Final report | Fresh architect integrates diagnoses and authors cards; orchestrator assigns `rank` to explorer | Validated ordering and `report.md`, with up to five ready recommendations |
+
+Use an [explicit focused route](references/continuation.md#explicit-focused-routes)
+only when the user asks for one, such as analyzing supplied reports, comparing
+given proposals, reviewing a diff or reassessing a completed change. Ask for a
+project location only when the working context does not identify a suitable
+Kotlin/Gradle checkout.
 
 ## Read by stage or explicit focus
 
 | Situation | Read at this point | Result |
 | --- | --- | --- |
-| Start the full cycle or fill measurement gaps | [Collection](references/collection.md), then [runtime](references/runtime.md) before any script | Reproducible snapshot and explicit collection gaps; continue to analysis and recommendations |
-| Explicit request to analyze existing reports, including reports without sources | [Collection](references/collection.md), import branch | Qualified snapshot; source-free results remain hypotheses |
+| Research configuration or collect missing measurements | [Collection](references/collection.md), then [runtime](references/runtime.md) before any script | Justified scope, reproducible snapshot and explicit collection gaps |
+| Explicit request to analyze existing reports, including reports without sources | [Focused routes](references/continuation.md#explicit-focused-routes), then [collection import](references/collection.md#import-existing-reports) | Qualified snapshot; source-free results remain hypotheses |
 | Calculate or interpret a signal | [Measurements](references/measurements.md) | Deterministic views and an investigation shortlist |
 | Diagnose candidates and compare changes | [Diagnosis](references/diagnosis.md), including its explicit `sdd-code-design` call | Source-grounded findings and a feasible change per recommendation |
 | Prioritize and deliver | [Decision output](references/decision-output.md) | Validated cards, tied priority groups and execution dependencies |
 | Review a diff or verify an implemented recommendation | [Reassessment](references/reassessment.md) | Comparable evidence for the affected code and consumers |
+| Request more evidence, resume after interruption or reconcile a changed basis | [Continuation](references/continuation.md) | Bounded follow-up, verified saved work and the next affected phase |
 
-Read only the references required by the current stage. Execute
-[metrics.py](scripts/metrics.py) for `identity`, `collect`, `analyze`, and `rank`;
-use its `--help` for arguments. Keep formulas in the supplied scripts. Scripts
-calculate observations; the agent establishes responsibilities, mechanisms and effects.
+Read only the references required by the current phase. The orchestrator uses
+the shared `sdd-spec.architect` and `sdd-spec.explorer`
+[selection keys](../sdd-shared/references/subagents.md) and their role instructions;
+this audit does not invoke the `sdd-spec` planning workflow. Role instructions
+define work quality; this workflow defines assignments, documents and transitions.
 
-## Full working sequence
-
-1. Fix the revision, working changes, source sets, package ownership and scope.
-   Use existing architecture decisions and tests; label inferred boundaries as hypotheses.
-2. Collect or qualify the necessary inputs. Unknown coverage is not 0%; an unknown
-   revision prevents implementation-ready recommendations. A local data defect limits
-   the affected claim rather than invalidating unrelated source evidence.
-3. Calculate views and shortlist 8–12 candidate groups. Merge signals for the same
-   area before selecting; retain important candidates justified by a known risk
-   or upcoming change even without a hotspot signal.
-4. Explicitly read the sibling [sdd-code-design skill](../sdd-code-design/SKILL.md)
-   and its [focused diagnosis](../sdd-code-design/workflows/diagnose-code.md) workflow.
-   Apply it to each source-available candidate group using the
-   [request and return contract](references/diagnosis.md). Inspect findings and
-   compare the current system with a concrete change. Source-free candidates
-   remain questions for investigation.
-5. Separate ready recommendations, decision-changing checks, observations and rejections.
-   Validate and order the authored cards with `rank`. Explain each strict priority
-   difference through the scenario, keeping ties visible.
+Assign [metrics.py](scripts/metrics.py) commands `identity`, `collect`, `analyze`
+and `rank` to explorer through the shared checks contract. Keep formulas in the
+supplied scripts. Scripts calculate observations; architects establish
+responsibilities, mechanisms and effects. The orchestrator launches all roles
+and handles requests for further research or checks.
 
 Before declaring a recommendation ready, verify its source evidence, feasible
 transformation, required behavior, acceptance check and three effect judgments.

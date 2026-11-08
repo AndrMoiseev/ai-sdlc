@@ -1,6 +1,6 @@
 ---
 name: sdd-shared
-description: Shared SDD document formats, validation scripts and subagent configuration contracts. Use when sdd-setup, sdd-spec, sdd-apply or sdd-sync needs these resources, or when explicitly inspecting the shared SDD API. Do not use for starting planning, project setup or implementation workflows.
+description: Shared SDD document formats, validation scripts, reusable role instructions and subagent selection contracts. Use when sdd-setup, sdd-spec, sdd-architect, sdd-apply or sdd-sync needs these resources, or when explicitly inspecting the shared SDD API. Do not use for starting planning, project setup or implementation workflows.
 ---
 
 # SDD Shared
@@ -21,11 +21,17 @@ decisions, review authorization and execution.
 4. For bounded research or check delegation, read the
    [explorer assignment contract](references/explorer.md) and pass the
    [explorer instructions](agents/explorer.md) to the worker.
+5. For architectural synthesis and authorship, pass the
+   [architect instructions](agents/architect.md) with the calling workflow's
+   assignment, sources, output boundaries and result format.
 
 ## Ownership
 
-The package owns parsers, validators, Git checkpoints, settings and role resolution.
-Authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
+The package owns parsers, validators, Git checkpoints, settings, role resolution
+and reusable role instructions. The calling workflow defines phases, documents,
+checks, worker lifecycle and context policy; the orchestrator executes it under
+the [shared coordination invariants](references/coordination.md).
+Specification-bundle authoring flows and templates belong to sdd-spec, configuration writes to sdd-setup,
 execution state, criterion conclusions and Git operations to sdd-apply, and baseline synchronization and
 change archiving to sdd-sync. A successful structural check
 reports evidence; the calling workflow determines whether it may proceed.

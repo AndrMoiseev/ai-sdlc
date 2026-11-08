@@ -55,8 +55,19 @@ capabilities under `capabilities.observations`, and register its `assignment`.
 Use `role_id` as assignment `id`, the original project root as `scope.project`,
 change ID as `scope.work`, and the task ID or null as `scope.task`. Pass the
 resulting packet and [explorer instructions](../../sdd-shared/agents/explorer.md).
-A continued context gets a new role ID after the prior role finishes; reuse only
-within one task, with the same launch identity, during task work.
+Persist assignments and actual launch evidence through `role_register`, results
+through `role_result`, and check evidence through the existing
+[checks API](api-checks.md) and [execution store](state-storage.md).
+
+The sdd-apply context policy keeps Explorer separate from executors and reviewers.
+Start its first assignment in a fresh context without their history.
+A continued context gets a new role ID and current basis after the prior role
+finishes. Reuse it for research or registered checks only within one task, with
+the same host, selected profile and launch identity, during task work. Another
+task, changed profile or lost context requires a fresh Explorer. Verify the live
+context through the host before continuation. Changed inputs require current check
+evidence. New assignments and contexts preserve repair/retry budgets and the
+[whole-batch deadline](api-checks.md#execution-ownership-and-one-batch-deadline).
 
 After the executor reports completion, stop writers and freeze the candidate.
 The orchestrator inventories project instructions, CI and configuration, registers

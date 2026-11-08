@@ -2,8 +2,13 @@
 
 ## Collection in the default full cycle
 
-Start with the current project's checkout and discover the inputs from its build
-and source tree. Inventory all five measurement families: dependencies, Git history,
+Use this reference in the configuration and evidence phases of the
+[four-phase workflow](workflow.md). Explorer researches the current checkout and
+proposes inputs from its build and source tree; the orchestrator saves the
+configuration and plan. Fresh explorer executes the assigned measurement commands
+through the checks contract in the evidence phase.
+
+Inventory all five measurement families: dependencies, Git history,
 source size, complexity and coverage. Obtain each applicable family with the
 available tools and existing project tasks, recording a concrete gap for any
 unavailable family. Reuse a report only after checking its scope and source identity.
@@ -14,7 +19,7 @@ intermediate results of this route.
 ## Establish the scope
 
 Read the project's build scripts, architecture decisions, package conventions,
-ArchUnit checks and domain vocabulary. Choose production Kotlin/Java source roots,
+ArchUnit checks and domain vocabulary. Propose production Kotlin/Java source roots,
 compiled class directories, variants, test tasks and exclusions from that evidence.
 Android and Multiplatform require an explicit JVM variant/source-set decision;
 do not silently treat native or common sources as a JVM bytecode graph.
@@ -27,8 +32,9 @@ Infer neither package responsibilities nor architectural modules from Gradle lay
 ## Maintain project configuration
 
 Use `<project-root>/.sdd/architect/collection.json` as the project's collection
-configuration. Apply this maintenance on every run with a project checkout,
-including runs that reuse existing reports:
+configuration. The orchestrator applies this maintenance from explorer's sourced
+proposal on every run with a project checkout, including runs that reuse existing
+reports. Explorer returns proposed changes without editing configuration or settings:
 
 1. Read the existing file. If absent, create its parent directory and initialize
    it from [collection.example.json](../assets/collection.example.json), replacing
@@ -43,7 +49,8 @@ including runs that reuse existing reports:
    class mappings and reports against their actual source identities; retain
    their original provenance and leave unknown values null. Saving the
    configuration does not make an older report current.
-4. Save the reconciled configuration before capturing source identity. As new
+4. Save the reconciled configuration and `collection-plan.md` before capturing
+   source identity. As new
    compilation or reports establish provenance, save those verified values before
    `collect`. Keep the configuration stable during each `identity` or `collect`
    command. Replace only changed values; an already current file needs no rewrite.
@@ -83,11 +90,18 @@ Keep `docs/reports/` out of source roots and measurement inputs.
 
 ## Obtain missing reports
 
+The orchestrator registers the exact commands, outputs and limits in the collection
+plan and assigns them to explorer as checks. Return verified provenance to the
+orchestrator for configuration updates before dependent `collect` execution.
+If one measurement chain fails, preserve its gap and collect independent families
+whose prerequisites remain valid. Use a new current checks assignment for unfinished
+independent work when the original batch stops; reuse verified successful results.
+
 1. Find the existing Gradle tasks for compilation, detekt and JaCoCo. Read their
    configuration before running them. Do not invent task names or change the
-   consumer's dependencies merely to make the audit run. If a task must be added,
-   propose its exact configuration or use a disposable external checkout within
-   the user's authorized scope. Put caches and temporary build output outside
+   consumer's dependencies merely to make the audit run. If a task is absent,
+   record the gap and propose its exact configuration as a separate follow-up.
+   Put caches and temporary build output outside
    the source checkout when the project's supported configuration permits it.
 2. Compile the selected production code and consumers. Set `bytecode_source_state`
    to the identity actually compiled. For `dependencies: {"collect": true}`,
@@ -120,6 +134,14 @@ that bytecode or coverage is current. Save logs/configuration paths in provenanc
 
 ## Import existing reports
 
+Use this branch for inputs reused by the full cycle or an explicit
+[focused route](continuation.md#explicit-focused-routes). A report's existence
+does not select a focused route. With a checkout, maintain the project
+configuration before identity capture; with no sources, use the import
+configuration described below. In both cases the orchestrator records import
+scope, artifact suitability and exact `collect`/`analyze` checks in the collection
+plan and assigns them to explorer.
+
 For each artifact, supply `path`, `format`, and `source_root` (the original checkout
 root encoded in file URIs). Accepted dependency input is `class-csv` (`from,to`)
 or `jdeps` text; history is `git-log`; sizes are per-file `scc` JSON; complexity
@@ -132,6 +154,10 @@ hashes and captures the current source inventory. `analyze` detects altered raw
 files, mixed source identities and mixed revisions. Unknown identity limits the
 related signal; known mismatches exclude it. Tool errors are recorded per artifact.
 Read the gap list and verify that required reports actually arrived.
+Unknown coverage remains unknown, not zero coverage. Qualify tool/configuration,
+source population, mapping and generation provenance for each intended claim;
+a current checkout does not make an older report suitable. Resolve only gaps that
+can change the focused decision through [bounded evidence](continuation.md#request-bounded-evidence).
 
 For source-free work, use the destination project directory as `repository`, with
 `source_roots: []` and `class_directories: []`. Import supplied material by absolute
@@ -140,6 +166,8 @@ a checkout revision or substitute the destination's revision for an input's iden
 Keep the import configuration and results in the named report directory according
 to [report storage](runtime.md#report-storage).
 Graph calculations remain useful. Concrete implementation readiness is unavailable.
+Continue with bounded hypotheses and the final report; preserve input provenance
+and gaps even when every imported command succeeds.
 
 ## Mapping and suitability
 
