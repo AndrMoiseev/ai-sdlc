@@ -1,0 +1,56 @@
+{
+  "skill_name": "sdd-code-design",
+  "evals": [
+    {
+      "id": 1,
+      "name": "tenant-boundary",
+      "category": "focused-diagnosis",
+      "prompt": "Explicitly use sdd-code-design. Read its SKILL.md and focused-diagnosis route. Read evals/files/tenant-boundary.ts. The team selected TenantReports for simplification because it is only a constructor and one short method. A proposed patch deletes TenantReports and Reports, injects VendorClient into report-page and csv-export, and has each caller supply request.verifiedTenant to client.find. Product behavior must continue to isolate reports to the authenticated tenant; client transport failures must remain ReportsUnavailable to callers. Diagnose this selected proposal using the supplied source. Give a concrete recommendation and the evidence needed to validate it; do not implement anything. Return a compact, substantive diagnosis (up to 1000 words).",
+      "expected_output": "Proposed removal of a thin tenant boundary",
+      "files": [
+        "evals/files/tenant-boundary.ts"
+      ],
+      "expectations": [
+        "Does the diagnosis identify the thin boundary's existing tenant binding, domain result/error translation, and consumer isolation using source declarations?",
+        "Does it explain that direct VendorClient calls make both consumers supply the tenant and handle vendor representation or failures, with removal risking lost isolation/contract rather than only fewer lines?",
+        "Does it recommend retaining the boundary, or name an equally concrete new owner that preserves all three protected obligations without duplicating them in consumers?",
+        "Does it propose at least one discriminating check for wrong-tenant use or transport failure translation, and distinguish proposed checks from checks actually run?",
+        "Does it stay within the selected read-only diagnosis without inventing observed failures or treating line count as sufficient evidence?"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "forwarding-chain",
+      "category": "focused-diagnosis",
+      "prompt": "Explicitly use sdd-code-design. Read its SKILL.md and focused-diagnosis route. Read evals/files/forwarding-chain.ts. A refactoring candidate replaces makeCatalog's ProductGateway(new ProductReader(new SqlProductCatalog(rows))) with new SqlProductCatalog(rows) and deletes ProductGateway and ProductReader. The author says the layers are shallow; a reviewer says every application layer is needed as an abstraction for future storage changes. Diagnose this selected proposal from the supplied source. Decide what change is justified now, show relevant consequences, and identify an acceptance check. Preserve product lookup behavior. Do not implement anything. Return a compact, substantive diagnosis (up to 1000 words).",
+      "expected_output": "Proposed removal of a pure forwarding chain",
+      "files": [
+        "evals/files/forwarding-chain.ts"
+      ],
+      "expectations": [
+        "Does the diagnosis trace both ProductReader and ProductGateway to unchanged ProductCatalog forwarding and support their removal from the actual composition and consumers?",
+        "Does it distinguish overhead that disappears (forwarding declarations, wiring, navigation or duplicate forwarding tests) from responsibilities that remain in SqlProductCatalog?",
+        "Does it state that consumers still depend on ProductCatalog and keep the same lookup/error contract after removal, rather than claiming all indirection or dependency management disappears?",
+        "Does it retain the useful ProductCatalog/SqlProductCatalog boundary and reject speculative future storage variation as sufficient reason to retain these two forwarding classes?",
+        "Does it propose a discriminating behavior check and keep this diagnosis read-only, without claiming tests ran?"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "upload-interface",
+      "category": "focused-diagnosis",
+      "prompt": "Explicitly use sdd-code-design. Read its SKILL.md and focused-diagnosis route. Read evals/files/upload-interface.ts. The selected candidate is the upload call chain and its API. Two proposed replacements are shown: UploadChannel advertises one public method instead of three; Publisher also advertises one method but adds orchestration. Both proposals can delete UploadRelay. The team favors UploadChannel because it is shorter, while adding Publisher looks like adding yet another layer. Required behavior is the existing prepare/push/finish protocol and retry policy in the source. Diagnose this selected choice and the relay deletion. Give the smallest justified transformation, its consequences, and a way to verify them. Do not implement anything. Return a compact, substantive diagnosis (up to 1000 words).",
+      "expected_output": "One-method upload API and forwarding relay",
+      "files": [
+        "evals/files/upload-interface.ts"
+      ],
+      "expectations": [
+        "Does it compare concrete caller duties before and after UploadChannel, identifying sequence, ticket reuse and retry/error handling that still remain in invoiceViaChannel?",
+        "Does it identify a concrete responsibility transfer to Publisher and the duties still retained by invoice/preview callers, rather than treating its one-method signature as proof?",
+        "Does it explain removing UploadRelay as disappearing forwarding/wiring overhead while the upload protocol and port contract remain with existing owners?",
+        "Does it explain that removing Publisher after adoption would redistribute orchestration/retry complexity into callers or lose the contract, distinguishing this from harmless relay deletion?",
+        "Does it support a bounded choice with named source evidence and discriminating order/retry checks, while distinguishing inspection from tests actually run?"
+      ]
+    }
+  ]
+}
