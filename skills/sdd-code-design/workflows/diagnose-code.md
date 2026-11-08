@@ -49,7 +49,8 @@ concerns something else:
 2. Who enforces each relevant invariant, and can construction or a consumer bypass
    that protection?
 3. Which implementation knowledge, dependencies and side effects must a consumer
-   account for when making the representative change?
+   account for when making the representative change? For a proposed interface
+   change, apply the [consumer-obligation comparison](../references/decomposition/rules.md#11-compare-consumer-obligations-before-and-after).
 
 Use observed code features to select one primary reference and at most one or two
 secondary references. The table supplies starting points, not mandatory checks
@@ -60,6 +61,7 @@ only when needed to establish a feasible option.
 | --- | --- | --- |
 | Branching, interacting state or mixed responsibilities | Which reasons for change and effects are entangled? | [Decomposition rules](../references/decomposition/rules.md), [smells](../references/decomposition/smells.md) |
 | Coordinated edits across responsibilities | Which rule or implementation detail has multiple owners or leaks to consumers? | [Decomposition smells](../references/decomposition/smells.md), [encapsulation](../references/encapsulation/rules.md) |
+| Forwarding chains or suspected redundant abstractions | What disappears, moves to consumers or loses an owner if the abstraction is removed? | [Hypothetical removal](../references/decomposition/rules.md#12-mentally-remove-a-suspected-indirection) |
 | Interchangeable primitive parameters or implicit contract conditions | Which misuse is representable, and where would stronger types actually prevent it? | [API design](../references/api-design/rules.md), [encapsulation](../references/encapsulation/rules.md) |
 | Repeated or bypassed validation | Where should validity be established and maintained? | [Encapsulation](../references/encapsulation/rules.md) |
 | Hidden effects or infrastructure mixed with domain decisions | Which effects surprise consumers or force unrelated changes? | [API design](../references/api-design/rules.md), [separation of concerns](../references/separation-of-concerns/rules.md) |
@@ -108,7 +110,8 @@ for each distinct cause with:
 - **Scenario and mechanism:** the consequence, existing protection, alternative
   explanation examined and what the inspection established.
 - **Options:** current construction, smallest useful change, affected owner and
-  consumers, expected effect, cost drivers and intervention risks.
+  consumers, expected effect, cost drivers and intervention risks. Include applicable
+  consumer-obligation comparisons and hypothetical-removal outcomes.
 - **Acceptance:** the check that would establish the effect and preserve required
   behavior; identify proposed checks that have not run.
 - **Uncertainty:** confidence in observation, diagnosis and expected effect

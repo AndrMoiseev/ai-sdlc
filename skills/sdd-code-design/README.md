@@ -39,10 +39,18 @@ own the cause. It returns evidence, applicable heuristics, mechanisms, feasible
 options and acceptance checks. The architect decides recommendation readiness and
 priority across candidates. A diagnosis can also conclude that no change is justified.
 
+For interface changes, the diagnosis compares what consumers must know or do before
+and after, including obligations beyond method signatures. For suspected redundant
+abstractions, it traces what their removal would eliminate, move to consumers or
+leave without an owner. This helps distinguish unnecessary forwarding from a useful
+thin boundary.
+
 | Request | Example prompt | Result |
 | --- | --- | --- |
 | Diagnose a hotspot | `$sdd-code-design Diagnose the frequently changed OrderService and its contracts. Check the risk of mixing customer and order IDs. Return findings without editing code.` | A scoped diagnosis with source evidence, existing protection, options and checks |
 | Diagnose an upcoming change | `$sdd-code-design Diagnose the pricing contract before we add regional rounding rules. Inspect its consumers even though the contract rarely changes.` | An explanation of change risks and feasible improvements, with uncertainty stated |
+| Compare an interface proposal | `$sdd-code-design Diagnose whether the proposed pricing facade simplifies its consumers. Compare the current contract with the proposal without editing code.` | A concrete comparison of consumer obligations, their owners and acceptance checks |
+| Assess a thin abstraction | `$sdd-code-design Diagnose the forwarding chain in the pricing module. Determine whether removing a layer is justified; return findings without editing code.` | An explanation of overhead removed, knowledge redistributed and responsibilities that must survive |
 
 Diagnosis does not require a PR or a high metric value. Its result covers the
 inspected area; it does not certify the whole codebase or start implementation.
@@ -85,6 +93,7 @@ Most reference folders summarize or operationalize ideas from Seemann's book. Th
 ## Changes from Upstream
 
 - Added focused code diagnosis for selected refactoring candidates and an explicit handoff from `sdd-architect`; this workflow is a fork addition.
+- Added consumer-obligation comparison and hypothetical removal of suspected indirection to focused diagnosis, adapted from [Matt Pocock's codebase-design](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md).
 - Moved the five standalone example documents into per-topic `examples/` directories, with filenames identifying the language and relevant framework. The original C# files retain their exact contents.
 - Added idiomatic Kotlin/JVM counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Framework-independent, JUnit 5, and Ktor examples are separated for selective loading.
 - Added Go counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Go 1.22+ examples separate domain code, standard-library `testing` tests, and `net/http` / `httptest` boundaries. Adaptations explain zero-value limits, explicit errors, composition, and migration without method overloading.
