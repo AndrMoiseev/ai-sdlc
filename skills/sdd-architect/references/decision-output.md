@@ -19,8 +19,8 @@ percent acceleration is calculated from churn, PC or coverage.
 
 ## Author cards
 
-Copy [recommendations.example.json](../assets/recommendations.example.json) into
-the external workspace and replace every example. `revision` and `source_state`
+Copy [recommendations.example.json](../assets/recommendations.example.json) to
+`<report-dir>/cards.json` and replace every example. `revision` and `source_state`
 come from the snapshot. Required ready-card fields are:
 
 - `id`, `status: "ready"`, `cause`, `action` with exact source objects and owner.
@@ -59,7 +59,9 @@ correct; review those before invoking it.
 Show up to five ready recommendations in a table: priority group, concrete change,
 M/R/S effects, basis/confidence, cost/dependencies. Follow with their compact cards,
 the short investigation queue, observations and important rejections. Zero ready
-recommendations is a valid result. Link the snapshot, analysis and authored cards.
+recommendations is a valid result. Save the finished report as `<report-dir>/report.md`
+and link the snapshot, analysis, diagnosis notes and authored cards with relative
+paths. Reply with the report link and a brief summary of the recommendations.
 
 For every strict priority difference state “above the next because …”, referring
 to the scenario and value order. Equal effects remain tied; explain effort,

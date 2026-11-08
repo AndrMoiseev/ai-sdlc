@@ -50,9 +50,10 @@ including runs that reuse existing reports:
 5. In the final report, state whether the configuration was created, updated or
    already current, and summarize changes to the analysis scope or definitions.
 
-This file is maintained project configuration; snapshots, raw reports and temporary
-data stay in an external workspace. It is separate from `.sdd/settings.json`,
-which configures SDD subagents.
+This file is maintained project configuration, separate from `.sdd/settings.json`,
+which configures SDD subagents. Save the collection plan, captured identity,
+snapshots, raw reports and logs in the current report directory following
+[report storage](runtime.md#report-storage).
 Keep the collection configuration itself out of `measurement_inputs`: it contains
 the resulting source-state identifiers, and `collect` already records its contents
 in the snapshot.
@@ -75,8 +76,10 @@ longest matching prefix wins. Equal prefixes assigned to different modules are e
 Use `identity` before a measurement run to obtain `revision`, `dirty` and
 `source_state`. The fingerprint covers selected source contents and measurement
 inputs, including uncommitted source changes. Record the complete actual scope;
-the fingerprint cannot detect an omitted input. Keep the working tree stable
-through compilation, tests, collection and source review.
+the fingerprint cannot detect an omitted input. Keep sources and measurement
+inputs stable through compilation, tests, collection and source review. Report
+writes can change Git's dirty flag without changing the measured source identity.
+Keep `docs/reports/` out of source roots and measurement inputs.
 
 ## Obtain missing reports
 
@@ -130,10 +133,12 @@ files, mixed source identities and mixed revisions. Unknown identity limits the
 related signal; known mismatches exclude it. Tool errors are recorded per artifact.
 Read the gap list and verify that required reports actually arrived.
 
-For source-free work, point `repository` at an external directory containing the
-supplied material, set `source_roots: []` and `class_directories: []`. Preserve
-the reported revision as provenance when known; do not invent a checkout revision.
-Without a project checkout, keep this import configuration in the external workspace.
+For source-free work, use the destination project directory as `repository`, with
+`source_roots: []` and `class_directories: []`. Import supplied material by absolute
+path and preserve its reported revision as provenance when known; do not invent
+a checkout revision or substitute the destination's revision for an input's identity.
+Keep the import configuration and results in the named report directory according
+to [report storage](runtime.md#report-storage).
 Graph calculations remain useful. Concrete implementation readiness is unavailable.
 
 ## Mapping and suitability

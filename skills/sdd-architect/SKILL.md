@@ -19,11 +19,17 @@ public contract and dependency rules. Gradle projects describe collection scope.
 Recommend package conventions and ArchUnit checks for boundaries; creating or
 splitting Gradle projects is outside this method.
 
-## Project configuration
+## Project configuration and report directory
 
 For every run with a project checkout, load and refresh
 `.sdd/architect/collection.json` through
 [project configuration maintenance](references/collection.md#maintain-project-configuration).
+
+Before producing any materials, establish
+`<project-root>/docs/reports/{report-name}/` using the
+[report storage contract](references/runtime.md#report-storage). Save the final
+report and all intermediate materials there for every route, including focused
+analysis and reassessment. Finish with a link to its `report.md`.
 
 ## Default route: full cycle
 

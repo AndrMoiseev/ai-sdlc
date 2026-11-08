@@ -1,4 +1,5 @@
 import copy
+import io
 import json
 import struct
 import tempfile
@@ -8,10 +9,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from analysis import analyze, suitability
-from collection import collect, digest, external_output
+from collection import collect, digest, report_output
 from graph import graph_view, module_for, module_views
 from history import group_activity, history_view, parse_history
 from inputs import class_source_file, coverage, dependencies, detekt, relative_path, source_description
+from metrics import main, write_json
 from recommendations import rank
 
 
@@ -213,10 +215,48 @@ class RecommendationTests(unittest.TestCase):
         self.assertEqual(suitability(self.snapshot, {"revision": "old", "source_state": "hash"})[0], "unusable")
 
 
+class ReportOutputTests(unittest.TestCase):
+    def test_outputs_require_a_named_project_report_directory(self):
+        repo = Path(tempfile.gettempdir()) / "architect-project"
+        report = repo / "docs" / "reports" / "pricing-audit"
+        with patch.object(Path, "resolve", lambda path: path):
+            self.assertEqual(report_output(report / "snapshot-1", repo), report / "snapshot-1")
+            self.assertEqual(report_output(report / "report.md", repo), report / "report.md")
+            for path in (repo / "report.md", repo.parent / "report.md",
+                         repo / "docs" / "reports", repo / "docs" / "reports" / "report.md"):
+                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "docs/reports"):
+                    report_output(path, repo)
+            with self.assertRaisesRegex(ValueError, "repository is required"):
+                report_output(report / "report.md", None)
+            with self.assertRaisesRegex(ValueError, "skill collections"):
+                report_output(repo / ".agents" / "skills" / "audit" / "report.md", repo)
+
+    def test_resolved_output_cannot_escape_reports(self):
+        repo = Path(tempfile.gettempdir()) / "architect-project"
+        output = repo / "docs" / "reports" / "pricing-audit" / "report.md"
+        # Model a symlink resolution through the existing Path adapter; no real link is needed.
+        with patch.object(Path, "resolve", lambda path: repo.parent / "report.md" if path == output else path):
+            with self.assertRaisesRegex(ValueError, "docs/reports"):
+                report_output(output, repo)
+
+    def test_collection_still_rejects_revision_or_source_changes(self):
+        repo = Path(tempfile.gettempdir()) / "architect-project"
+        before = {"revision": "abc", "source_state": "original", "dirty": False, "source_files": {}}
+        for key in ("revision", "source_state"):
+            after = {**before, key: "changed"}
+            with self.subTest(key=key), patch.object(Path, "resolve", lambda path: path), \
+                    patch.object(Path, "is_dir", return_value=True), \
+                    patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"), \
+                    patch("collection.identity", side_effect=[before, after]), \
+                    patch("collection.map_classes", return_value=({}, [])):
+                with self.assertRaisesRegex(ValueError, "Source state changed"):
+                    collect({"repository": str(repo)}, repo / "docs" / "reports" / "audit" / "snapshot-1")
+
+
 class SnapshotIntegrationTests(unittest.TestCase):
     def test_collect_analyze_and_raw_tamper(self):
-        # Risk: portable path resolution and immutable artifact copies can fail together.
-        # One real filesystem fixture checks that boundary; graph/parser combinations use unit tests above.
+        # Risk: collection, CLI output paths and immutable copies can disagree on actual disk writes.
+        # Extend the existing filesystem fixture; in-memory graph/parser tests cannot verify retained files.
         with tempfile.TemporaryDirectory(prefix="sdd-architect-test-") as temporary:
             workspace = Path(temporary)
             repo, raw = workspace / "project", workspace / "reports"
@@ -229,19 +269,44 @@ class SnapshotIntegrationTests(unittest.TestCase):
             config = {"repository": str(repo), "source_roots": ["src"], "modules": {"A": ["a"]},
                       "artifacts": {"complexity": {"path": str(raw / "detekt.json"), "format": "detekt-sarif", "complete_mcc": True},
                                     "coverage": {"path": str(raw / "coverage.csv"), "format": "coverage-csv"}}}
-            with patch("collection.shutil.which", return_value=None):
-                snapshot = collect(config, workspace / "snapshot")
-            value = analyze(snapshot, workspace / "snapshot")
+            report = repo / "docs" / "reports" / "pricing-audit"
+            snapshot_dir = report / "snapshot-1"
+            with patch("collection.shutil.which", return_value="git"), \
+                    patch("collection.run", side_effect=[b"abc", b"", b"abc", b"?? docs/reports/\n"]):
+                snapshot = collect(config, snapshot_dir)
+            self.assertFalse(snapshot["dirty"])
+            self.assertEqual(snapshot["configuration"], config)
+            value = analyze(snapshot, snapshot_dir)
             self.assertAlmostEqual(value["files"]["src/Price.kt"]["CRAP_file"], 85.728)
             self.assertEqual(value["files"]["src/Price.kt"]["revisions"], None)
             self.assertEqual(value["signals"][0]["weights_MRS"], [1, 1, 1])
             self.assertEqual(value["aggregates"]["package"]["a"]["coverage"]["line"]["value"], .2)
-            (workspace / "snapshot" / "coverage.raw").write_text("tampered", encoding="utf-8")
-            altered = analyze(snapshot, workspace / "snapshot")
+            snapshot_path = snapshot_dir / "snapshot.json"
+            cards = {"revision": snapshot["revision"], "source_state": snapshot["source_state"],
+                     "recommendations": [card("R1", ("local", "local", "not_shown"))]}
+            write_json(report / "cards.json", cards, repo)
+            with patch("builtins.print"):
+                self.assertEqual(main(["analyze", "--snapshot", str(snapshot_path),
+                                       "--output", str(report / "analysis-1.json")]), 0)
+                self.assertEqual(main(["rank", "--snapshot", str(snapshot_path),
+                                       "--recommendations", str(report / "cards.json"),
+                                       "--output", str(report / "ranked-1.json"),
+                                       "--markdown", str(report / "report.md")]), 0)
+            self.assertEqual(json.loads((report / "analysis-1.json").read_text(encoding="utf-8")), value)
+            self.assertEqual(json.loads((report / "ranked-1.json").read_text(encoding="utf-8"))["priority_groups"], [["R1"]])
+            self.assertIn("Extract price calculation", (report / "report.md").read_text(encoding="utf-8"))
+            with self.assertRaisesRegex(ValueError, "already exists"):
+                collect(config, snapshot_dir)
+            with self.assertRaisesRegex(ValueError, "already exists"):
+                write_json(report / "cards.json", {}, repo)
+            with patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(main(["analyze", "--snapshot", str(snapshot_path),
+                                       "--output", str(repo / "misplaced.json")]), 2)
+            self.assertFalse((repo / "misplaced.json").exists())
+            (snapshot_dir / "coverage.raw").write_text("tampered", encoding="utf-8")
+            altered = analyze(snapshot, snapshot_dir)
             self.assertIsNone(altered["files"]["src/Price.kt"]["CRAP_file"])
             self.assertEqual(altered["artifact_status"]["coverage"]["status"], "unusable")
-            with self.assertRaisesRegex(ValueError, "outside"):
-                external_output(repo / "report.json", repo)
 
 
 class IncompleteEvidenceTests(unittest.TestCase):

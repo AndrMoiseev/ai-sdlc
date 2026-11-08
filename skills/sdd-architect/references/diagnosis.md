@@ -27,6 +27,8 @@ Its focused rule selection replaces a full PR review for this task.
 
 Keep one investigation per related candidate group. Follow a cold contract or
 invariant owner when needed to establish the cause; record the scope expansion.
+Retain the shortlist, returned diagnoses and rejected candidates in
+`<report-dir>/diagnosis.md` as the investigation progresses.
 Inspect supplied history for mechanical changes before interpreting activity as
 evidence of a maintenance problem. Metrics explain selection; they do not prove
 the diagnosis or determine implementation priority.
