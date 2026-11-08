@@ -1,6 +1,7 @@
 # Decomposition Rules
 
 > **Source note:** This book-derived theme includes 2026 editorial reframing for agent-scale changes and system-level complexity. Those additions are not from Seemann.
+> Rules 11–12 are local diagnostic adaptations of [Matt Pocock's codebase-design](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md), not material from Seemann's book.
 
 Heuristics for keeping logic cohesive and preventing local complexity from growing into system-wide mud.
 
@@ -70,6 +71,26 @@ Tiny functions can still form a Big Ball of Mud. Review:
 
 Use available architecture tests or static analysis where they provide reliable signals. Do not mandate a particular product or reduce architectural judgment to one score.
 
+### 11. Compare Consumer Obligations Before and After
+
+For a proposed interface change, trace one representative consumer and compare what it must know or do to use the contract correctly. Include material obligations beyond the signature: input validity, operation ordering and lifetime, failure/retry handling, configuration, and performance constraints.
+
+For each affected obligation, cite the consumer or contract evidence, name its owner before and after, and explain how the proposed owner enforces it. Mark obligations that remain with the consumer. Keep this comparison in the existing options and acceptance evidence.
+
+Credit simplification when a concrete obligation disappears or is reliably discharged by its new owner. A facade with fewer methods may leave every ordering or recovery obligation with its consumers. Preserve required behavior and check whether another consumer or boundary acquires a new burden; a mixed result needs an explicit trade-off.
+
+### 12. Mentally Remove a Suspected Indirection
+
+When forwarding chains, tiny wrappers or repeated navigation suggest a redundant abstraction, imagine bypassing or removing it. Trace the affected consumers and wiring without editing the code. Identify which outcome the source supports:
+
+| Outcome | Diagnostic consequence |
+| --- | --- |
+| Forwarding or navigation overhead disappears with no responsibility lost | Consider removal or consolidation and name the affected consumers |
+| Hidden rules or implementation knowledge return to consumers | The abstraction earns its place; name what each consumer would have to reproduce |
+| A responsibility or useful contract is lost | Preserve it or give it an explicit new owner before recommending removal |
+
+A thin implementation can own validation, authorization, error translation, observability or dependency isolation. Check those obligations before treating it as overhead. Retain both gains and losses when outcomes are mixed, and state the acceptance check for the chosen option. The number of methods, lines or adapters does not establish redundancy.
+
 ## Guidelines
 
 - Prefer deletion and reuse over adding another helper or abstraction.
@@ -98,3 +119,5 @@ Use available architecture tests or static analysis where they provide reliable 
 | Stronger parse results | Return information, not a lossy Boolean |
 | Every zoom level coherent | Make parts nameable and change locations predictable |
 | Check system structure | Prevent cycles, duplication, sprawl, and permanent migration debt |
+| Compare consumer obligations | Show which obligations change owners and which remain |
+| Mentally remove indirection | Distinguish vanished overhead, redistributed complexity and lost responsibility |

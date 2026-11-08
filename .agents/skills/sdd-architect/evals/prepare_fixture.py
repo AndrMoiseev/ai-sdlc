@@ -62,8 +62,9 @@ class OrderServiceTest {
     run(["git", "init", "--quiet"], repo)
     run(["git", "add", "."], repo)
     run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "Synthetic fixture"], repo)
-    raw = destination / "raw"
-    raw.mkdir()
+    report = repo / "docs" / "reports" / "pricing-audit"
+    raw = report / "raw"
+    raw.mkdir(parents=True)
     (raw / "dependencies.csv").write_text("from,to\nexample.order.OrderService,example.pricing.PriceCalculator\nexample.pricing.PriceCalculator,example.order.OrderService\n", encoding="utf-8")
     config = {"repository": str(repo), "source_roots": ["src/main/kotlin"],
               "measurement_inputs": ["settings.gradle.kts", "build.gradle.kts", "ARCHITECTURE.md"],
@@ -77,8 +78,10 @@ class OrderServiceTest {
     config["artifacts"]["dependencies"] = {"path": str(raw / "dependencies.csv"), "format": "class-csv", "tool": "synthetic-fixture",
                                             "version": "1", "command": ["synthetic-explicit-edges"],
                                             "revision": current["revision"], "source_state": current["source_state"]}
-    collect(config, destination / "snapshot")
-    (destination / "collection.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+    configuration = repo / ".sdd" / "architect" / "collection.json"
+    configuration.parent.mkdir(parents=True)
+    configuration.write_text(json.dumps(config, indent=2), encoding="utf-8")
+    collect(config, report / "snapshot-1")
     print(destination)
 
 

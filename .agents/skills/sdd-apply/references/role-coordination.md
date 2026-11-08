@@ -30,6 +30,24 @@ checks, commits, blockers and rejected approaches. Send paths
 and a bounded summary; exclude author conversation, grading answers and unrelated
 task histories. Workers read their contract and task material, not execution algorithms.
 
+For ordinary changes and refactoring affecting software, also send executors and
+code reviewers the absolute sibling `sdd-code-design/SKILL.md` path and the absolute
+path of their selected workflow:
+
+- Executor, ordinary change: `workflows/add-feature-outside-in.md`, **implementation**.
+- Executor, refactoring: `workflows/refactor-code.md`, **implementation**.
+- Code reviewer, either work kind: `workflows/diagnose-code.md`, **implemented code**.
+
+For refactoring, include the accepted structural target, original behavior sources,
+local acceptance, `contributes_to`, `preserves` and approved test changes.
+Resolve the skill and workflow paths through
+their [executor](../agents/executor.md) or [code lens](code-lens.md) instructions,
+verify the files are readable, and explicitly assign that use in the fresh context.
+Reading them in the orchestrator does not apply them in a worker. Missing files
+block the dependent assignment; report the dependency gap. Explorer and verification
+reviewers use their own contracts without these calls. Existing packets and result
+formats remain the authority; no extra role or review round is required.
+
 Use actual fresh-context and messaging capabilities. Busy slots require waiting;
 missing capabilities block the dependent launch. Reconcile a lost worker's actual
 work before replacement through [resume](../flows/resume.md). Fabricated launch
@@ -55,8 +73,19 @@ capabilities under `capabilities.observations`, and register its `assignment`.
 Use `role_id` as assignment `id`, the original project root as `scope.project`,
 change ID as `scope.work`, and the task ID or null as `scope.task`. Pass the
 resulting packet and [explorer instructions](../../sdd-shared/agents/explorer.md).
-A continued context gets a new role ID after the prior role finishes; reuse only
-within one task, with the same launch identity, during task work.
+Persist assignments and actual launch evidence through `role_register`, results
+through `role_result`, and check evidence through the existing
+[checks API](api-checks.md) and [execution store](state-storage.md).
+
+The sdd-apply context policy keeps Explorer separate from executors and reviewers.
+Start its first assignment in a fresh context without their history.
+A continued context gets a new role ID and current basis after the prior role
+finishes. Reuse it for research or registered checks only within one task, with
+the same host, selected profile and launch identity, during task work. Another
+task, changed profile or lost context requires a fresh Explorer. Verify the live
+context through the host before continuation. Changed inputs require current check
+evidence. New assignments and contexts preserve repair/retry budgets and the
+[whole-batch deadline](api-checks.md#execution-ownership-and-one-batch-deadline).
 
 After the executor reports completion, stop writers and freeze the candidate.
 The orchestrator inventories project instructions, CI and configuration, registers

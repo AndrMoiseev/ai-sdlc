@@ -33,6 +33,9 @@
 Прочитай [формат рефакторинга](../../sdd-shared/references/document-format-refactoring.md).
 Создай [proposal](../templates/refactoring-proposal.md) и
 [design](../templates/refactoring-design.md). Specs и искусственные REQ не нужны.
+Для программного рефакторинга явно примени `sdd-code-design` с предметом
+`proposed design` по [авторскому контракту](architect.md#применение-sdd-code-design).
+Сравнение структур и способ проверки улучшения включи в design.
 Журнал, вопросы, state и review веди относительно выбранного корня по
 общим правилам. Шаблоны показывают форму: замени пример реальными источниками,
 областями и проверяемыми результатами проекта.
