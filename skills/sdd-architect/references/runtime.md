@@ -21,12 +21,16 @@ Keep all retained materials in `<report-dir>`:
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
 | Final report | `report.md` |
+| Continuation state maintained by the orchestrator | `state.md` |
 | Collection plan and captured identity | `collection-plan.md`, `identity-1.json` |
 | Tool logs and generated input reports | `logs/`, `raw/` |
 | Immutable snapshots and their raw input copies/configuration | `snapshot-1/`, `snapshot-2/`, ... |
 | Calculated views | `analysis-1.json`, `analysis-2.json`, ... |
-| Candidate shortlist and source diagnosis notes | `diagnosis.md` |
-| Authored cards and validated ordering | `cards.json`, `ranked-1.json` |
+| Candidate shortlist and diagnosis index | `diagnosis.md` |
+| Separate source diagnosis for each candidate group | `diagnoses/<group-id>/diagnosis-1.md`, `diagnosis-2.md`, ... |
+| Saved assignment, actual launch and worker result | `assignments/<assignment-id>/request.json`, `launch.json`, `result.json` |
+| Retained versions of mutable assignment inputs | `assignments/<assignment-id>/inputs/` |
+| Authored cards, validated ordering and optional generated Markdown | `cards.json`, `ranked-1.json`, `ranked-1.md` |
 
 Retain materials as they are produced, including incomplete results and collection
 gaps. Direct report-producing tools here when supported; otherwise copy their
@@ -35,6 +39,18 @@ may originate elsewhere; `collect` retains their raw copies in the snapshot.
 Link retained evidence from `report.md` with relative paths so the report directory
 can be reviewed as a unit. New outputs must resolve inside this directory, including
 through symlinks. Do not overwrite an earlier run's artifacts.
+
+Follow the [assignment and context contract](orchestration.md) for these records.
+Keep [continuation state](continuation.md#save-continuation-state) linked to actual
+requests, launches, results and primary artifacts; verify them when resuming.
+The orchestrator writes requests, launch evidence and collection plans; the
+assigned worker writes its result and named outputs. Keep assignment IDs and group
+IDs stable, distinct and safe single directory components. Retain the input versions
+behind a request before changing configuration, plans or cards. A completed group
+diagnosis stays intact; a further diagnosis uses a new numbered output and the
+index links the applicable result. Transfer an output only after the previous
+writer's stopped state is verified. All retained audit records belong here;
+caches and disposable execution state use external runtime storage below.
 
 Maintain `<project-root>/.sdd/architect/collection.json` through
 [Collection](collection.md#maintain-project-configuration). It is reusable project
@@ -61,13 +77,22 @@ adjacent lockfiles; no project environment or dependency setup is required.
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" identity --config "<project-root>/.sdd/architect/collection.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<report-dir>/snapshot-1"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" analyze --snapshot "<report-dir>/snapshot-1/snapshot.json" --output "<report-dir>/analysis-1.json"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --snapshot "<report-dir>/snapshot-1/snapshot.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/report.md"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --snapshot "<report-dir>/snapshot-1/snapshot.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
 ```
 
 Resolve placeholders before execution. Existing output paths are rejected to
 retain the prior snapshot. JSON is the complete result; the Markdown output is
-a starting report in the user's language, with at most five ready cards.
+a starting report in the user's language, with at most five ready cards. Keep that
+generated file separate from the integration architect's final `report.md`.
 Inspect gaps in successful JSON results: success does not mean every measurement exists.
+
+Register the resolved commands, cwd, exact input basis, outputs and limits in
+`collection-plan.md` before assigning them to explorer. Register `identity` stdout
+as a captured artifact such as `identity-1.json`; it has no `--output` option.
+For `rank`, retain the exact completed cards version with the assignment and keep
+it stable until the command returns. Further checks use unused numbered outputs;
+link the relevant result from the authored report. The examples show command shape,
+not permission for a research assignment to execute checks.
 
 The scripts use only the standard library. Cached and empty-cache execution
 therefore require no package download, including deliberate `--offline` runs.

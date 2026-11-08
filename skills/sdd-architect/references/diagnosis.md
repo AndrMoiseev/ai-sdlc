@@ -2,10 +2,13 @@
 
 ## Request focused code diagnosis
 
-Own the investigation queue and final recommendation decision. Explicitly load
-[sdd-code-design](../../sdd-code-design/SKILL.md) and select its
+Follow the analysis and final-report phases in the [workflow](workflow.md).
+The orchestrator owns the investigation queue and gives an architect one bounded
+candidate-group assignment. The assigned architect explicitly loads
+[sdd-code-design](../../sdd-code-design/SKILL.md) and selects its
 [focused code diagnosis](../../sdd-code-design/workflows/diagnose-code.md) route.
-Apply it to each selected candidate group with source access.
+Apply it to that source-available group, including owners, consumers, wiring and
+tests needed to explain the mechanism across package or module boundaries.
 The sibling paths are relative to this reference; from the `sdd-architect` skill
 directory the entry point is `../sdd-code-design/SKILL.md`. Resolve the loaded
 skill's own references from its directory. This is an explicit file-based call;
@@ -27,16 +30,21 @@ Its focused rule selection replaces a full PR review for this task.
 
 Keep one investigation per related candidate group. Follow a cold contract or
 invariant owner when needed to establish the cause; record the scope expansion.
-Retain the shortlist, returned diagnoses and rejected candidates in
-`<report-dir>/diagnosis.md` as the investigation progresses.
+Write the bounded diagnosis to its assigned artifact. Return its identity, source
+basis, inspected scope, proposed disposition and evidence references to the
+orchestrator. It links that result, its gaps and rejected candidates from the
+shortlist in `<report-dir>/diagnosis.md`. Further research or checks return through
+the orchestrator; the architect does not launch other roles.
 Inspect supplied history for mechanical changes before interpreting activity as
 evidence of a maintenance problem. Metrics explain selection; they do not prove
 the diagnosis or determine implementation priority.
 
 ## Assess the returned diagnosis
 
-Use the diagnosis as evidence for the questions below; revisit source only for
-gaps or inconsistent claims rather than repeating an adequate inspection.
+The group architect applies the questions below to its bounded result. The fresh
+integration architect uses those diagnoses as evidence for the final recommendation
+decision; revisit source for gaps or inconsistent claims rather than repeating
+an adequate inspection.
 Merge findings that share a cause, preserve justified non-issues and distinguish
 uninspected areas from areas without findings. A rule deviation becomes a
 recommendation only when the scenario, mechanism and feasible improvement are
