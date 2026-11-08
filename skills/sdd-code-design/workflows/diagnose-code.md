@@ -1,17 +1,21 @@
-# Focused code diagnosis
+# Focused diagnosis
 
-Diagnose a selected candidate for a refactoring decision: a hotspot, a related
-group of declarations, or an area selected for a known risk or upcoming change.
-Return findings grounded in source code. The caller owns candidate selection,
-architectural effect judgments and priority across recommendations.
+Diagnose a selected proposed design or implemented code: a contract, a related
+group of responsibilities, or an area selected for a known risk or upcoming change.
+Ground findings in the named work product. The caller owns scope, architectural
+effect judgments and priority across recommendations.
 
 This route is read-only. End with the diagnosis; implementation, persistent gates
 and project-instruction edits require their own task. A selected candidate does
 not start the full PR-review workflow or a repository-wide rule audit.
+The caller's lens boundaries, report format, check-execution limits, severity and
+acceptance policy govern the return. Send observations outside the assigned lens
+to the caller with their intended owner; they are not extra verdicts.
 
 ## Table of Contents
 
 - [Establish the input and scope](#establish-the-input-and-scope)
+- [Inspect the selected work product](#inspect-the-selected-work-product)
 - [Inspect the common questions, then select rules](#inspect-the-common-questions-then-select-rules)
 - [Establish a consequential finding](#establish-a-consequential-finding)
 - [Return the diagnosis](#return-the-diagnosis)
@@ -20,12 +24,17 @@ not start the full PR-review workflow or a repository-wide rule audit.
 
 Recover these inputs from the calling skill or the user's explicit request:
 
-- Candidate paths, declarations and source revision/working state.
+- Work product: **proposed design** or **implemented code**; candidate paths,
+  document sections or declarations, and revision/working state.
 - Reason for selection: supplied metric signals, an incident, a critical contract
   or a planned change. Metrics may be absent.
 - The change or behavior scenario, required product behavior and known constraints.
-- Available measurements with their scope and limitations, relevant history and
-  existing evidence about consumers, wiring and tests.
+- Available measurements with their scope and limitations, relevant history,
+  accepted requirements and evidence about consumers, wiring and tests.
+
+## Inspect the selected work product
+
+For **implemented code**, use source inspection:
 
 Read the selected declarations in full and inspect the consumers, invariant owners,
 wiring and tests needed to explain the scenario. Inspect representative commits
@@ -38,6 +47,30 @@ is needed and stop expanding when the mechanism and affected consumers are clear
 Keep uninspected areas and unavailable evidence explicit. Without source access,
 return questions and limits; do not invent source findings. If no scenario was
 supplied, derive an explicitly hypothetical one from the inspected code.
+
+For **proposed design**, read the requirements and the selected design's contracts,
+responsibilities, dependency direction, operations and proposed checks. Trace a
+scenario through the explicitly described construction. Existing code and tests
+can establish the current baseline or integration constraints; cite them separately
+from claims about the proposal. Future code and test execution are not prerequisites
+for identifying a contradiction in the design.
+
+Distinguish three conclusions:
+
+- **Design defect:** an explicit choice permits a concrete violation or contradicts
+  another required property. Cite the choice, requirement and failure mechanism.
+- **Material gap:** an unspecified choice prevents assessing an important guarantee
+  or selecting a boundary. State which decision depends on it and what would resolve it.
+- **Implementation freedom:** a detail can be decided later without changing the
+  required guarantee or boundary. Its omission is not a finding.
+
+For example, a design that sends confirmation before saving contradicts a requirement
+that a failed save sends no confirmation. Unspecified ordering is a material gap
+when that guarantee depends on it. A helper's unspecified name can remain an
+implementation choice. Proposed tests remain proposed; the diagnosis establishes
+neither runtime behavior nor conformance of code that has not been inspected.
+When existing source is unavailable, qualify the affected baseline claim without
+discarding conclusions supported by the design itself.
 
 ## Inspect the common questions, then select rules
 
@@ -52,7 +85,7 @@ concerns something else:
    account for when making the representative change? For a proposed interface
    change, apply the [consumer-obligation comparison](../references/decomposition/rules.md#11-compare-consumer-obligations-before-and-after).
 
-Use observed code features to select one primary reference and at most one or two
+Use inspected code or explicitly proposed constructions to select one primary reference and at most one or two
 secondary references. The table supplies starting points, not mandatory checks
 for every candidate. Select language examples through [guidelines](../guidelines.md)
 only when needed to establish a feasible option.
@@ -78,14 +111,14 @@ diagnosis or the choice of transformation.
 
 For each suspected problem:
 
-1. Locate the observed construction and cite the rule's file and section. Explain
+1. Locate the observed or proposed construction and cite the rule's file and section. Explain
    why the rule applies in this context, including relevant exceptions.
-2. Trace the scenario through the code to a concrete error, coordinated edit,
+2. Trace the scenario through the code or described design to a concrete error, coordinated edit,
    hidden dependency or repeated work. Inspect existing protection and an
    alternative explanation before calling it a problem.
-3. Compare the current construction with the smallest useful transformation.
+3. Compare the inspected construction with the smallest useful alternative.
    Identify changed declarations, responsibility/contract ownership, consumers,
-   preserved behavior, cost drivers and intervention risks. Retaining the current
+   required behavior, cost drivers and intervention risks. Retaining the inspected
    construction is a valid result.
 4. State an acceptance check that discriminates the claimed improvement. Separate
    checks already performed from proposed checks and predicted effects.
@@ -103,11 +136,11 @@ a useful acceptance check while graph or complexity metrics remain unchanged.
 
 ## Return the diagnosis
 
-Start with the candidate, source identity, selection reason and inspected scope,
+Start with the work product, candidate, source identity, selection reason and inspected scope,
 including any cold dependencies and important omissions. Return a compact finding
 for each distinct cause with:
 
-- **Evidence and rule:** exact paths and declarations, observed construction,
+- **Evidence and rule:** exact paths and document sections or declarations, inspected construction,
   relevant consumers/tests, and the heuristic reference and section.
 - **Scenario and mechanism:** the consequence, existing protection, alternative
   explanation examined and what the inspection established.
@@ -119,6 +152,10 @@ for each distinct cause with:
 - **Uncertainty:** confidence in observation, diagnosis and expected effect
   separately; any consequential question, accessible next check and how its
   possible answers change the decision.
+
+For proposed design, retain the distinction between a design defect, material gap
+and implementation freedom in the caller's existing finding or limitation fields.
+Use its completion rules when a material gap prevents a required conclusion.
 
 Retain important non-issues with their explanation and unresolved questions with
 their limits. Zero justified findings is a completed diagnosis; do not widen the

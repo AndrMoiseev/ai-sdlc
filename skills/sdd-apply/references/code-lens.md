@@ -9,6 +9,17 @@ Read the approved design and the complete owned implementation diff, including
 configuration. Report concrete architecture or code-rule violations with proof;
 other improvements are recommendations recorded as technical debt.
 
+For an ordinary change affecting software, explicitly read
+[sdd-code-design](../../sdd-code-design/SKILL.md) and use
+[focused diagnosis](../../sdd-code-design/workflows/diagnose-code.md) with
+**implemented code** as the work product. Skip this call for `refactoring`.
+The candidate is the complete owned implementation diff at the frozen commit;
+inspect affected consumers and contracts where needed. Select references from
+the sources independently of the author. The diagnosis supplies evidence and
+mechanisms for this lens's existing findings, within the review policy's proof,
+severity and repair rules. Route behavior and test-sufficiency observations to
+verification; suggested checks go to the orchestrator. Execute no diagnosis checks.
+
 Use these questions where the changed code exposes the relevant concern:
 
 - **Invariants:** where are domain constraints enforced across parsing,

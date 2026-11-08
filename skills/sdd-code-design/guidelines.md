@@ -56,14 +56,22 @@ The C# files retain the upstream text. The Kotlin and Go files are additions in 
 
 ## By Task
 
-### Focused Code Diagnosis
+### Focused Diagnosis
 
-For an explicit request to diagnose a selected candidate, including a request from
-`sdd-architect`, use [focused code diagnosis](workflows/diagnose-code.md). This route
-accepts hotspots and candidates selected for a known risk or upcoming change.
+For an explicit request to diagnose a proposed design or implemented code, including
+a scoped review requested by an SDD role, use [focused diagnosis](workflows/diagnose-code.md).
+Select its work product explicitly. The code branch also accepts hotspots and
+candidates selected by `sdd-architect` for a known risk or upcoming change.
 It owns the scoped inspection and rule selection; return its findings before the
 caller decides which recommendations to prioritize. A general PR review uses the
 separate route below.
+
+### Feature Design
+
+For a feature's proposed solution, use [outside-in](workflows/add-feature-outside-in.md)
+with **proposed design** as the work product. Return contracts, responsibility and
+invariant owners, effect ordering, alternatives and proposed checks in the caller's
+documents. Its implementation steps apply only to an implementation assignment.
 
 ### Code Review
 
@@ -84,7 +92,7 @@ separate route below.
 
 | What you're writing | Load these files |
 |---------------------|-------------------|
-| A brand-new feature | `workflows/add-feature-outside-in.md`, `references/outside-in-tdd/knowledge.md` |
+| A new or changed feature | `workflows/add-feature-outside-in.md` (implementation), `references/outside-in-tdd/knowledge.md` |
 | A new domain type with invariants | `references/encapsulation/rules.md`, `references/encapsulation/examples/` |
 | A new public API | `references/api-design/knowledge.md`, `references/api-design/rules.md` |
 | A unit test (first for this SUT) | `references/outside-in-tdd/rules.md`, `references/outside-in-tdd/examples/` |

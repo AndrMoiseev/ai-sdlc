@@ -8,6 +8,13 @@ The skill is based on Mark Seemann's *Code That Fits in Your Head: Heuristics fo
 
 Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. A sibling APM skill can also explicitly instruct the agent to read `../sdd-code-design/SKILL.md`, relative to its own directory, and apply it to a named task. Implicit invocation remains disabled; task relevance or a passing mention alone does not activate it.
 
+[sdd-spec](../sdd-spec/README.md) uses outside-in when designing ordinary software
+changes and focused diagnosis when reviewing that design. [sdd-apply](../sdd-apply/README.md)
+uses the same workflows for implementation and code review. Their roles retain
+scope, check execution and acceptance decisions. These integrations exclude the
+SDD refactoring route; the existing focused diagnosis used by `sdd-architect`
+remains available.
+
 Use it when a task is about:
 
 - designing complex code, APIs, domain types, validation boundaries, and invariants
@@ -30,7 +37,25 @@ Code examples include the original C# material and Kotlin/JVM and Go counterpart
 
 The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. Focused diagnosis returns findings. Tasks that authorize lasting gates or project-instruction edits can operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
 
-### Focused code diagnosis
+### Design and implementation
+
+Outside-in starts with the external contract and works toward responsibility
+boundaries, invariant owners and effect ordering. A design assignment returns
+the proposed construction and checks; an implementation assignment produces
+code and execution evidence within its authorized scope.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Design a feature | `$sdd-code-design Design order confirmation from these requirements. Identify contracts, invariant owners and effect ordering; implementation is a later task.` | A proposed design with examples, alternatives and verification strategy |
+| Implement a feature | `$sdd-code-design Implement order confirmation using the approved design and acceptance criteria. Work within the assigned order module.` | Code and checks for the assigned scope, with material contract conflicts returned to the caller |
+| Diagnose a design | `$sdd-code-design Diagnose the proposed order-confirmation design against its requirements. No implementation exists yet. Distinguish design defects, material gaps and implementation freedom.` | Findings grounded in documents, with proposed checks and limits on claims about future code |
+
+### Focused diagnosis
+
+For a proposed design, diagnosis traces scenarios through documented contracts
+and operations. It distinguishes a contradictory choice from an unresolved
+decision and from a detail the implementer can choose. Existing code can supply
+integration evidence; missing future code does not prevent document-based findings.
 
 [sdd-architect](../sdd-architect/README.md) uses this route after selecting candidates
 from metrics or a known risk/change scenario. The diagnosis follows the relevant
