@@ -8,12 +8,11 @@ The skill is based on Mark Seemann's *Code That Fits in Your Head: Heuristics fo
 
 Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. A sibling APM skill can also explicitly instruct the agent to read `../sdd-code-design/SKILL.md`, relative to its own directory, and apply it to a named task. Implicit invocation remains disabled; task relevance or a passing mention alone does not activate it.
 
-[sdd-spec](../sdd-spec/README.md) uses outside-in when designing ordinary software
-changes and focused diagnosis when reviewing that design. [sdd-apply](../sdd-apply/README.md)
-uses the same workflows for implementation and code review. Their roles retain
-scope, check execution and acceptance decisions. These integrations exclude the
-SDD refactoring route; the existing focused diagnosis used by `sdd-architect`
-remains available.
+[sdd-spec](../sdd-spec/README.md) uses outside-in for ordinary software design and
+the refactoring workflow for structural changes with preserved behavior.
+[sdd-apply](../sdd-apply/README.md) uses the corresponding workflow for implementation.
+Both use focused diagnosis in their design or code reviews. Their roles govern
+scope, check execution and acceptance decisions.
 
 Use it when a task is about:
 
@@ -49,6 +48,25 @@ code and execution evidence within its authorized scope.
 | Design a feature | `$sdd-code-design Design order confirmation from these requirements. Identify contracts, invariant owners and effect ordering; implementation is a later task.` | A proposed design with examples, alternatives and verification strategy |
 | Implement a feature | `$sdd-code-design Implement order confirmation using the approved design and acceptance criteria. Work within the assigned order module.` | Code and checks for the assigned scope, with material contract conflicts returned to the caller |
 | Diagnose a design | `$sdd-code-design Diagnose the proposed order-confirmation design against its requirements. No implementation exists yet. Distinguish design defects, material gaps and implementation freedom.` | Findings grounded in documents, with proposed checks and limits on claims about future code |
+
+### Refactoring
+
+The refactoring workflow compares the current and target structure while tracing
+the behavior that must survive. It explains the benefit to owners and consumers,
+identifies missing baseline evidence and describes usable transition stages.
+Design assignments return proposals; implementation assignments transform the
+approved scope and return check evidence for the caller's acceptance process.
+
+Structural outcomes and preserved behavior have separate criteria. A removed
+internal boundary may retire its structural tests; mixed tests retain their
+behavioral guarantees at an appropriate boundary. Compatibility work follows
+explicitly agreed scope.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Design a refactoring | `$sdd-code-design Design a refactoring of the streaming publisher to separate the publication decision from I/O. Preserve the rule that publication failure stops further input reads. Compare alternatives; implementation is a later task.` | A structural comparison, preservation sources and gaps, transition stages and proposed checks |
+| Implement a refactoring | `$sdd-code-design Implement the approved publisher refactoring within the assigned module. Use the supplied baseline, preservation criteria and approved test changes.` | The assigned structural change, retained behavior checks and evidence for review |
+| Review a refactoring | `$sdd-code-design Diagnose the proposed publisher refactoring against its structural result and preserved failure behavior. Inspect the original sources and test-change proposal.` | Separate findings about the target structure, preservation evidence and transformation risks |
 
 ### Focused diagnosis
 
@@ -98,7 +116,7 @@ references/              # Focused reference packs by theme
 references/tooling/      # Executable measurement commands (complexity, cycles, dead code, …)
 ```
 
-Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, debugging, threat modelling, and operationalizing findings into gates.
+Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, refactoring, debugging, threat modelling, and operationalizing findings into gates.
 
 ## Source Boundaries
 
@@ -154,6 +172,7 @@ not copy the external implementation or introduce a runtime dependency.
 
 ## Changes from Upstream
 
+- Added a refactoring workflow for proposed design and implementation, integrated into SDD authoring, execution and focused reviews. It uses separate structural and preservation criteria and the caller's existing test-evolution rules.
 - Added semantic-layer diagnosis, paired policy and representation-change scenarios, and safeguards for moving reads and effects. Sources and adaptation boundaries are recorded above.
 - Added focused code diagnosis for selected refactoring candidates and an explicit handoff from `sdd-architect`; this workflow is a fork addition.
 - Added consumer-obligation comparison and hypothetical removal of suspected indirection to focused diagnosis, adapted from [Matt Pocock's codebase-design](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md).

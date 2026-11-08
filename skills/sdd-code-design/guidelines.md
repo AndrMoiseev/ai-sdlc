@@ -102,6 +102,13 @@ documents. Its implementation steps apply only to an implementation assignment.
 
 ### Refactoring
 
+For a structural change within a declared preservation boundary, use
+[refactoring](workflows/refactor-code.md) with **proposed design** or
+**implementation** as assigned. Return the structural comparison, preservation
+evidence and checks in the caller's existing result. For an independent assessment,
+use [focused diagnosis](workflows/diagnose-code.md) with the relevant work product.
+Select references below for the specific transformation.
+
 | What you're changing | Load these files |
 |----------------------|-------------------|
 | A long/complex function | `references/decomposition/rules.md`, `references/decomposition/patterns.md` |

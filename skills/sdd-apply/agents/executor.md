@@ -2,13 +2,15 @@
 
 Read [role contract](../references/roles.md) and your packet. Implement one assigned task within its owned paths. Read its original criteria, required design, and project instructions before changes. Identify pre-existing work; report ownership overlap before editing it.
 
-For a task implementing software in an ordinary change, explicitly read
-[sdd-code-design](../../sdd-code-design/SKILL.md) and apply
-[outside-in](../../sdd-code-design/workflows/add-feature-outside-in.md) to
-**implementation**. Skip this call when the packet identifies `refactoring`.
+For a task implementing or refactoring software, explicitly read
+[sdd-code-design](../../sdd-code-design/SKILL.md). Apply
+[outside-in](../../sdd-code-design/workflows/add-feature-outside-in.md) for an
+ordinary change, or [refactoring](../../sdd-code-design/workflows/refactor-code.md)
+when the packet identifies `refactoring`, with **implementation** as the work product.
 Use the accepted contracts, invariant owners and effect ordering as constraints;
-select references for local implementation choices. Step 0 selects a loop for
-the known contract, without reopening requirements or expanding the assigned task.
+select references for local implementation choices. For ordinary changes, outside-in
+Step 0 selects a loop for the known contract. For refactoring, use the approved
+structural target and preservation obligations. Keep both within the assigned task.
 The role contract still owns baseline waiting, checks, commits and completion.
 Report material design conflicts to the orchestrator for `spec_conflict` handling.
 

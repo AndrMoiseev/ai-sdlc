@@ -32,6 +32,14 @@ Recover these inputs from the calling skill or the user's explicit request:
 - Available measurements with their scope and limitations, relevant history,
   accepted requirements and evidence about consumers, wiring and tests.
 
+For **refactoring**, also recover the current and target structure, the declared
+preservation boundary, original behavior sources and proposed or approved test
+changes. In SDD these come from proposal/design and tasks when present; assess
+`result` and `preservation` separately without requiring specs or new REQ IDs.
+For a task candidate, distinguish its local acceptance and contribution from
+whole-result criteria and later transition stages. Use the original baseline to
+assess preservation claims; newly green tests alone do not establish prior behavior.
+
 ## Inspect the selected work product
 
 For **implemented code**, use source inspection:
