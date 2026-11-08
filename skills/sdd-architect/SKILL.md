@@ -19,6 +19,12 @@ public contract and dependency rules. Gradle projects describe collection scope.
 Recommend package conventions and ArchUnit checks for boundaries; creating or
 splitting Gradle projects is outside this method.
 
+## Project configuration
+
+For every run with a project checkout, load and refresh
+`.sdd/architect/collection.json` through
+[project configuration maintenance](references/collection.md#maintain-project-configuration).
+
 ## Default route: full cycle
 
 A bare `$sdd-architect`, `/sdd-architect`, or skill selection without additional
