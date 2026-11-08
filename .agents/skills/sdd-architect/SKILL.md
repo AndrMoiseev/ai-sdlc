@@ -19,6 +19,12 @@ public contract and dependency rules. Gradle projects describe collection scope.
 Recommend package conventions and ArchUnit checks for boundaries; creating or
 splitting Gradle projects is outside this method.
 
+## Project configuration
+
+For every run with a project checkout, load and refresh
+`.sdd/architect/collection.json` through
+[project configuration maintenance](references/collection.md#maintain-project-configuration).
+
 ## Default route: full cycle
 
 A bare `$sdd-architect`, `/sdd-architect`, or skill selection without additional
@@ -45,7 +51,7 @@ not identify a suitable Kotlin/Gradle checkout.
 | Start the full cycle or fill measurement gaps | [Collection](references/collection.md), then [runtime](references/runtime.md) before any script | Reproducible snapshot and explicit collection gaps; continue to analysis and recommendations |
 | Explicit request to analyze existing reports, including reports without sources | [Collection](references/collection.md), import branch | Qualified snapshot; source-free results remain hypotheses |
 | Calculate or interpret a signal | [Measurements](references/measurements.md) | Deterministic views and an investigation shortlist |
-| Diagnose candidates and compare changes | [Diagnosis](references/diagnosis.md) | One mechanism and feasible change per recommendation |
+| Diagnose candidates and compare changes | [Diagnosis](references/diagnosis.md), including its explicit `sdd-code-design` call | Source-grounded findings and a feasible change per recommendation |
 | Prioritize and deliver | [Decision output](references/decision-output.md) | Validated cards, tied priority groups and execution dependencies |
 | Review a diff or verify an implemented recommendation | [Reassessment](references/reassessment.md) | Comparable evidence for the affected code and consumers |
 
@@ -62,9 +68,14 @@ calculate observations; the agent establishes responsibilities, mechanisms and e
    revision prevents implementation-ready recommendations. A local data defect limits
    the affected claim rather than invalidating unrelated source evidence.
 3. Calculate views and shortlist 8–12 candidate groups. Merge signals for the same
-   area before selecting; start with structural evidence, then behavioral risk.
-4. Read the code, consumers, wiring, tests and representative changes for each group.
-   Test an alternative explanation and compare the current system with a concrete change.
+   area before selecting; retain important candidates justified by a known risk
+   or upcoming change even without a hotspot signal.
+4. Explicitly read the sibling [sdd-code-design skill](../sdd-code-design/SKILL.md)
+   and its [focused diagnosis](../sdd-code-design/workflows/diagnose-code.md) workflow.
+   Apply it to each source-available candidate group using the
+   [request and return contract](references/diagnosis.md). Inspect findings and
+   compare the current system with a concrete change. Source-free candidates
+   remain questions for investigation.
 5. Separate ready recommendations, decision-changing checks, observations and rejections.
    Validate and order the authored cards with `rank`. Explain each strict priority
    difference through the scenario, keeping ties visible.

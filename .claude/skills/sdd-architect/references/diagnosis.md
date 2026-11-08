@@ -1,5 +1,48 @@
 # From a candidate to a feasible change
 
+## Request focused code diagnosis
+
+Own the investigation queue and final recommendation decision. Explicitly load
+[sdd-code-design](../../sdd-code-design/SKILL.md) and select its
+[focused code diagnosis](../../sdd-code-design/workflows/diagnose-code.md) route.
+Apply it to each selected candidate group with source access.
+The sibling paths are relative to this reference; from the `sdd-architect` skill
+directory the entry point is `../sdd-code-design/SKILL.md`. Resolve the loaded
+skill's own references from its directory. This is an explicit file-based call;
+it does not rely on automatic skill selection or the Skill tool.
+
+Pass the candidate's paths/declarations, revision and working state, selection
+reason, qualified metric records and limitations, known change/behavior scenario,
+required behavior and relevant source/history evidence. Use a source-grounded
+hypothetical scenario when no roadmap is available. Resolve the sibling entry
+point and workflow before diagnosis; if a required file is unavailable, report
+that dependency gap and retain the affected candidate as an investigation item.
+Without source access, retain questions rather than claiming a diagnosis ran.
+
+The requested result is a bounded diagnosis with inspected scope, source evidence,
+heuristic references, consequential mechanisms, existing protection, alternatives,
+feasible changes, cost/risk, acceptance checks and uncertainty. The route's common
+contract/invariant/dependency questions apply regardless of the selecting metric.
+Its focused rule selection replaces a full PR review for this task.
+
+Keep one investigation per related candidate group. Follow a cold contract or
+invariant owner when needed to establish the cause; record the scope expansion.
+Inspect supplied history for mechanical changes before interpreting activity as
+evidence of a maintenance problem. Metrics explain selection; they do not prove
+the diagnosis or determine implementation priority.
+
+## Assess the returned diagnosis
+
+Use the diagnosis as evidence for the questions below; revisit source only for
+gaps or inconsistent claims rather than repeating an adequate inspection.
+Merge findings that share a cause, preserve justified non-issues and distinguish
+uninspected areas from areas without findings. A rule deviation becomes a
+recommendation only when the scenario, mechanism and feasible improvement are
+established. Keep the heuristic
+file/section with the mechanism; do not count rule matches or deviations as a
+quality score. Assign readiness and M/R/S effects here, then prioritize through
+[decision output](decision-output.md). Zero justified recommendations is valid.
+
 For each selected candidate, answer five questions with inspectable evidence:
 
 1. What is observed? Cite the revision, full path, declaration/signature, actual

@@ -30,7 +30,9 @@ come from the snapshot. Required ready-card fields are:
   thresholds, suitability, M/R/S weights and shared provenance groups. Use an
   empty list only for a source-grounded issue unsupported by a measured signal.
 - `scenario`, `mechanism`, `alternative_explanation` and the observed outcome of
-  checking it; distinguish facts from a hypothetical future scenario.
+  checking it; distinguish facts from a hypothetical future scenario. In
+  `mechanism`, retain the diagnostic heuristic's file/section and explain its
+  applicability; the rule reference does not replace inspected source evidence.
 - `baseline`, `chosen_option`, responsibility/contract/dependency before/after,
   concrete consumers, and why the smaller or no-change option was not selected.
 - `effects` for modularity, regression_risk and development_speed, plus
@@ -63,6 +65,11 @@ For every strict priority difference state “above the next because …”, ref
 to the scenario and value order. Equal effects remain tied; explain effort,
 intervention risk, prerequisites and historical exposure as execution considerations.
 Do not assign an artificial scalar score to break a tie.
+
+Hotspot position and the number of heuristic deviations are investigation context,
+not an implementation ranking. A stronger type contract may reduce regression
+risk without changing graph/complexity metrics or demonstrating better modularity;
+assign only the effects established for its scenario.
 
 Remove duplicate recommendations for the same cause or identify alternatives and
 select one. Preparation tests belong to their parent change. A lower-priority
