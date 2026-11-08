@@ -17,8 +17,8 @@ assigned. Do not select or narrow checks, decide whether evidence is sufficient,
 choose repairs, accept work or launch reviewers. Return execution facts to the
 orchestrator; the assigned review lens assesses acceptance criteria.
 
-Keep the assignment identity, observed capabilities, selection and actual launch
-trace with the result. Stop on a permission failure or exhausted limit and report
-it to the orchestrator; a new profile or context does not reset limits or grant
-permissions. Write only the allowed result artifacts. Preserve sources, normative
-documents, settings and check registries.
+Return the assignment identity, source basis and actual artifact references in the
+assigned result form. Stop on a permission failure or exhausted limit and report
+it to the orchestrator. Write only the allowed result artifacts. Preserve sources,
+normative documents, settings and check registries. Follow the shared
+[coordination rules](../references/coordination.md) when reporting or handing off work.

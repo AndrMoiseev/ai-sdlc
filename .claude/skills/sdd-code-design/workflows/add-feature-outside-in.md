@@ -1,10 +1,13 @@
 # Add a Feature Outside-In Workflow
 
-Build a new feature from the outside (HTTP / CLI boundary) inward to the domain, test-first.
+Design or implement a feature from its external boundary inward to the domain.
+Choose the work product below before following the implementation steps.
 
 ## Table of Contents
 
 - [When to Use](#when-to-use)
+- [Choose the Work Product](#choose-the-work-product)
+- [Proposed Design](#proposed-design)
 - [Prerequisites](#prerequisites)
 - [Step 0: Choose the Loop Granularity](#step-0-choose-the-loop-granularity)
 - [Step 1: Clarify the Boundary](#step-1-clarify-the-boundary)
@@ -16,18 +19,63 @@ Build a new feature from the outside (HTTP / CLI boundary) inward to the domain,
 - [Step 7: Decompose If Needed](#step-7-decompose-if-needed)
 - [Step 8: Add Cross-Cutting Concerns](#step-8-add-cross-cutting-concerns-if-needed)
 - [Step 9: Threat-Model If Publicly Exposed](#step-9-threat-model-if-publicly-exposed)
-- [Step 10: Commit in Small, Reversible Steps](#step-10-commit-in-small-reversible-steps)
+- [Step 10: Preserve Coherent, Recoverable History](#step-10-preserve-coherent-recoverable-history)
 - [Quick Checklist](#quick-checklist)
 - [Common Mistakes](#common-mistakes)
 - [Exit Criteria](#exit-criteria)
 
 ## When to Use
 
-- Adding a new endpoint, command, or user-visible capability
+- Designing or implementing a new or changed endpoint, command, or user-visible capability
 - Starting a new feature from scratch
 - You want the fastest credible path to a deployable slice
 
+## Choose the Work Product
+
+Use **proposed design** when the assignment requests a solution before implementation.
+Use **implementation** when it authorizes building the feature or one of its tasks.
+The calling workflow governs scope, accepted requirements, write permissions,
+check execution, commits and acceptance. Apply only the steps within that assignment.
+For an approved contract, use Step 0 to select the implementation loop; return a
+material contract conflict to the caller instead of discovering a replacement spec.
+
+## Proposed Design
+
+Read the required behavior, representative inputs/outputs, constraints and existing
+architecture. Inspect relevant code and consumers when available; distinguish that
+baseline from the proposed construction. A new feature can be designed before its
+code, executable tests or walking skeleton exist.
+
+Work through these questions using the relevant references from the steps below:
+
+| Question | Design result | References in this workflow |
+| --- | --- | --- |
+| Where does the behavior begin, and what can its caller observe? | Inputs, outputs, errors and external obligations | Step 1 |
+| Which cases distinguish a correct solution from a plausible wrong one? | Boundary examples, negative cases and a proposed verification strategy | Steps 2, 4 and 6 |
+| Who establishes and maintains each invariant? | Responsibility owners, domain contracts and allowed construction/mutation paths | Step 5 |
+| Which boundaries make the required change understandable and local? | Dependencies, consumer obligations and justified alternatives | Step 7 |
+| Which effects must occur in which order, including failure? | Reads, writes, resource lifetimes and cross-cutting responsibilities | Steps 7 and 8 |
+| Which exposed boundary changes the threat model? | Applicable threats and proportionate measures | Step 9 |
+
+Start with one primary reference and at most two secondary references for the
+current design question. Reuse existing boundaries where they already own the
+responsibility. Explain a significant choice through a concrete behavior or change
+scenario, its alternatives, consequences and a proposed check. Leave local coding
+choices to implementation unless they determine a required guarantee or boundary.
+
+Return the external contract, important examples, invariant owners, module contracts,
+effect ordering, proposed checks and material open questions in the caller's design
+documents. In SDD, observable obligations belong in specs, structure and alternatives
+in design, and significant decisions use the existing DEC format. An obvious local
+choice needs no separate decision record.
+
+Stop after delivering that design result. Test cases here are proposals; writing
+production code, running the red-green loop and claiming a working slice belong to
+an implementation assignment. Read the sections below as reference material only.
+
 ## Prerequisites
+
+These prerequisites and the remaining execution steps apply to **implementation**.
 
 - A code base with a basic walking skeleton (CI, tests runnable, a deployable build)
 - A concrete description of the feature (user story, example input/output)
@@ -224,7 +272,9 @@ For large features or migrations, define the target architecture, dependency dir
 
 ## Exit Criteria
 
-Feature is done when:
+For proposed design, use the result and stop condition above. For implementation,
+report completion against the assigned task or feature scope; the caller owns final
+acceptance. A complete feature requires:
 - [ ] All boundary tests pass
 - [ ] Domain unit tests pass
 - [ ] Decomposition rules satisfied

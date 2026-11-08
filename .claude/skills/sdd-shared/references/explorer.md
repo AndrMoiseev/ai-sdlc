@@ -41,7 +41,7 @@ Save these fields before dispatch; the calling workflow owns persistence:
 
 | Field | Meaning |
 |---|---|
-| `id` | Stable assignment identity; apply uses role_id, spec uses the external request/result pair name |
+| `id` | Stable assignment identity mapped to the calling workflow's saved request and result |
 | `kind` | `research` or `checks` |
 | `scope` | Object with exactly `project`, `work`, `task`; each value is a nonempty string identity or null before it exists. Nested objects and arrays are invalid. |
 | `basis` | Nonempty object identifying the actual source/documents/configuration basis |
@@ -58,26 +58,23 @@ create an execution state machine. Include the requested result form and ordinar
 selection/launch evidence in the enclosing packet. Project research before a work
 or task exists uses null scope values; it does not create a fictitious TASK.
 
-For spec, save request/result/launch artifacts in a unique external directory under
-the system temporary directory selected through the environment's API. Keep it
-outside project, skill collections and uv cache. Save its absolute path and digest
-in the continuation point. Missing answers remain unfinished; deleted artifacts
-are unavailable evidence. Apply uses the existing role packets/results and store.
+The calling workflow defines artifact storage, continuation records and recovery.
+Keep request, launch and result identities distinguishable in that storage.
+Missing answers remain unfinished; deleted artifacts are unavailable evidence.
 
-## Result and context
+## Result
 
 Return assignment ID, scope, kind, basis, status, selection/actual launch evidence,
 capability limitations and artifact references. Research adds the answer, cited
 sources, inspected scope, gaps, assumptions and questions. Checks adds the machine
 summary/raw-artifact references and factual observations. Keep full logs outside the
-message; the verification review lens inspects referenced evidence without rerunning
-a check. Explorer executes the orchestrator's exact assignment and reports its result;
+message so the assigned assessor can inspect primary evidence. Explorer executes
+the orchestrator's exact assignment and reports its result;
 it does not choose or narrow checks, decide acceptance, repairs or the next stage.
 Unknown counts remain null. Neither result type substitutes for a verification
 result, approval or acceptance.
 
-An explorer context stays separate from authors and reviewers. The same task may reuse it for research, baseline, self, independent
-and integration assignments with the same profile and a new current basis. Changed
-inputs require new check evidence. Another task or a changed profile requires a fresh explorer.
-The calling workflow enforces these boundaries and retains existing repair/retry
-budgets; new assignments and contexts do not reset a whole-suite deadline.
+Changed inputs require new check evidence. The calling workflow defines context
+isolation, reuse and replacement under the [coordination contract](coordination.md).
+New assignments, profiles and contexts do not reset repair/retry budgets or a
+whole-suite deadline and do not grant new permissions.

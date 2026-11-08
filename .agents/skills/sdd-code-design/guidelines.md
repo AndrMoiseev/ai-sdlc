@@ -56,14 +56,22 @@ The C# files retain the upstream text. The Kotlin and Go files are additions in 
 
 ## By Task
 
-### Focused Code Diagnosis
+### Focused Diagnosis
 
-For an explicit request to diagnose a selected candidate, including a request from
-`sdd-architect`, use [focused code diagnosis](workflows/diagnose-code.md). This route
-accepts hotspots and candidates selected for a known risk or upcoming change.
+For an explicit request to diagnose a proposed design or implemented code, including
+a scoped review requested by an SDD role, use [focused diagnosis](workflows/diagnose-code.md).
+Select its work product explicitly. The code branch also accepts hotspots and
+candidates selected by `sdd-architect` for a known risk or upcoming change.
 It owns the scoped inspection and rule selection; return its findings before the
 caller decides which recommendations to prioritize. A general PR review uses the
 separate route below.
+
+### Feature Design
+
+For a feature's proposed solution, use [outside-in](workflows/add-feature-outside-in.md)
+with **proposed design** as the work product. Return contracts, responsibility and
+invariant owners, effect ordering, alternatives and proposed checks in the caller's
+documents. Its implementation steps apply only to an implementation assignment.
 
 ### Code Review
 
@@ -84,7 +92,7 @@ separate route below.
 
 | What you're writing | Load these files |
 |---------------------|-------------------|
-| A brand-new feature | `workflows/add-feature-outside-in.md`, `references/outside-in-tdd/knowledge.md` |
+| A new or changed feature | `workflows/add-feature-outside-in.md` (implementation), `references/outside-in-tdd/knowledge.md` |
 | A new domain type with invariants | `references/encapsulation/rules.md`, `references/encapsulation/examples/` |
 | A new public API | `references/api-design/knowledge.md`, `references/api-design/rules.md` |
 | A unit test (first for this SUT) | `references/outside-in-tdd/rules.md`, `references/outside-in-tdd/examples/` |
@@ -94,11 +102,20 @@ separate route below.
 
 ### Refactoring
 
+For a structural change within a declared preservation boundary, use
+[refactoring](workflows/refactor-code.md) with **proposed design** or
+**implementation** as assigned. Return the structural comparison, preservation
+evidence and checks in the caller's existing result. For an independent assessment,
+use [focused diagnosis](workflows/diagnose-code.md) with the relevant work product.
+Select references below for the specific transformation.
+
 | What you're changing | Load these files |
 |----------------------|-------------------|
 | A long/complex function | `references/decomposition/rules.md`, `references/decomposition/patterns.md` |
 | A class that has feature envy | `references/decomposition/smells.md`, `references/decomposition/examples/` |
 | Splitting monolithic logic | `references/decomposition/patterns.md`, `references/separation-of-concerns/patterns.md` |
+| Separating domain policy from storage or transport representation | [Stratified Design](references/decomposition/stratified-design.md) |
+| Extracting calculations while moving reads, writes or resource boundaries | [Preserve behavior when moving effects](references/decomposition/patterns.md#preserve-behavior-when-moving-effects) |
 | Replacing a legacy subsystem | `references/evolution/patterns.md` (Strangler), `references/evolution/examples/` |
 | Tests without touching prod code | `references/outside-in-tdd/rules.md` (separate-refactor section) |
 | Hardening validation | `references/encapsulation/rules.md` (parse-don't-validate) |
@@ -153,6 +170,8 @@ separate route below.
 | Unused helpers / leftover parallel implementations | `references/decomposition/smells.md` (D9) |
 | Method envies another object's data | `references/decomposition/smells.md` (D4 feature envy) |
 | Vocabulary drift between layers | `references/decomposition/smells.md` (D5 lost in translation) |
+| Domain decisions expose storage fields or transport encoding | [Stratified Design](references/decomposition/stratified-design.md) |
+| A proposed pure pipeline still reads a database, clock or mutable external state | [Sequential Composition](references/decomposition/patterns.md#pattern-sequential-composition) |
 | Boolean `IsValid()` scattered everywhere | `references/encapsulation/rules.md` (parse-don't-validate) |
 | Invariants checked in many places | `references/encapsulation/rules.md`, `references/encapsulation/examples/` |
 | `null!` or `?` sprinkled to silence compiler | `references/encapsulation/rules.md` |
@@ -195,6 +214,7 @@ For any retained practice referenced by name (for example Strangler or CQS), fir
 | Reproduce Defects as Tests | `references/troubleshooting/patterns.md` |
 | Semantic Versioning | `references/evolution/rules.md` |
 | Strangler | `references/evolution/patterns.md` |
+| Stratified Design | [Semantic layers and change comparison](references/decomposition/stratified-design.md) |
 | STRIDE / Threat Model | `references/security/knowledge.md`, `references/security/checklist.md` |
 | Transformation Priority Premise | `references/encapsulation/rules.md` |
 | X Out Names | `references/api-design/rules.md` |

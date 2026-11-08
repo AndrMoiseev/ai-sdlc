@@ -37,5 +37,11 @@ launches with changed source hashes require reconciliation.
 
 Repair and continuation retain the running executor's selection. Reconfigure only a
 fresh successor through role registration and resume reconciliation.
-Record actual model observations separately from requested
-parameters. These changes leave task budgets, approvals and independent checks intact.
+Record actual model observations as `model_observation` with their source trace,
+separately from requested parameters in `agent_selection`. These changes leave
+task budgets, approvals and independent checks intact.
+
+Tracked and nonignored configuration files participate in ordinary source snapshots:
+edits can invalidate candidate checks or violate task scope. Change selection between
+tasks or reconcile it through the existing recovery/check procedure. Preserve those
+configuration files in source checks; excluding them would bypass these protections.

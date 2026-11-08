@@ -6,12 +6,12 @@ Recomposition strategies: once you split a block, how do you put the pieces back
 
 ### Intent
 
-Chain Queries so the output of one becomes the input of the next. Use instead of nesting objects inside objects, which hides side effects and inflates the chunk count.
+Chain pure transformations so the output of one becomes the input of the next. Make the data flow visible without hidden effects or time-dependent reads.
 
 ### When to Use
 
 - The method performs a pipeline of transformations over data.
-- You can express each step as a Query (no side effect, returns data).
+- Each step computes deterministically from explicit inputs without observable side effects.
 - You want the reader to see the full pipeline without drilling into dependencies.
 
 ### Structure
@@ -27,7 +27,7 @@ return Finalise(c);
 
 ```csharp
 // From the restaurant code base: WillAccept composed sequentially from
-// constructor, Where + Overlaps, Allocate, Any + Fits — all Queries.
+// constructor, Where + Overlaps, Allocate, Any + Fits — pure transformations.
 var seating = new Seating(SeatingDuration, candidate);
 var relevantReservations = existingReservations.Where(seating.Overlaps);
 var availableTables = Allocate(relevantReservations);
@@ -38,11 +38,12 @@ return availableTables.Any(t => t.Fits(candidate.Quantity));
 
 - The reader can trace data flow top-to-bottom.
 - Each step is testable in isolation.
-- No hidden side effects — because no step has any.
+- Deterministic steps can be reasoned about from their explicit inputs.
 
 ### Considerations
 
-- Requires that each step be a Query. If a step has side effects, push it outward.
+- A CQS Query does not change observable state, but it can read a database or clock. Its result can depend on when it runs; absence of writes does not establish purity. Keep such reads explicit in the effectful orchestration and pass their results to pure transformations.
+- When moving a read or effect, apply [Preserve behavior when moving effects](#preserve-behavior-when-moving-effects).
 - Works best when types chain cleanly; introduce small value objects when signatures don't line up.
 
 ---
@@ -122,13 +123,42 @@ public async Task<ActionResult> Post(ReservationDto dto)
 ### Benefits
 
 - Pure core is trivial to test (no mocks, no fakes).
-- Shell stays thin; side effects are visible at a glance.
+- The shell exposes the effect protocol; its size follows the ordering and recovery responsibilities it owns.
 - Aligns with fractal architecture — the shell is the trunk, the core is where the branches live.
 
 ### Considerations
 
 - Requires discipline to keep the core pure; resist injecting clocks or random generators into it — pass those values in.
 - Works in C# just as well as in functional languages.
+
+### Preserve behavior when moving effects
+
+When extracting a calculation moves a read, write or resource boundary, trace
+the affected path before and after. Preserve the behavior required by the task:
+
+- **Conditional and lazy reads:** keep short-circuiting, streaming and the point
+  at which the next input is consumed. Reading all inputs first can change failure
+  order, memory use and I/O cost.
+- **Failure handling:** keep each operation under the handler that owns its retry,
+  translation or propagation. Moving a read across a handler can change the result.
+- **Resource ownership:** identify who acquires, uses and releases each resource.
+  A helper must not close a stream before its consumer finishes or move cleanup
+  outside the required scope.
+- **Consistency and recovery:** retain required atomic checks, transaction
+  boundaries, acknowledgement order, cancellation and recovery behavior. A value
+  read earlier may be stale when the decision is applied.
+
+For example, an operation reads one input record, computes a publication decision,
+and publishes it before reading the next record. Publication failure must stop
+consumption. Materializing every record before calling the pure calculation would
+violate that contract. Keep consumption and publication interleaved; extract the
+decision over the current record. An acceptance check can make publication fail
+and verify that no subsequent record is consumed and the required error escapes.
+
+Choose checks for the contract at risk, including resource cleanup or transaction
+behavior when applicable. Private helper-call order needs no assertion unless it
+protects required behavior. The shell may still own substantial retry or recovery
+logic; removing domain decisions does not remove those responsibilities.
 
 ---
 
@@ -189,4 +219,5 @@ For the `Post` method after extracting `Validate()`, the caller exposes four con
 | Controller or message handler | Functional Core, Imperative Shell |
 | Complex domain logic | Pure functions + Referential Transparency Replacement |
 | Method feels crowded | Concept Inventory diagnosis |
+| Domain operations expose data representation | [Stratified Design](stratified-design.md) |
 | You are tempted to nest objects deeply | Reconsider — prefer sequential |

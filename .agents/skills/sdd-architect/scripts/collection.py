@@ -1,4 +1,4 @@
-"""Collect an immutable input snapshot without changing the consuming repository."""
+"""Collect an immutable input snapshot in the project's named report directory."""
 
 import hashlib
 import json
@@ -41,13 +41,17 @@ def inside(path, root):
     return path == root or root in path.parents
 
 
-def external_output(path, repository=None):
+def report_output(path, repository):
     path = Path(path).resolve()
     package = Path(__file__).resolve().parents[1]
-    if inside(path, package) or (repository and inside(path, Path(repository).resolve())):
-        raise ValueError("Write reports outside the skill and consuming repository")
-    if any(part in {".agents", ".claude", ".codex", "skills"} for part in path.parts):
+    if inside(path, package) or any(part in {".agents", ".claude", ".codex", "skills"} for part in path.parts):
         raise ValueError("Write reports outside skill collections")
+    if not repository:
+        raise ValueError("A project repository is required for report output")
+    root = Path(repository).resolve()
+    reports = root / "docs" / "reports"
+    if not path.is_relative_to(reports) or len(path.relative_to(reports).parts) < 2:
+        raise ValueError("Write outputs inside <project-root>/docs/reports/<report-name>/")
     return path
 
 
@@ -119,7 +123,7 @@ def collect(config, output):
     root = Path(config["repository"]).resolve()
     if not root.is_dir():
         raise ValueError(f"Repository not found: {root}")
-    output = external_output(output, root)
+    output = report_output(output, root)
     if output.exists():
         raise ValueError("Snapshot output already exists; choose a new directory")
     output.mkdir(parents=True)
@@ -184,7 +188,8 @@ def collect(config, output):
         except (OSError, ValueError) as error:
             gaps.append({"artifact": name, "reason": str(error)})
     after = identity(config, root)
-    if before != after:
+    # Report files can change Git's dirty flag without changing the measured sources.
+    if any(before[key] != after[key] for key in ("revision", "source_state")):
         raise ValueError("Source state changed during collection; discard this incomplete snapshot and collect again")
     snapshot = {"schema_version": 1, "repository": str(root), **before,
                 "scope": config.get("scope", {}), "modules": config.get("modules", {}),

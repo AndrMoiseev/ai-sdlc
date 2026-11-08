@@ -20,7 +20,7 @@
       "id": 2,
       "name": "source-grounded-boundary",
       "category": "core",
-      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по snapshot/snapshot.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Артефакты отчёта сохрани вне fixture. Приоритеты: модульность, риск регрессий, скорость.",
+      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/docs/reports/pricing-audit/snapshot-1/snapshot.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи отчёт pricing-audit в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость.",
       "expected_output": "Run analysis; inspect both sides; propose concrete responsibility transfer and ArchUnit acceptance, validated ordering.",
       "files": ["evals/prepare_fixture.py"],
       "expectations": [
@@ -29,7 +29,8 @@
         "Names a concrete transformation and affected consumers rather than only splitting a class.",
         "Keeps package boundaries and specifies ArchUnit scope including consumers.",
         "Preserves tax/rounding behavior and names a meaningful acceptance check.",
-        "Does not claim real-project validation from this synthetic fixture."
+        "Does not claim real-project validation from this synthetic fixture.",
+        "Saves report.md and every intermediate artifact under project/docs/reports/pricing-audit/ and links retained evidence."
       ]
     },
     {

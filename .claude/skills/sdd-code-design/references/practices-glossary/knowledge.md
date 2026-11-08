@@ -1,6 +1,6 @@
 # Practices Glossary
 
-Fast-lookup reference for currently retained named practices from the book. Project-specific formatting and screen-size conventions are intentionally omitted.
+Fast-lookup reference for retained design and review practices. Project-specific formatting and screen-size conventions are intentionally omitted.
 
 ## Quick Lookup Table
 
@@ -28,6 +28,7 @@ Fast-lookup reference for currently retained named practices from the book. Proj
 | Separate Refactoring of Test and Production Code | Never refactor test and production code simultaneously | `outside-in-tdd/rules.md` |
 | Slice | Ship small vertical slices that each improve a working system | `outside-in-tdd/rules.md` |
 | Strangler | Add the new implementation alongside the old, migrate gradually | `evolution/rules.md` |
+| Stratified Design | Express operations at useful semantic levels and compare where policy and representation changes belong | [Decomposition](../decomposition/stratified-design.md) |
 | Threat-Model | Make deliberate security decisions using STRIDE | `security/rules.md` |
 | Transformation Priority Premise | Prefer small transformations that keep code in valid states | `outside-in-tdd/rules.md` |
 | X-driven Development | Always drive your code with something (a test, analyzer, refactor tool) | `outside-in-tdd/rules.md` |
@@ -144,6 +145,11 @@ Fast-lookup reference for currently retained named practices from the book. Proj
 **Definition**: Establish the new implementation beside the old, migrate callers, and remove the old path when side-by-side change reduces blast radius or improves verification and rollback.
 **Use when**: In-place replacement would create excessive compatibility, deployment, or recovery risk.
 **Deep dive**: `evolution/rules.md`
+
+### Stratified Design
+**Definition**: Organize operations into semantic levels that hide details from callers; evaluate a disputed boundary through plausible policy and representation changes.
+**Use when**: Domain operations expose storage or transport details, or a boundary is meant to localize changes.
+**Deep dive**: [Semantic layers and change comparison](../decomposition/stratified-design.md)
 
 ### Threat-Model
 **Definition**: Take deliberate security decisions. For non-experts, the STRIDE model is manageable: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. Involve IT and stakeholders — mitigation weighs business concerns against security risks.

@@ -8,6 +8,12 @@ The skill is based on Mark Seemann's *Code That Fits in Your Head: Heuristics fo
 
 Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. A sibling APM skill can also explicitly instruct the agent to read `../sdd-code-design/SKILL.md`, relative to its own directory, and apply it to a named task. Implicit invocation remains disabled; task relevance or a passing mention alone does not activate it.
 
+[sdd-spec](../sdd-spec/README.md) uses outside-in for ordinary software design and
+the refactoring workflow for structural changes with preserved behavior.
+[sdd-apply](../sdd-apply/README.md) uses the corresponding workflow for implementation.
+Both use focused diagnosis in their design or code reviews. Their roles govern
+scope, check execution and acceptance decisions.
+
 Use it when a task is about:
 
 - designing complex code, APIs, domain types, validation boundaries, and invariants
@@ -30,7 +36,44 @@ Code examples include the original C# material and Kotlin/JVM and Go counterpart
 
 The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. Focused diagnosis returns findings. Tasks that authorize lasting gates or project-instruction edits can operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
 
-### Focused code diagnosis
+### Design and implementation
+
+Outside-in starts with the external contract and works toward responsibility
+boundaries, invariant owners and effect ordering. A design assignment returns
+the proposed construction and checks; an implementation assignment produces
+code and execution evidence within its authorized scope.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Design a feature | `$sdd-code-design Design order confirmation from these requirements. Identify contracts, invariant owners and effect ordering; implementation is a later task.` | A proposed design with examples, alternatives and verification strategy |
+| Implement a feature | `$sdd-code-design Implement order confirmation using the approved design and acceptance criteria. Work within the assigned order module.` | Code and checks for the assigned scope, with material contract conflicts returned to the caller |
+| Diagnose a design | `$sdd-code-design Diagnose the proposed order-confirmation design against its requirements. No implementation exists yet. Distinguish design defects, material gaps and implementation freedom.` | Findings grounded in documents, with proposed checks and limits on claims about future code |
+
+### Refactoring
+
+The refactoring workflow compares the current and target structure while tracing
+the behavior that must survive. It explains the benefit to owners and consumers,
+identifies missing baseline evidence and describes usable transition stages.
+Design assignments return proposals; implementation assignments transform the
+approved scope and return check evidence for the caller's acceptance process.
+
+Structural outcomes and preserved behavior have separate criteria. A removed
+internal boundary may retire its structural tests; mixed tests retain their
+behavioral guarantees at an appropriate boundary. Compatibility work follows
+explicitly agreed scope.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Design a refactoring | `$sdd-code-design Design a refactoring of the streaming publisher to separate the publication decision from I/O. Preserve the rule that publication failure stops further input reads. Compare alternatives; implementation is a later task.` | A structural comparison, preservation sources and gaps, transition stages and proposed checks |
+| Implement a refactoring | `$sdd-code-design Implement the approved publisher refactoring within the assigned module. Use the supplied baseline, preservation criteria and approved test changes.` | The assigned structural change, retained behavior checks and evidence for review |
+| Review a refactoring | `$sdd-code-design Diagnose the proposed publisher refactoring against its structural result and preserved failure behavior. Inspect the original sources and test-change proposal.` | Separate findings about the target structure, preservation evidence and transformation risks |
+
+### Focused diagnosis
+
+For a proposed design, diagnosis traces scenarios through documented contracts
+and operations. It distinguishes a contradictory choice from an unresolved
+decision and from a detail the implementer can choose. Existing code can supply
+integration evidence; missing future code does not prevent document-based findings.
 
 [sdd-architect](../sdd-architect/README.md) uses this route after selecting candidates
 from metrics or a known risk/change scenario. The diagnosis follows the relevant
@@ -39,10 +82,26 @@ own the cause. It returns evidence, applicable heuristics, mechanisms, feasible
 options and acceptance checks. The architect decides recommendation readiness and
 priority across candidates. A diagnosis can also conclude that no change is justified.
 
+For interface changes, the diagnosis compares what consumers must know or do before
+and after, including obligations beyond method signatures. For suspected redundant
+abstractions, it traces what their removal would eliminate, move to consumers or
+leave without an owner. This helps distinguish unnecessary forwarding from a useful
+thin boundary.
+
+When domain operations expose storage or transport details, the diagnosis compares
+a plausible business-rule change with a representation change and shows which
+consumers and tests each affects. When a proposed extraction moves effects, it
+checks required read order, failure handling and resource ownership. A read-only
+query is not assumed to be a pure calculation.
+
 | Request | Example prompt | Result |
 | --- | --- | --- |
 | Diagnose a hotspot | `$sdd-code-design Diagnose the frequently changed OrderService and its contracts. Check the risk of mixing customer and order IDs. Return findings without editing code.` | A scoped diagnosis with source evidence, existing protection, options and checks |
 | Diagnose an upcoming change | `$sdd-code-design Diagnose the pricing contract before we add regional rounding rules. Inspect its consumers even though the contract rarely changes.` | An explanation of change risks and feasible improvements, with uncertainty stated |
+| Compare an interface proposal | `$sdd-code-design Diagnose whether the proposed pricing facade simplifies its consumers. Compare the current contract with the proposal without editing code.` | A concrete comparison of consumer obligations, their owners and acceptance checks |
+| Assess a thin abstraction | `$sdd-code-design Diagnose the forwarding chain in the pricing module. Determine whether removing a layer is justified; return findings without editing code.` | An explanation of overhead removed, knowledge redistributed and responsibilities that must survive |
+| Compare semantic boundaries | `$sdd-code-design Diagnose the booking policy, which reads storage fields directly. Compare changing the party-size rule with changing the timestamp representation. Return findings without editing code.` | A comparison of affected owners, consumers and tests, with the smallest useful boundary change |
+| Check a proposed pure pipeline | `$sdd-code-design Review the proposed extraction of the publication loop into a pure calculation. The input is streamed and publication failure must stop further reads. Check clock and storage reads, error handling and resource lifetime.` | A diagnosis of purity and effect-ordering risks, with acceptance checks for the required behavior |
 
 Diagnosis does not require a PR or a high metric value. Its result covers the
 inspected area; it does not certify the whole codebase or start implementation.
@@ -57,11 +116,40 @@ references/              # Focused reference packs by theme
 references/tooling/      # Executable measurement commands (complexity, cycles, dead code, …)
 ```
 
-Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, debugging, threat modelling, and operationalizing findings into gates.
+Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, refactoring, debugging, threat modelling, and operationalizing findings into gates.
 
 ## Source Boundaries
 
 Most reference folders summarize or operationalize ideas from Seemann's book. The `references/agent-native/` folder is different: it contains local editorial additions for coding agents—verification integrity, hallucination and dependency grounding, executable guardrails, and accountable review. Editorial amendments placed in book-derived themes are explicitly marked. Do not attribute them to Seemann.
+
+### Stratified design sources
+
+The semantic-layer reference and the additions about moving effects draw on
+[j2h4u/skill-stratified-design at commit 6f0957e](https://github.com/j2h4u/skill-stratified-design/tree/6f0957e60521b886c3bcbcea2f8260ebfe8cc8f5).
+They are additions to this skill, not material from Seemann's book. Their
+attributions and source history belong here; the agent instructions contain the
+applicable rules and examples.
+
+- [SICP, section 2.2.4](https://sicp.sourceacademy.org/chapters/2.2.4.html)
+  supplies the model of successive languages with primitives, combinations and
+  abstractions.
+- Eric Normand develops the practical approach in *Grokking Simplicity*, chapters
+  8–9, and [More about Stratified Design](https://ericnormand.me/podcast/more-about-stratified-design).
+  [What is an action?](https://ericnormand.me/podcast/what-is-an-action) and
+  [What is a calculation?](https://ericnormand.me/podcast/what-is-a-calculation)
+  explain time-dependent actions and calculations from explicit inputs.
+- The paired business-rule and representation-change comparison is the external
+  skill author's [application of those ideas](https://github.com/j2h4u/skill-stratified-design/blob/6f0957e60521b886c3bcbcea2f8260ebfe8cc8f5/references/author-notes.md#L49-L61).
+  Its [worked example](https://github.com/j2h4u/skill-stratified-design/blob/6f0957e60521b886c3bcbcea2f8260ebfe8cc8f5/references/worked-example.md)
+  illustrates why publication failure must stop further input consumption.
+- The CQS Query versus pure-calculation distinction, conditional routing and
+  integration into the existing diagnosis are local adaptations. The booking
+  example and agent instructions are written for this skill.
+
+The external skill's original guidance is [MIT-licensed](https://github.com/j2h4u/skill-stratified-design/blob/6f0957e60521b886c3bcbcea2f8260ebfe8cc8f5/LICENSE),
+copyright 2026 j2h4u. Its separately licensed SICP excerpt uses CC BY-SA 4.0;
+that excerpt is not included here. These additions paraphrase the ideas and do
+not copy the external implementation or introduce a runtime dependency.
 
 ## Governing Principles
 
@@ -84,7 +172,10 @@ Most reference folders summarize or operationalize ideas from Seemann's book. Th
 
 ## Changes from Upstream
 
+- Added a refactoring workflow for proposed design and implementation, integrated into SDD authoring, execution and focused reviews. It uses separate structural and preservation criteria and the caller's existing test-evolution rules.
+- Added semantic-layer diagnosis, paired policy and representation-change scenarios, and safeguards for moving reads and effects. Sources and adaptation boundaries are recorded above.
 - Added focused code diagnosis for selected refactoring candidates and an explicit handoff from `sdd-architect`; this workflow is a fork addition.
+- Added consumer-obligation comparison and hypothetical removal of suspected indirection to focused diagnosis, adapted from [Matt Pocock's codebase-design](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md).
 - Moved the five standalone example documents into per-topic `examples/` directories, with filenames identifying the language and relevant framework. The original C# files retain their exact contents.
 - Added idiomatic Kotlin/JVM counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Framework-independent, JUnit 5, and Ktor examples are separated for selective loading.
 - Added Go counterparts for API design, encapsulation, decomposition, evolution, and outside-in TDD, retaining the applicable C# example structure. Go 1.22+ examples separate domain code, standard-library `testing` tests, and `net/http` / `httptest` boundaries. Adaptations explain zero-value limits, explicit errors, composition, and migration without method overloading.
