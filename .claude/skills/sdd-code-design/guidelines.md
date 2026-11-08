@@ -56,6 +56,15 @@ The C# files retain the upstream text. The Kotlin and Go files are additions in 
 
 ## By Task
 
+### Focused Code Diagnosis
+
+For an explicit request to diagnose a selected candidate, including a request from
+`sdd-architect`, use [focused code diagnosis](workflows/diagnose-code.md). This route
+accepts hotspots and candidates selected for a known risk or upcoming change.
+It owns the scoped inspection and rule selection; return its findings before the
+caller decides which recommendations to prioritize. A general PR review uses the
+separate route below.
+
 ### Code Review
 
 | What you're reviewing | Load these files |

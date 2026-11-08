@@ -5,6 +5,11 @@ identity. JDK `jdeps` and `scc` are needed only for their selected collection
 branches. detekt and JaCoCo tasks belong to the consuming project's build.
 Missing a tool limits that branch; preserve the other available evidence.
 
+Maintain `<project-root>/.sdd/architect/collection.json` through
+[Collection](collection.md#maintain-project-configuration). Resolve `<project-root>`
+to the consuming checkout's absolute path. For source-free imports, use the external
+configuration path described in Collection.
+
 Keep environments, caches, fixtures and reports outside the consuming project
 and all skill collections. Preserve inherited `UV_CACHE_DIR` and `UV_TOOL_DIR`.
 If absent, resolve the OS temporary directory through its API and set absolute
@@ -17,8 +22,8 @@ Use its absolute path in every run. Entry points have PEP 723 metadata and
 adjacent lockfiles; no project environment or dependency setup is required.
 
 ```text
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" identity --config "<workspace>/collection.json"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<workspace>/collection.json" --output "<workspace>/snapshot-1"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" identity --config "<project-root>/.sdd/architect/collection.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<workspace>/snapshot-1"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" analyze --snapshot "<workspace>/snapshot-1/snapshot.json" --output "<workspace>/analysis-1.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --snapshot "<workspace>/snapshot-1/snapshot.json" --recommendations "<workspace>/cards.json" --output "<workspace>/ranked-1.json" --markdown "<workspace>/report-1.md"
 ```

@@ -4,8 +4,10 @@ This skill operationalizes the repository's **2026-11-07 proposal**,
 `docs/decisions/research/0013-kotlin-architecture-quality-metrics/refactoring-workflow.md`.
 The procedure's originating Kotlin pilot provides measured artifact kinds and
 formula examples. It does not validate this skill's usefulness on real project
-source or establish portable empirical thresholds. The package is self-contained;
-neither the research directory nor the FPF skill is a runtime dependency.
+source or establish portable empirical thresholds. Measurement scripts are
+self-contained; source diagnosis explicitly uses the sibling
+[sdd-code-design skill](../../sdd-code-design/SKILL.md). Neither the research
+directory nor the FPF skill is a runtime dependency.
 
 The implementation deliberately replaces project-specific paths, Kora exclusions
 and hardcoded module buckets with declared configuration. It retains support
@@ -36,6 +38,8 @@ the source procedure used the local adaptation at commit
 | Architectural module | Declared package group with responsibility, public contract and dependency rules |
 | Candidate | A subject selected for source investigation by signals or a known change scenario |
 | Signal | An observed metric and its allowed evidential role; not a diagnosis |
+| Diagnosis | A scoped explanation of a consequential mechanism, alternatives and uncertainty grounded in inspected source |
+| Finding | One source-grounded issue with its mechanism, existing protection and uncertainty |
 | Recommendation | One feasible complete change addressing one established cause |
 | Priority group | Recommendations indistinguishable by the supported M/R/S effect profile |
 | Execution order | Prerequisite-respecting work order, distinct from benefit priority |

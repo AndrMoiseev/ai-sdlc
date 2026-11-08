@@ -24,11 +24,42 @@ when it explains runtime behavior, even if it is excluded from the measured grap
 An undeclared package stays unassigned; it is not a shared `legacy` module.
 Infer neither package responsibilities nor architectural modules from Gradle layout.
 
-Start with the configuration in [collection.example.json](../assets/collection.example.json).
-Copy it to an external workspace and replace the example values. All artifact paths
-are absolute; source roots, compiled directories and measurement inputs are relative
-to `repository`. Module prefixes match package segments; the longest matching prefix
-wins. Equal prefixes assigned to different modules are errors.
+## Maintain project configuration
+
+Use `<project-root>/.sdd/architect/collection.json` as the project's collection
+configuration. Apply this maintenance on every run with a project checkout,
+including runs that reuse existing reports:
+
+1. Read the existing file. If absent, create its parent directory and initialize
+   it from [collection.example.json](../assets/collection.example.json), replacing
+   the example values with evidence from the current project.
+2. Recheck source roots, compiled directories, measurement inputs, package
+   prefixes, module ownership, exclusions, Gradle scope and test tasks against
+   the current source tree, build and architecture decisions. Reconcile additions,
+   moves and removals. Preserve deliberate boundaries, exclusions and the history
+   window unless project evidence or the requested analysis justifies changing them.
+   Leave packages with unknown ownership unassigned.
+3. Refresh checkout and artifact paths for this run. Verify reused bytecode,
+   class mappings and reports against their actual source identities; retain
+   their original provenance and leave unknown values null. Saving the
+   configuration does not make an older report current.
+4. Save the reconciled configuration before capturing source identity. As new
+   compilation or reports establish provenance, save those verified values before
+   `collect`. Keep the configuration stable during each `identity` or `collect`
+   command. Replace only changed values; an already current file needs no rewrite.
+5. In the final report, state whether the configuration was created, updated or
+   already current, and summarize changes to the analysis scope or definitions.
+
+This file is maintained project configuration; snapshots, raw reports and temporary
+data stay in an external workspace. It is separate from `.sdd/settings.json`,
+which configures SDD subagents.
+Keep the collection configuration itself out of `measurement_inputs`: it contains
+the resulting source-state identifiers, and `collect` already records its contents
+in the snapshot.
+
+All artifact paths are absolute; source roots, compiled directories and measurement
+inputs are relative to `repository`. Module prefixes match package segments; the
+longest matching prefix wins. Equal prefixes assigned to different modules are errors.
 
 | Configuration field | Meaning |
 | --- | --- |
@@ -102,6 +133,7 @@ Read the gap list and verify that required reports actually arrived.
 For source-free work, point `repository` at an external directory containing the
 supplied material, set `source_roots: []` and `class_directories: []`. Preserve
 the reported revision as provenance when known; do not invent a checkout revision.
+Without a project checkout, keep this import configuration in the external workspace.
 Graph calculations remain useful. Concrete implementation readiness is unavailable.
 
 ## Mapping and suitability
