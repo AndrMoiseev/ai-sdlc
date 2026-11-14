@@ -32,7 +32,7 @@ def write_json(path, value, repository):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    sub = commands.add_parser("collect", help="Collect and calculate every catalog output under docs/reports/<report-name>/")
+    sub = commands.add_parser("collect", help="Collect every catalog output under memory/tech-debt/audits/<date-time>/")
     sub.add_argument("--config", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
     sub = commands.add_parser("rank", help="Check Markdown cards and rank their metadata for sdd-spec discussion")

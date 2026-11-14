@@ -265,14 +265,22 @@ class RecommendationTests(unittest.TestCase):
 class ReportOutputTests(unittest.TestCase):
     def test_outputs_require_a_named_project_report_directory(self):
         repo = Path(tempfile.gettempdir()) / "architect-project"
-        report = repo / "docs" / "reports" / "pricing-audit"
+        report = repo / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
         with patch.object(Path, "resolve", lambda path: path):
             self.assertEqual(report_output(report / "metrics", repo), report / "metrics")
             self.assertEqual(report_output(report / "report.md", repo), report / "report.md")
             for path in (repo / "report.md", repo.parent / "report.md",
-                         repo / "docs" / "reports", repo / "docs" / "reports" / "report.md"):
-                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "docs/reports"):
+                         report.parent, report.parent / "report.md",
+                         repo / "memory" / "tech-debt" / "plan" / "plan.md"):
+                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "memory/tech-debt/audits"):
                     report_output(path, repo)
+            self.assertEqual(report_output(report, repo, directory=True), report)
+            fractional = report.with_name("2026-11-14T14-30-00.123456Z")
+            self.assertEqual(report_output(fractional, repo, directory=True), fractional)
+            for name in ("pricing-audit", "2026-02-30T14-30-00Z", "2026-11-14T25-00-00Z",
+                         "2026-11-14T14-30-00.1234567Z", "2026-11-14T14-30-00"):
+                with self.subTest(name=name), self.assertRaisesRegex(ValueError, "date-time"):
+                    report_output(report.with_name(name), repo, directory=True)
             with self.assertRaisesRegex(ValueError, "repository is required"):
                 report_output(report / "report.md", None)
             with self.assertRaisesRegex(ValueError, "skill collections"):
@@ -280,10 +288,10 @@ class ReportOutputTests(unittest.TestCase):
 
     def test_resolved_output_cannot_escape_reports(self):
         repo = Path(tempfile.gettempdir()) / "architect-project"
-        output = repo / "docs" / "reports" / "pricing-audit" / "report.md"
+        output = repo / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z" / "report.md"
         # Model a symlink resolution through the existing Path adapter; no real link is needed.
         with patch.object(Path, "resolve", lambda path: repo.parent / "report.md" if path == output else path):
-            with self.assertRaisesRegex(ValueError, "docs/reports"):
+            with self.assertRaisesRegex(ValueError, "memory/tech-debt/audits"):
                 report_output(output, repo)
 
 class CollectionIntegrationTests(unittest.TestCase):
@@ -295,7 +303,7 @@ class CollectionIntegrationTests(unittest.TestCase):
             repo = workspace / "project"
             (repo / "src").mkdir(parents=True)
             (repo / "src" / "Price.kt").write_text("package a\nclass Price", encoding="utf-8")
-            report = repo / "docs" / "reports" / "pricing-audit"
+            report = repo / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
             raw = report / "raw"
             raw.mkdir(parents=True)
             (raw / "detekt.sarif").write_text(json.dumps({"runs": [{"results": [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)")]}]}), encoding="utf-8")
@@ -365,7 +373,7 @@ class CollectionIntegrationTests(unittest.TestCase):
 class MeasurementTests(unittest.TestCase):
     def test_interrupted_collection_records_unfinished_outputs(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
-        report = root / "docs" / "reports" / "audit"
+        report = root / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
         saved = []
         with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),
               patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"),
@@ -379,7 +387,7 @@ class MeasurementTests(unittest.TestCase):
 
     def test_git_failure_only_limits_requested_history_chain(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
-        report = root / "docs" / "reports" / "audit"
+        report = root / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
         config = {"repository": str(root), "artifacts": {
             "history": {"collect": True}, "coverage": {"path": str(root / "coverage.csv"), "format": "coverage-csv"}}}
         with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),

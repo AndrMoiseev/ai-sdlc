@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import signal
 import subprocess
 from collections import defaultdict
@@ -44,9 +45,16 @@ def report_output(path, repository, directory=False):
     if not repository:
         raise ValueError("A project repository is required for report output")
     root = Path(repository).resolve()
-    reports = root / "docs" / "reports"
-    if not path.is_relative_to(reports) or len(path.relative_to(reports).parts) < (1 if directory else 2):
-        raise ValueError("Write outputs inside <project-root>/docs/reports/<report-name>/")
+    audits = root / "memory" / "tech-debt" / "audits"
+    if not path.is_relative_to(audits) or len(path.relative_to(audits).parts) < (1 if directory else 2):
+        raise ValueError("Write outputs inside <project-root>/memory/tech-debt/audits/<date-time>/")
+    audit = path.relative_to(audits).parts[0]
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(?:\.\d{1,6})?Z", audit):
+        raise ValueError("Audit directory needs a UTC date-time: YYYY-MM-DDTHH-mm-ss[.ffffff]Z")
+    try:
+        datetime.strptime(audit, "%Y-%m-%dT%H-%M-%S.%fZ" if "." in audit else "%Y-%m-%dT%H-%M-%SZ")
+    except ValueError:
+        raise ValueError(f"Invalid audit date-time: {audit}") from None
     return path
 
 

@@ -34,6 +34,7 @@ replacement. Keep this short navigation record:
 | Assignments | Finished/unfinished IDs, worker identity, output ownership and last host-observed state |
 | Evidence | Request, launch, result and primary-output paths; assessment of each handoff |
 | Open work | Candidate-group/queue paths and keys, shortlist adjustments, diagnoses/cards, unexecuted checks, gaps and unresolved decisions |
+| Plan | Current plan path, matched tasks, completed additions and remaining plan updates; read current user decisions from the plan |
 | Next step | Exact phase/assignment and its substantive prerequisite or blocker |
 
 State links primary records instead of duplicating them. Worker completion remains
@@ -51,7 +52,9 @@ separate from the orchestrator's assessment. Retain unknown observations as unkn
 4. Continue a live worker only within its bounded phase; new phases/groups and
    replacement workers receive fresh contexts with primary references. Assign a
    new request when the task scope, outputs or limits change.
-5. Save the completed portion and next step, then continue through `report.md`.
+5. Reread the current plan; reconcile user edits and partially completed additions
+   under [plan maintenance](tech-debt-plan.md#apply-user-changes-and-resume-safely).
+   Save the completed portion and next step, then finish report and plan delivery.
 
 No comparison of source revisions, fingerprints or material checksums participates
 in resumption. Their absence or difference does not trigger a stop, downgrade,
@@ -86,10 +89,13 @@ a shorter route. Maintain project configuration whenever sources are available.
 | Proposal comparison | Read the named cards, evidence and current sources. Compare mechanisms and effects; rank justified corrected cards and explain ties or gaps. |
 | Diff review | Use the supplied diff or requested Git comparison to locate changes. Inspect current contracts and consumers beyond the diff, then follow [reassessment](reassessment.md). No source-version gate is introduced. |
 | Reassessment | Read the earlier card, evidence and acceptance. Inspect the current implementation and relevant measurements; report supported, contradicted and untested effects. |
+| Plan-only change | Apply the user's assessment/status/priority changes under [plan maintenance](tech-debt-plan.md#apply-user-changes-and-resume-safely), keeping ready before needs_check. Return the plan link; no audit or collection is needed. |
 
 Qualify populations, tools, extraction limits and source/class mapping through
 [collection](collection.md#import-existing-reports). Missing coverage stays unknown.
 Source-free evidence cannot establish current ownership or implementation feasibility.
 Use the same fresh-context and checks contracts for the chosen scope, explaining
-any omitted phase or measurement family. Every route retains its materials and
-finishes with `report.md`; implementing recommendations requires a separate task.
+any omitted phase or measurement family. Every audit route retains its materials
+and finishes with report and plan delivery, including excluded-status notification.
+Plan-only changes update the plan directly. Implementing recommendations requires
+a separate task.

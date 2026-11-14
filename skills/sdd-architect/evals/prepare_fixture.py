@@ -62,7 +62,7 @@ class OrderServiceTest {
     run(["git", "init", "--quiet"], repo)
     run(["git", "add", "."], repo)
     run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "Synthetic fixture"], repo)
-    report = repo / "docs" / "reports" / "pricing-audit"
+    report = repo / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
     raw = report / "raw"
     raw.mkdir(parents=True)
     (raw / "dependencies.csv").write_text("from,to\nexample.order.OrderService,example.pricing.PriceCalculator\nexample.pricing.PriceCalculator,example.order.OrderService\n", encoding="utf-8")

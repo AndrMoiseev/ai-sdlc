@@ -55,7 +55,8 @@ then assign these checks within the relevant scope:
    change yet means the long-term benefit is untested.
 
 If an outcome differs from the prediction, identify whether the data, diagnosis,
-chosen transformation or implementation was wrong. Revise affected recommendations.
+chosen transformation or implementation was wrong. Record revised recommendations
+in the new audit and link their predecessors; retain the original audit cards.
 More coverage does not demonstrate modularity; lower PC does not measure speed.
 Reopen the audit after a meaningful contract change, new problem or the project's
 chosen review cycle, proportionate to the cost of collection.
@@ -65,6 +66,9 @@ which expected effects are supported, contradicted or still untested, with exact
 source/check evidence and consequences for dependent cards. Preserve unknown
 coverage and measurement completeness as limitations; missing execution is not a pass.
 Validate changed cards using current sources and keyed JSONL evidence with assigned `rank` checks.
-Save the authored `report.md` in the report directory and return its link, including
-when the result is only unresolved findings. Implementing a recommendation or
+Save the authored `report.md` in its timestamped audit directory and complete
+[plan maintenance](tech-debt-plan.md), including when the result is only unresolved
+findings. Existing task reassessments are reported for the user's decision; automatic
+admission adds only new eligible tasks. Return report and plan links and excluded-status
+notifications. Implementing a recommendation or
 repairing the reviewed change requires a separate instruction.
