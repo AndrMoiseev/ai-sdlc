@@ -35,7 +35,7 @@ def main(argv=None):
     sub = commands.add_parser("collect", help="Collect and calculate every catalog output under docs/reports/<report-name>/")
     sub.add_argument("--config", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
-    sub = commands.add_parser("rank", help="Validate authored recommendation cards; preserve equal priorities")
+    sub = commands.add_parser("rank", help="Check Markdown cards and rank their metadata for sdd-spec discussion")
     sub.add_argument("--collection", required=True, type=Path)
     sub.add_argument("--recommendations", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
@@ -47,14 +47,21 @@ def main(argv=None):
             print(json.dumps({"collection": str(args.output / "collection.json"),
                               "complete_outputs": sum(row["status"] == "complete" for row in value["outputs"].values()),
                               "unavailable_outputs": sum(row["status"] != "complete" for row in value["outputs"].values()),
+                              "candidate_groups": value["selections"]["candidate-groups"]["records"],
                               "gaps": value["gaps"]}))
         else:
             collection = read_json(args.collection)
             if collection.get("status") != "complete":
                 raise ValueError("Collection has unfinished calculations; inspect its output outcomes")
             sources = inventory(collection["parameters"], Path(collection["repository"]).resolve())
+            card_root = args.recommendations.resolve().parent
+            def read_card(path):
+                card_path = (card_root / path).resolve()
+                if not card_path.is_relative_to(card_root):
+                    raise ValueError("Markdown card must stay inside its report directory")
+                return card_path.read_text(encoding="utf-8-sig")
             value = rank(read_json(args.recommendations), sources,
-                         lambda ref: resolve_reference(ref, collection, args.collection.parent))
+                         lambda ref: resolve_reference(ref, collection, args.collection.parent), read_card)
             destination = report_output(args.output, collection.get("repository"))
             if destination.exists():
                 raise ValueError("Output already exists")

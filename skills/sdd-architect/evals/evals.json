@@ -6,7 +6,7 @@
       "name": "source-free-signals",
       "category": "limited-evidence",
       "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Приоритеты: модульность, риск регрессий, скорость. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
-      "expected_output": "Bounded investigation queue, no implementation-ready cards or Gradle split.",
+      "expected_output": "Bounded investigation queue; no ready directions without source evidence or Gradle split.",
       "expectations": [
         "Absent sources prevent implementation readiness; source-version metadata is not required.",
         "Missing coverage is not replaced by zero or a computed CRAP.",
@@ -21,14 +21,16 @@
       "name": "source-grounded-boundary",
       "category": "core",
       "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/docs/reports/pricing-audit/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи отчёт pricing-audit в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость.",
-      "expected_output": "Read prepared JSONL measurements; inspect both sides; propose concrete responsibility transfer and ArchUnit acceptance, validated ordering.",
+      "expected_output": "Read prepared JSONL measurements; inspect both sides; propose an evidenced responsibility-transfer direction in a six-section Markdown card for human-involved sdd-spec work, with validated ordering.",
       "files": ["evals/prepare_fixture.py"],
       "expectations": [
         "Uses collect for normalization and all calculations, then rank after source diagnosis; references JSONL files and object keys.",
+        "Reads computed candidate-groups and investigation-queue selections, retains their path/key origins and explains source-grounded shortlist adjustments instead of reconstructing the preliminary calculations.",
         "Inspects actual declarations and identifies tax rule ownership crossing pricing/order.",
-        "Names a concrete transformation and affected consumers rather than only splitting a class.",
-        "Keeps package boundaries and specifies ArchUnit scope including consumers.",
-        "Preserves tax/rounding behavior and names a meaningful acceptance check.",
+        "Explains the proposed responsibility/dependency direction and affected existing consumers.",
+        "Uses a six-section Markdown card covering problem, evidence, mechanism, direction, rationale and sdd-spec questions; JSON contains only ranking metadata and evidence addresses.",
+        "Leaves final package/API layout, ArchUnit scope and implementation tasks to human-involved sdd-spec work.",
+        "Names tax/rounding behavior to preserve and observable effect criteria without claiming future implementation has been verified.",
         "Does not claim real-project validation from this synthetic fixture.",
         "Saves report.md and every intermediate artifact under project/docs/reports/pricing-audit/ and links retained evidence."
       ]
@@ -51,7 +53,7 @@
   "micro_test": {
     "repetitions_per_arm": 5,
     "prompt": "Kotlin/Gradle-аудит по отчётам без исходников: MCC файла 12, покрытия нет, coupling 50% average-revs 20, D=0.9 у стабильного DTO; всё в одном Gradle-проекте. Нужен короткий следующий шаг и конкретная рекомендация. Ответ до 160 слов.",
-    "focus": "Missing data stays unknown, scope stays package-based, no implementation readiness without sources."
+    "focus": "Missing data stays unknown, scope stays package-based; ready means an evidenced direction for sdd-spec discussion, not an implementation plan."
   },
   "discovery": [
     {"prompt": "Составь очередь рефакторинга Kotlin-проекта по detekt и зависимостям пакетов.", "should_trigger": true},

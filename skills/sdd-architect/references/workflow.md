@@ -41,37 +41,43 @@ measurement family has an intended source or a concrete gap.
    for necessary path/configuration updates before a dependent batch.
 2. `collect` retains each raw report once, normalizes available inputs, calculates
    all [catalog outputs](measurements.md) in dependency order and saves selections.
+   It then [builds candidate groups](candidate-groups.md), attaches contained signals,
+   records overlaps and prepares the budgeted investigation queue.
    It records errors and missing inputs per chain while completing independent work.
 3. Return the compact `collection.json` description, output counts and gaps. Read
    only the JSONL files relevant to the next investigation; do not send the complete
    metric population to the orchestrator.
 
 **Exit:** every planned output is complete or has a concrete unavailable/error reason.
-Primary observations, derived values, group aggregates, rankings and threshold
-selections are ready before substantive analysis starts. Interrupted calculations
-remain incomplete. Source version metadata is neither needed nor inspected.
+Primary observations, derived values, group aggregates, rankings, threshold
+selections, preliminary groups and the queue are ready before substantive analysis.
+Interrupted calculations remain incomplete. Source version metadata is neither
+needed nor inspected.
 
 ## Phase 3: Substantive analysis
 
-**Input:** collection description, relevant JSONL records and selections, scope,
+**Input:** collection description, candidate groups/queue, relevant JSONL records, scope,
 current source paths, limitations and known change/behavior scenarios.
 
-1. Start a fresh architect to select 8–12 related candidate groups using
-   [Measurements](measurements.md). Merge signals for the same cause; include known
-   risks and upcoming changes even without hotspots. Explain a smaller bounded
-   population and material omissions. Save the shortlist in `diagnosis.md`.
+1. Start a fresh architect to refine the [computed candidate groups](candidate-groups.md).
+   Read selected and deferred queue entries, overlaps and limitations. Keep collection
+   calculations in the scripts. Inspect sources/context to justify merges, splits,
+   additions or omissions, including known risks without hotspots. Save the final
+   shortlist in `diagnosis.md` with keyed origins and reasons for each adjustment.
 2. Record each group's source paths/declarations, JSONL paths and object keys,
    scenario, owners, consumers, wiring and tests. A cold dependency can own the cause.
 3. Start a fresh architect for each bounded group. Apply the explicit
    [sdd-code-design diagnosis call](diagnosis.md), inspect mechanisms and consumers,
    and save `diagnoses/<group-id>/diagnosis-<n>.md`. Require alternative explanations,
-   feasible transformations, required behavior, cost/risk, acceptance and separate
+   evidenced directions, required behavior, cost/risk, observable effect criteria and separate
    confidence in observation, diagnosis and effect. Source-free groups stay hypotheses.
 4. After group work, start a fresh integration architect. Merge shared causes,
    preserve non-issues and resolve contradictory claims through primary evidence.
-   Check dependencies and conflicting transformations across recommendations.
-   Apply [Decision output](decision-output.md) to author `cards.json` with readiness
-   and grounded M/R/S effects. Request bounded research/checks through the orchestrator
+   Check dependencies and conflicting directions across recommendations.
+   Apply [Decision output](decision-output.md) to author six-section Markdown cards
+   in `recommendations/` and compact `cards.json` metadata with readiness and grounded
+   M/R/S effects. Keep detailed design questions for human-involved `sdd-spec` work.
+   Request bounded research/checks through the orchestrator
    only when an attainable answer can change the decision.
 
 **Exit:** every shortlisted group has a diagnosis or a specific gap and decision
@@ -82,11 +88,11 @@ A proposed check is not an executed check. Thresholds alone do not establish rea
 
 **Input:** authored cards, collection description and current sources.
 
-Assign `rank` to a separate explorer checks assignment. It validates required fields,
-current source paths, keyed metric references, effects, boundary acceptance and
-prerequisites. Save `ranked-<n>.json` and optional rendered Markdown separately from
+Assign `rank` to a separate explorer checks assignment. It validates compact metadata,
+the six-section Markdown structure, current source paths, keyed metric references
+and effects. Save `ranked-<n>.json` and optional rendered Markdown separately from
 `report.md`. Return validation failures to the card author, then rerun ranking on
-corrected cards. Preserve equal profiles and separate priority from execution order.
+corrected cards. Preserve equal profiles; leave implementation planning to `sdd-spec`.
 
 **Exit:** the completed cards have a successful structural ranking result. This
 result does not establish the truth of the diagnosis; that belongs to phase 3.
@@ -96,10 +102,12 @@ result does not establish the truth of the diagnosis; that belongs to phase 3.
 **Input:** shortlist, diagnoses, current cards, validated ordering and scope/gaps.
 
 Start a fresh architect to author `report.md` from primary evidence. Show up to
-five ready recommendations, their priority rationale, dependencies and acceptance,
+five ready directions, their priority rationale, dependencies and effect criteria,
 the investigation queue and important observations/rejections. Link concrete JSONL
 files and object keys, collection description, diagnoses, cards and ranking with
-relative paths. Zero ready recommendations is a valid result.
+relative paths. Link each full six-section card instead of duplicating its narrative.
+Zero ready recommendations is a valid result. The report supports subsequent
+discussion with a human in `sdd-spec`; it does not start that workflow.
 
 If a substantive contradiction requires changing a card, return it to analysis
 and ranking before relying on it in the report. A rendered table alone does not

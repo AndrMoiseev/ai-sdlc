@@ -3,13 +3,14 @@
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
+from candidate_groups import prepare_candidate_groups
 from graph import aggregate, graph_view, module_for, module_views, package_of
 from history import group_activity, history_view, parse_history
 from inputs import coverage, dependencies, detekt, ratio, sizes, type_counts
 from measurements import CATALOG, key_text, ordered_rows, reference
 
 WEIGHTS = {"cycle": [2, 1, 1], "coupling": [2, 1, 1], "hotspot": [2, 1, 1],
-           "complexity": [1, 2, 1], "shape": [1, 1, 1], "coverage": [0, 2, 0], "crap": [0, 2, 0]}
+           "complexity": [1, 2, 1], "shape": [1, 1, 1], "coverage": [0, 2, 0], "crap": [0, 2, 0], "boundary": [1, 0, 0]}
 
 
 def suitability(metadata):
@@ -271,7 +272,9 @@ def prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts
             rows[identifier] = []
             outcomes[identifier] = {"status": "error", "reason": module_error}
         rows[identifier] = ordered_rows(identifier, rows[identifier])
-    return rows, outcomes, prepare_selections(rows, outcomes, artifacts), gaps
+    selections = prepare_selections(rows, outcomes, artifacts)
+    selections.update(prepare_candidate_groups(config, rows, outcomes, selections["signals"]))
+    return rows, outcomes, selections, gaps
 
 
 def prepare_selections(rows, outcomes, artifacts):
@@ -294,13 +297,18 @@ def prepare_selections(rows, outcomes, artifacts):
             for row in rows[identifier]:
                 signal("cycle", "members > 1", [(identifier, row)])
         threshold = {"cyclomatic-complexity/function": (10, "complexity"), "cognitive-complexity/function": (15, "complexity"),
-                     "method-length/function": (20, "shape"), "function-count/declaration": (11, "shape"), "crap-file/file": (30, "crap")}.get(identifier)
+                     "method-length/function": (20, "shape"), "function-count/declaration": (11, "shape"),
+                     "crap-file/file": (30, "crap"), "distance/package": (.7, "boundary")}.get(identifier)
         if threshold:
             value, family = threshold
             for row in measured:
                 selected = row["value"] > value if family == "crap" else row["value"] >= value
                 if selected:
                     signal(family, f"value {'>' if family == 'crap' else '>='} {value}", [(identifier, row)])
+        if identifier == "parameter-list/declaration":
+            for row in rows[identifier]:
+                if not row.get("suppressed"):
+                    signal("shape", "unsuppressed LongParameterList finding; count may be unknown", [(identifier, row)])
         if identifier.startswith("hotspot-"):
             for row in sorted(measured, key=lambda row: (-row["value"], row["file"]))[:5]:
                 if row["value"] > 0:
