@@ -6,10 +6,18 @@ tasks belong to the consuming project. Missing tools limit their own chains.
 
 ## Report storage
 
-Before producing materials, establish `<project-root>/docs/reports/{report-name}/`
-and use its absolute path as `<report-dir>`. Use the requested name or a descriptive
-kebab-case name. Choose an unused numeric suffix for an unrelated report with the
-same name. Continue an existing audit through its saved state and current inputs.
+Before producing materials, establish
+`<project-root>/memory/tech-debt/audits/<date-time>/` and use its absolute path as
+`<report-dir>`. Use a UTC start timestamp `YYYY-MM-DDTHH-mm-ssZ`, for example
+`2026-11-14T14-30-00Z`. For a collision use fractional seconds before `Z` (up to
+six digits) and create an unused directory. Keep a descriptive audit title inside
+the report. Resume an unfinished audit in its existing directory. Retain completed
+audit materials; later investigations use a new timestamp and link their predecessors.
+
+The current plan is separate: `memory/tech-debt/plan/plan.md` and
+`memory/tech-debt/plan/tasks/<task-name>/task.md`. Follow
+[plan maintenance](tech-debt-plan.md) for automatic additions and user changes.
+Measurement and ranking commands write only inside audit directories.
 
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
@@ -31,7 +39,7 @@ the containing document; measurement addresses are relative to the report direct
 and the metadata's `card` path is relative to `cards.json`. Resolve writes inside the intended report,
 including symlinks. `collect --output` accepts the report directory itself, including
 pre-existing `raw/` and plans, but rejects an existing `collection.json`, `metrics/`
-or `selections/`. Further collection uses a new named report directory, linked from
+or `selections/`. Further collection uses a new timestamped audit directory, linked from
 the audit being continued. Do so only for a measurement need, never a version check.
 
 There are no monolithic measurement exports or copied source trees. Keep the current

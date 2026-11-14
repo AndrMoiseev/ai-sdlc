@@ -1,6 +1,6 @@
 ---
 name: sdd-architect
-description: Full-cycle metrics collection, analysis and source-grounded refactoring recommendations for Kotlin/JVM and Gradle projects, by explicit invocation.
+description: Architecture audits, source-grounded refactoring recommendations and a maintained tech debt plan for Kotlin/JVM and Gradle projects, by explicit invocation.
 disable-model-invocation: true
 ---
 
@@ -21,7 +21,7 @@ Describe proposed boundaries through responsibilities and dependency directions.
 Detailed package contracts and ArchUnit checks belong to subsequent `sdd-spec`
 work; creating or splitting Gradle projects is outside this method.
 
-## Project configuration and report directory
+## Project configuration, audit storage and tech debt plan
 
 For every run with a project checkout, the orchestrator saves the researched
 configuration in `.sdd/architect/collection.json` through
@@ -29,16 +29,25 @@ configuration in `.sdd/architect/collection.json` through
 Explorer proposes the configuration; the orchestrator owns its persistence.
 
 Before producing any materials, establish
-`<project-root>/docs/reports/{report-name}/` using the
+`<project-root>/memory/tech-debt/audits/{date-time}/` using the
 [report storage contract](references/runtime.md#report-storage). Save the final
 report and all intermediate materials there for every route, including focused
-analysis and reassessment. Finish with a link to its `report.md`.
+analysis and reassessment.
+
+Read [tech debt plan maintenance](references/tech-debt-plan.md) before selecting
+candidates and again before completion. Reuse known diagnoses from the current
+plan. Automatically copy only new `ready` and `needs_check` cards into
+`memory/tech-debt/plan/tasks/{task-name}/task.md` and update `plan/plan.md`.
+Keep all `ready` tasks before all `needs_check` tasks and preserve user assessments
+and priorities. Finish with both report and plan links and explicit notification
+about `observe` and `rejected` cards. A user's plan-only edit follows that reference
+directly, without starting an audit.
 
 ## Default route: full cycle
 
 A bare `$sdd-architect`, `/sdd-architect`, or skill selection without additional
 task text starts **configuration → collect → analysis → ranking → final
-report**. General audit and refactoring
+report → plan update**. General audit and refactoring
 requests use the same route. Start from the current project's checkout and discover
 its scope and build configuration; an omitted prompt is not a request to choose a mode.
 
@@ -46,7 +55,7 @@ Read the [workflow](references/workflow.md) before starting. Before
 dispatch, continuation or handoff, read
 [assignments and context](references/orchestration.md) for saved requests/results,
 current input basis, fresh contexts and single-writer ownership.
-The orchestrator runs the phases sequentially through `report.md`, without
+The orchestrator runs the phases sequentially through report and plan delivery, without
 intermediate user approvals for the already requested audit. Existing reports are
 inputs to qualify within this cycle; their presence does not select a reports-only route.
 
@@ -57,6 +66,7 @@ inputs to qualify within this cycle; their presence does not select a reports-on
 | 3. Analysis | Architect refines the computed shortlist; fresh architects diagnose groups and integrate recommendations | Six-section Markdown cards with evidence and open design questions; compact ranking metadata |
 | 4. Ranking | Explorer executes assigned `rank` against the cards, collection and current sources | Checked card structure, evidence addresses and priority groups |
 | 5. Final report | Fresh architect authors the report from diagnoses, cards and ranking | `report.md`, with up to five ready recommendations |
+| 6. Plan update | Orchestrator adds eligible new tasks and retains current user decisions | Updated `plan/plan.md`, new task cards and final notifications |
 
 Use an [explicit focused route](references/continuation.md#explicit-focused-routes)
 only when the user asks for one, such as analyzing supplied reports, comparing
@@ -74,6 +84,7 @@ Kotlin/Gradle checkout.
 | Prepare or refine the investigation shortlist | [Candidate groups](references/candidate-groups.md) | Computed groups and ordering; source-grounded shortlist adjustments |
 | Diagnose candidates and compare directions | [Diagnosis](references/diagnosis.md), including its explicit `sdd-code-design` call | Source-grounded findings and a justified refactoring direction |
 | Author cards, prioritize and deliver | [Decision output](references/decision-output.md) | Six-section Markdown cards, tied priority groups and evidence for `sdd-spec` |
+| Reuse known tasks, add audit results or apply a user's plan change | [Tech debt plan](references/tech-debt-plan.md) | Persistent tasks, ready-before-needs-check ordering and preserved user decisions |
 | Review a diff or verify an implemented recommendation | [Reassessment](references/reassessment.md) | Comparable evidence for the affected code and consumers |
 | Request more evidence, resume after interruption or reconcile a changed basis | [Continuation](references/continuation.md) | Bounded follow-up, verified saved work and the next affected phase |
 

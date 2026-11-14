@@ -50,6 +50,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Архитектурная рекомендация** `Recommendation` kind:entity
 - **Архитектурное решение** `Decision` kind:entity
 - **Архитектурный модуль** `Module` kind:concept
+- **Аудит техдолга** `TechDebtAudit` kind:process
 - **База знаний** `KnowledgeBase` kind:concept
 - **Бенчмарк** `Benchmark` kind:concept
 - **Верификация** `Verification` kind:process
@@ -62,6 +63,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Дизайн** `Design` kind:entity
 - **Документ** `Document` kind:entity
 - **Задача** `Task` kind:entity
+- **Задача техдолга** `TechDebtTask` kind:entity
 - **Заключение по критериям** `VerificationResult` kind:value
 - **Изменение** `Change` kind:aggregate
 - **Исполнитель** `Executor` kind:role
@@ -78,6 +80,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Основание** `Basis` kind:value
 - **Пакет скиллов** `SkillPackage` kind:concept
 - **План** `Plan` kind:entity
+- **План техдолга** `TechDebtPlan` kind:entity
 - **Поручение исследователю** `Assignment` kind:entity
 - **Предложение** `Proposal` kind:entity
 - **Приёмка задачи** `TaskAcceptance` kind:process
@@ -97,6 +100,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Спецификация** `Spec` kind:entity
 - **Сценарий оценки** `Eval` kind:entity
 - **Текущая спецификация** `CurrentSpecification` kind:entity
+- **Технический долг** `TechDebt` kind:concept
 - **Точка отсчёта** `Baseline` kind:concept
 - **Требование** `Requirement` kind:entity
 - **Утверждение комплекта** `DocumentApproval` kind:value
@@ -163,6 +167,30 @@ baseline проверок. Совпадение имён само по себе 
 - **Изменения на 100 строк кода** `ChangesPerCode` kind:value
 
 ## Terms
+
+### Аудит техдолга
+
+- **Definition**: Отдельное исследование `sdd-architect`, материалы которого сохраняются в `memory/tech-debt/audits/<date-time>/`. Завершённые материалы фиксируют выводы исследования; прерванный аудит продолжается в своём каталоге.
+- **NOT**: Текущее состояние плана техдолга или снимок версии исходников.
+- **Source**: [хранение материалов аудита](../skills/sdd-architect/references/runtime.md#report-storage).
+
+### Задача техдолга
+
+- **Definition**: Постоянная рабочая карточка в `memory/tech-debt/plan/tasks/<task-name>/task.md`, созданная из архитектурной рекомендации со статусом `ready` или `needs_check`. Пользователь может менять её оценку и приоритет в плане; исходная карточка аудита сохраняет историческую оценку.
+- **NOT**: Задача реализации `Task` из подробного плана SDD. Совпадение файла или заголовка само по себе не устанавливает тождество задач техдолга.
+- **Source**: [ведение плана техдолга](../skills/sdd-architect/references/tech-debt-plan.md).
+
+### План техдолга
+
+- **Definition**: Накопленный перечень задач техдолга в `memory/tech-debt/plan/` со сводной таблицей `plan.md` и отдельными карточками. Текущие оценки и приоритеты пользователя сохраняются при последующих аудитах; все `ready` предшествуют всем `needs_check`.
+- **NOT**: Подробный план реализации SDD `Plan`, отчёт одного аудита или разрешение выполнять рефакторинг.
+- **Source**: [ведение плана техдолга](../skills/sdd-architect/references/tech-debt-plan.md).
+
+### Технический долг
+
+- **Definition**: Проблемы устройства проекта, для которых исследуют причины, последствия и направления устранения. Материалы исследований и текущий план работ разделены внутри `memory/tech-debt/`.
+- **NOT**: Любое превышение порога метрики: сигнал ещё требует содержательной диагностики.
+- **Source**: [sdd-architect](../skills/sdd-architect/SKILL.md).
 
 ### Сбор измерений
 

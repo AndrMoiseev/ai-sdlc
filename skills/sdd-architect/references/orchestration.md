@@ -8,6 +8,10 @@ its quality. Use the existing `sdd-spec.architect` and `sdd-spec.explorer` selec
 keys directly, without loading the `sdd-spec` skill or its authoring workflow.
 Run one assignment at a time. The orchestrator owns dispatch and transitions;
 workers request additional research, checks or decisions through it.
+The orchestrator alone maintains the [tech debt plan](tech-debt-plan.md). Workers
+receive relevant current task cards and user decisions as read-only inputs; keep
+their write scopes inside the assigned audit. Reread user-edited plan entries before
+the orchestrator applies additions or a requested plan change.
 
 ## Save the request before dispatch
 
@@ -58,7 +62,7 @@ of this object to the calling skill. For this audit, use:
 | `source_paths` | Current checkout and relevant source directories/declarations; empty for source-free work |
 | `configuration` | Current configuration path |
 | `collection_plan` | Collection-plan path; exact command-registry revision belongs to checks assignments |
-| `artifacts` | Collection description, candidate groups/queue and metric JSONL paths/keys, shortlist, diagnoses or cards needed for this task |
+| `artifacts` | Collection description, candidate groups/queue and metric JSONL paths/keys, shortlist, diagnoses, audit cards or existing plan tasks needed for this task |
 | `decisions` | Authoritative requests, decisions and exact conditions affecting the task |
 
 Check that inputs exist and answer the assigned question. Source review uses the

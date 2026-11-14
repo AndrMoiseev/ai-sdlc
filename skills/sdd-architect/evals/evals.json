@@ -20,7 +20,7 @@
       "id": 2,
       "name": "source-grounded-boundary",
       "category": "core",
-      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/docs/reports/pricing-audit/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи отчёт pricing-audit в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость.",
+      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/memory/tech-debt/audits/2026-11-14T14-30-00Z/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи этот аудит в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость. Заверши отчёт и обнови план техдолга.",
       "expected_output": "Read prepared JSONL measurements; inspect both sides; propose an evidenced responsibility-transfer direction in a six-section Markdown card for human-involved sdd-spec work, with validated ordering.",
       "files": ["evals/prepare_fixture.py"],
       "expectations": [
@@ -32,7 +32,10 @@
         "Leaves final package/API layout, ArchUnit scope and implementation tasks to human-involved sdd-spec work.",
         "Names tax/rounding behavior to preserve and observable effect criteria without claiming future implementation has been verified.",
         "Does not claim real-project validation from this synthetic fixture.",
-        "Saves report.md and every intermediate artifact under project/docs/reports/pricing-audit/ and links retained evidence."
+        "Saves report.md and every intermediate artifact under project/memory/tech-debt/audits/2026-11-14T14-30-00Z/ and links retained evidence.",
+        "Adds only new ready and needs_check cards to memory/tech-debt/plan/tasks/<task-name>/task.md with source audit/card provenance and rebased evidence links; plan.md links every added task, including eligible cards beyond the report's top five.",
+        "Keeps every current ready task before every current needs_check task, regardless of speculative effect, and preserves existing user assessments and within-group priority.",
+        "Finishes with report and plan links and explicit observe/rejected counts and links, or says neither occurred; does not auto-add these statuses."
       ]
     },
     {

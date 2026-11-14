@@ -109,6 +109,9 @@ in the collection; an interrupted grouping remains incomplete like other selecti
 Start from selected queue entries and inspect their groups, overlaps, limits and
 the deferred population. Save the final shortlist in `diagnosis.md`, linking each
 computed origin by path/key and explaining each merge, split, addition or omission.
+Compare candidates with the [current tech debt plan](tech-debt-plan.md#read-the-plan-before-investigation).
+Link matching existing tasks and reuse adequate diagnoses. Known tasks can reduce
+the substantive investigation, but do not remove files or signals from collection.
 Keep these calculations in `collect`; the architect does not reconstruct filters
 or rerank raw measurements by hand.
 

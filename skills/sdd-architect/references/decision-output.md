@@ -1,8 +1,9 @@
 # Recommendation cards and priority
 
 Prepare directions and evidence for a human to develop through `sdd-spec`.
-The audit ends when the reader can judge which refactoring direction deserves
-that work. A ready recommendation is sufficiently grounded for that discussion;
+The report lets the reader judge which refactoring direction deserves
+that work; delivery also includes [plan maintenance](tech-debt-plan.md).
+A ready recommendation is sufficiently grounded for that discussion;
 it is not an approved design or an implementation plan.
 
 The fresh integration architect owns this work in the
@@ -97,9 +98,11 @@ changes to cards or metadata.
 
 Show up to five ready recommendations in a table: priority group, direction,
 M/R/S effects, basis/confidence and material cost/dependencies. Link each to its
-complete six-section Markdown card. Keep the full card in one place; use summaries
-and links in `report.md`, followed by the short investigation queue, observations
-and important rejections. Zero ready recommendations is a valid result.
+complete six-section Markdown card. Within this audit keep the full card in one place; use summaries
+and links in `report.md`, followed by the short investigation queue and a linked
+list of every `observe` and `rejected` card with its reason. Zero ready recommendations
+is a valid result. The five-direction display limit does not limit plan admission:
+all new `ready` and `needs_check` cards are eligible.
 
 State the inspected scope and material gaps. Link the collection description,
 specific JSONL records, diagnoses and ranking with paths relative to the report.
@@ -110,5 +113,7 @@ inform the human's next choice; they are not a task sequence or a scalar tie-bre
 Save generated ranking Markdown separately from `report.md`. A fresh architect
 authors the final report, preserving validated order and uncertainty. The report
 and linked cards provide the evidence for subsequent `sdd-spec` discussion;
-completing the audit does not start that workflow. The orchestrator finishes with
-the report link and a brief summary of directions and limitations.
+completing the audit does not start that workflow. The orchestrator then updates
+the plan under its separate contract and returns both links, additions/known tasks,
+limitations and explicit notification of the excluded statuses. Audit ranking does
+not overwrite the user's current assessment or priority in the plan.
