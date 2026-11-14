@@ -5,7 +5,7 @@ thresholds explain why a candidate was examined. Only an established mechanism
 and a feasible transformation justify an effect category.
 
 The fresh integration architect owns this work in the
-[final-report phase](workflow.md#phase-4-final-report). It reconciles bounded
+[analysis phase](workflow.md#phase-3-substantive-analysis). It reconciles bounded
 diagnoses, resolves shared causes and contradictions, and checks dependencies
 across the whole recommendation set before authoring cards.
 
@@ -25,14 +25,15 @@ percent acceleration is calculated from churn, PC or coverage.
 ## Author cards
 
 Copy [recommendations.example.json](../assets/recommendations.example.json) to
-`<report-dir>/cards.json` and replace every example. `revision` and `source_state`
-come from the snapshot. Required ready-card fields are:
+`<report-dir>/cards.json` and replace every example. Cards describe current sources
+and evidence, without source-version fields. Required ready-card fields are:
 
 - `id`, `status: "ready"`, `cause`, `action` with exact source objects and owner.
-- `source_evidence`: inspected snapshot file, declaration including signature, and
+- `source_evidence`: inspected current source file, declaration including signature, and
   finding; include relevant consumers, wiring and tests in the narrative evidence.
-- `metric_evidence`: records, values/units, numerators/denominators, aggregation,
-  thresholds, suitability, M/R/S weights and shared provenance groups. Use an
+- `metric_evidence`: each reference contains a relative JSONL `path`, complete object
+  `key` from the catalog, and a `finding`. Explain units, numerators/denominators,
+  aggregation, thresholds, suitability and shared provenance in the finding. Use an
   empty list only for a source-grounded issue unsupported by a measured signal.
 - `scenario`, `mechanism`, `alternative_explanation` and the observed outcome of
   checking it; distinguish facts from a hypothetical future scenario. In
@@ -54,11 +55,11 @@ Unresolved cards use `status: "needs_check"`, `question`, `next_action`,
 and `revisit`. Keep costs as a supported range or unknown, never invented days.
 
 The orchestrator assigns `rank` to explorer through the shared checks contract,
-using the exact cards and snapshot as its basis. Explorer returns command outcomes
+using the cards, collection description and current source paths. Explorer returns command outcomes
 and full artifact references. The integration architect assesses failures and
 changes the cards; a changed input requires new assigned check evidence.
 
-`rank` checks completeness, source identity, duplicate causes, effect categories,
+`rank` checks completeness, current source paths, keyed JSONL references, duplicate causes, effect categories,
 boundary acceptance and prerequisite cycles. It sorts ready profiles
 lexicographically M→R→S and emits equal-profile priority groups. It cannot verify
 that the source evidence was honestly inspected or that a semantic diagnosis is
@@ -70,7 +71,7 @@ Show up to five ready recommendations in a table: priority group, concrete chang
 M/R/S effects, basis/confidence, cost/dependencies. Follow with their compact cards,
 the short investigation queue, observations and important rejections. Zero ready
 recommendations is a valid result. Save the finished report as `<report-dir>/report.md`
-and link the snapshot, analysis, diagnosis notes and authored cards with relative
+and link the collection description, specific JSONL records, diagnosis notes and authored cards with relative
 paths. State the inspected scope and material collection/diagnosis gaps, preserving
 the source references behind each recommendation. The orchestrator replies with
 the report link and a brief summary of the recommendations.

@@ -1,151 +1,107 @@
-# Four-phase architecture audit
+# Architecture audit workflow
 
-The orchestrator owns assignments and phase transitions. Start with
-[report storage and runtime](runtime.md), then follow the phases below in order.
-A bare invocation authorizes the complete audit through `report.md`; phase
-completion is an evidence check, not an additional user approval.
+Run **configuration → collect → substantive analysis → ranking → final report**.
+The orchestrator owns assignments and transitions under
+[assignments and context](orchestration.md). Execute assignments sequentially with
+fresh contexts at phase and diagnosis-group boundaries. Architects author findings;
+explorers research or execute exact checks. Product sources remain read-only.
 
-Before dispatch, continuation or handoff, use
-[assignments and context](orchestration.md): saved requests and results, exact input
-basis, shared role selection, fresh contexts and verified writer transfer. Execute
-assignments sequentially. The orchestrator receives requests for additional research
-or checks; architects author assigned analysis and explorers produce assigned
-evidence. Product sources remain read-only throughout the audit.
-
-For a bounded evidence request, changed basis or interrupted audit, use
-[continuation](continuation.md). Save the current phase and primary record links
-in `state.md`; resume from verified artifacts and host state.
+A bare invocation authorizes the complete audit through `report.md` without extra
+approvals between phases. Read [runtime](runtime.md) before producing artifacts.
+Save phase and primary links in `state.md`; use [continuation](continuation.md) for
+bounded evidence requests or interrupted work. All work refers to current source
+paths and task scope. No phase binds the audit to a source version.
 
 ## Phase 1: Configuration
 
-**Input:** project checkout, requested audit scope and constraints, existing
-collection configuration, architecture decisions and build/source evidence.
+**Input:** checkout, requested scope and constraints, existing configuration,
+architecture decisions and build/source evidence.
 
-1. Start a fresh explorer with a research question covering production source roots, Gradle
-   projects and variants, compiled outputs, existing measurement/test tasks,
-   exclusions and package ownership. Apply [Collection](collection.md).
-   Inspect existing reports for possible reuse and retain their original provenance.
-2. Require a proposed configuration and collection plan with source references
-   explaining the scope choices. Inventory all five measurement families:
-   dependencies, history, source size, complexity and coverage. For each family,
-   name its intended input or exact collection command, output and known limitation.
-   Label inferred module boundaries and unknown ownership explicitly.
-3. Reconcile the proposal against the user's scope and current project evidence.
-   The orchestrator writes `.sdd/architect/collection.json` and
-   `<report-dir>/collection-plan.md` before capturing identity. Explorer requests
-   configuration changes in its result; it does not edit project configuration
-   or `.sdd/settings.json`.
+1. Start a fresh explorer to research production roots, Gradle projects/variants,
+   compiled outputs, existing measurement and test tasks, exclusions and package
+   ownership. Apply [Collection](collection.md), including supplied report inputs.
+2. Require proposed configuration and a plan justified by source references.
+   Inventory dependencies, history, size, complexity and coverage. Record exact
+   commands or input paths and known limitations; unknown ownership stays explicit.
+3. The orchestrator saves `.sdd/architect/collection.json` and `collection-plan.md`.
+   Register executable commands with dependencies, destinations and limits under
+   the [checks contract](orchestration.md#register-checks-in-the-collection-plan).
+   Explorer proposes changes but does not edit project configuration or settings.
 
-Register commands in the collection plan under the
-[checks contract](orchestration.md#register-checks-in-the-collection-plan).
-Research proposes commands; builds, tests and measurements require an assigned
-checks set. Use existing tasks and record an unavailable task as a gap rather
-than changing the product build during the audit.
+**Exit:** saved scope, population, exclusions and ownership are justified; every
+measurement family has an intended source or a concrete gap.
 
-**Exit:** the saved configuration and plan agree on source/build scope, exclusions,
-ownership and all five families. Every scope choice has evidence or an explicit
-assumption. An omitted source set is a stated limit, not an invisible default.
+## Phase 2: Collect
 
-## Phase 2: Evidence
+**Input:** saved configuration, exact registered commands and output destinations.
 
-**Input:** saved configuration and collection plan, exact registered commands,
-current source basis and permitted evidence destinations.
+1. Start a fresh explorer with a checks assignment containing the registered IDs,
+   stage and command-registry revision. Execute existing build/report tasks and
+   then `collect` in dependency order. Return tool/report facts to the orchestrator
+   for necessary path/configuration updates before a dependent batch.
+2. `collect` retains each raw report once, normalizes available inputs, calculates
+   all [catalog outputs](measurements.md) in dependency order and saves selections.
+   It records errors and missing inputs per chain while completing independent work.
+3. Return the compact `collection.json` description, output counts and gaps. Read
+   only the JSONL files relevant to the next investigation; do not send the complete
+   metric population to the orchestrator.
 
-1. Start a fresh explorer with a `checks` assignment. The orchestrator supplies
-   exact `check_ids`, stage and registry revision under the shared contract.
-   Execute identity capture, existing build/report tasks, `collect` and `analyze`
-   in their recorded dependency order. Keep configuration stable during each
-   `identity` or `collect` command.
-2. Return verified provenance from compilation and report generation to the
-   orchestrator. It saves those configuration values before the dependent
-   collection batch. A dependent batch receives an updated assignment and basis;
-   explorer never edits configuration to make a check pass.
-3. Retain raw reports and logs, captured identity, immutable snapshot and
-   deterministic analysis views in the report directory. Each measurement family
-   returns its result and provenance or a concrete gap: failed command, absent
-   tool/input, unsuitable population, unknown identity or unavailable permission.
-   Preserve partial usable evidence and the distinction between zero and unknown.
-4. Return a compact result with assignment identity, command outcomes, source
-   basis, family coverage/gaps and artifact references. Full report bodies remain
-   in files. Use the collector's compact stdout; the orchestrator reads summaries
-   and forwards evidence references rather than loading raw dumps into its context.
+**Exit:** every planned output is complete or has a concrete unavailable/error reason.
+Primary observations, derived values, group aggregates, rankings and threshold
+selections are ready before substantive analysis starts. Interrupted calculations
+remain incomplete. Source version metadata is neither needed nor inspected.
 
-**Exit:** retained snapshot and analysis views cover the declared scope; all five
-families have a result or precise gap. The orchestrator checks actual artifacts
-and source identities against the assignment. Successful execution alone does not
-prove complete measurements. A missing family limits its dependent claims;
-unavailable execution capability stops only the dependent work. Unknown revision
-or source identity prevents implementation-ready recommendations.
+## Phase 3: Substantive analysis
 
-## Phase 3: Analysis
+**Input:** collection description, relevant JSONL records and selections, scope,
+current source paths, limitations and known change/behavior scenarios.
 
-**Input:** qualified snapshot, deterministic views, scope/gaps, source references
-and the known change or behavior scenario.
+1. Start a fresh architect to select 8–12 related candidate groups using
+   [Measurements](measurements.md). Merge signals for the same cause; include known
+   risks and upcoming changes even without hotspots. Explain a smaller bounded
+   population and material omissions. Save the shortlist in `diagnosis.md`.
+2. Record each group's source paths/declarations, JSONL paths and object keys,
+   scenario, owners, consumers, wiring and tests. A cold dependency can own the cause.
+3. Start a fresh architect for each bounded group. Apply the explicit
+   [sdd-code-design diagnosis call](diagnosis.md), inspect mechanisms and consumers,
+   and save `diagnoses/<group-id>/diagnosis-<n>.md`. Require alternative explanations,
+   feasible transformations, required behavior, cost/risk, acceptance and separate
+   confidence in observation, diagnosis and effect. Source-free groups stay hypotheses.
+4. After group work, start a fresh integration architect. Merge shared causes,
+   preserve non-issues and resolve contradictory claims through primary evidence.
+   Check dependencies and conflicting transformations across recommendations.
+   Apply [Decision output](decision-output.md) to author `cards.json` with readiness
+   and grounded M/R/S effects. Request bounded research/checks through the orchestrator
+   only when an attainable answer can change the decision.
 
-1. Start a fresh architect for the shortlist. Use [Measurements](measurements.md) to select
-   8–12 related candidate groups, merging signals for the same area. Include a
-   known risk, critical contract or upcoming change even without a hotspot signal.
-   If the source population supports fewer distinct groups, explain that bound.
-   Retain selection reasons and material omissions in `diagnosis.md`.
-2. Record for each group its identity, paths/declarations, qualified signals,
-   scenario and the owner, consumers, wiring and tests needed to investigate it.
-   A group may cross package or module boundaries; the cause can belong to a cold
-   dependency. The group is an investigation scope, not a module definition.
-3. Start a fresh architect for each group's bounded diagnosis. Pass the saved
-   group and evidence references, required behavior, known limits and one assigned
-   `diagnoses/<group-id>/diagnosis-<n>.md` output. Require the explicit `sdd-code-design` focused diagnosis
-   call in [Diagnosis](diagnosis.md). Each architect inspects that group's mechanism
-   and affected consumers; it does not repeat a repository-wide audit.
-4. Require source evidence, alternative explanations and transformations,
-   preservation of required behavior, cost/risk, acceptance and separate confidence
-   in observation, diagnosis and expected effect. Each result proposes `ready`,
-   `needs_check`, `observe` or `rejected` with the grounds required by
-   [stop conditions](diagnosis.md#stop-conditions). Source-free groups return
-   questions and limits. A proposed check is distinct from an executed check.
+**Exit:** every shortlisted group has a diagnosis or a specific gap and decision
+consequence; authored cards contain the substantive evidence needed for ranking.
+A proposed check is not an executed check. Thresholds alone do not establish readiness.
 
-After the shortlist author's verified stop, the orchestrator links each separate
-diagnosis from the shortlist under the [context and writer contract](orchestration.md#choose-the-context-boundary).
-Keep expansions to owners/consumers explicit and bounded by the causal question.
-Route [bounded evidence requests](continuation.md#request-bounded-evidence) through
-the orchestrator; existing raw evidence can be opened without rerunning its command.
+## Phase 4: Ranking
 
-**Exit:** every shortlisted group has a returned diagnosis or a specific unresolved
-gap with its decision consequence. The retained result includes justified non-issues;
-neither a finding count nor a metric threshold establishes readiness.
+**Input:** authored cards, collection description and current sources.
 
-## Phase 4: Final report
+Assign `rank` to a separate explorer checks assignment. It validates required fields,
+current source paths, keyed metric references, effects, boundary acceptance and
+prerequisites. Save `ranked-<n>.json` and optional rendered Markdown separately from
+`report.md`. Return validation failures to the card author, then rerun ranking on
+corrected cards. Preserve equal profiles and separate priority from execution order.
 
-**Input:** shortlist, bounded diagnoses and their evidence references, snapshot,
-analysis views, current scope/gaps and source basis.
+**Exit:** the completed cards have a successful structural ranking result. This
+result does not establish the truth of the diagnosis; that belongs to phase 3.
 
-1. Start a fresh architect for integration. Merge diagnoses that share a cause,
-   retain important non-issues and resolve contradictory claims against their
-   source evidence. Request bounded follow-up research/checks through the
-   orchestrator when an attainable answer changes the decision. Preserve an
-   unresolved contradiction as uncertainty in the affected recommendation.
-2. Check dependencies across the complete set: changed owners and contracts,
-   affected consumers, conflicting transformations, prerequisites and required
-   behavior. Compare the current system with the smallest useful change and a
-   broader option when meaningful. Avoid awarding one cause or preparation test
-   the same benefit twice.
-3. Apply [Decision output](decision-output.md) to author `cards.json`. Establish
-   readiness and each M/R/S effect from mechanisms, feasible transformations and
-   acceptance. Write the substantive reason for each strict priority difference;
-   equal effects remain tied. An unresolved trade-off keeps its effect unknown.
-4. The architect returns completed cards and stops dependent writing. The orchestrator
-   assigns `rank` to explorer as exact registered checks against that retained cards
-   version and its snapshot. Save the full result and optional generated
-   Markdown separately from `report.md`. Return validation failures to the
-   architect for correction against the evidence, then assign checks on the
-   changed input. `rank` validates and orders authored claims; it cannot prove
-   that a diagnosis is true.
-5. Continue the integrating architect with the saved ranking result and current
-   input basis under [the handoff contract](orchestration.md#accept-the-handoff). Finish `report.md`
-   with source evidence, actual scope and gaps, up to five ready recommendations,
-   their grounded priority rationale and dependencies, the investigation queue,
-   observations and important rejections. Link the snapshot, analysis, diagnoses,
-   cards and ranking. Zero ready recommendations is a valid completed result.
+## Phase 5: Final report
 
-**Exit:** report conclusions agree with retained evidence and validated ordering;
-unresolved items remain visibly unresolved. The orchestrator returns the report
-link and a brief account of the recommendations and material limitations.
+**Input:** shortlist, diagnoses, current cards, validated ordering and scope/gaps.
+
+Start a fresh architect to author `report.md` from primary evidence. Show up to
+five ready recommendations, their priority rationale, dependencies and acceptance,
+the investigation queue and important observations/rejections. Link concrete JSONL
+files and object keys, collection description, diagnoses, cards and ranking with
+relative paths. Zero ready recommendations is a valid result.
+
+If a substantive contradiction requires changing a card, return it to analysis
+and ranking before relying on it in the report. A rendered table alone does not
+complete the audit. The orchestrator checks evidence and phase outcomes and returns
+the report link with a brief account of recommendations and material limitations.

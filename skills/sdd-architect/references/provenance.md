@@ -34,7 +34,9 @@ the source procedure used the local adaptation at commit
 
 | Term | Meaning |
 | --- | --- |
-| Snapshot | Source identity, selected scope and immutable raw measurement artifacts |
+| Collection | Current scope and collection parameters, raw inputs, separate JSONL measurements and explicit output outcomes |
+| Measurement | One observation or computed indicator at one granularity, addressed by an object key |
+| Selection | A sorting or threshold condition with keyed references to measurements |
 | Architectural module | Declared package group with responsibility, public contract and dependency rules |
 | Candidate | A subject selected for source investigation by signals or a known change scenario |
 | Signal | An observed metric and its allowed evidential role; not a diagnosis |

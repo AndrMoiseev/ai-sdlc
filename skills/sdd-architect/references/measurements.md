@@ -1,8 +1,127 @@
 # Measurement meanings and filters
 
-Use `analyze` for the arithmetic. Values select questions; source investigation
+The `collect` command completes the arithmetic before substantive analysis. Values select questions; source investigation
 establishes whether there is a problem. The script outputs measurements and
 signals, not an architecture score or a refactoring verdict.
+
+## JSONL catalog and record addressing
+
+The executable catalog is [scripts/measurements.py](../scripts/measurements.py).
+Adapters live in `inputs.py` and `history.py`; `analysis.py` joins normalized inputs
+and emits the catalog; `graph.py` calculates graph definitions. `collection.py`
+handles commands and storage. Each input is parsed once per collection.
+
+Every `metrics/<name>/<level>.jsonl` is UTF-8: one independent JSON object per
+nonempty line, never an array. Each row has exactly one measurement plus its key,
+source location, supporting counters and completeness information. Source paths
+are repository-relative with `/`. Shared formulas/units live here and in the
+catalog; parameters and per-output availability live in `collection.json`.
+
+In the tables, each comma-separated name and each listed level expands to its
+own file. `G` expands to `class`, `package`, `module`; `S` to `file`, `package`,
+`module`. Keys are complete JSON objects containing the listed fields. Rows sort
+ascending by the canonical JSON of their key (keys sorted, Unicode preserved).
+Member arrays sort lexically; dependency-layer `position` preserves peeling order.
+A compound key retains the whole region and declaration, not a line number in a
+JSONL file. `declaration` means the declaration reported by the instrument, which
+can be a class, object, file or another scope; do not relabel it as a function.
+
+| Primary name | Level | Key | Source, unit and measured population |
+| --- | --- | --- | --- |
+| `source-files` | file | file | Selected current Kotlin/Java files; package/language reference only |
+| `class-files` | class | class | JVM SourceFile plus package or explicit override; file correspondence |
+| `type-count`, `abstract-type-count` | file | file | Counts from the Kotlin declaration heuristic; Java values unknown; explicit abstract classes/interfaces only for the second count |
+| `dependencies` | class | from, to | Unique directed admitted class pairs, value 1; nested classes retained |
+| `changes` | commit | commit | Historical event: date, full changeset size, list of file numstat counters and binary flags; ID addresses the event only |
+| `code-lines`, `total-lines` | file | file | scc Code and Lines respectively, in lines; whole reported file population within selected sources |
+| `cyclomatic-complexity`, `cognitive-complexity` | function | file, region, declaration | detekt measured complexity at its actual function/method location |
+| `method-length` | function | file, region, declaration | detekt LongMethod measured lines |
+| `function-count` | declaration | file, region, declaration | detekt TooManyFunctions count at the declaration it reports |
+| `parameter-list` | declaration | file, region, declaration | LongParameterList finding; parameter count stays unknown when absent from the message |
+| `line-coverage`, `branch-coverage` | file | file | Separate covered/total counters and fraction; file population and mapping from the coverage source |
+
+Retain raw finding pointers, region, declaration text, suppressions and unknown
+numeric values. The raw pointer addresses the tool report; all links between
+normalized measurements use object keys. Absence of a detekt finding is unknown,
+including when `complete_mcc` was requested. Full-population claims require observed
+MCC and no unknown or suppressed MCC findings for that file.
+
+| Derived name | Level | Key | Dependencies, formula/unit and applicability |
+| --- | --- | --- | --- |
+| `dependencies` | package, module | from, to | Class edges; summed unique class-pair weights across the boundary |
+| `node-count`, `edge-count` | G | graph | Corresponding graph; endpoint count and unique directed edge count |
+| `fan-in`, `fan-out` | G | node | Corresponding graph; distinct direct consumers/suppliers, count |
+| `incoming-weight`, `outgoing-weight` | G | node | Corresponding graph; sums of class-pair weights |
+| `reachable-in`, `reachable-out` | G | node | Corresponding graph; reachable consumers/suppliers including self, count |
+| `visibility-in`, `visibility-out` | G | node | Corresponding reachability / N, fraction; numerator and denominator retained |
+| `propagation-cost` | G | graph | Sum reachable-out / N², fraction; N=0 is not applicable |
+| `cyclic-components` | G | members | Corresponding graph; SCC member sets of size >1 |
+| `cyclic-edges` | G | from, to | Edges inside cyclic components, class-pair weight |
+| `dependency-layers` | G | members | Corresponding graph; peeling rule below, with kind and sequence position |
+| `cohesion` | module | module | Package edges and declared map; internal/(internal+boundary), fraction; no weight is not applicable |
+| `external-affinity` | package | package | Package edges and declared map; external module shares, denominator and unknown-ownership fraction; labels below |
+| `ca`, `ce` | package | package | Package edges and type counts; incoming/outgoing class-pair weights; T≥5 and Ca+Ce>0 |
+| `instability`, `abstractness`, `distance` | package | package | Martin I, A, D formulas below; same eligibility, partial type populations remain limited |
+| `change-frequency` | S | level name | History: file commit count; package/module sum of current member-file counts, commits |
+| `added-lines`, `deleted-lines`, `churn` | S | level name | History: additions, deletions, sum of both; groups sum current members; binary count retained |
+| `activity`, `recent-activity` | package, module | level name | History and current membership; distinct commits for entire window / last 30 days, inclusive |
+| `coupling` | file-pair | left, right | History; floor(200×shared/(rA+rB)), percent; changesets ≤30 before both frequencies and shared support; all observed pairs retained |
+| `implicit-coupling` | file-pair | left, right | Co-change, static edges and mapping; live Kotlin files in different packages without an observed direct edge; incomplete mapping limits the claim |
+| `cyclomatic-complexity` | file | file | Sum observed unsuppressed function MCC, complexity; observed count and population completeness retained |
+| `line-coverage`, `branch-coverage` | package, module | level name | Current membership and file coverage; sum covered/sum total, fraction; included/omitted/not-applicable files retained |
+| `crap-file` | file | file | Observed file MCC and line coverage; CRAP_file formula below, adapted CRAP units |
+| `crap-sum`, `crap-mean`, `crap-above-threshold` | package, module | level name | Defined file CRAP: sum, mean, count >30; explicit included/omitted/incomplete files; no measured values remains unknown |
+| `hotspot-in-frequency`, `hotspot-out-frequency`, `hotspot-in-churn` | file | file | Mapped class visibility and history; max(V_in)×r, max(V_out)×r, max(V_in)×churn; weighted commits or lines respectively |
+| `changes-per-code` | file | file | History and scc Code; 100×r/Code, commits per 100 code lines; Kotlin, r≥5 and Code≥20 |
+
+For scalar file outputs, the row universe is the union of current sources, admitted
+report paths and paths observed in history. Missing observations get `value: null`
+and `status: unknown` with a reason. Historical-only paths carry `live_production`
+in frequency/churn rows and do not enter current package/module aggregates.
+Group members come from current source packages and declared module ownership;
+empty declared modules are retained. Full changesets remain in `changes/commit`
+so filtering history cannot silently change coupling denominators.
+
+### Outcomes, empty sets and references
+
+`collection.json` contains `parameters`, raw artifact provenance, `outputs`, selection
+links and gaps, without metric tables. Every output descriptor has path, record count
+and one outcome: `complete`, `unavailable`, `error`, or `incomplete`. The last means
+calculation has not finished; a successful empty file has `complete` and count 0.
+A branch with unavailable inputs can retain unknown rows for known objects while
+its output outcome still explains why no measurement was obtained.
+
+Within a row, `measured` includes zero; `unknown` means missing information;
+`not_applicable` means the formula's population/denominator condition is false;
+`measured_subset` preserves a numeric result whose population is incomplete.
+Coverage with total=0 is not applicable. If a group also omits files, its empty
+measured denominator cannot establish applicability for the whole group.
+
+Cite a metric using its path and full key, for example:
+
+```json
+{"path":"metrics/line-coverage/file.jsonl","key":{"file":"src/Order.kt"},"finding":"Coverage observation for the pricing scenario"}
+```
+
+`selections/rankings.jsonl` retains path, key, position and sorting condition for
+non-null numeric unsuppressed observations. Ties sort by object key.
+`selections/signals.jsonl` retains conditions and keyed references for cycles,
+complexity/shape thresholds, supported co-change, hotspots, coverage and CRAP.
+It records suitability and ordinal weights without copying metric values.
+Selections do not establish a diagnosis. The `rank` command validates authored
+recommendations after source analysis and resolves only the cited metric files.
+
+### Treatment of prior auxiliary outputs
+
+Comments, blank lines, scc Complexity and author identities remain in raw reports;
+no normalized metrics, ownership shares or author/changeset summary scores are
+emitted for them. History window and import parameters stay in artifact provenance;
+actual event dates remain in `changes/commit`. Group file occurrences are represented
+by summed `change-frequency`; distinct commits use `activity`. Former absent-path
+lists are recoverable from historical events and `live_production`. Mapping gaps
+live once in the collection description. Group coverage and three CRAP aggregates
+are separate outputs with explicit membership. No auxiliary monolithic export is
+retained.
 
 ## Graph and declared modules
 
@@ -11,7 +130,7 @@ counts unique class pairs crossing that boundary, not calls or runtime frequency
 The class, package and declared-module graphs are different populations.
 Nodes are edge endpoints; isolated declarations and internal edges discarded by
 aggregation do not enter the corresponding denominator. Retain that scope when
-comparing snapshots. JVM nested classes are preserved in this implementation;
+comparing measurements. JVM nested classes are preserved in this implementation;
 the pilot collapsed them, so those graph series are not directly comparable.
 
 | View | Calculation and limit |
@@ -49,11 +168,11 @@ sum of file frequencies. The 30-day view is inclusive from latest log date minus
 30 days. It is a nested window, not a measured acceleration.
 
 `churn = added + deleted` is rewritten text, not size growth. Binary changes retain
-an explicit count; they do not become textual churn. Author counts and top-author
-share provide context with weight zero; they do not measure quality or bus factor.
+an explicit count; they do not become textual churn. Authors remain in the raw history for optional source investigation; authorship
+aggregates are excluded from the measurement catalog.
 
 For coupling, filter changesets larger than 30 files **before** computing both
-individual frequencies and shared support. Then require mean frequency ≥5,
+individual frequencies and shared support. Retain every observed pair in JSONL. Selections require mean frequency ≥5,
 shared commits ≥5 and `floor(200×shared/(rA+rB)) ≥30`. Preserve rA, rB and shared;
 `ceil((rA+rB)/2)` is the export's average-revs, not shared support. A 50% pair
 can have rA=10, rB=30, shared=10; it is not a directional probability.
