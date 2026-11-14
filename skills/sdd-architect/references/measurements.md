@@ -107,7 +107,8 @@ Cite a metric using its path and full key, for example:
 non-null numeric unsuppressed observations. Ties sort by object key.
 `selections/signals.jsonl` retains conditions and keyed references for cycles,
 complexity/shape thresholds, supported co-change, hotspots, coverage and CRAP.
-It records suitability and ordinal weights without copying metric values.
+It records suitability and ordinal weights without copying metric values. Signals
+have collection-local IDs and feed deterministic [candidate groups and the investigation queue](candidate-groups.md).
 Selections do not establish a diagnosis. The `rank` command validates authored
 recommendations after source analysis and resolves only the cited metric files.
 
@@ -240,15 +241,10 @@ at 1; unusable evidence is excluded without replacing its value by zero.
 Weights are ordinal and never added. Shared provenance prevents double counting.
 All speed weights are ≤1 because this metric set contains no speed measurements.
 
-Start with 8–12 groups: structural candidates, then risk, then supporting views
-that could change a diagnosis. New/changed cycles and graph plus substantive
-co-change deserve early investigation. Include candidates justified by a known
-incident, critical contract or upcoming change even without historical activity.
-Unknown or absent history is not evidence of safety. A hotspot's cause can be in
-a cold dependency, which remains eligible for the same scoped investigation.
-Merge SCC, visibility and hotspot signals for the same area. Near a boundary
-(29/30%, 9/10 revisions), inspect the neighboring case instead of inventing a
-health cliff. Explain shortlist omissions as budget limits, not absence of problems.
+Use the [computed groups and queue](candidate-groups.md) for preliminary selection.
+That contract defines exact-scope grouping, contained signals, overlaps, ordering,
+budget and architect adjustments. Numeric rankings remain available for supporting
+views; they are not an additional group-ranking algorithm.
 
 Send selected source-available groups to [focused diagnosis](diagnosis.md).
 Signals guide where to look; the source mechanism and feasible change

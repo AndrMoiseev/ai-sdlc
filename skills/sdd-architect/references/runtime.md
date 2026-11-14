@@ -19,13 +19,16 @@ same name. Continue an existing audit through its saved state and current inputs
 | Collection parameters, output links and outcomes; no value tables | `collection.json` |
 | One metric at one granularity | `metrics/<metric>/<granularity>.jsonl` |
 | Keyed sorting and threshold selections | `selections/rankings.jsonl`, `selections/signals.jsonl` |
+| Preliminary groups with overlaps and complete investigation queue | `selections/candidate-groups.jsonl`, `selections/investigation-queue.jsonl` |
 | Candidate shortlist and diagnosis index | `diagnosis.md` |
 | Separate bounded diagnoses | `diagnoses/<group-id>/diagnosis-<n>.md` |
 | Saved assignment, launch and worker result | `assignments/<assignment-id>/request.json`, `launch.json`, `result.json` |
-| Authored cards, validated ordering and optional rendered table | `cards.json`, `ranked-<n>.json`, `ranked-<n>.md` |
+| Six-section Markdown recommendation cards | `recommendations/<id>.md` |
+| Compact ranking metadata, validated ordering and optional rendered table | `cards.json`, `ranked-<n>.json`, `ranked-<n>.md` |
 
-Source paths are relative to the project with `/`; links between retained materials
-are relative to their report directory. Resolve writes inside the intended report,
+Source paths are relative to the project with `/`. Markdown links are relative to
+the containing document; measurement addresses are relative to the report directory,
+and the metadata's `card` path is relative to `cards.json`. Resolve writes inside the intended report,
 including symlinks. `collect --output` accepts the report directory itself, including
 pre-existing `raw/` and plans, but rejects an existing `collection.json`, `metrics/`
 or `selections/`. Further collection uses a new named report directory, linked from
@@ -67,9 +70,12 @@ uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collec
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
 ```
 
-`collect` prepares the complete catalog and selections before substantive analysis.
-Its stdout reports counts, the collection-description path and gaps. `rank` runs
-after cards are authored; it reads only cited metric files and current source paths.
+`collect` prepares the complete catalog, selections, preliminary groups and their
+queue before substantive analysis. Its stdout reports counts, including candidate
+groups, the collection-description path and gaps. `rank` runs
+after cards are authored; it checks their six-section Markdown structure and reads
+only cited metric files and current source paths. Narrative stays in the Markdown
+cards; JSON carries addresses, statuses and effects for ranking.
 Generated Markdown is an input to the final report; the assigned architect authors
 `report.md`. Existing ranked output files are rejected to preserve retained results.
 

@@ -6,7 +6,8 @@ Use this reference during configuration and collection in the [workflow](workflo
 Explorer researches the current checkout; the orchestrator saves the configuration
 and registers exact build/report commands. A fresh explorer executes the assigned
 checks. `collect` then retains raw reports, normalizes each source once, computes
-all derived measurements and prepares keyed selections before architects begin
+all derived measurements and prepares keyed selections, preliminary candidate groups
+and their investigation queue before architects begin
 substantive analysis. Read individual JSONL files through `collection.json`.
 
 Inventory dependencies, history, size, complexity and coverage. Each catalog output
@@ -56,6 +57,7 @@ is their ordinary repository history, not an input to this process.
 | `scope` | Gradle projects, source sets, variant and test tasks |
 | `class_directories` | Compiled directories for jdeps and JVM SourceFile mapping |
 | `class_files` | Optional explicit JVM-class to repository-relative source mapping |
+| `candidate_group_limit` | Positive integer, default 12; automatic investigation budget under [candidate groups](candidate-groups.md) |
 | `artifacts` | Available dependencies, history, sizes, complexity and coverage inputs |
 
 Artifact import paths are absolute. Source roots and compiled directories are

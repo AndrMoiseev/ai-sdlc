@@ -25,7 +25,9 @@ values under the needed definition if that resolves the question. Never subtract
 not automate a semantic comparison between configurations.
 
 After implementation of a selected recommendation, link the original card,
-diagnosis, keyed measurements and acceptance to the observed implementation. An earlier
+diagnosis, keyed measurements and the effect criteria in section 6 to the observed
+implementation. Obtain detailed acceptance checks from the resulting `sdd-spec`
+design and plan when available. An earlier
 report is a hypothesis to verify, not evidence of current completion. Reconcile
 changed sources and decisions through [basis reassessment](continuation.md#reconcile-a-changed-basis),
 then assign these checks within the relevant scope:

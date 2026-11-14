@@ -37,14 +37,15 @@ the source procedure used the local adaptation at commit
 | Collection | Current scope and collection parameters, raw inputs, separate JSONL measurements and explicit output outcomes |
 | Measurement | One observation or computed indicator at one granularity, addressed by an object key |
 | Selection | A sorting or threshold condition with keyed references to measurements |
+| Candidate group | Preliminary collection of signals with an exact file scope or unresolved measurement objects; retains overlaps without claiming a common cause |
+| Investigation queue | Deterministic group ordering with an automatic selection budget and explicit deferral reasons, refined by the architect |
 | Architectural module | Declared package group with responsibility, public contract and dependency rules |
 | Candidate | A subject selected for source investigation by signals or a known change scenario |
 | Signal | An observed metric and its allowed evidential role; not a diagnosis |
 | Diagnosis | A scoped explanation of a consequential mechanism, alternatives and uncertainty grounded in inspected source |
 | Finding | One source-grounded issue with its mechanism, existing protection and uncertainty |
-| Recommendation | One feasible complete change addressing one established cause |
+| Recommendation | One evidenced refactoring direction addressing an established cause, documented in six sections for human-involved `sdd-spec` work |
 | Priority group | Recommendations indistinguishable by the supported M/R/S effect profile |
-| Execution order | Prerequisite-respecting work order, distinct from benefit priority |
 
 ## Instrument definitions
 

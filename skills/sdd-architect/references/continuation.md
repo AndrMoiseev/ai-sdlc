@@ -33,7 +33,7 @@ replacement. Keep this short navigation record:
 | Basis | Current source paths, configuration/collection-plan paths, collection description and decision sources |
 | Assignments | Finished/unfinished IDs, worker identity, output ownership and last host-observed state |
 | Evidence | Request, launch, result and primary-output paths; assessment of each handoff |
-| Open work | Groups/cards, unexecuted checks, gaps, unresolved decisions and remaining limits |
+| Open work | Candidate-group/queue paths and keys, shortlist adjustments, diagnoses/cards, unexecuted checks, gaps and unresolved decisions |
 | Next step | Exact phase/assignment and its substantive prerequisite or blocker |
 
 State links primary records instead of duplicating them. Worker completion remains

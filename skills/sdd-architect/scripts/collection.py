@@ -101,7 +101,9 @@ def map_classes(config, root, sources):
 
 def collect(config, output):
     from analysis import prepare_measurements
+    from candidate_groups import SELECTION_NAMES, candidate_group_limit
 
+    limit = candidate_group_limit(config)
     root = Path(config["repository"]).resolve()
     if not root.is_dir():
         raise ValueError(f"Repository not found: {root}")
@@ -112,10 +114,11 @@ def collect(config, output):
     description = {"repository": str(root), "status": "incomplete",
                    "parameters": {key: config.get(key, default) for key, default in (
                        ("source_roots", []), ("exclude_paths", []), ("package_prefixes", []),
-                       ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}))},
+                       ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}),
+                       ("candidate_group_limit", limit))},
                    "artifacts": {}, "gaps": [],
                    "selections": {name: {"path": f"selections/{name}.jsonl", "status": "incomplete", "records": None}
-                                  for name in ("rankings", "signals")},
+                                  for name in SELECTION_NAMES},
                    "outputs": {name: {"path": spec["path"], "status": "incomplete", "records": None,
                                       "reason": "Collection has not completed this calculation"}
                                for name, spec in CATALOG.items()}}

@@ -13,7 +13,7 @@ from history import group_activity, history_view, parse_history
 from inputs import class_source_file, coverage, dependencies, detekt, relative_path, source_description
 from metrics import main, write_json
 from measurements import CATALOG, ordered_rows, record_key, resolve_reference
-from recommendations import rank
+from recommendations import markdown, rank, validate_card
 
 
 def finding(rule, message, line=10):
@@ -23,17 +23,34 @@ def finding(rule, message, line=10):
 
 
 def card(identity, effect):
-    return {"id": identity, "status": "ready", "cause": identity,
-            "action": "Extract price calculation", "scenario": "Change a rounding rule", "mechanism": "I/O mixes with calculation",
-            "alternative_explanation": "Checked that calculation has a separate policy owner", "chosen_option": "Pure calculation",
-            "baseline": "Mixed function", "expected_effect": "Rule change becomes local", "steps": ["Extract", "Run tests"],
-            "cost_and_risk": "One function and its caller; preserve rounding", "acceptance": "Rounding behavior retained",
-            "revisit": "Pricing contract changes", "priority_reason": "More independent rule changes",
-            "feasible": True, "preserves_required_behavior": True, "boundary_change": False,
+    return {"id": identity, "status": "ready", "card": f"recommendations/{identity}.md",
             "metric_evidence": [],
-            "confidence": {"observation": "high: inspected", "diagnosis": "medium: scenario", "effect": "medium: predicted"},
-            "source_evidence": [{"file": "src/Price.kt", "declaration": "price(lines: List<Line>): Money", "finding": "Calculation calls transport"}],
-            "effects": dict(zip(("modularity", "regression_risk", "development_speed"), effect)), "depends_on": []}
+            "source_evidence": [{"file": "src/Price.kt", "declaration": "price(lines: List<Line>): Money"}],
+            "effects": dict(zip(("modularity", "regression_risk", "development_speed"), effect))}
+
+
+def card_markdown(identity):
+    return f"""# {identity}: Extract price calculation
+
+## 1. Problem and scenario
+A regional rounding rule changes alongside transport handling in Price.
+
+## 2. Evidence
+Inspected src/Price.kt, price(lines: List<Line>): Money and its consumer.
+
+## 3. Mechanism
+The consumer knows the rounding policy. Source inspection ruled out generated code.
+
+## 4. Direction
+Let pricing own the calculation and hide the policy from its consumer.
+
+## 5. Effects and alternatives
+Local modularity and risk benefit are predicted; current coupling persists without change.
+
+## 6. Questions for sdd-spec
+Choose the API and package layout with a human. Preserve rounding behavior;
+a policy change should no longer require changing the transport consumer.
+"""
 
 
 def prepare_memory(payloads, sources=None, mappings=None, config=None):
@@ -169,59 +186,78 @@ class RecommendationTests(unittest.TestCase):
         self.sources = {"src/Price.kt": {}}
         self.document = {"recommendations": []}
 
+    def rank(self, sources=None, resolve_metric=None):
+        return rank(self.document, self.sources if sources is None else sources, resolve_metric,
+                    lambda path: card_markdown(Path(path).stem))
+
     def test_modularity_precedes_large_risk_improvement_and_ties_remain(self):
         self.document["recommendations"] = [card("R", ("not_shown", "substantial", "local")),
                                              card("M", ("local", "local", "not_shown")),
                                              card("T", ("local", "local", "not_shown"))]
-        self.assertEqual(rank(self.document, self.sources)["priority_groups"], [["M", "T"], ["R"]])
+        self.assertEqual(self.rank()["priority_groups"], [["M", "T"], ["R"]])
 
-    def test_dependencies_order_execution_not_benefits(self):
-        parent, prep = card("M", ("substantial", "local", "not_shown")), card("R", ("not_shown", "local", "not_shown"))
-        parent["depends_on"] = ["R"]
-        self.document["recommendations"] = [parent, prep]
-        value = rank(self.document, self.sources)
-        self.assertEqual(value["priority_groups"], [["M"], ["R"]])
-        self.assertEqual(value["execution_order"], ["R", "M"])
-        prep["depends_on"] = ["M"]
-        with self.assertRaisesRegex(ValueError, "Cyclic"):
-            rank(self.document, self.sources)
+    def test_direction_with_open_design_questions_is_ready_and_links_its_card(self):
+        self.document["recommendations"] = [card("R1", ("local", "local", "not_shown"))]
+        value = self.rank()
+        self.assertEqual(value["priority_groups"], [["R1"]])
+        self.assertNotIn("execution_order", value)
+        rendered = markdown(value)
+        self.assertIn("[R1: Extract price calculation](<recommendations/R1.md>)", rendered)
+        self.assertNotIn("implementation-ready", rendered)
+        self.assertNotIn("Choose the API", json.dumps(value))
 
-    def test_ready_rejects_source_free_unknown_and_duplicate_cause(self):
+    def test_ready_rejects_missing_sources_and_unresolved_effects(self):
         self.document["recommendations"] = [card("M", ("local", "local", "not_shown"))]
         with self.assertRaisesRegex(ValueError, "inspected sources"):
-            rank(self.document, {})
-        self.document["recommendations"][0]["effects"]["modularity"] = "unknown"
-        with self.assertRaisesRegex(ValueError, "unknown"):
-            rank(self.document, self.sources)
-        first, second = card("A", ("local", "local", "not_shown")), card("B", ("local", "local", "not_shown"))
-        second["cause"] = first["cause"]
-        self.document["recommendations"] = [first, second]
-        with self.assertRaisesRegex(ValueError, "duplicates cause"):
-            rank(self.document, self.sources)
+            self.rank(sources={})
+        for effect in ("unknown", "worsening"):
+            self.document["recommendations"][0]["effects"]["modularity"] = effect
+            with self.subTest(effect=effect), self.assertRaisesRegex(ValueError, "cannot be ready"):
+                self.rank()
+        self.document["recommendations"][0]["status"] = "needs_check"
+        self.assertEqual(self.rank()["priority_groups"], [])
 
-    def test_boundary_acceptance_is_required(self):
+    def test_narrative_and_design_stay_out_of_ranking_metadata(self):
         value = card("M", ("local", "local", "not_shown"))
-        value["boundary_change"] = True
+        value["steps"] = ["Design the API", "Implement it"]
         self.document["recommendations"] = [value]
-        with self.assertRaisesRegex(ValueError, "ArchUnit"):
-            rank(self.document, self.sources)
+        with self.assertRaisesRegex(ValueError, "Markdown card, not ranking metadata"):
+            self.rank()
 
-    def test_omitted_boundary_decision_cannot_bypass_validation(self):
-        value = card("M", ("local", "local", "not_shown"))
-        del value["boundary_change"]
+    def test_six_sections_are_ordered_nonempty_and_not_faked_inside_a_diagram(self):
+        text = card_markdown("R1")
+        diagram = "```mermaid\nflowchart LR\n  current --> proposed\n```\n"
+        self.assertEqual(validate_card(text.replace("Let pricing", diagram + "Let pricing")),
+                         "R1: Extract price calculation")
+        invalid = [text.replace("## 3.", "## 2."), text.replace("## 6.", "### 6."),
+                   text.split("## 6.")[0] + "## 6. Questions\n",
+                   "# R1\n```markdown\n" + text + "\n```\n"]
+        for content in invalid:
+            with self.subTest(content=content), self.assertRaises(ValueError):
+                validate_card(content)
+
+    def test_invalid_or_duplicate_card_addresses_are_rejected(self):
+        value = card("R1", ("local", "local", "not_shown"))
         self.document["recommendations"] = [value]
-        with self.assertRaisesRegex(ValueError, "explicit boundary_change"):
-            rank(self.document, self.sources)
+        for path in ("../outside.md", "/outside.md", "C:/outside.md", "cards.json"):
+            value["card"] = path
+            with self.subTest(path=path), self.assertRaisesRegex(ValueError, "relative Markdown"):
+                self.rank()
+        value["card"] = "recommendations/R1.md"
+        duplicate = {**value, "id": "R2"}
+        self.document["recommendations"].append(duplicate)
+        with self.assertRaisesRegex(ValueError, "own Markdown card"):
+            self.rank()
 
     def test_ready_without_source_version_and_metric_reference_validation(self):
         value = card("M", ("local", "local", "not_shown"))
         self.document["recommendations"] = [value]
-        self.assertEqual(rank(self.document, self.sources)["priority_groups"], [["M"]])
-        value["metric_evidence"] = [{"path": "metrics/line-coverage/file.jsonl", "key": {"file": "src/Price.kt"}, "finding": "Low line coverage"}]
+        self.assertEqual(self.rank()["priority_groups"], [["M"]])
+        value["metric_evidence"] = [{"path": "metrics/line-coverage/file.jsonl", "key": {"file": "src/Price.kt"}}]
         with self.assertRaisesRegex(ValueError, "metric evidence"):
-            rank(self.document, self.sources)
+            self.rank()
         seen = []
-        rank(self.document, self.sources, seen.append)
+        self.rank(resolve_metric=seen.append)
         self.assertEqual(seen, value["metric_evidence"])
         self.assertEqual(suitability({"status": "complete", "tool": "detekt", "version": "test", "command": ["detekt"]}), "usable")
 
@@ -274,6 +310,13 @@ class CollectionIntegrationTests(unittest.TestCase):
             description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
             self.assertEqual(set(description["outputs"]), set(CATALOG))
             self.assertEqual(description["status"], "complete")
+            self.assertEqual(description["parameters"]["candidate_group_limit"], 12)
+            self.assertEqual(set(description["selections"]), {"rankings", "signals", "candidate-groups", "investigation-queue"})
+            groups = [json.loads(line) for line in (report / "selections/candidate-groups.jsonl").read_text(encoding="utf-8").splitlines()]
+            queue = [json.loads(line) for line in (report / "selections/investigation-queue.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(groups[0]["scope"]["files"], ["src/Price.kt"])
+            self.assertEqual(queue[0]["candidate_group"]["key"]["group"], groups[0]["group"])
+            self.assertTrue(queue[0]["selected"])
             self.assertEqual(len(list(raw.iterdir())), 2)
             for name, spec in CATALOG.items():
                 content = (report / spec["path"]).read_text(encoding="utf-8")
@@ -293,14 +336,17 @@ class CollectionIntegrationTests(unittest.TestCase):
             (repo / "src" / "Price.kt").write_text("package a\nclass Price { fun price() = 1 }", encoding="utf-8")
             (repo / "src" / "Consumer.kt").write_text("package a\nclass Consumer", encoding="utf-8")
             ready = card("R1", ("local", "local", "not_shown"))
-            ready["source_evidence"].append({"file": "src/Consumer.kt", "declaration": "Consumer", "finding": "Consumer uses pricing"})
-            ready["metric_evidence"] = [{**ref, "finding": "File CRAP observation"}]
+            ready["source_evidence"].append({"file": "src/Consumer.kt", "declaration": "Consumer"})
+            ready["metric_evidence"] = [ref]
+            (report / "recommendations").mkdir()
+            (report / ready["card"]).write_text(card_markdown("R1"), encoding="utf-8")
             write_json(report / "cards.json", {"recommendations": [ready]}, repo)
             with patch("sys.stdout", new_callable=io.StringIO):
                 self.assertEqual(main(["rank", "--collection", str(report / "collection.json"),
                                        "--recommendations", str(report / "cards.json"), "--output", str(report / "ranked.json"),
-                                       "--markdown", str(report / "report.md")]), 0)
-            self.assertIn("Extract price calculation", (report / "report.md").read_text(encoding="utf-8"))
+                                       "--markdown", str(report / "ranked.md")]), 0)
+            self.assertIn("Extract price calculation", (report / "ranked.md").read_text(encoding="utf-8"))
+            self.assertIn("recommendations/R1.md", (report / "ranked.md").read_text(encoding="utf-8"))
             self.assertEqual(json.loads((report / "ranked.json").read_text(encoding="utf-8"))["priority_groups"], [["R1"]])
             self.assertNotIn("source_files", description)
             for field in ("revision", "dirty", "source_state", "sha256"):
@@ -441,7 +487,8 @@ class MeasurementTests(unittest.TestCase):
         self.assertIsNone(parameter["value"])
         self.assertEqual(parameter["region"], {"startLine": 10})
         self.assertEqual(value["rows"]["function-count/declaration"][0]["value"], 12)
-        self.assertFalse(value["selections"]["signals"])
+        self.assertEqual(len(value["selections"]["signals"]), 1)
+        self.assertEqual(value["selections"]["signals"][0]["references"][0]["path"], "metrics/parameter-list/declaration.jsonl")
         self.assertEqual(len({spec["path"] for spec in CATALOG.values()}), len(CATALOG))
         for identifier, spec in CATALOG.items():
             self.assertTrue(all(spec[field] for field in ("key", "unit", "kind", "inputs", "meaning")), identifier)

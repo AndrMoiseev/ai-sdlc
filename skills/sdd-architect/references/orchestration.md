@@ -58,7 +58,7 @@ of this object to the calling skill. For this audit, use:
 | `source_paths` | Current checkout and relevant source directories/declarations; empty for source-free work |
 | `configuration` | Current configuration path |
 | `collection_plan` | Collection-plan path; exact command-registry revision belongs to checks assignments |
-| `artifacts` | Collection description, JSONL paths/object keys, shortlist, diagnoses or cards needed for this task |
+| `artifacts` | Collection description, candidate groups/queue and metric JSONL paths/keys, shortlist, diagnoses or cards needed for this task |
 | `decisions` | Authoritative requests, decisions and exact conditions affecting the task |
 
 Check that inputs exist and answer the assigned question. Source review uses the
@@ -113,7 +113,7 @@ the checks result links them instead of returning full logs in chat.
 | --- | --- |
 | Configuration research | Fresh explorer; bounded follow-up may continue only this research on its updated request |
 | Evidence collection | Fresh explorer, separate from configuration research; dependent batches may continue within this phase with current task paths and scope |
-| Analysis shortlist | Fresh architect with qualified measurements and scope; save the shortlist before group diagnosis |
+| Analysis shortlist | Fresh architect with computed candidate groups/queue, qualified measurements and scope; explain shortlist adjustments before group diagnosis |
 | One related candidate group | Fresh architect for each group, including a group selected by the shortlist author; allow bounded owner, consumer, wiring and test investigation |
 | Recommendation integration | Fresh architect in the analysis phase with the shortlist and group diagnoses; author cards |
 | Final report | Fresh architect with diagnoses, cards and validated ranking; author report.md |
@@ -186,7 +186,8 @@ links rather than silently dropping them to meet a length preference.
    [single-writer contract](../../sdd-shared/references/coordination.md#writing-and-handoff).
 4. During ranking, keep the card author stopped while explorer reads the completed cards.
    Explorer owns `ranked-<n>.json` and optional `ranked-<n>.md`; the integrating
-   architect owns `cards.json`. Return failures to that author and rerank corrected
+   architect owns `recommendations/<id>.md` and the compact `cards.json` metadata.
+   Return failures to that author and rerank corrected
    cards. Give the successful result to the fresh final-report architect, which owns `report.md`.
    A generated ranking table is an input to that report, not its completion.
 

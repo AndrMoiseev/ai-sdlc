@@ -1,5 +1,6 @@
 {
   "repository": "/absolute/path/to/checkout",
+  "candidate_group_limit": 12,
   "source_roots": ["app/src/main/kotlin", "app/src/main/java"],
   "exclude_paths": ["**/generated/**"],
   "package_prefixes": ["example"],
