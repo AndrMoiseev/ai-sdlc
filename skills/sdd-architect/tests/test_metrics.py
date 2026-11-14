@@ -1,19 +1,18 @@
-import copy
 import io
 import json
 import struct
 import tempfile
 import unittest
-from datetime import date, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
-from analysis import analyze, suitability
-from collection import collect, digest, report_output
+from analysis import prepare_measurements, suitability
+from collection import collect, report_output
 from graph import graph_view, module_for, module_views
 from history import group_activity, history_view, parse_history
 from inputs import class_source_file, coverage, dependencies, detekt, relative_path, source_description
 from metrics import main, write_json
+from measurements import CATALOG, ordered_rows, record_key, resolve_reference
 from recommendations import rank
 
 
@@ -37,15 +36,13 @@ def card(identity, effect):
             "effects": dict(zip(("modularity", "regression_risk", "development_speed"), effect)), "depends_on": []}
 
 
-def analyze_memory(payloads, extra=None):
-    directory = Path(tempfile.gettempdir()) / "sdd-architect-memory"
-    snapshot = {"revision": "abc", "source_state": "hash", "source_files": {}, "package_prefixes": ["a", "b"],
-                "artifacts": {name: {"path": name + ".raw", "sha256": digest(text.encode()), "revision": "abc",
-                                     "source_state": "hash", "tool": name, "version": "fixture", "command": [name],
-                                     "source_root": "/checkout", **spec}
-                              for name, (text, spec) in payloads.items()}, **(extra or {})}
-    with patch.object(Path, "read_bytes", lambda path: payloads[path.stem][0].encode()):
-        return analyze(snapshot, directory)
+def prepare_memory(payloads, sources=None, mappings=None, config=None):
+    artifacts = {name: {"status": "complete", "tool": name, "version": "fixture", "command": [name],
+                        "source_root": "/checkout", **spec} for name, (_, spec) in payloads.items()}
+    rows, outcomes, selections, gaps = prepare_measurements(
+        {"package_prefixes": ["a", "b"], **(config or {})}, sources or {}, mappings or {}, [],
+        {name: text for name, (text, _) in payloads.items()}, artifacts)
+    return {"rows": rows, "outcomes": outcomes, "selections": selections, "gaps": gaps, "artifacts": artifacts}
 
 
 class GraphTests(unittest.TestCase):
@@ -109,6 +106,11 @@ class HistoryTests(unittest.TestCase):
     def test_ambiguous_rename_is_not_silently_joined(self):
         with self.assertRaisesRegex(ValueError, "no-renames"):
             parse_history("--abc--2026-01-01--a\n1\t1\tsrc/{old => new}/A.kt\n")
+        parsed = parse_history("--abc--2026-01-01--a\n1\t1\tsrc/Percent%20.kt\n")
+        self.assertIn("src/Percent%20.kt", parsed[0]["changes"])
+        for path in ("../outside.kt", "/outside.kt", "C:/outside.kt"):
+            with self.subTest(path=path), self.assertRaisesRegex(ValueError, "repository-relative"):
+                parse_history(f"--abc--2026-01-01--a\n1\t1\t{path}\n")
 
 
 class AdapterTests(unittest.TestCase):
@@ -159,60 +161,69 @@ class AdapterTests(unittest.TestCase):
     def test_source_counts_remain_explicit_heuristic(self):
         value = source_description('package a\n// interface Fake\ndata class X(val s: String)\ninterface API\nsealed class S\nabstract class A', ".kt")
         self.assertEqual((value["types"], value["abstract"]), (4, 2))
+        self.assertIsNone(source_description("package a; class JavaType {}", ".java")["types"])
 
 
 class RecommendationTests(unittest.TestCase):
     def setUp(self):
-        self.snapshot = {"revision": "abc", "source_state": "hash", "source_files": {"src/Price.kt": {}}}
-        self.document = {"revision": "abc", "source_state": "hash", "recommendations": []}
+        self.sources = {"src/Price.kt": {}}
+        self.document = {"recommendations": []}
 
     def test_modularity_precedes_large_risk_improvement_and_ties_remain(self):
         self.document["recommendations"] = [card("R", ("not_shown", "substantial", "local")),
                                              card("M", ("local", "local", "not_shown")),
                                              card("T", ("local", "local", "not_shown"))]
-        self.assertEqual(rank(self.document, self.snapshot)["priority_groups"], [["M", "T"], ["R"]])
+        self.assertEqual(rank(self.document, self.sources)["priority_groups"], [["M", "T"], ["R"]])
 
     def test_dependencies_order_execution_not_benefits(self):
         parent, prep = card("M", ("substantial", "local", "not_shown")), card("R", ("not_shown", "local", "not_shown"))
         parent["depends_on"] = ["R"]
         self.document["recommendations"] = [parent, prep]
-        value = rank(self.document, self.snapshot)
+        value = rank(self.document, self.sources)
         self.assertEqual(value["priority_groups"], [["M"], ["R"]])
         self.assertEqual(value["execution_order"], ["R", "M"])
         prep["depends_on"] = ["M"]
         with self.assertRaisesRegex(ValueError, "Cyclic"):
-            rank(self.document, self.snapshot)
+            rank(self.document, self.sources)
 
     def test_ready_rejects_source_free_unknown_and_duplicate_cause(self):
         self.document["recommendations"] = [card("M", ("local", "local", "not_shown"))]
         with self.assertRaisesRegex(ValueError, "inspected sources"):
-            rank(self.document, {**self.snapshot, "source_files": {}})
+            rank(self.document, {})
         self.document["recommendations"][0]["effects"]["modularity"] = "unknown"
         with self.assertRaisesRegex(ValueError, "unknown"):
-            rank(self.document, self.snapshot)
+            rank(self.document, self.sources)
         first, second = card("A", ("local", "local", "not_shown")), card("B", ("local", "local", "not_shown"))
         second["cause"] = first["cause"]
         self.document["recommendations"] = [first, second]
         with self.assertRaisesRegex(ValueError, "duplicates cause"):
-            rank(self.document, self.snapshot)
+            rank(self.document, self.sources)
 
     def test_boundary_acceptance_is_required(self):
         value = card("M", ("local", "local", "not_shown"))
         value["boundary_change"] = True
         self.document["recommendations"] = [value]
         with self.assertRaisesRegex(ValueError, "ArchUnit"):
-            rank(self.document, self.snapshot)
+            rank(self.document, self.sources)
 
     def test_omitted_boundary_decision_cannot_bypass_validation(self):
         value = card("M", ("local", "local", "not_shown"))
         del value["boundary_change"]
         self.document["recommendations"] = [value]
         with self.assertRaisesRegex(ValueError, "explicit boundary_change"):
-            rank(self.document, self.snapshot)
+            rank(self.document, self.sources)
 
-    def test_unknown_revision_is_not_current_because_imported_today(self):
-        self.assertEqual(suitability(self.snapshot, {"revision": None})[0], "limited")
-        self.assertEqual(suitability(self.snapshot, {"revision": "old", "source_state": "hash"})[0], "unusable")
+    def test_ready_without_source_version_and_metric_reference_validation(self):
+        value = card("M", ("local", "local", "not_shown"))
+        self.document["recommendations"] = [value]
+        self.assertEqual(rank(self.document, self.sources)["priority_groups"], [["M"]])
+        value["metric_evidence"] = [{"path": "metrics/line-coverage/file.jsonl", "key": {"file": "src/Price.kt"}, "finding": "Low line coverage"}]
+        with self.assertRaisesRegex(ValueError, "metric evidence"):
+            rank(self.document, self.sources)
+        seen = []
+        rank(self.document, self.sources, seen.append)
+        self.assertEqual(seen, value["metric_evidence"])
+        self.assertEqual(suitability({"status": "complete", "tool": "detekt", "version": "test", "command": ["detekt"]}), "usable")
 
 
 class ReportOutputTests(unittest.TestCase):
@@ -220,7 +231,7 @@ class ReportOutputTests(unittest.TestCase):
         repo = Path(tempfile.gettempdir()) / "architect-project"
         report = repo / "docs" / "reports" / "pricing-audit"
         with patch.object(Path, "resolve", lambda path: path):
-            self.assertEqual(report_output(report / "snapshot-1", repo), report / "snapshot-1")
+            self.assertEqual(report_output(report / "metrics", repo), report / "metrics")
             self.assertEqual(report_output(report / "report.md", repo), report / "report.md")
             for path in (repo / "report.md", repo.parent / "report.md",
                          repo / "docs" / "reports", repo / "docs" / "reports" / "report.md"):
@@ -239,108 +250,205 @@ class ReportOutputTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "docs/reports"):
                 report_output(output, repo)
 
-    def test_collection_still_rejects_revision_or_source_changes(self):
-        repo = Path(tempfile.gettempdir()) / "architect-project"
-        before = {"revision": "abc", "source_state": "original", "dirty": False, "source_files": {}}
-        for key in ("revision", "source_state"):
-            after = {**before, key: "changed"}
-            with self.subTest(key=key), patch.object(Path, "resolve", lambda path: path), \
-                    patch.object(Path, "is_dir", return_value=True), \
-                    patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"), \
-                    patch("collection.identity", side_effect=[before, after]), \
-                    patch("collection.map_classes", return_value=({}, [])):
-                with self.assertRaisesRegex(ValueError, "Source state changed"):
-                    collect({"repository": str(repo)}, repo / "docs" / "reports" / "audit" / "snapshot-1")
-
-
-class SnapshotIntegrationTests(unittest.TestCase):
-    def test_collect_analyze_and_raw_tamper(self):
-        # Risk: collection, CLI output paths and immutable copies can disagree on actual disk writes.
-        # Extend the existing filesystem fixture; in-memory graph/parser tests cannot verify retained files.
+class CollectionIntegrationTests(unittest.TestCase):
+    def test_collect_jsonl_and_rank_current_sources(self):
+        # Risk: CLI, physical JSONL files, raw retention and keyed reads can disagree.
+        # This extends the existing filesystem integration; pure adapters cannot verify writes.
         with tempfile.TemporaryDirectory(prefix="sdd-architect-test-") as temporary:
             workspace = Path(temporary)
-            repo, raw = workspace / "project", workspace / "reports"
+            repo = workspace / "project"
             (repo / "src").mkdir(parents=True)
-            raw.mkdir()
             (repo / "src" / "Price.kt").write_text("package a\nclass Price", encoding="utf-8")
-            complexity = {"runs": [{"results": [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)")]}]}
-            (raw / "detekt.json").write_text(json.dumps(complexity), encoding="utf-8")
+            report = repo / "docs" / "reports" / "pricing-audit"
+            raw = report / "raw"
+            raw.mkdir(parents=True)
+            (raw / "detekt.sarif").write_text(json.dumps({"runs": [{"results": [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)")]}]}), encoding="utf-8")
             (raw / "coverage.csv").write_text("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,2,10,0,0\n", encoding="utf-8")
             config = {"repository": str(repo), "source_roots": ["src"], "modules": {"A": ["a"]},
-                      "artifacts": {"complexity": {"path": str(raw / "detekt.json"), "format": "detekt-sarif", "complete_mcc": True},
+                      "artifacts": {"complexity": {"path": str(raw / "detekt.sarif"), "format": "detekt-sarif", "complete_mcc": True},
                                     "coverage": {"path": str(raw / "coverage.csv"), "format": "coverage-csv"}}}
-            report = repo / "docs" / "reports" / "pricing-audit"
-            snapshot_dir = report / "snapshot-1"
-            with patch("collection.shutil.which", return_value="git"), \
-                    patch("collection.run", side_effect=[b"abc", b"", b"abc", b"?? docs/reports/\n"]):
-                snapshot = collect(config, snapshot_dir)
-            self.assertFalse(snapshot["dirty"])
-            self.assertEqual(snapshot["configuration"], config)
-            value = analyze(snapshot, snapshot_dir)
-            self.assertAlmostEqual(value["files"]["src/Price.kt"]["CRAP_file"], 85.728)
-            self.assertEqual(value["files"]["src/Price.kt"]["revisions"], None)
-            self.assertEqual(value["signals"][0]["weights_MRS"], [1, 1, 1])
-            self.assertEqual(value["aggregates"]["package"]["a"]["coverage"]["line"]["value"], .2)
-            snapshot_path = snapshot_dir / "snapshot.json"
-            cards = {"revision": snapshot["revision"], "source_state": snapshot["source_state"],
-                     "recommendations": [card("R1", ("local", "local", "not_shown"))]}
-            write_json(report / "cards.json", cards, repo)
-            with patch("builtins.print"):
-                self.assertEqual(main(["analyze", "--snapshot", str(snapshot_path),
-                                       "--output", str(report / "analysis-1.json")]), 0)
-                self.assertEqual(main(["rank", "--snapshot", str(snapshot_path),
-                                       "--recommendations", str(report / "cards.json"),
-                                       "--output", str(report / "ranked-1.json"),
+            config_path = workspace / "collection-input.json"
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO):
+                self.assertEqual(main(["collect", "--config", str(config_path), "--output", str(report)]), 0)
+            description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
+            self.assertEqual(set(description["outputs"]), set(CATALOG))
+            self.assertEqual(description["status"], "complete")
+            self.assertEqual(len(list(raw.iterdir())), 2)
+            for name, spec in CATALOG.items():
+                content = (report / spec["path"]).read_text(encoding="utf-8")
+                rows = [json.loads(line) for line in content.splitlines() if line.strip()]
+                self.assertTrue(all(isinstance(row, dict) for row in rows))
+                self.assertEqual(rows, ordered_rows(name, rows))
+                self.assertEqual(len(rows), description["outputs"][name]["records"])
+            ref = {"path": "metrics/crap-file/file.jsonl", "key": {"file": "src/Price.kt"}}
+            self.assertAlmostEqual(resolve_reference(ref, description, report)["value"], 85.728)
+            self.assertEqual(resolve_reference({"path": "metrics/branch-coverage/file.jsonl", "key": ref["key"]}, description, report)["status"], "not_applicable")
+            for selection in description["selections"].values():
+                for line in (report / selection["path"]).read_text(encoding="utf-8").splitlines():
+                    row = json.loads(line)
+                    for link in row.get("references", [row] if "path" in row else []):
+                        resolve_reference(link, description, report)
+            # A new current file is eligible even though it was absent during collection.
+            (repo / "src" / "Price.kt").write_text("package a\nclass Price { fun price() = 1 }", encoding="utf-8")
+            (repo / "src" / "Consumer.kt").write_text("package a\nclass Consumer", encoding="utf-8")
+            ready = card("R1", ("local", "local", "not_shown"))
+            ready["source_evidence"].append({"file": "src/Consumer.kt", "declaration": "Consumer", "finding": "Consumer uses pricing"})
+            ready["metric_evidence"] = [{**ref, "finding": "File CRAP observation"}]
+            write_json(report / "cards.json", {"recommendations": [ready]}, repo)
+            with patch("sys.stdout", new_callable=io.StringIO):
+                self.assertEqual(main(["rank", "--collection", str(report / "collection.json"),
+                                       "--recommendations", str(report / "cards.json"), "--output", str(report / "ranked.json"),
                                        "--markdown", str(report / "report.md")]), 0)
-            self.assertEqual(json.loads((report / "analysis-1.json").read_text(encoding="utf-8")), value)
-            self.assertEqual(json.loads((report / "ranked-1.json").read_text(encoding="utf-8"))["priority_groups"], [["R1"]])
             self.assertIn("Extract price calculation", (report / "report.md").read_text(encoding="utf-8"))
+            self.assertEqual(json.loads((report / "ranked.json").read_text(encoding="utf-8"))["priority_groups"], [["R1"]])
+            self.assertNotIn("source_files", description)
+            for field in ("revision", "dirty", "source_state", "sha256"):
+                self.assertNotIn(field, json.dumps(description))
+            self.assertFalse(list(report.glob("snapshot*")))
+            self.assertFalse(list(report.glob("analysis-*.json")))
             with self.assertRaisesRegex(ValueError, "already exists"):
-                collect(config, snapshot_dir)
+                collect(config, report)
             with self.assertRaisesRegex(ValueError, "already exists"):
                 write_json(report / "cards.json", {}, repo)
-            with patch("sys.stderr", new_callable=io.StringIO):
-                self.assertEqual(main(["analyze", "--snapshot", str(snapshot_path),
-                                       "--output", str(repo / "misplaced.json")]), 2)
-            self.assertFalse((repo / "misplaced.json").exists())
-            (snapshot_dir / "coverage.raw").write_text("tampered", encoding="utf-8")
-            altered = analyze(snapshot, snapshot_dir)
-            self.assertIsNone(altered["files"]["src/Price.kt"]["CRAP_file"])
-            self.assertEqual(altered["artifact_status"]["coverage"]["status"], "unusable")
+            for invalid in ({"path": "../escape.jsonl", "key": {}}, {**ref, "key": {"file": "absent.kt"}}):
+                with self.assertRaises(ValueError):
+                    resolve_reference(invalid, description, report)
 
 
-class IncompleteEvidenceTests(unittest.TestCase):
-    def test_unknown_mcc_cannot_claim_complete_crap(self):
+class MeasurementTests(unittest.TestCase):
+    def test_interrupted_collection_records_unfinished_outputs(self):
+        root = Path(tempfile.gettempdir()) / "architect-project"
+        report = root / "docs" / "reports" / "audit"
+        saved = []
+        with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),
+              patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"),
+              patch.object(Path, "write_text", lambda path, text, **kwargs: saved.append(json.loads(text))),
+              patch("collection.inventory", side_effect=KeyboardInterrupt("Source read interrupted"))):
+            with self.assertRaisesRegex(KeyboardInterrupt, "interrupted"):
+                collect({"repository": str(root)}, report)
+        self.assertEqual(saved[0]["status"], "incomplete")
+        self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["outputs"].values()))
+        self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["selections"].values()))
+
+    def test_git_failure_only_limits_requested_history_chain(self):
+        root = Path(tempfile.gettempdir()) / "architect-project"
+        report = root / "docs" / "reports" / "audit"
+        config = {"repository": str(root), "artifacts": {
+            "history": {"collect": True}, "coverage": {"path": str(root / "coverage.csv"), "format": "coverage-csv"}}}
+        with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),
+              patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"),
+              patch.object(Path, "write_text"), patch.object(Path, "write_bytes"),
+              patch.object(Path, "read_bytes", return_value=b"file,line_covered,line_total,branch_covered,branch_total\nsrc/A.kt,0,2,0,0\n"),
+              patch("collection.inventory", side_effect=OSError("Source read unavailable")), patch("collection.map_classes", return_value=({}, [])),
+              patch("collection.write_jsonl"), patch("collection.run", side_effect=FileNotFoundError("Git unavailable")) as command):
+            value = collect(config, report)
+        self.assertEqual(value["status"], "complete")
+        self.assertEqual(value["outputs"]["changes/commit"]["status"], "error")
+        self.assertEqual(value["outputs"]["source-files/file"]["status"], "error")
+        self.assertEqual(value["outputs"]["line-coverage/file"]["status"], "complete")
+        self.assertEqual(command.call_count, 1)
+        self.assertIn("log", command.call_args.args[0])
+        self.assertNotIn("HEAD", command.call_args.args[0])
+
+    def test_missing_mcc_and_partial_coverage_remain_visible(self):
         findings = [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)"),
                     finding("CyclomaticComplexMethod", "Changed instrument message; threshold 1", 20)]
-        value = analyze_memory({
-            "complexity": (json.dumps({"runs": [{"results": findings}]}), {"complete_mcc": True}),
-            "coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,2,10,0,0\n", {"format": "coverage-csv"})})
-        self.assertFalse(value["files"]["src/Price.kt"]["mcc_population_complete"])
-        self.assertEqual(next(s for s in value["signals"] if s["family"] == "crap")["weights_MRS"], [0, 1, 0])
-
-    def test_coverage_membership_and_local_xml_failure(self):
         sources = {"src/Price.kt": {"package": "a", "types": 1, "abstract": 0},
                    "src/Missing.kt": {"package": "a", "types": 1, "abstract": 0}}
-        value = analyze_memory({"coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,100,100,0,0\n",
-                                               {"format": "coverage-csv"})}, {"source_files": sources})
-        counter = value["aggregates"]["package"]["a"]["coverage"]["line"]
-        self.assertEqual(counter["status"], "measured_subset")
-        self.assertEqual(counter["omitted_files"], ["src/Missing.kt"])
-        zero = analyze_memory({"coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,0,0,0,0\n",
-                                             {"format": "coverage-csv"})}, {"source_files": sources})
-        self.assertEqual(zero["aggregates"]["package"]["a"]["coverage"]["line"]["status"], "unknown")
-        broken = analyze_memory({"coverage": ("<broken", {"format": "jacoco"}),
-                                 "dependencies": ("from,to\na.A,b.B\n", {"format": "class-csv"})})
-        self.assertEqual(broken["artifact_status"]["coverage"]["status"], "unusable")
-        self.assertEqual(broken["graphs"]["class"]["edge_count"], 1)
+        value = prepare_memory({
+            "complexity": (json.dumps({"runs": [{"results": findings}]}), {"complete_mcc": True}),
+            "coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,2,10,0,0\n", {"format": "coverage-csv"})}, sources)
+        rows = value["rows"]
+        mcc = {row["file"]: row for row in rows["cyclomatic-complexity/file"]}
+        self.assertFalse(mcc["src/Price.kt"]["population_complete"])
+        self.assertIsNone(mcc["src/Missing.kt"]["value"])
+        self.assertEqual(rows["line-coverage/package"][0]["status"], "measured_subset")
+        self.assertEqual(rows["line-coverage/package"][0]["omitted_files"], ["src/Missing.kt"])
+        self.assertEqual(rows["branch-coverage/package"][0]["status"], "unknown")
+        self.assertEqual(rows["crap-sum/package"][0]["incomplete_files"], ["src/Price.kt"])
+        self.assertEqual(next(row for row in value["selections"]["signals"] if row["family"] == "crap")["weights_MRS"], [0, 1, 0])
 
-    def test_mapping_limits_absence_separately_from_cochange(self):
-        text = "".join(f"--{i:x}--2026-01-01--a\n1\t0\tsrc/A.kt\n1\t0\tsrc/B.kt\n" for i in range(5))
+    def test_empty_unavailable_error_and_zero_are_distinct(self):
+        empty = prepare_memory({"dependencies": ("from,to\n", {"format": "class-csv"}),
+                                "complexity": ('{"runs":[]}', {})})
+        self.assertEqual(empty["outcomes"]["dependencies/class"]["status"], "complete")
+        self.assertEqual(empty["rows"]["dependencies/class"], [])
+        self.assertEqual(empty["rows"]["node-count/class"][0]["value"], 0)
+        self.assertEqual(empty["rows"]["propagation-cost/class"][0]["status"], "not_applicable")
+        self.assertEqual(empty["outcomes"]["line-coverage/file"]["status"], "unavailable")
+        broken = prepare_memory({"coverage": ("<broken", {"format": "jacoco"}),
+                                 "dependencies": ("from,to\na.A,b.B\n", {"format": "class-csv"})})
+        self.assertEqual(broken["outcomes"]["line-coverage/file"]["status"], "error")
+        self.assertEqual(broken["rows"]["edge-count/class"][0]["value"], 1)
+        malformed = prepare_memory({"complexity": ("[]", {}), "history": ("", {})})
+        self.assertEqual(malformed["outcomes"]["cyclomatic-complexity/function"]["status"], "error")
+        self.assertEqual(malformed["outcomes"]["changes/commit"]["status"], "complete")
+        unmeasured_types = prepare_memory({"dependencies": ("from,to\na.JavaType,b.B\n", {"format": "class-csv"})},
+                                         {"src/JavaType.java": {"package": "a", "types": None, "abstract": None}})
+        self.assertEqual(unmeasured_types["rows"]["abstractness/package"][0]["status"], "unknown")
+        self.assertEqual(unmeasured_types["rows"]["changes-per-code/file"][0]["status"], "not_applicable")
+
+    def test_granularities_weights_support_and_determinism(self):
+        history = "".join(f"--{i:x}--2026-01-01--a\n1\t2\tsrc/A.kt\n1\t0\tsrc/B.kt\n" for i in range(5))
+        sources = {"src/A.kt": {"package": "a", "types": 5, "abstract": 1},
+                   "src/B.kt": {"package": "b", "types": 5, "abstract": 0}}
+        mappings = {"a.A": "src/A.kt", "a.A$Inner": "src/A.kt", "b.B": "src/B.kt"}
+        payloads = {"history": (history, {}), "dependencies": ("from,to\na.A,b.B\na.A$Inner,b.B\na.A,b.B\n", {"format": "class-csv"}),
+                    "coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/A.kt,1,10,1,2\nsrc/B.kt,9,90,2,8\n", {"format": "coverage-csv"})}
+        config = {"modules": {"all": ["a", "b"]}}
+        first = prepare_memory(payloads, sources, mappings, config)
+        second = prepare_memory(dict(reversed(list(payloads.items()))), dict(reversed(list(sources.items()))), mappings, config)
+        self.assertEqual(first["rows"], second["rows"])
+        self.assertEqual(first["selections"], second["selections"])
+        rows = first["rows"]
+        self.assertEqual(rows["dependencies/package"][0]["value"], 2)
+        self.assertEqual(rows["dependencies/module"], [])
+        self.assertEqual(rows["node-count/class"][0]["value"], 3)
+        self.assertEqual(rows["node-count/package"][0]["value"], 2)
+        self.assertEqual(rows["node-count/module"][0]["value"], 0)
+        self.assertEqual(rows["coupling/file-pair"][0]["left_frequency"], 5)
+        self.assertEqual(rows["coupling/file-pair"][0]["shared"], 5)
+        self.assertEqual(rows["activity/module"][0]["value"], 5)
+        self.assertEqual(rows["change-frequency/module"][0]["value"], 10)
+        self.assertEqual(rows["churn/module"][0]["value"], 20)
+        self.assertEqual(rows["line-coverage/module"][0]["value"], .1)
+        self.assertEqual(rows["branch-coverage/module"][0]["value"], .3)
+        self.assertEqual(rows["hotspot-in-frequency/file"][1]["value"], 5)
+        self.assertEqual(rows["implicit-coupling/file-pair"], [])
+        for selection in first["selections"].values():
+            for row in selection:
+                self.assertNotIn("value", row)
+                for ref in row.get("references", [row] if "path" in row else []):
+                    identifier = next(name for name, spec in CATALOG.items() if spec["path"] == ref["path"])
+                    self.assertEqual(sum(record_key(identifier, r) == ref["key"] for r in rows[identifier]), 1)
+
+    def test_coupling_keeps_values_below_threshold_and_mapping_limits(self):
+        text = "--a--2026-01-01--a\n1\t0\tsrc/A.kt\n1\t0\tsrc/B.kt\n"
         sources = {"src/A.kt": {"package": "a", "types": 1, "abstract": 0},
                    "src/B.kt": {"package": "b", "types": 1, "abstract": 0}}
-        value = analyze_memory({"history": (text, {}), "dependencies": ("from,to\na.A,b.B\n", {"format": "class-csv"})},
-                               {"source_files": sources})
-        self.assertEqual(value["history"]["coupling"][0]["static_absence_suitability"], "limited")
-        self.assertEqual(next(s for s in value["signals"] if s["family"] == "coupling")["weights_MRS"], [2, 1, 1])
-        self.assertNotIn("no_direct_static_edge_observed", next(s for s in value["signals"] if s["family"] == "coupling")["values"])
+        value = prepare_memory({"history": (text, {}), "dependencies": ("from,to\na.A,b.B\n", {"format": "class-csv"})}, sources)
+        self.assertEqual(value["rows"]["coupling/file-pair"][0]["shared"], 1)
+        self.assertEqual(value["rows"]["implicit-coupling/file-pair"][0]["status"], "measured_subset")
+        self.assertFalse(any(s["family"] == "coupling" for s in value["selections"]["signals"]))
+
+    def test_catalog_keys_and_observed_function_population(self):
+        findings = [finding("LongParameterList", "f(a: Pair<A,B>) exceeds threshold"),
+                    finding("TooManyFunctions", "Object 'X' with '12' functions", 20)]
+        findings[1]["suppressions"] = [{"kind": "inSource"}]
+        value = prepare_memory({"complexity": (json.dumps({"runs": [{"results": findings}]}), {})})
+        parameter = value["rows"]["parameter-list/declaration"][0]
+        self.assertIsNone(parameter["value"])
+        self.assertEqual(parameter["region"], {"startLine": 10})
+        self.assertEqual(value["rows"]["function-count/declaration"][0]["value"], 12)
+        self.assertFalse(value["selections"]["signals"])
+        self.assertEqual(len({spec["path"] for spec in CATALOG.values()}), len(CATALOG))
+        for identifier, spec in CATALOG.items():
+            self.assertTrue(all(spec[field] for field in ("key", "unit", "kind", "inputs", "meaning")), identifier)
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            ordered_rows("code-lines/file", [{"file": "a", "value": 1}, {"file": "a", "value": 2}])
+
+    def test_cli_has_only_collection_and_ranking(self):
+        for removed in ("identity", "analyze"):
+            with self.subTest(command=removed), patch("sys.stderr", new_callable=io.StringIO), self.assertRaises(SystemExit):
+                main([removed])

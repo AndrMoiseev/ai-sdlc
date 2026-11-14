@@ -1,9 +1,7 @@
-"""Collect an immutable input snapshot in the project's named report directory."""
+"""Collect current evidence and complete the measurement catalog in one operation."""
 
-import hashlib
 import json
 import os
-import shutil
 import signal
 import subprocess
 from collections import defaultdict
@@ -11,11 +9,8 @@ from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from pathlib import Path
 
-from inputs import class_source_file, source_description
-
-
-def digest(data):
-    return hashlib.sha256(data).hexdigest()
+from inputs import class_source_file, relative_path, source_description
+from measurements import CATALOG, write_jsonl
 
 
 def run(argv, cwd, timeout=60):
@@ -41,7 +36,7 @@ def inside(path, root):
     return path == root or root in path.parents
 
 
-def report_output(path, repository):
+def report_output(path, repository, directory=False):
     path = Path(path).resolve()
     package = Path(__file__).resolve().parents[1]
     if inside(path, package) or any(part in {".agents", ".claude", ".codex", "skills"} for part in path.parts):
@@ -50,7 +45,7 @@ def report_output(path, repository):
         raise ValueError("A project repository is required for report output")
     root = Path(repository).resolve()
     reports = root / "docs" / "reports"
-    if not path.is_relative_to(reports) or len(path.relative_to(reports).parts) < 2:
+    if not path.is_relative_to(reports) or len(path.relative_to(reports).parts) < (1 if directory else 2):
         raise ValueError("Write outputs inside <project-root>/docs/reports/<report-name>/")
     return path
 
@@ -70,29 +65,8 @@ def inventory(config, root):
             if any(fnmatchcase(relative, pattern) for pattern in config.get("exclude_paths", [])):
                 continue
             data = path.read_bytes()
-            sources[relative] = {**source_description(data.decode("utf-8-sig"), path.suffix),
-                                 "sha256": digest(data), "language": path.suffix}
+            sources[relative] = {**source_description(data.decode("utf-8-sig"), path.suffix), "language": path.suffix}
     return dict(sorted(sources.items()))
-
-
-def identity(config, root):
-    sources = inventory(config, root)
-    measured_inputs = {path: row["sha256"] for path, row in sources.items()}
-    for value in config.get("measurement_inputs", []):
-        path = (root / value).resolve()
-        if not inside(path, root):
-            raise ValueError(f"Measurement input leaves repository: {value}")
-        measured_inputs[path.relative_to(root).as_posix()] = digest(path.read_bytes())
-    source_state = digest(json.dumps(measured_inputs, sort_keys=True).encode())
-    revision, dirty = None, None
-    if shutil.which("git"):
-        try:
-            revision = run(["git", "rev-parse", "HEAD"], root).decode().strip()
-            dirty = bool(run(["git", "status", "--porcelain", "--untracked-files=normal"], root))
-        except ValueError:
-            pass  # A source export is valid; it has no verified Git revision.
-    return {"revision": revision, "dirty": dirty, "source_state": source_state,
-            "source_files": sources, "measurement_inputs": measured_inputs}
 
 
 def map_classes(config, root, sources):
@@ -102,9 +76,14 @@ def map_classes(config, root, sources):
     for directory in config.get("class_directories", []):
         directory = (root / directory).resolve()
         if not directory.is_dir():
-            raise ValueError(f"Missing compiled class directory: {directory}")
+            unresolved.append({"reason": f"Missing compiled class directory: {directory}"})
+            continue
         for path in sorted(directory.rglob("*.class")):
-            name, source_file = class_source_file(path.read_bytes())
+            try:
+                name, source_file = class_source_file(path.read_bytes())
+            except (OSError, ValueError, KeyError, TypeError) as error:
+                unresolved.append({"reason": str(error), "class_file": str(path)})
+                continue
             candidates = lookup[name.rpartition(".")[0], source_file]
             if len(candidates) == 1:
                 if name in mappings and mappings[name] != candidates[0]:
@@ -113,6 +92,7 @@ def map_classes(config, root, sources):
             else:
                 unresolved.append({"class": name, "source_file": source_file, "candidates": candidates})
     for name, path in config.get("class_files", {}).items():
+        path = relative_path(path, root)
         if path not in sources:
             raise ValueError(f"Explicit mapping is outside source inventory: {name} -> {path}")
         mappings[name] = path
@@ -120,35 +100,60 @@ def map_classes(config, root, sources):
 
 
 def collect(config, output):
+    from analysis import prepare_measurements
+
     root = Path(config["repository"]).resolve()
     if not root.is_dir():
         raise ValueError(f"Repository not found: {root}")
-    output = report_output(output, root)
-    if output.exists():
-        raise ValueError("Snapshot output already exists; choose a new directory")
-    output.mkdir(parents=True)
-    before = identity(config, root)
-    mappings, mapping_gaps = map_classes(config, root, before["source_files"])
-    mapping_states = []
-    if config.get("class_directories"):
-        mapping_states.append(config.get("bytecode_source_state"))
-    if config.get("class_files"):
-        mapping_states.append(config.get("class_files_source_state"))
-    mapping_status = ("unusable" if any(state and state != before["source_state"] for state in mapping_states)
-                      else "usable" if mapping_states and all(mapping_states) else "limited")
-    artifacts, gaps = {}, []
+    output = report_output(output, root, directory=True)
+    if any((output / name).exists() for name in ("collection.json", "metrics", "selections")):
+        raise ValueError("Collection output already exists; choose a new report directory")
+    output.mkdir(parents=True, exist_ok=True)
+    description = {"repository": str(root), "status": "incomplete",
+                   "parameters": {key: config.get(key, default) for key, default in (
+                       ("source_roots", []), ("exclude_paths", []), ("package_prefixes", []),
+                       ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}))},
+                   "artifacts": {}, "gaps": [],
+                   "selections": {name: {"path": f"selections/{name}.jsonl", "status": "incomplete", "records": None}
+                                  for name in ("rankings", "signals")},
+                   "outputs": {name: {"path": spec["path"], "status": "incomplete", "records": None,
+                                      "reason": "Collection has not completed this calculation"}
+                               for name, spec in CATALOG.items()}}
+
+    def save_description():
+        (output / "collection.json").write_text(json.dumps(description, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+
+    save_description()
+    source_error = None
+    try:
+        sources = inventory(config, root)
+    except (OSError, ValueError) as error:
+        sources, source_error = {}, str(error)
+    try:
+        mappings, mapping_gaps = map_classes(config, root, sources)
+    except (OSError, ValueError) as error:
+        mappings, mapping_gaps = {}, [{"reason": str(error)}]
+    artifacts, raw = description["artifacts"], {}
     supported = {"dependencies", "history", "sizes", "complexity", "coverage"}
-    for name, spec in sorted(config.get("artifacts", {}).items()):
-        if name not in supported:
-            raise ValueError(f"Unknown artifact: {name}")
-        metadata = dict(spec)
+    unknown = set(config.get("artifacts", {})) - supported
+    if unknown:
+        raise ValueError(f"Unknown artifacts: {sorted(unknown)}")
+    extensions = {"jdeps": ".txt", "class-csv": ".csv", "git-log": ".log", "scc": ".json",
+                  "detekt-sarif": ".sarif", "jacoco": ".xml", "coverage-csv": ".csv"}
+    formats = {"dependencies": {"jdeps", "class-csv"}, "history": {"git-log"}, "sizes": {"scc"},
+               "complexity": {"detekt-sarif"}, "coverage": {"jacoco", "coverage-csv"}}
+    retained = {}
+    for name in sorted(supported):
+        spec = config.get("artifacts", {}).get(name)
+        if spec is None:
+            artifacts[name] = {"status": "unavailable", "reason": "No source configured"}
+            continue
+        metadata = {key: spec[key] for key in ("format", "tool", "version", "command", "source_root", "complete_mcc", "limitations", "since", "until") if key in spec}
         try:
             if spec.get("collect"):
                 if name == "history":
-                    if before["revision"] is None:
-                        raise ValueError("Git history needs a repository with HEAD")
                     argv = ["git", "-c", "core.quotePath=false", "log", "--no-merges", "--no-renames",
-                            "--date=short", "--format=--%H--%ad--%an", "--numstat", before["revision"]]
+                            "--date=short", "--format=--%H--%ad--%an", "--numstat"]
                     for key in ("since", "until"):
                         if spec.get(key):
                             argv.append(f"--{key}={spec[key]}")
@@ -171,33 +176,49 @@ def collect(config, output):
                 else:
                     raise ValueError(f"{name}: run the project's selected Gradle task and import its report")
                 metadata["command"] = argv
-                metadata["revision"] = before["revision"]
-                metadata["source_state"] = (config.get("bytecode_source_state") if name == "dependencies"
-                                             else before["source_state"])
+                path = None
             else:
+                if spec.get("format") not in formats[name]:
+                    raise ValueError(f"Unsupported {name} format: {spec.get('format')}")
                 path = Path(spec["path"])
                 if not path.is_absolute():
                     raise ValueError(f"Artifact path must be absolute: {name}")
+                path = path.resolve()
                 data = path.read_bytes()
-                metadata["imported_from"] = str(path)
-            raw_path = output / f"{name}.raw"
-            raw_path.write_bytes(data)
-            metadata.update(path=raw_path.name, sha256=digest(data), collected_at=datetime.now(timezone.utc).isoformat())
+            raw_directory = (output / "raw").resolve()
+            if not raw_directory.is_relative_to(output):
+                raise ValueError("Raw report directory leaves the selected report")
+            if path is not None and path.is_relative_to(raw_directory):
+                raw_path = path
+            elif path is not None and path in retained:
+                raw_path = retained[path]
+            else:
+                raw_path = (raw_directory / (name + extensions[metadata["format"]])).resolve()
+                if not raw_path.is_relative_to(output):
+                    raise ValueError("Raw report path leaves the selected report")
+                if raw_path.exists():
+                    raise ValueError(f"Raw report output already exists: {raw_path}")
+                raw_path.parent.mkdir(parents=True, exist_ok=True)
+                raw_path.write_bytes(data)
+            if path is not None:
+                retained[path] = raw_path
+            metadata.update(path=raw_path.relative_to(output).as_posix(), status="complete",
+                            collected_at=datetime.now(timezone.utc).isoformat())
             metadata.setdefault("source_root", str(root))
-            artifacts[name] = metadata
+            raw[name] = data.decode("utf-8-sig")
         except (OSError, ValueError) as error:
-            gaps.append({"artifact": name, "reason": str(error)})
-    after = identity(config, root)
-    # Report files can change Git's dirty flag without changing the measured sources.
-    if any(before[key] != after[key] for key in ("revision", "source_state")):
-        raise ValueError("Source state changed during collection; discard this incomplete snapshot and collect again")
-    snapshot = {"schema_version": 1, "repository": str(root), **before,
-                "scope": config.get("scope", {}), "modules": config.get("modules", {}),
-                "package_prefixes": config.get("package_prefixes", []),
-                "exclude_classes": config.get("exclude_classes", []),
-                "class_files": mappings, "mapping_gaps": mapping_gaps,
-                "mapping_status": mapping_status, "mapping_source_states": mapping_states,
-                "artifacts": artifacts, "gaps": gaps,
-                "configuration": config}
-    (output / "snapshot.json").write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    return snapshot
+            metadata.update(status="error", reason=str(error))
+        artifacts[name] = metadata
+    measurements, outcomes, selections, gaps = prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, source_error)
+    description["gaps"] = gaps
+    for name, rows in measurements.items():
+        write_jsonl(output / CATALOG[name]["path"], rows)
+        description["outputs"][name] = {"path": CATALOG[name]["path"], "records": len(rows), **outcomes[name]}
+    description["selections"] = {}
+    for name, rows in selections.items():
+        path = f"selections/{name}.jsonl"
+        write_jsonl(output / path, rows)
+        description["selections"][name] = {"path": path, "records": len(rows), "status": "complete"}
+    description["status"] = "complete"
+    save_description()
+    return description

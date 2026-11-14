@@ -6,7 +6,7 @@ FIELDS = ("action", "scenario", "mechanism", "alternative_explanation", "chosen_
           "expected_effect", "steps", "cost_and_risk", "acceptance", "revisit", "priority_reason")
 
 
-def rank(document, snapshot):
+def rank(document, sources, resolve_metric=None):
     cards = document["recommendations"]
     ids, causes, ready = set(), {}, {}
     for card in cards:
@@ -21,10 +21,8 @@ def rank(document, snapshot):
             if any(not card.get(field) for field in required):
                 raise ValueError(f"{identity}: {status} needs {', '.join(required)}")
             continue
-        if not snapshot.get("revision") or not snapshot.get("source_files"):
-            raise ValueError(f"{identity}: ready requires inspected sources at a known revision")
-        if document.get("revision") != snapshot["revision"] or document.get("source_state") != snapshot["source_state"]:
-            raise ValueError("Recommendation basis does not match the snapshot")
+        if not sources:
+            raise ValueError(f"{identity}: ready requires inspected sources")
         if any(not card.get(field) for field in FIELDS):
             raise ValueError(f"{identity}: ready requires all recommendation fields: {', '.join(FIELDS)}")
         cause = card.get("cause")
@@ -45,8 +43,12 @@ def rank(document, snapshot):
         if not evidence:
             raise ValueError(f"{identity}: cite inspected declarations and consumers")
         for reference in evidence:
-            if reference.get("file") not in snapshot["source_files"] or not reference.get("declaration") or not reference.get("finding"):
-                raise ValueError(f"{identity}: source evidence must identify a snapshot file, declaration and finding")
+            if reference.get("file") not in sources or not reference.get("declaration") or not reference.get("finding"):
+                raise ValueError(f"{identity}: source evidence must identify a current source file, declaration and finding")
+        for reference in card["metric_evidence"]:
+            if not isinstance(reference, dict) or not reference.get("finding") or resolve_metric is None:
+                raise ValueError(f"{identity}: metric evidence requires a JSONL path, object key and finding")
+            resolve_metric(reference)
         profile = card.get("effects", {})
         if set(profile) != {"modularity", "regression_risk", "development_speed"} or any(value not in EFFECTS for value in profile.values()):
             raise ValueError(f"{identity}: unknown or worsening effect needs a decision check before ready ranking")
@@ -80,13 +82,13 @@ def rank(document, snapshot):
         card = available[0]
         execution.append(card["id"])
         remaining.remove(card)
-    return {**document, "priority_groups": groups, "execution_order": execution,
+    return {"priority_groups": groups, "execution_order": execution,
             "recommendations": ordered + [card for card in cards if card["status"] != "ready"],
             "ordering": "modularity, regression_risk, development_speed; equal profiles remain tied"}
 
 
 def markdown(document):
-    lines = ["# Refactoring recommendations", "", f"Revision: `{document.get('revision')}`.", "",
+    lines = ["# Refactoring recommendations", "",
              "| Priority | Change | Modularity | Regression risk | Development speed |",
              "| --- | --- | --- | --- | --- |"]
     priorities = {identity: index for index, group in enumerate(document["priority_groups"], 1) for identity in group}

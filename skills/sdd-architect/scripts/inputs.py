@@ -92,6 +92,8 @@ def sizes(text, source_root):
     for language in json.loads(text):
         for row in language.get("Files", []):
             path = relative_path(row["Location"], source_root)
+            if path in result:
+                raise ValueError(f"Duplicate scc file: {path}")
             result[path] = {key: int(row[key]) for key in ("Lines", "Code", "Comment", "Blank")}
             if any(value < 0 for value in result[path].values()):
                 raise ValueError(f"Negative scc count for {path}")
@@ -147,8 +149,8 @@ def source_description(text, language):
     clean = re.sub(r'"""[\s\S]*?"""|"(?:\\.|[^"\\])*"|/\*[\s\S]*?\*/|//[^\n]*', " ", text)
     package = re.search(r"(?m)^\s*package\s+([\w.]+)", clean)
     declarations = re.findall(r"\b(?:(abstract)\s+)?(class|interface|object)\s+\w+", clean) if language == ".kt" else []
-    return {"package": package[1] if package else "", "types": len(declarations),
-            "abstract": sum(bool(explicit) or kind == "interface" for explicit, kind in declarations)}
+    return {"package": package[1] if package else "", "types": len(declarations) if language == ".kt" else None,
+            "abstract": sum(bool(explicit) or kind == "interface" for explicit, kind in declarations) if language == ".kt" else None}
 
 
 def class_source_file(data):
@@ -201,5 +203,5 @@ def class_source_file(data):
 def type_counts(sources):
     counts = defaultdict(Counter)
     for source in sources.values():
-        counts[source["package"]].update({key: source[key] for key in ("types", "abstract")})
+        counts[source["package"]].update({key: source[key] for key in ("types", "abstract") if source.get(key) is not None})
     return dict(counts)

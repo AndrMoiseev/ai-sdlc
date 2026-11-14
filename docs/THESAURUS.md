@@ -102,7 +102,344 @@ baseline проверок. Совпадение имён само по себе 
 - **Утверждение комплекта** `DocumentApproval` kind:value
 - **Эвристика** `Heuristic` kind:concept
 
+- **Сбор измерений** `Collection` kind:process
+- **Измерение** `Measurement` kind:value
+- **Гранулярность** `Granularity` kind:value
+- **Вычисляемая выборка** `Selection` kind:value
+- **Перечень исходников** `SourceFiles` kind:value
+- **Сопоставление классов файлам** `ClassFiles` kind:value
+- **Число типов** `TypeCount` kind:value
+- **Число абстрактных типов** `AbstractTypeCount` kind:value
+- **Зависимости** `Dependencies` kind:value
+- **Число узлов** `NodeCount` kind:value
+- **Число рёбер** `EdgeCount` kind:value
+- **Непосредственные потребители** `FanIn` kind:value
+- **Непосредственные зависимости** `FanOut` kind:value
+- **Входящий вес** `IncomingWeight` kind:value
+- **Исходящий вес** `OutgoingWeight` kind:value
+- **Достижимые потребители** `ReachableIn` kind:value
+- **Достижимые зависимости** `ReachableOut` kind:value
+- **Видимость потребителей** `VisibilityIn` kind:value
+- **Видимость зависимостей** `VisibilityOut` kind:value
+- **Стоимость распространения** `PropagationCost` kind:value
+- **Циклические компоненты** `CyclicComponents` kind:value
+- **Связи внутри циклов** `CyclicEdges` kind:value
+- **Слои зависимостей** `DependencyLayers` kind:value
+- **Связность модуля** `Cohesion` kind:value
+- **Внешнее притяжение** `ExternalAffinity` kind:value
+- **Афферентная связанность** `Ca` kind:value
+- **Эфферентная связанность** `Ce` kind:value
+- **Нестабильность пакета** `Instability` kind:value
+- **Абстрактность пакета** `Abstractness` kind:value
+- **Расстояние Мартина** `Distance` kind:value
+- **Исторические изменения** `Changes` kind:value
+- **Частота изменений** `ChangeFrequency` kind:value
+- **Добавленные строки** `AddedLines` kind:value
+- **Удалённые строки** `DeletedLines` kind:value
+- **Объём переписанного текста** `Churn` kind:value
+- **Активность группы** `Activity` kind:value
+- **Недавняя активность группы** `RecentActivity` kind:value
+- **Совместное изменение** `Coupling` kind:value
+- **Неявное совместное изменение** `ImplicitCoupling` kind:value
+- **Строки кода** `CodeLines` kind:value
+- **Общее число строк** `TotalLines` kind:value
+- **Цикломатическая сложность** `CyclomaticComplexity` kind:value
+- **Когнитивная сложность** `CognitiveComplexity` kind:value
+- **Длина метода** `MethodLength` kind:value
+- **Число функций** `FunctionCount` kind:value
+- **Список параметров** `ParameterList` kind:value
+- **Покрытие строк** `LineCoverage` kind:value
+- **Покрытие ветвей** `BranchCoverage` kind:value
+- **Файловая адаптация CRAP** `CrapFile` kind:value
+- **Сумма файлового CRAP** `CrapSum` kind:value
+- **Среднее файлового CRAP** `CrapMean` kind:value
+- **Файлы выше порога CRAP** `CrapAboveThreshold` kind:value
+- **Hotspot потребителей по частоте** `HotspotInFrequency` kind:value
+- **Hotspot зависимостей по частоте** `HotspotOutFrequency` kind:value
+- **Hotspot потребителей по churn** `HotspotInChurn` kind:value
+- **Изменения на 100 строк кода** `ChangesPerCode` kind:value
+
 ## Terms
+
+### Сбор измерений
+
+- **Definition**: Сбор текущих свидетельств, нормализация и расчёт всех предусмотренных измерений; `collection.json` описывает параметры и исходы без таблиц значений и идентификаторов версии исходников.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Измерение
+
+- **Definition**: Одно определённое наблюдение или вычисленный показатель с единицей, популяцией и условиями применимости.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Гранулярность
+
+- **Definition**: Уровень объекта измерения: функция, декларация, файл, класс, пакет, модуль, граф, пара или событие изменения.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Вычисляемая выборка
+
+- **Definition**: Вычисляемая сортировка или пороговая выборка, содержащая условие и ссылки на измерения по ключам объектов.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Перечень исходников
+
+- **Definition**: Перечень текущих исходных файлов с языком и пакетом.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Сопоставление классов файлам
+
+- **Definition**: Соответствие JVM-классов исходным файлам по атрибуту SourceFile или явному сопоставлению.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Число типов
+
+- **Definition**: Число деклараций типов в файле по эвристике извлечения.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Число абстрактных типов
+
+- **Definition**: Число интерфейсов и явно абстрактных типов в файле по той же эвристике.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Зависимости
+
+- **Definition**: Уникальные направленные связи классов и их агрегаты по пакетам и модулям.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Число узлов
+
+- **Definition**: Количество концов рёбер в выбранном графе.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Число рёбер
+
+- **Definition**: Количество уникальных направленных рёбер выбранного графа.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Непосредственные потребители
+
+- **Definition**: Число непосредственных потребителей узла.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Непосредственные зависимости
+
+- **Definition**: Число непосредственных зависимостей узла.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Входящий вес
+
+- **Definition**: Сумма весов входящих рёбер.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Исходящий вес
+
+- **Definition**: Сумма весов исходящих рёбер.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Достижимые потребители
+
+- **Definition**: Число достижимых потребителей с учётом самого узла.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Достижимые зависимости
+
+- **Definition**: Число достижимых зависимостей с учётом самого узла.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Видимость потребителей
+
+- **Definition**: Доля достижимых потребителей в популяции графа.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Видимость зависимостей
+
+- **Definition**: Доля достижимых зависимостей в популяции графа.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Стоимость распространения
+
+- **Definition**: Доля достижимых упорядоченных пар в квадрате числа узлов, включая диагональ.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Циклические компоненты
+
+- **Definition**: Сильно связанные компоненты с несколькими узлами.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Связи внутри циклов
+
+- **Definition**: Рёбра внутри циклических компонент.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Слои зависимостей
+
+- **Definition**: Последовательное разложение графа удалением узлов без зависимостей, без потребителей или циклического ядра.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Связность модуля
+
+- **Definition**: Доля внутреннего межпакетного веса в сумме внутреннего и граничного веса объявленного модуля.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Внешнее притяжение
+
+- **Definition**: Распределение внешнего веса пакета по другим объявленным модулям с учётом неизвестной принадлежности.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Афферентная связанность
+
+- **Definition**: Входящий вес пакета в применимой популяции метрик Мартина.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Эфферентная связанность
+
+- **Definition**: Исходящий вес пакета в применимой популяции метрик Мартина.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Нестабильность пакета
+
+- **Definition**: Показатель Мартина I, равный Ce/(Ca+Ce).
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Абстрактность пакета
+
+- **Definition**: Показатель Мартина A, доля явно абстрактных типов.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Расстояние Мартина
+
+- **Definition**: Показатель Мартина D, равный abs(A+I−1).
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Исторические изменения
+
+- **Definition**: Исторические события изменений с датой, путями, numstat и полным размером changeset; ID коммита адресует событие, а не состояние аудита.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Частота изменений
+
+- **Definition**: Число коммитов с изменением файла; групповой агрегат суммирует частоты файлов.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Добавленные строки
+
+- **Definition**: Сумма добавленных текстовых строк за окно истории.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Удалённые строки
+
+- **Definition**: Сумма удалённых текстовых строк за окно истории.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Объём переписанного текста
+
+- **Definition**: Сумма добавленных и удалённых строк; бинарные изменения учитываются отдельно.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Активность группы
+
+- **Definition**: Число различных коммитов, затронувших группу за окно истории.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Недавняя активность группы
+
+- **Definition**: Число различных коммитов группы за включительное окно от последней даты истории минус 30 дней.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Совместное изменение
+
+- **Definition**: Степень совместного изменения пары файлов с индивидуальными частотами и общей поддержкой после фильтра больших changeset.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Неявное совместное изменение
+
+- **Definition**: Совместное изменение без наблюдаемой прямой статической связи, с ограничениями сопоставления классов файлам.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Строки кода
+
+- **Definition**: Число строк кода файла по scc Code.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Общее число строк
+
+- **Definition**: Общее число строк файла по scc Lines.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Цикломатическая сложность
+
+- **Definition**: Измеренная цикломатическая сложность функции и сумма наблюдаемой сложности файла с явной полнотой.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Когнитивная сложность
+
+- **Definition**: Измеренная когнитивная сложность функции.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Длина метода
+
+- **Definition**: Измеренная длина функции или метода по detekt LongMethod.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Число функций
+
+- **Definition**: Число функций в фактической декларации, указанной инструментом.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Список параметров
+
+- **Definition**: Находка LongParameterList с неизвестным количеством параметров, если инструмент не сообщает число.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Покрытие строк
+
+- **Definition**: Покрытие строк как covered/total; групповой показатель использует суммы счётчиков.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Покрытие ветвей
+
+- **Definition**: Покрытие ветвей как covered/total; отсутствующий счётчик отличается от нулевого знаменателя.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Файловая адаптация CRAP
+
+- **Definition**: Файловая адаптация CRAP на наблюдаемой сложности и покрытии строк.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Сумма файлового CRAP
+
+- **Definition**: Сумма определённых CrapFile в группе с перечислением включённых и пропущенных файлов.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Среднее файлового CRAP
+
+- **Definition**: Среднее определённых CrapFile в группе с той же явной популяцией.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Файлы выше порога CRAP
+
+- **Definition**: Число измеренных файлов группы с CrapFile > 30; порог служит отбору для чтения.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Hotspot потребителей по частоте
+
+- **Definition**: Максимальная VisibilityIn сопоставленных классов файла, умноженная на ChangeFrequency.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Hotspot зависимостей по частоте
+
+- **Definition**: Максимальная VisibilityOut сопоставленных классов файла, умноженная на ChangeFrequency.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Hotspot потребителей по churn
+
+- **Definition**: Максимальная VisibilityIn сопоставленных классов файла, умноженная на Churn.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Изменения на 100 строк кода
+
+- **Definition**: Число изменений на 100 строк кода для Kotlin-файлов с частотой ≥5 и CodeLines ≥20.
+- **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
 
 ### Архив изменения
 
@@ -294,6 +631,7 @@ baseline проверок. Совпадение имён само по себе 
 ### Основание
 
 - **Definition**: Зафиксированная идентичность входных документов, исходников и применимой конфигурации, относительно которой выдано поручение или получен результат.
+- **Usage**: В архитектурном аудите `basis` содержит текущую область и пути исходников, конфигурации и материалов. Здесь идентичность означает адресуемые объекты; версия исходников и контрольные суммы не фиксируются и не сверяются. Другие SDD-процессы сохраняют собственные контракты основания.
 - **NOT**: Обоснование решения в свободном тексте: `basis` позволяет проверять применимость результата к текущему состоянию.
 - **Source**: [basis поручения](../skills/sdd-shared/scripts/sdd_shared/explorer.py), [основание проверки и заключения](../skills/sdd-apply/scripts/lib/verification_results.py).
 
@@ -386,6 +724,7 @@ baseline проверок. Совпадение имён само по себе 
 ### Свидетельство
 
 - **Definition**: Сохранённое наблюдение или артефакт проверки с происхождением и привязкой к исследованному состоянию, на которое может опираться заключение.
+- **Usage**: В архитектурном аудите наблюдение адресуется путём и ключом объекта измерения. Оно описывает популяцию, способ измерения и ограничения без привязки к идентификатору версии исходников.
 - **NOT**: Само заключение об успешности критерия; неизвестные показатели сохраняются неизвестными.
 - **Source**: [машинные сводки и ссылки на артефакты](../skills/sdd-shared/scripts/sdd_shared/check_summary.py), [применимость evidence_refs](../skills/sdd-apply/scripts/lib/verification_results.py).
 
@@ -405,7 +744,7 @@ baseline проверок. Совпадение имён само по себе 
 
 - **Definition**: Зафиксированное представление исследованного состояния файлов и их идентичности, с которым сравнивают основание анализа или проверки.
 - **NOT**: Контрольная точка: снимок сам по себе не фиксирует принятое пользователем состояние работы.
-- **Source**: [снимки SDD-документов](../skills/sdd-shared/scripts/sdd_shared/snapshots.py), [сбор исходников архитектурного анализа](../skills/sdd-architect/scripts/collection.py).
+- **Source**: [снимки SDD-документов](../skills/sdd-shared/scripts/sdd_shared/snapshots.py). Архитектурный аудит использует Collection без фиксации версии исходников.
 
 ### Спецификация
 

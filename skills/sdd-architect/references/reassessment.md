@@ -1,17 +1,18 @@
 # Diff review and post-change reassessment
 
 Use these [explicit focused routes](continuation.md#explicit-focused-routes)
-within the four-phase contracts. The orchestrator maintains configuration on a
+within the workflow contracts. The orchestrator maintains configuration on a
 run with a checkout, registers exact comparison/acceptance checks, and records
 the phase, basis and unresolved work in `state.md`. Explorers collect evidence;
 architects diagnose and integrate it. Keep source changes outside this audit.
 
-For a diff, fix base and target revisions and any working-tree state. Inspect
-affected consumers even when they are outside the diff. Collect separate numbered
-snapshots under comparable definitions and preserve the actual configuration and
-source identity for each. Read a particular graph at its own level; a package
-cycle is not a class cycle. Use the same package map unless the change explicitly
-revises it. Keep earlier snapshots and raw results intact.
+Use a supplied diff or the requested Git comparison to locate affected code.
+Read the current implementation and consumers, including those outside the diff.
+A comparison's historical references describe that input only; do not capture or
+verify the audited source version. Collect relevant current measurements when
+they can answer the question, retaining separate report directories and their
+measurement definitions. A package cycle is not a class cycle. Explain any change
+to declared ownership instead of inferring it from moved files.
 
 For source-available diff candidates or a reopened diagnosis, use the explicit
 `sdd-code-design` call and return contract in [diagnosis](diagnosis.md). Limit the
@@ -19,12 +20,12 @@ questions to the affected contracts, mechanisms and consumers.
 
 Before comparing values, compare tool versions, configurations, source sets,
 variants, exclusions, history windows, mapping, graph node normalization and row
-populations. Changed definitions require recalculating both revisions or separate
-series. Never subtract incomparable values to claim improvement. The scripts do
+populations. Use separate series when definitions differ; calculate current
+values under the needed definition if that resolves the question. Never subtract incomparable values to claim improvement. The scripts do
 not automate a semantic comparison between configurations.
 
 After implementation of a selected recommendation, link the original card,
-diagnosis, snapshot and acceptance to the observed implementation. An earlier
+diagnosis, keyed measurements and acceptance to the observed implementation. An earlier
 report is a hypothesis to verify, not evidence of current completion. Reconcile
 changed sources and decisions through [basis reassessment](continuation.md#reconcile-a-changed-basis),
 then assign these checks within the relevant scope:
@@ -60,8 +61,8 @@ chosen review cycle, proportionate to the cost of collection.
 Finish through a fresh integration architect and the final-report contract. State
 which expected effects are supported, contradicted or still untested, with exact
 source/check evidence and consequences for dependent cards. Preserve unknown
-coverage and source identity as limitations; missing execution is not a pass.
-Validate changed cards against their current snapshot with assigned `rank` checks.
+coverage and measurement completeness as limitations; missing execution is not a pass.
+Validate changed cards using current sources and keyed JSONL evidence with assigned `rank` checks.
 Save the authored `report.md` in the report directory and return its link, including
 when the result is only unresolved findings. Implementing a recommendation or
 repairing the reviewed change requires a separate instruction.

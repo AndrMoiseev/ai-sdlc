@@ -14,8 +14,15 @@ directory the entry point is `../sdd-code-design/SKILL.md`. Resolve the loaded
 skill's own references from its directory. This is an explicit file-based call;
 it does not rely on automatic skill selection or the Skill tool.
 
-Pass the candidate's paths/declarations, revision and working state, selection
-reason, qualified metric records and limitations, known change/behavior scenario,
+For this architecture audit, apply the focused route's input-basis requirement
+using the current checkout path, declarations and task scope only. Its generic
+request for revision/working state does not apply here: omit those fields and
+all version comparisons from the assignment and result. Keep this instruction
+in the bounded diagnosis request so loading the shared route cannot introduce
+source-version checks into the audit.
+
+Pass the candidate's current paths/declarations, task scope, selection
+reason, JSONL metric paths and object keys, limitations, known change/behavior scenario,
 required behavior and relevant source/history evidence. Use a source-grounded
 hypothetical scenario when no roadmap is available. Resolve the sibling entry
 point and workflow before diagnosis; if a required file is unavailable, report
@@ -55,7 +62,7 @@ quality score. Assign readiness and M/R/S effects here, then prioritize through
 
 For each selected candidate, answer five questions with inspectable evidence:
 
-1. What is observed? Cite the revision, full path, declaration/signature, actual
+1. What is observed? Cite the current path, declaration/signature, actual
    dependency or commit, metric record and any numerator/denominator.
 2. Which representative change or behavior makes this matter? Use an upcoming
    task, a real historical change, or an explicitly hypothetical scenario grounded
@@ -64,7 +71,7 @@ For each selected candidate, answer five questions with inspectable evidence:
    coordinated edits, setup or error mechanism. Read both sides, affected consumers
    and wiring. For a local function read its complete body, callers and tests.
 4. Which other explanation fits the same number? Check a stable shared contract,
-   mechanical rewrite, generator, aggregation, rename or stale report. Identify the
+   mechanical rewrite, generator, aggregation, rename or incomplete measurement. Identify the
    smallest accessible observation that distinguishes the consequential alternatives.
 5. Is a specific action justified? Choose ready, needs_check, observe or rejected.
    Source-free metrics support hypotheses and checks, never readiness.

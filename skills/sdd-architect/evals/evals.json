@@ -5,10 +5,10 @@
       "id": 1,
       "name": "source-free-signals",
       "category": "limited-evidence",
-      "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Приоритеты: модульность, риск регрессий, скорость. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Ревизия отчётов неизвестна. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
+      "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Приоритеты: модульность, риск регрессий, скорость. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
       "expected_output": "Bounded investigation queue, no implementation-ready cards or Gradle split.",
       "expectations": [
-        "Unknown revision and absent sources prevent implementation readiness.",
+        "Absent sources prevent implementation readiness; source-version metadata is not required.",
         "Missing coverage is not replaced by zero or a computed CRAP.",
         "No recommendation to create or split Gradle projects.",
         "Coupling average-revs is not treated as exact shared support.",
@@ -20,11 +20,11 @@
       "id": 2,
       "name": "source-grounded-boundary",
       "category": "core",
-      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/docs/reports/pricing-audit/snapshot-1/snapshot.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи отчёт pricing-audit в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость.",
-      "expected_output": "Run analysis; inspect both sides; propose concrete responsibility transfer and ArchUnit acceptance, validated ordering.",
+      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/docs/reports/pricing-audit/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи отчёт pricing-audit в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость.",
+      "expected_output": "Read prepared JSONL measurements; inspect both sides; propose concrete responsibility transfer and ArchUnit acceptance, validated ordering.",
       "files": ["evals/prepare_fixture.py"],
       "expectations": [
-        "Uses the supplied script for arithmetic and recommendation validation.",
+        "Uses collect for normalization and all calculations, then rank after source diagnosis; references JSONL files and object keys.",
         "Inspects actual declarations and identifies tax rule ownership crossing pricing/order.",
         "Names a concrete transformation and affected consumers rather than only splitting a class.",
         "Keeps package boundaries and specifies ArchUnit scope including consumers.",
@@ -50,7 +50,7 @@
   ],
   "micro_test": {
     "repetitions_per_arm": 5,
-    "prompt": "Kotlin/Gradle-аудит по отчётам без исходников: ревизия неизвестна, MCC файла 12, покрытия нет, coupling 50% average-revs 20, D=0.9 у стабильного DTO; всё в одном Gradle-проекте. Нужен короткий следующий шаг и конкретная рекомендация. Ответ до 160 слов.",
+    "prompt": "Kotlin/Gradle-аудит по отчётам без исходников: MCC файла 12, покрытия нет, coupling 50% average-revs 20, D=0.9 у стабильного DTO; всё в одном Gradle-проекте. Нужен короткий следующий шаг и конкретная рекомендация. Ответ до 160 слов.",
     "focus": "Missing data stays unknown, scope stays package-based, no implementation readiness without sources."
   },
   "discovery": [
