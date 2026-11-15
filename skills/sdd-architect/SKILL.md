@@ -62,6 +62,9 @@ Read the [workflow](references/workflow.md) before starting. Before
 dispatch, continuation or handoff, read
 [assignments and context](references/orchestration.md) for saved requests/results,
 current input basis, fresh contexts and single-writer ownership.
+The orchestrator maintains `state.json` through the
+[continuation state contract](references/continuation.md#save-continuation-state)
+and exclusively through its read/check/write helper. This is the audit's only continuation file.
 The orchestrator runs the phases sequentially through report and plan delivery, without
 intermediate user approvals for the already requested audit. Existing reports are
 inputs to qualify within this cycle; their presence does not select a reports-only route.
