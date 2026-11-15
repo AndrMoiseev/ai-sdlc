@@ -38,6 +38,9 @@ measurement family has an intended source or a concrete gap.
 
 **Input:** saved configuration, exact registered commands and output destinations.
 
+Resolve the project [analysis policy](analysis-policy.md) through the script before
+running collection. Preserve low detector thresholds used to collect observations.
+
 1. Start a fresh explorer with a checks assignment containing the registered IDs,
    stage and command-registry revision. Execute existing build/report tasks and
    then `collect` in dependency order. Return tool/report facts to the orchestrator
@@ -106,8 +109,9 @@ result does not establish the truth of the diagnosis; that belongs to phase 3.
 
 **Input:** shortlist, diagnoses, current cards, validated ordering and scope/gaps.
 
-Start a fresh architect to author `report.md` from primary evidence. Show up to
-five ready directions, their priority rationale, dependencies and effect criteria,
+Start a fresh architect to author `report.md` from primary evidence. Obtain the
+saved collection policy through the script and show ready directions within
+`recommendations.report_limit`, their priority rationale, dependencies and effect criteria,
 the investigation queue and all `observe`/`rejected` cards. Link concrete JSONL
 files and object keys, collection description, diagnoses, cards and ranking with
 relative paths. Link each full six-section card instead of duplicating its narrative.

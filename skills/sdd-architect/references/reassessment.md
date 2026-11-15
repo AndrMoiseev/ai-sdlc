@@ -20,7 +20,9 @@ questions to the affected contracts, mechanisms and consumers.
 
 Before comparing values, compare tool versions, configurations, source sets,
 variants, exclusions, history windows, mapping, graph node normalization and row
-populations. Use separate series when definitions differ; calculate current
+populations. Obtain each collection's [analysis policy](analysis-policy.md) through
+the script and compare its measurement parameters and selection thresholds.
+Use separate series when definitions differ; calculate current
 values under the needed definition if that resolves the question. Never subtract incomparable values to claim improvement. The scripts do
 not automate a semantic comparison between configurations.
 

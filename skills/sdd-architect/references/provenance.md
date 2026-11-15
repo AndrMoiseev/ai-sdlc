@@ -9,6 +9,11 @@ self-contained; source diagnosis explicitly uses the sibling
 [sdd-code-design skill](../../sdd-code-design/SKILL.md). Neither the research
 directory nor the FPF skill is a runtime dependency.
 
+Bundled [analysis policy](analysis-policy.md) values are starting heuristics, not
+calibrated defect boundaries. The parameter-list minimum is an analyzer policy
+choice; it is not inferred from the detector's deliberately low collection threshold.
+Record the project rationale when tuning these settings.
+
 The implementation deliberately replaces project-specific paths, Kora exclusions
 and hardcoded module buckets with declared configuration. It retains support
 counts, unknown states and provenance, preserves nested JVM class identities and
@@ -26,7 +31,7 @@ engineering terms rather than requiring a framework-specific report:
 - C.11.DUA: ask for evidence only when its attainable answer can change the choice.
 - C.43: return realized outcomes to diagnosis and revise mistaken expectations.
 - PSDA.6: distinguish separately valued consequences and declare the compensatory
-  policy: equal criterion weights, local=1, substantial=2, equal sums tied.
+  policy: explicit effect points and criterion weights, equal sums tied.
 - PSDA.8: retain consequence profiles, shared burdens and unresolved effects beside
   the comparison; separate an investigation score from a recommendation's benefit.
 
@@ -39,6 +44,7 @@ the source procedure used the local adaptation at commit
 | Term | Meaning |
 | --- | --- |
 | Collection | Current scope and collection parameters, raw inputs, separate JSONL measurements and explicit output outcomes |
+| Analysis policy | Resolved numeric settings for measurements, selection, investigation and recommendation ordering, obtained through the script and retained per audit |
 | Measurement | One observation or computed indicator at one granularity, addressed by an object key |
 | Selection | A sorting or threshold condition with keyed references to measurements |
 | Candidate group | Preliminary collection of signals with an exact file scope or unresolved measurement objects; retains overlaps without claiming a common cause |

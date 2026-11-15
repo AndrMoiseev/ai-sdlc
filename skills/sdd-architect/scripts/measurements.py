@@ -42,7 +42,7 @@ define("external-affinity", "package", "package", "fraction", "derived", "depend
 for name, meaning in (("ca", "Incoming package weight"), ("ce", "Outgoing package weight"),
                       ("instability", "Ce / (Ca + Ce)"), ("abstractness", "Abstract types / types"),
                       ("distance", "abs(A + I - 1)")):
-    define(name, "package", "package", "class pairs" if name in ("ca", "ce") else "fraction", "derived", "sources dependencies", meaning + "; types >= 5 and Ca+Ce > 0")
+    define(name, "package", "package", "class pairs" if name in ("ca", "ce") else "fraction", "derived", "sources dependencies", meaning + "; types meet policy minimum and Ca+Ce > 0")
 define("changes", "commit", "commit", "event", "primary", "history", "Historical commit date, full changeset size and numstat paths")
 for name, unit, meaning in (("change-frequency", "commits", "File commit count; group sum of file counts"),
                             ("added-lines", "lines", "Sum of textual additions"), ("deleted-lines", "lines", "Sum of textual deletions"),
@@ -52,10 +52,10 @@ for name, unit, meaning in (("change-frequency", "commits", "File commit count; 
         CATALOG[f"{name}/{level}"]["key"] = [level]
         CATALOG[f"{name}/{level}"]["inputs"].append("sources")
 for name, meaning in (("activity", "Distinct commits touching group in history window"),
-                      ("recent-activity", "Distinct group commits since latest log date minus 30 days, inclusive")):
+                      ("recent-activity", "Distinct group commits since latest log date minus policy recent_days, inclusive")):
     for level in ("package", "module"):
         define(name, level, level, "commits", "derived", "sources history", meaning)
-define("coupling", "file-pair", "left right", "percent", "derived", "history", "floor(200*shared/(left_frequency+right_frequency)); full changeset <= 30 before all support counts")
+define("coupling", "file-pair", "left right", "percent", "derived", "history", "floor(200*shared/(left_frequency+right_frequency)); policy changeset-size filter before all support counts")
 define("implicit-coupling", "file-pair", "left right", "percent", "derived", "history dependencies sources", "Coupled live Kotlin files in different packages without an observed direct static edge; absent or partial mapping limits the claim")
 for name, field in (("code-lines", "Code"), ("total-lines", "Lines")):
     define(name, "file", "file", "lines", "primary", "sizes", "scc " + field)
@@ -73,15 +73,15 @@ for name in ("line-coverage", "branch-coverage"):
         define(name, level, level, "fraction", "primary" if level == "file" else "derived", "coverage", "covered / total; group sums of counters with explicit omissions")
         if level != "file":
             CATALOG[f"{name}/{level}"]["inputs"].append("sources")
-define("crap-file", "file", "file", "adapted CRAP", "derived", "complexity coverage", "observed_MCC**2 * (1-line_coverage)**3 + observed_MCC; incomplete population retained")
-for name, meaning in (("crap-sum", "Sum"), ("crap-mean", "Mean"), ("crap-above-threshold", "Count > 30")):
+define("crap-file", "file", "file", "adapted CRAP", "derived", "complexity coverage", "observed_MCC**complexity_exponent * (1-line_coverage)**uncovered_exponent + observed_MCC; exponents from policy; incomplete population retained")
+for name, meaning in (("crap-sum", "Sum"), ("crap-mean", "Mean"), ("crap-above-threshold", "Count above policy CRAP minimum")):
     for level in ("package", "module"):
         define(name, level, level, "files" if name == "crap-above-threshold" else "adapted CRAP", "derived", "complexity coverage sources", meaning + " of defined CRAP_file values; included, omitted and incomplete files explicit")
 for name, meaning in (("hotspot-in-frequency", "max class visibility_in * file change_frequency"),
                       ("hotspot-out-frequency", "max class visibility_out * file change_frequency"),
                       ("hotspot-in-churn", "max class visibility_in * file churn")):
     define(name, "file", "file", "weighted lines" if name.endswith("churn") else "weighted commits", "derived", "dependencies history mapping", meaning)
-define("changes-per-code", "file", "file", "commits per 100 code lines", "derived", "history sizes", "100 * change_frequency / Code; Kotlin, frequency >= 5, Code >= 20")
+define("changes-per-code", "file", "file", "commits per configured code-line unit", "derived", "history sizes", "code_line_unit * change_frequency / Code; Kotlin, policy minimum frequency and Code")
 
 
 def record_key(identifier, row):

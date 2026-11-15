@@ -1,0 +1,39 @@
+{
+  "signals": {
+    "cycle": {"minimum_members": 2},
+    "complexity": {"cyclomatic_minimum": 10, "cognitive_minimum": 15},
+    "shape": {"method_length_minimum": 20, "function_count_minimum": 11, "parameter_list_minimum": 6},
+    "boundary": {"distance_minimum": 0.7},
+    "coupling": {"minimum_degree": 30, "minimum_average_frequency": 5, "minimum_shared_commits": 5},
+    "hotspot": {"top_count": 5, "minimum_score": 0, "minimum_frequency": 10, "minimum_visibility": 0.05},
+    "coverage": {"minimum_frequency": 13, "maximum_line_coverage": 0.5},
+    "crap": {"minimum_value": 30}
+  },
+  "measurements": {
+    "history": {"maximum_changeset_size": 30, "recent_days": 30},
+    "martin": {"minimum_types": 5},
+    "external_affinity": {"minimum_declared_fraction": 0.34, "minimum_leading_share": 0.25, "minimum_bridge_share": 0.33},
+    "changes_per_code": {"minimum_frequency": 5, "minimum_code_lines": 20, "code_line_unit": 100},
+    "crap": {"complexity_exponent": 2, "uncovered_exponent": 3}
+  },
+  "evidence": {
+    "limited_weight_cap": 1,
+    "weights": {
+      "cycle": {"modularity": 2, "regression_risk": 1, "change_cost_reduction": 1},
+      "coupling": {"modularity": 2, "regression_risk": 1, "change_cost_reduction": 1},
+      "hotspot": {"modularity": 2, "regression_risk": 1, "change_cost_reduction": 1},
+      "complexity": {"modularity": 1, "regression_risk": 2, "change_cost_reduction": 1},
+      "shape": {"modularity": 1, "regression_risk": 1, "change_cost_reduction": 1},
+      "coverage": {"modularity": 0, "regression_risk": 2, "change_cost_reduction": 0},
+      "crap": {"modularity": 0, "regression_risk": 2, "change_cost_reduction": 0},
+      "boundary": {"modularity": 1, "regression_risk": 0, "change_cost_reduction": 0}
+    }
+  },
+  "investigation": {"candidate_group_limit": 12, "family_points": {"usable": 2, "limited": 1}},
+  "recommendations": {
+    "report_limit": 5,
+    "effect_points": {"not_shown": 0, "local": 1, "substantial": 2},
+    "criterion_weights": {"modularity": 1, "regression_risk": 1, "change_cost_reduction": 1}
+  },
+  "runtime": {"command_timeout_seconds": 60, "stderr_tail_characters": 3000}
+}

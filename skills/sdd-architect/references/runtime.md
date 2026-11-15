@@ -25,6 +25,7 @@ Measurement and ranking commands write only inside audit directories.
 | Collection plan | `collection-plan.md` |
 | One retained copy of each raw input and tool logs | `raw/`, `logs/` |
 | Collection parameters, output links and outcomes; no value tables | `collection.json` |
+| Effective numerical policy | `collection.json.analysis_policy`, read through `metrics.py policy --collection` |
 | One metric at one granularity | `metrics/<metric>/<granularity>.jsonl` |
 | Keyed sorting and threshold selections | `selections/rankings.jsonl`, `selections/signals.jsonl` |
 | Preliminary groups with overlaps and complete investigation queue | `selections/candidate-groups.jsonl`, `selections/investigation-queue.jsonl` |
@@ -44,7 +45,8 @@ the audit being continued. Do so only for a measurement need, never a version ch
 
 There are no monolithic measurement exports or copied source trees. Keep the current
 configuration at `.sdd/architect/collection.json`; `collection.json` in the report
-records the used measurement parameters. Source-free input settings instead use
+records the used measurement parameters and resolved [analysis policy](analysis-policy.md).
+Project numerical overrides live in `.sdd/architect/analysis-policy.json`. Source-free input settings instead use
 `collection-input.json` beside the output. Existing external reports are copied
 once into `raw/`; inputs already there are reused directly.
 
@@ -74,11 +76,13 @@ Use its absolute path in every run. Entry points have PEP 723 metadata and adjac
 lockfiles; the consuming project needs no Python environment or dependencies.
 
 ```text
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
 ```
 
-`collect` prepares the complete catalog, selections, preliminary groups and their
+`policy` is the sole numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
 queue before substantive analysis. Its stdout reports counts, including candidate
 groups, the collection-description path and gaps. `rank` runs
 after cards are authored; it checks their six-section Markdown structure and reads

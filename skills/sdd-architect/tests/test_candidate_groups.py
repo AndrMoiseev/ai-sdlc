@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from candidate_groups import candidate_group_limit, prepare_candidate_groups
-from test_metrics import finding, prepare_memory
+from candidate_groups import prepare_candidate_groups
+from test_metrics import DEFAULT_POLICY, finding, prepare_memory, resolved_policy
 
 
 def complexity(files):
@@ -71,7 +71,7 @@ class CandidateGroupTests(unittest.TestCase):
         value = prepare_memory({
             "dependencies": ("from,to\na.A,b.B\nb.B,a.A\n", {"format": "class-csv"}),
             "complexity": (complexity({"src/Low.kt": 12, "src/High.kt": 30}), {})},
-            sources, {"a.A": "src/A.kt", "b.B": "src/B.kt"}, {"candidate_group_limit": 2})
+            sources, {"a.A": "src/A.kt", "b.B": "src/B.kt"}, policy={"investigation": {"candidate_group_limit": 2}})
         groups = {row["group"]: row for row in value["selections"]["candidate-groups"]}
         queue = value["selections"]["investigation-queue"]
         selected = [groups[row["candidate_group"]["key"]["group"]] for row in queue if row["selected"]]
@@ -101,7 +101,7 @@ class CandidateGroupTests(unittest.TestCase):
         value = prepare_memory({
             "dependencies": ("from,to\na.A,b.B\nb.B,c.C\n", {"format": "class-csv"}),
             "history": (history(pairs), {})}, sources,
-            {f"{name.lower()}.{name}": f"src/{name}.kt" for name in "ABC"}, {"candidate_group_limit": 2})
+            {f"{name.lower()}.{name}": f"src/{name}.kt" for name in "ABC"}, policy={"investigation": {"candidate_group_limit": 2}})
         groups = {row["group"]: row for row in value["selections"]["candidate-groups"]}
         queue = value["selections"]["investigation-queue"]
         selected = [groups[row["candidate_group"]["key"]["group"]]["scope"]["files"] for row in queue if row["selected"]]
@@ -118,7 +118,8 @@ class CandidateGroupTests(unittest.TestCase):
             if signal["references"][0]["key"]["file"] == "src/High.kt":
                 signal["suitability"] = "limited"
                 signal["evidence_weights"] = {"modularity": 1, "regression_risk": 1, "change_cost_reduction": 1}
-        selections = prepare_candidate_groups({"candidate_group_limit": 1}, value["rows"], value["outcomes"], signals)
+        selections = prepare_candidate_groups({}, value["rows"], value["outcomes"], signals,
+                                              resolved_policy({"investigation": {"candidate_group_limit": 1}}))
         selected = next(row for row in selections["investigation-queue"] if row["selected"])
         group = next(row for row in selections["candidate-groups"] if row["group"] == selected["candidate_group"]["key"]["group"])
         self.assertEqual(group["scope"]["files"], ["src/Low.kt"])
@@ -130,7 +131,7 @@ class CandidateGroupTests(unittest.TestCase):
             "dependencies": ("from,to\na.A,b.B\nb.B,a.A\n", {"format": "class-csv"}),
             "history": (history([["src/Y.kt", "src/Z.kt"]] * 5), {}),
             "complexity": (complexity({"src/Z.kt": 14}), {})}, sources,
-            {"a.A": "src/A.kt", "b.B": "src/B.kt"}, {"candidate_group_limit": 1})
+            {"a.A": "src/A.kt", "b.B": "src/B.kt"}, policy={"investigation": {"candidate_group_limit": 1}})
         selections = value["selections"]
         groups = {row["group"]: row for row in selections["candidate-groups"]}
         queue = selections["investigation-queue"]
@@ -181,22 +182,20 @@ class CandidateGroupTests(unittest.TestCase):
             self.assertTrue(group["limitations"])
         self.assert_references(value["selections"])
 
-    def test_source_free_parameter_finding_is_retained_without_a_number(self):
+    def test_unknown_parameter_count_is_retained_as_a_gap_without_threshold_selection(self):
         row = finding("LongParameterList", "f(a: Pair<A,B>) exceeds threshold")
         value = prepare_memory({"complexity": (json.dumps({"runs": [{"results": [row]}]}), {})})
-        group = value["selections"]["candidate-groups"][0]
-        self.assertFalse(group["source_available"])
-        self.assertEqual(set(group["evidence_families"]), {"code_risk"})
         self.assertIsNone(value["rows"]["parameter-list/declaration"][0]["value"])
-        self.assertTrue(group["limitations"])
-        self.assertTrue(value["selections"]["investigation-queue"][0]["selected"])
+        self.assertEqual(value["selections"]["candidate-groups"], [])
+        self.assertEqual(value["selections"]["investigation-queue"], [])
+        self.assertTrue(any("Parameter count is unknown" in gap.get("reason", "") for gap in value["gaps"]))
 
     def test_repeated_and_reordered_signals_produce_identical_groups(self):
         value = prepare_memory({"complexity": (complexity({"src/B.kt": 15, "src/A.kt": 15}), {})},
                                {"src/A.kt": {"package": "a"}, "src/B.kt": {"package": "b"}})
         signals = [{key: field for key, field in row.items() if key != "signal"} for row in value["selections"]["signals"]]
-        first = prepare_candidate_groups({}, value["rows"], value["outcomes"], signals)
-        second = prepare_candidate_groups({}, value["rows"], value["outcomes"], list(reversed(signals + signals)))
+        first = prepare_candidate_groups({}, value["rows"], value["outcomes"], signals, DEFAULT_POLICY)
+        second = prepare_candidate_groups({}, value["rows"], value["outcomes"], list(reversed(signals + signals)), DEFAULT_POLICY)
         self.assertEqual(first, second)
         self.assertEqual(len(first["signals"]), 2)
         self.assert_references(first)
@@ -210,8 +209,8 @@ class CandidateGroupTests(unittest.TestCase):
             self.assertEqual(value["selections"]["investigation-queue"], [])
 
     def test_limit_is_explicit_and_rejects_non_integer_values(self):
-        self.assertEqual(candidate_group_limit({}), 12)
-        self.assertEqual(candidate_group_limit({"candidate_group_limit": 8}), 8)
+        self.assertEqual(resolved_policy()["investigation"]["candidate_group_limit"], 12)
+        self.assertEqual(resolved_policy({"investigation": {"candidate_group_limit": 8}})["investigation"]["candidate_group_limit"], 8)
         for value in (0, -1, True, None, "12", 1.5):
-            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "positive integer"):
-                candidate_group_limit({"candidate_group_limit": value})
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "candidate_group_limit"):
+                resolved_policy({"investigation": {"candidate_group_limit": value}})

@@ -8,26 +8,18 @@ from measurements import CATALOG, key_text, record_key
 
 
 SELECTION_NAMES = ("rankings", "signals", "candidate-groups", "investigation-queue")
-DEFAULT_CANDIDATE_GROUP_LIMIT = 12
 EVIDENCE_FAMILIES = {"cycle": "dependency_structure", "boundary": "dependency_structure",
                      "coupling": "change_patterns", "hotspot": "change_patterns",
                      "complexity": "code_risk", "coverage": "code_risk", "crap": "code_risk", "shape": "code_risk"}
-
-
-def candidate_group_limit(config):
-    limit = config.get("candidate_group_limit", DEFAULT_CANDIDATE_GROUP_LIMIT)
-    if type(limit) is not int or limit < 1:
-        raise ValueError("candidate_group_limit must be a positive integer")
-    return limit
 
 
 def selection_reference(name, field, identity):
     return {"path": f"selections/{name}.jsonl", "key": {field: identity}}
 
 
-def prepare_candidate_groups(config, rows, outcomes, signals):
+def prepare_candidate_groups(config, rows, outcomes, signals, policy):
     """Keep all groups and omissions; merge exact complete scopes, never overlaps."""
-    limit = candidate_group_limit(config)
+    limit = policy["investigation"]["candidate_group_limit"]
     unique = {}
     for signal in signals:
         signal = {**signal, "references": sorted(signal["references"], key=key_text)}
@@ -123,7 +115,7 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
             family = families.setdefault(EVIDENCE_FAMILIES[signal["family"]], {"points": 0, "signals": []})
             # Cap related observations at one contribution; raw metric magnitudes
             # and diagnostic evidence weights never become comparable severity.
-            family["points"] = max(family["points"], 2 if signal["suitability"] == "usable" else 1)
+            family["points"] = max(family["points"], policy["investigation"]["family_points"][signal["suitability"]])
             family["signals"].append(selection_reference("signals", "signal", identity))
         group["evidence_families"] = dict(sorted(families.items()))
         group["investigation_score"] = sum(family["points"] for family in families.values())

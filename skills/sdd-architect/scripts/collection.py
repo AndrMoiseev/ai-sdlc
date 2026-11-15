@@ -10,11 +10,13 @@ from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from pathlib import Path
 
+from analysis_policy import load_policy
 from inputs import class_source_file, relative_path, source_description
 from measurements import CATALOG, write_jsonl
 
 
-def run(argv, cwd, timeout=60):
+def run(argv, cwd, policy):
+    timeout = policy["runtime"]["command_timeout_seconds"]
     options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session": True}
     process = subprocess.Popen(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                shell=False, **options)
@@ -29,7 +31,8 @@ def run(argv, cwd, timeout=60):
         process.communicate()
         raise ValueError(f"Command timed out after {timeout}s: {argv[0]}") from None
     if process.returncode:
-        raise ValueError(f"Command failed ({process.returncode}): {argv!r}\n{stderr.decode('utf-8', errors='replace')[-3000:]}")
+        detail = stderr.decode('utf-8', errors='replace')[-policy["runtime"]["stderr_tail_characters"]:]
+        raise ValueError(f"Command failed ({process.returncode}): {argv!r}\n{detail}")
     return stdout
 
 
@@ -109,21 +112,22 @@ def map_classes(config, root, sources):
 
 def collect(config, output):
     from analysis import prepare_measurements
-    from candidate_groups import SELECTION_NAMES, candidate_group_limit
+    from candidate_groups import SELECTION_NAMES
 
-    limit = candidate_group_limit(config)
+    if "candidate_group_limit" in config:
+        raise ValueError("Set investigation.candidate_group_limit in .sdd/architect/analysis-policy.json")
     root = Path(config["repository"]).resolve()
     if not root.is_dir():
         raise ValueError(f"Repository not found: {root}")
+    policy = load_policy(root)
     output = report_output(output, root, directory=True)
     if any((output / name).exists() for name in ("collection.json", "metrics", "selections")):
         raise ValueError("Collection output already exists; choose a new report directory")
     output.mkdir(parents=True, exist_ok=True)
-    description = {"repository": str(root), "status": "incomplete",
+    description = {"repository": str(root), "status": "incomplete", "analysis_policy": policy,
                    "parameters": {key: config.get(key, default) for key, default in (
                        ("source_roots", []), ("exclude_paths", []), ("package_prefixes", []),
-                       ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}),
-                       ("candidate_group_limit", limit))},
+                       ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}))},
                    "artifacts": {}, "gaps": [],
                    "selections": {name: {"path": f"selections/{name}.jsonl", "status": "incomplete", "records": None}
                                   for name in SELECTION_NAMES},
@@ -168,22 +172,22 @@ def collect(config, output):
                     for key in ("since", "until"):
                         if spec.get(key):
                             argv.append(f"--{key}={spec[key]}")
-                    data = run(argv, root)
-                    metadata.update(format="git-log", tool="git", version=run(["git", "--version"], root).decode().strip())
+                    data = run(argv, root, policy)
+                    metadata.update(format="git-log", tool="git", version=run(["git", "--version"], root, policy).decode().strip())
                 elif name == "dependencies":
                     directories = [str((root / p).resolve()) for p in config.get("class_directories", [])]
                     if not directories:
                         raise ValueError("jdeps collection needs class_directories from the selected Gradle source sets")
                     argv = ["jdeps", "-verbose:class", "-filter:none", "--ignore-missing-deps", *directories]
-                    data = run(argv, root)
-                    metadata.update(format="jdeps", tool="jdeps", version=run(["jdeps", "--version"], root).decode().strip())
+                    data = run(argv, root, policy)
+                    metadata.update(format="jdeps", tool="jdeps", version=run(["jdeps", "--version"], root, policy).decode().strip())
                 elif name == "sizes":
                     roots = [str((root / p).resolve()) for p in config.get("source_roots", [])]
                     if not roots:
                         raise ValueError("scc collection needs source_roots")
                     argv = ["scc", "--by-file", "--format", "json", *roots]
-                    data = run(argv, root)
-                    metadata.update(format="scc", tool="scc", version=run(["scc", "--version"], root).decode().strip())
+                    data = run(argv, root, policy)
+                    metadata.update(format="scc", tool="scc", version=run(["scc", "--version"], root, policy).decode().strip())
                 else:
                     raise ValueError(f"{name}: run the project's selected Gradle task and import its report")
                 metadata["command"] = argv
@@ -220,7 +224,7 @@ def collect(config, output):
         except (OSError, ValueError) as error:
             metadata.update(status="error", reason=str(error))
         artifacts[name] = metadata
-    measurements, outcomes, selections, gaps = prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, source_error)
+    measurements, outcomes, selections, gaps = prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error)
     description["gaps"] = gaps
     for name, rows in measurements.items():
         write_jsonl(output / CATALOG[name]["path"], rows)
