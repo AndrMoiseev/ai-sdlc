@@ -1,8 +1,9 @@
 # Runtime and storage
 
-Use `uv` and a system Python 3.11+. Git is required only for requested history
-collection; jdeps and scc only for their respective branches. detekt and JaCoCo
-tasks belong to the consuming project. Missing tools limit their own chains.
+Use `uv` and a system Python 3.11+. Full audits require Git, jdeps, scc, a JDK source
+launcher, the bundled Kotlin measurement helper and complete detekt/JaCoCo reports.
+Gradle build/test/report tasks belong to the consuming project. Missing tools or
+mandatory sources block a full audit. Explicit focused routes can use partial inputs.
 
 ## Report storage
 
@@ -18,6 +19,9 @@ The current plan is separate: `memory/tech-debt/plan/plan.md` and
 `memory/tech-debt/plan/tasks/<task-name>/task.md`. Follow
 [plan maintenance](tech-debt-plan.md) for automatic additions and user changes.
 Measurement and ranking commands write only inside audit directories.
+After the complete full audit succeeds, the final `status` command alone replaces
+`memory/tech-debt/status.json` and `status.md` under the
+[publication contract](quality-indicators.md#publication).
 
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
@@ -26,6 +30,7 @@ Measurement and ranking commands write only inside audit directories.
 | One retained copy of each raw input and tool logs | `raw/`, `logs/` |
 | Collection parameters, output links and outcomes; no value tables | `collection.json` |
 | Effective numerical policy | `collection.json.analysis_policy`, read through `metrics.py policy --collection` |
+| Calculated project/module aggregates, awaiting final publication | `metrics/quality-indicators.json` |
 | One metric at one granularity | `metrics/<metric>/<granularity>.jsonl` |
 | Keyed sorting and threshold selections | `selections/rankings.jsonl`, `selections/signals.jsonl` |
 | Preliminary groups with overlaps and complete investigation queue | `selections/candidate-groups.jsonl`, `selections/investigation-queue.jsonl` |
@@ -43,7 +48,7 @@ pre-existing `raw/` and plans, but rejects an existing `collection.json`, `metri
 or `selections/`. Further collection uses a new timestamped audit directory, linked from
 the audit being continued. Do so only for a measurement need, never a version check.
 
-There are no monolithic measurement exports or copied source trees. Keep the current
+The aggregate document is separate from keyed JSONL diagnostics. Do not copy source trees. Keep the current
 configuration at `.sdd/architect/collection.json`; `collection.json` in the report
 records the used measurement parameters and resolved [analysis policy](analysis-policy.md).
 Project numerical overrides live in `.sdd/architect/analysis-policy.json`. Source-free input settings instead use
@@ -55,6 +60,9 @@ Retain partial outputs and concrete gaps. The collection description starts with
 accounts for each output as `complete`, `unavailable` or `error`; an interrupted
 calculation remains distinguishable from a successful empty JSONL file. Outcome
 metadata, parameters and gaps stay outside metric rows.
+In a full audit, a required source failure sets collection `status: blocked` and
+raises an actionable error. No live status file is touched. Independent partial
+chains are allowed only for explicitly focused work.
 
 Use the [assignment contract](orchestration.md) for roles and output ownership.
 The orchestrator writes requests, launch evidence, plans and continuation state;
@@ -80,6 +88,7 @@ uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<report-dir>"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --collection "<report-dir>/collection.json"
 ```
 
 `policy` is the sole numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
@@ -90,19 +99,33 @@ only cited metric files and current source paths. Narrative stays in the Markdow
 cards; JSON carries addresses, statuses and effects for ranking.
 Generated Markdown is an input to the final report; the assigned architect authors
 `report.md`. Existing ranked output files are rejected to preserve retained results.
+`status` runs only after report and plan completion. For an explicitly focused route,
+add `--focused` to `collect`; that collection cannot publish project status.
 
 Register resolved commands, cwd, paths, expected outputs and limits in
 `collection-plan.md` before assigning checks. Execute only the exact assigned set.
-The scripts use the standard library; no package download is required, including
-empty-cache or deliberately offline execution. Keep `--locked`; update lockfiles
-only for an intentional dependency change.
+Python scripts use the standard library. The Kotlin helper executes Java source
+against detekt CLI 1.23.8 `all.jar`; it does not modify project build dependencies.
+Find Java via `artifacts.kotlin.java`, PATH or JAVA_HOME. The helper needs JDK 11+
+source-launcher support. It downloads the fixed Maven distribution into
+`UV_TOOL_DIR/sdd-architect/` if absent. For offline use provide the existing jar's
+absolute path as `artifacts.kotlin.detekt_jar`. Keep the jar, temporary source
+manifest and JVM caches outside the project and skill package. Record detekt's
+measurement version independently of the project's Kotlin version. A download,
+launch or syntax failure blocks collection. Keep `--locked`; update Python
+lockfiles only for an intentional dependency change.
 
 On filesystem errors, report the first failing path. Probe with the same interpreter
 and launch method, then use the host's normal permission mechanism if necessary.
 Preserve sandbox and ACLs. Windows commands launched by the collector are hidden;
 timeouts stop their process trees. Report command text is never executed implicitly.
 
-Developer validation runs `scripts/test.py` with the same uv invocation. The full
+Developer validation runs `scripts/test.py` with the same uv invocation. Set
+`ARCHITECT_TEST_JAVA` to the JDK launcher and `ARCHITECT_TEST_DETEKT_JAR` to the
+detekt 1.23.8 `all.jar`, both absolute paths outside the package. The mandatory
+single JVM scenario verifies actual parser/metric integration; the remaining
+formula/rule combinations run without subprocesses. The publication scenario
+checks real status files in an external temporary directory. The full
 sequential deterministic suite has a 120-second wall-clock budget including setup
 and launch. Stop its process tree and work if the limit is exceeded. Keep test logs
 and fixtures outside the project and package. Behavior scenarios require separate

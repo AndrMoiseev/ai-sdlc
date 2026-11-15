@@ -19,8 +19,10 @@ First inspect retained primary evidence. Assign explorer research for source/rep
 inspection or checks for exact registered commands. Expand scope only when an
 identified dependency can answer the question; give an unrelated cause its own
 assignment. Suspend only dependent conclusions and continue independent work.
-A failed measurement source does not close other chains. Preserve useful partial
-results and inherited limits; missing execution is a gap, not a successful check.
+This independent-chain rule applies to explicitly focused work. A missing or failed
+mandatory source blocks the full audit: retain intermediate materials and the
+previous live status, explain the prerequisite and propose fixing it first.
+Missing execution is a gap, not a successful check.
 
 ## Save continuation state
 
@@ -57,6 +59,10 @@ separate from the orchestrator's assessment. Retain unknown observations as unkn
 5. Reread the current plan; reconcile user edits and partially completed additions
    under [plan maintenance](tech-debt-plan.md#apply-user-changes-and-resume-safely).
    Save the completed portion and next step, then finish report and plan delivery.
+   For a full audit, publish project status only after all preceding phases succeed.
+   After a source blocker is resolved, collection uses a new timestamped directory
+   as required by runtime; link it from the continued audit and use its aggregate
+   input. Never publish stale aggregates from the failed attempt.
 
 No comparison of source revisions, fingerprints or material checksums participates
 in resumption. Their absence or difference does not trigger a stop, downgrade,
@@ -86,8 +92,8 @@ a shorter route. Maintain project configuration whenever sources are available.
 
 | Requested route | Work and result |
 | --- | --- |
-| Existing reports with sources | Qualify populations and mappings; `collect` prepares JSONL evidence. Diagnose requested groups using current declarations, then rank and deliver. |
-| Source-free reports | Record input paths and known limitations in `collection-input.json`. `collect` calculates available outputs; analysis returns hypotheses and bounded questions, followed by the report. |
+| Existing reports with sources | Qualify populations and mappings; `collect --focused` prepares JSONL evidence. Diagnose requested groups using current declarations, then rank and deliver. |
+| Source-free reports | Record input paths and known limitations in `collection-input.json`. `collect --focused` calculates available outputs; analysis returns hypotheses and bounded questions, followed by the report. |
 | Proposal comparison | Read the named cards, evidence and current sources. Compare mechanisms and effects; rank justified corrected cards and explain ties or gaps. |
 | Diff review | Use the supplied diff or requested Git comparison to locate changes. Inspect current contracts and consumers beyond the diff, then follow [reassessment](reassessment.md). No source-version gate is introduced. |
 | Reassessment | Read the earlier card, evidence and acceptance. Inspect the current implementation and relevant measurements; report supported, contradicted and untested effects. |
@@ -101,3 +107,4 @@ any omitted phase or measurement family. Every audit route retains its materials
 and finishes with report and plan delivery, including excluded-status notification.
 Plan-only changes update the plan directly. Implementing recommendations requires
 a separate task.
+Focused routes never overwrite project status or substitute for a blocked full audit.

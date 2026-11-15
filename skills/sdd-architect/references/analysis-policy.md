@@ -54,6 +54,7 @@ policy changes alone do not establish a code improvement.
 | --- | --- |
 | `signals` | Analyzer thresholds for cycles, complexity, declaration shape, Martin distance, coupling, hotspots, coverage and file CRAP |
 | `measurements` | History filtering/window, Martin applicability, affinity labels, changes-per-code population/unit and CRAP exponents |
+| `measurements.quality_indicators` | Cognitive/size limits, clone length/reference fraction, DL small-group limit and aggregate history window/support filters |
 | `evidence` | Per-signal diagnostic weights and the cap for limited evidence |
 | `investigation` | Automatic candidate-group budget and capped points for usable/limited evidence families |
 | `recommendations` | Effect-category points, criterion weights and report display limit |
@@ -64,6 +65,10 @@ in code: empty counts, arithmetic identities, graph pairs, percentage conversion
 JVM format tags, source coordinates and the fixed recommendation-card sections.
 They do not change when a project tunes its analysis policy. Fixture measurements
 and expected test results describe test cases, not operational defaults.
+The [aggregate profile](quality-indicators.md) records its resolved parameters in
+status.json. Changes to those definitions or parameters create a different comparison
+basis; do not tune them merely to obtain a desired project score. Catalog history
+filters and aggregate-history filters have distinct documented populations.
 
 ## Parameter counts and collection thresholds
 

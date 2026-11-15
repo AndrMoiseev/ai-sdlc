@@ -95,6 +95,11 @@ def map_classes(config, root, sources):
             except (OSError, ValueError, KeyError, TypeError) as error:
                 unresolved.append({"reason": str(error), "class_file": str(path)})
                 continue
+            if any(fnmatchcase(name, pattern) for pattern in config.get("exclude_classes", [])):
+                continue
+            prefixes = config.get("package_prefixes", [])
+            if prefixes and not any(name == prefix or name.startswith(prefix + ".") for prefix in prefixes):
+                continue
             candidates = lookup[name.rpartition(".")[0], source_file]
             if len(candidates) == 1:
                 if name in mappings and mappings[name] != candidates[0]:
@@ -107,10 +112,11 @@ def map_classes(config, root, sources):
         if path not in sources:
             raise ValueError(f"Explicit mapping is outside source inventory: {name} -> {path}")
         mappings[name] = path
+    unresolved = [gap for gap in unresolved if gap.get("class") not in mappings]
     return dict(sorted(mappings.items())), unresolved
 
 
-def collect(config, output):
+def collect(config, output, *, full=True):
     from analysis import prepare_measurements
     from candidate_groups import SELECTION_NAMES
 
@@ -124,7 +130,7 @@ def collect(config, output):
     if any((output / name).exists() for name in ("collection.json", "metrics", "selections")):
         raise ValueError("Collection output already exists; choose a new report directory")
     output.mkdir(parents=True, exist_ok=True)
-    description = {"repository": str(root), "status": "incomplete", "analysis_policy": policy,
+    description = {"repository": str(root), "status": "incomplete", "route": "full" if full else "focused", "analysis_policy": policy,
                    "parameters": {key: config.get(key, default) for key, default in (
                        ("source_roots", []), ("exclude_paths", []), ("package_prefixes", []),
                        ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}))},
@@ -138,6 +144,12 @@ def collect(config, output):
     def save_description():
         (output / "collection.json").write_text(json.dumps(description, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
 
+    def block(reason):
+        description["status"] = "blocked"
+        description["gaps"].append({"reason": reason})
+        save_description()
+        raise ValueError(reason + "; stop the audit and resolve this prerequisite before continuing")
+
     save_description()
     source_error = None
     try:
@@ -149,24 +161,43 @@ def collect(config, output):
     except (OSError, ValueError) as error:
         mappings, mapping_gaps = {}, [{"reason": str(error)}]
     artifacts, raw = description["artifacts"], {}
-    supported = {"dependencies", "history", "sizes", "complexity", "coverage"}
+    supported = {"dependencies", "history", "sizes", "complexity", "coverage", "kotlin"}
     unknown = set(config.get("artifacts", {})) - supported
     if unknown:
         raise ValueError(f"Unknown artifacts: {sorted(unknown)}")
+    if full:
+        missing = supported - config.get("artifacts", {}).keys()
+        if missing:
+            block("Missing configured sources: " + ", ".join(sorted(missing)))
+        if source_error or mapping_gaps:
+            block(source_error or "Incomplete JVM source mapping: " + str(mapping_gaps[:3]))
+        if not config.get("source_roots") or not config.get("modules"):
+            block("Configure production source roots and architectural module ownership")
+        if not config.get("class_directories") and not config.get("class_files"):
+            block("Compile production code and configure its JVM class directories")
     extensions = {"jdeps": ".txt", "class-csv": ".csv", "git-log": ".log", "scc": ".json",
-                  "detekt-sarif": ".sarif", "jacoco": ".xml", "coverage-csv": ".csv"}
-    formats = {"dependencies": {"jdeps", "class-csv"}, "history": {"git-log"}, "sizes": {"scc"},
-               "complexity": {"detekt-sarif"}, "coverage": {"jacoco", "coverage-csv"}}
+                  "detekt-sarif": ".sarif", "jacoco": ".xml", "coverage-csv": ".csv", "kotlin-measurements": ".json", "git-history": ".json"}
+    formats = {"dependencies": {"jdeps", "class-csv"}, "history": {"git-log", "git-history"}, "sizes": {"scc"},
+               "complexity": {"detekt-sarif"}, "coverage": {"jacoco", "coverage-csv"}, "kotlin": {"kotlin-measurements"}}
     retained = {}
     for name in sorted(supported):
         spec = config.get("artifacts", {}).get(name)
         if spec is None:
             artifacts[name] = {"status": "unavailable", "reason": "No source configured"}
             continue
-        metadata = {key: spec[key] for key in ("format", "tool", "version", "command", "source_root", "complete_mcc", "limitations", "since", "until") if key in spec}
+        metadata = {key: spec[key] for key in ("format", "tool", "version", "parser_version", "command", "source_root", "complete_mcc", "complete", "test_result", "limitations", "since", "until") if key in spec}
         try:
             if spec.get("collect"):
-                if name == "history":
+                if name == "kotlin":
+                    from kotlin_measurements import collect_kotlin
+                    data, details = collect_kotlin(spec, sources, root, run, policy)
+                    metadata.update(details)
+                    argv = details["command"]
+                elif name == "history" and full:
+                    from history import collect_history
+                    data, argv = collect_history(config, root, run, policy, sources)
+                    metadata.update(format="git-history", tool="git", version=run(["git", "--version"], root, policy).decode().strip())
+                elif name == "history":
                     argv = ["git", "-c", "core.quotePath=false", "log", "--no-merges", "--no-renames",
                             "--date=short", "--format=--%H--%ad--%an", "--numstat"]
                     for key in ("since", "until"):
@@ -182,10 +213,10 @@ def collect(config, output):
                     data = run(argv, root, policy)
                     metadata.update(format="jdeps", tool="jdeps", version=run(["jdeps", "--version"], root, policy).decode().strip())
                 elif name == "sizes":
-                    roots = [str((root / p).resolve()) for p in config.get("source_roots", [])]
+                    roots = [str(root)] if full else [str((root / p).resolve()) for p in config.get("source_roots", [])]
                     if not roots:
                         raise ValueError("scc collection needs source_roots")
-                    argv = ["scc", "--by-file", "--format", "json", *roots]
+                    argv = ["scc", "--by-file", "--format", "json", "--no-cocomo", *roots]
                     data = run(argv, root, policy)
                     metadata.update(format="scc", tool="scc", version=run(["scc", "--version"], root, policy).decode().strip())
                 else:
@@ -224,8 +255,23 @@ def collect(config, output):
         except (OSError, ValueError) as error:
             metadata.update(status="error", reason=str(error))
         artifacts[name] = metadata
+        if full and metadata.get("status") != "complete":
+            block(f"{name}: {metadata.get('reason', 'source unavailable')}")
     measurements, outcomes, selections, gaps = prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error)
     description["gaps"] = gaps
+    if full:
+        failed = [name for name, metadata in artifacts.items() if metadata.get("status") != "complete"]
+        if failed:
+            block("Invalid measurement sources: " + ", ".join(failed))
+        from project_status import prepare_status
+        try:
+            quality = prepare_status(config, sources, mappings, raw, artifacts, policy)
+        except (OSError, ValueError, KeyError, TypeError, SyntaxError) as error:
+            block(str(error))
+        quality_path = output / "metrics" / "quality-indicators.json"
+        quality_path.parent.mkdir(parents=True, exist_ok=True)
+        quality_path.write_text(json.dumps(quality, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+        description["quality_indicators"] = {"path": "metrics/quality-indicators.json", "status": "complete"}
     for name, rows in measurements.items():
         write_jsonl(output / CATALOG[name]["path"], rows)
         description["outputs"][name] = {"path": CATALOG[name]["path"], "records": len(rows), **outcomes[name]}

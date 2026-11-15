@@ -1,6 +1,6 @@
 # Architecture audit workflow
 
-Run **configuration → collect → substantive analysis → ranking → final report → plan update**.
+Run **configuration → collect → substantive analysis → ranking → final report → plan update → project status**.
 The orchestrator owns assignments and transitions under
 [assignments and context](orchestration.md). Execute assignments sequentially with
 fresh contexts at phase and diagnosis-group boundaries. Architects author findings;
@@ -24,15 +24,19 @@ before commissioning research. Carry user assessments and known problems into th
    compiled outputs, existing measurement and test tasks, exclusions and package
    ownership. Apply [Collection](collection.md), including supplied report inputs.
 2. Require proposed configuration and a plan justified by source references.
-   Inventory dependencies, history, size, complexity and coverage. Record exact
+   Inventory dependencies, history, scc statistics, Kotlin tokens/functions,
+   complexity and coverage under [quality indicators](quality-indicators.md). Record exact
    commands or input paths and known limitations; unknown ownership stays explicit.
 3. The orchestrator saves `.sdd/architect/collection.json` and `collection-plan.md`.
    Register executable commands with dependencies, destinations and limits under
    the [checks contract](orchestration.md#register-checks-in-the-collection-plan).
    Explorer proposes changes but does not edit project configuration or settings.
 
-**Exit:** saved scope, population, exclusions and ownership are justified; every
-measurement family has an intended source or a concrete gap.
+**Exit:** saved scope, population, exclusions and module ownership are justified;
+every required source has an executable collection path or a qualified complete
+report. Missing coverage, tools or other prerequisites block the full audit.
+Explain the concrete problem and propose resolving it before restarting; do not
+silently configure the project's tests or continue with missing sources.
 
 ## Phase 2: Collect
 
@@ -49,12 +53,14 @@ running collection. Preserve low detector thresholds used to collect observation
    all [catalog outputs](measurements.md) in dependency order and saves selections.
    It then [builds candidate groups](candidate-groups.md), attaches contained signals,
    records overlaps and prepares the budgeted investigation queue.
-   It records errors and missing inputs per chain while completing independent work.
+   It also computes project and module aggregates in `metrics/quality-indicators.json`.
+   Any failed required source blocks the full audit. The live status remains untouched.
 3. Return the compact `collection.json` description, output counts and gaps. Read
    only the JSONL files relevant to the next investigation; do not send the complete
    metric population to the orchestrator.
 
-**Exit:** every planned output is complete or has a concrete unavailable/error reason.
+**Exit:** every required source and aggregate calculation is complete. A valid
+empty population can yield `not_applicable`; a missing source cannot.
 Primary observations, derived values, group aggregates, rankings, threshold
 selections, preliminary groups and the queue are ready before substantive analysis.
 Interrupted calculations remain incomplete. Source version metadata is neither
@@ -123,7 +129,7 @@ and ranking before relying on it in the report. A rendered table alone does not
 complete the audit. The orchestrator checks evidence and phase outcomes before
 updating the plan.
 
-## Phase 6: Plan update and delivery
+## Phase 6: Plan update
 
 **Input:** report, complete validated card set and the latest user-edited plan.
 
@@ -134,5 +140,22 @@ task. Record additions, reused tasks and disagreements in the report and complet
 state. No eligible additions is a valid result and still requires the final notification.
 
 **Exit:** plan cards and table agree, links resolve, repeated completion creates no
-duplicates, and the final response links both report and plan. Notify the user about
-all excluded statuses, including when `observe` and `rejected` are both absent.
+duplicates. All substantive audit work is complete before publishing project status.
+
+## Phase 7: Project status and delivery
+
+**Input:** successful full collection, finished report and updated plan.
+
+The orchestrator verifies that all preceding phases succeeded, records completion
+state, and assigns the final `metrics.py status --collection <report-dir>/collection.json`
+under the checks contract. The command replaces `memory/tech-debt/status.json` and
+renders `status.md` from that JSON structure and the bundled template. Never edit
+the Markdown values manually. This is the last artifact-writing action of a full
+audit; see [publication](quality-indicators.md#publication).
+
+If any earlier phase fails or is interrupted, stop without touching the previous
+status. A failure during the two final writes requires no rollback, backup or
+recovery protocol; earlier committed values remain in Git.
+
+**Exit:** the final response links report, plan and status. Notify the user about
+all excluded card statuses, including when `observe` and `rejected` are both absent.

@@ -134,6 +134,23 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "quality_indicators": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "cognitive_complexity": {"type": "number", "exclusiveMinimum": 0},
+            "function_tokens": {"type": "integer", "minimum": 1},
+            "class_tokens": {"type": "integer", "minimum": 1},
+            "file_tokens": {"type": "integer", "minimum": 1},
+            "clone_tokens": {"type": "integer", "minimum": 1},
+            "duplication_reference": {"type": "number", "exclusiveMinimum": 0},
+            "small_group_files": {"type": "integer", "minimum": 2},
+            "history_days": {"type": "integer", "minimum": 1},
+            "history_maximum_files": {"type": "integer", "minimum": 1},
+            "history_minimum_shared": {"type": "integer", "minimum": 1},
+            "history_minimum_average": {"type": "number", "exclusiveMinimum": 0},
+            "history_minimum_coupling": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
         "history": {
           "type": "object",
           "additionalProperties": false,
