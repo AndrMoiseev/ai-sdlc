@@ -25,7 +25,7 @@ After the complete full audit succeeds, the final `status` command alone replace
 
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
-| Final report and continuation state | `report.md`, `state.md` |
+| Final report and continuation state | `report.md`, `state.json` |
 | Collection plan | `collection-plan.md` |
 | One retained copy of each raw input and tool logs | `raw/`, `logs/` |
 | Collection parameters, output links and outcomes; no value tables | `collection.json` |
@@ -120,7 +120,37 @@ and launch method, then use the host's normal permission mechanism if necessary.
 Preserve sandbox and ACLs. Windows commands launched by the collector are hidden;
 timeouts stop their process trees. Report command text is never executed implicitly.
 
-Developer validation runs `scripts/test.py` with the same uv invocation. Set
+## Continuation state commands
+
+The orchestrator runs this helper directly; it does not dispatch state maintenance
+to a worker. These commands are the exclusive agent interface to saved `state.json`:
+read through `read`, prepare the changed document, and persist through `write`.
+Use `check` for material consistency. Use the same system Python and uv environment
+as the metric commands:
+
+```text
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" read --report-dir "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" check --report-dir "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" write --report-dir "<report-dir>" --input "<external-temporary-dir>/state-input.json"
+```
+
+`write` also accepts the whole JSON document on stdin when `--input` is omitted.
+Prepare candidates outside the project/package, preserve exact user constraints,
+and use `write` for each update. It validates the schema and internal relationships,
+flushes a temporary sibling in the audit directory and atomically replaces
+`state.json`; it cleans up the sibling when the operation returns. A failure before
+replacement preserves the old file. The orchestrator is the only writer.
+
+`read` validates and returns the saved JSON. `check` additionally verifies linked
+material through the [continuation contract](continuation.md#save-continuation-state)
+and returns `valid` and `issues`, with a nonzero exit code for issues. `write` applies
+these material checks before saving `phase: complete`. Saving unfinished state is
+possible while linked evidence is unavailable, so recovery work can be retained.
+Run `check` before dependent work and obtain fresh host observations on resumption.
+
+## Developer validation
+
+Run `scripts/test.py` with the same uv invocation. Set
 `ARCHITECT_TEST_JAVA` to the JDK launcher and `ARCHITECT_TEST_DETEKT_JAR` to the
 detekt 1.23.8 `all.jar`, both absolute paths outside the package. The mandatory
 single JVM scenario verifies actual parser/metric integration; the remaining

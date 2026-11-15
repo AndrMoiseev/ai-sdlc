@@ -138,7 +138,10 @@ Before completion check:
 - New card links resolve from their new location to the intended audit/source evidence.
 - The report records additions, reused tasks, disagreements and all excluded cards.
 
-Save plan-update progress and links in audit `state.md`. Finish with links to both
+Save plan-update progress and links in audit `state.json` through the
+[continuation contract](continuation.md#save-continuation-state). After a card write,
+record any remaining table-row update; reconcile the actual plan before marking
+that addition finished. Finish with links to both
 `report.md` and `plan/plan.md`, counts of added/known tasks, and material gaps.
 Explicitly notify the user about `observe` and `rejected` counts and link their cards
 or the report section listing every such card. Say when neither status occurred.

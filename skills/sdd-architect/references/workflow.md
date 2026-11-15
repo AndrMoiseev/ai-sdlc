@@ -8,7 +8,7 @@ explorers research or execute exact checks. Product sources remain read-only.
 
 A bare invocation authorizes the complete audit and plan update without extra
 approvals between phases. Read [runtime](runtime.md) before producing artifacts.
-Save phase and primary links in `state.md`; use [continuation](continuation.md) for
+Save phase and primary links in `state.json`; use [continuation](continuation.md) for
 bounded evidence requests or interrupted work. All work refers to current source
 paths and task scope. No phase binds the audit to a source version.
 
@@ -146,12 +146,16 @@ duplicates. All substantive audit work is complete before publishing project sta
 
 **Input:** successful full collection, finished report and updated plan.
 
-The orchestrator verifies that all preceding phases succeeded, records completion
-state, and assigns the final `metrics.py status --collection <report-dir>/collection.json`
+The orchestrator verifies that all preceding phases succeeded, saves
+`phase: publication` and its pending assignment in `state.json`, and assigns
+the final `metrics.py status --collection <report-dir>/collection.json`
 under the checks contract. The command replaces `memory/tech-debt/status.json` and
 renders `status.md` from that JSON structure and the bundled template. Never edit
-the Markdown values manually. This is the last artifact-writing action of a full
-audit; see [publication](quality-indicators.md#publication).
+the Markdown values manually. This is the last audit phase;
+see [publication](quality-indicators.md#publication). After verifying its result and
+the writer's stop, record the accepted handoff and `phase: complete` in `state.json`,
+clear finished work and run the continuation-state check. Interrupted or failed
+publication leaves the audit unfinished.
 
 If any earlier phase fails or is interrupted, stop without touching the previous
 status. A failure during the two final writes requires no rollback, backup or

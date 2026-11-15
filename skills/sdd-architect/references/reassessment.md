@@ -3,7 +3,8 @@
 Use these [explicit focused routes](continuation.md#explicit-focused-routes)
 within the workflow contracts. The orchestrator maintains configuration on a
 run with a checkout, registers exact comparison/acceptance checks, and records
-the phase, basis and unresolved work in `state.md`. Explorers collect evidence;
+the phase, basis and unresolved work in `state.json` through the
+[continuation contract](continuation.md#save-continuation-state). Explorers collect evidence;
 architects diagnose and integrate it. Keep source changes outside this audit.
 
 Use a supplied diff or the requested Git comparison to locate affected code.

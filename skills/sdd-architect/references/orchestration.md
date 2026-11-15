@@ -26,7 +26,7 @@ intact. These are saved workflow records; no additional execution engine is need
 
 | Field | Required content |
 | --- | --- |
-| `report`, `phase`, `role` | Report name; `configuration`, `evidence`, `analysis`, `ranking` or `report`; selected shared role key |
+| `report`, `phase`, `role` | Report name; `configuration`, `evidence`, `analysis`, `ranking`, `report` or `publication`; selected shared role key |
 | `objective`, `constraints` | One bounded outcome and the applicable user decisions, required behavior, scope, language and permission limits, with their sources |
 | `assignment` | `id`, `scope`, `basis`, `read_scope`, `outputs`, `limits`; add the explorer fields below for explorer work |
 | `instructions` | Shared role file and only the current assignment's phase instructions and required reference sections |
@@ -161,6 +161,8 @@ trace, and runtime-observed model/effort. For continuation, reference the origin
 launch and record the actual delivery to that worker. Requested selection and
 observed execution remain separate; unobserved model, effort, tokens or context
 usage are null. Do not infer a numeric context limit from the chosen profile.
+Store the host worker identity in `worker_id`, or null while it is unknown;
+`state.json` host observations must name that same worker.
 
 The worker writes `assignments/<assignment-id>/result.json` and returns its path
 with a concise disposition. The saved result contains:
@@ -169,7 +171,7 @@ with a concise disposition. The saved result contains:
 | --- | --- |
 | `assignment_id`, `report`, `phase`, `role`, `scope` | Identity matching the request; include `kind` for explorer |
 | `basis`, `observed_basis` | Assigned scope/paths and the actual sources/materials inspected; call out substantive gaps |
-| `status`, `completed`, `artifacts` | `completed`, `partial` or `blocked`; finished portion and actual output paths and keyed evidence references |
+| `status`, `completed`, `artifacts` | `completed`, `partial` or `blocked`; finished portion; `artifacts` is an array of primary output file paths, absolute or relative to the audit directory. Keep keyed evidence references in findings. |
 | `findings`, `inspected_scope` | Facts and conclusions with primary references; separate observation, interpretation and proposal |
 | `limitations`, `remaining` | Gaps, assumptions, contradictions, capability limits and bounded next questions with decision consequences |
 | `launch`, `writing_stopped` | Saved launch reference and the worker's statement that writing has stopped |
@@ -186,6 +188,8 @@ links rather than silently dropping them to meet a length preference.
 
 1. Read the saved result and verify artifact existence, output ownership and relevance to the assigned question. Keep the worker result separate from the orchestrator's assessment.
    Completion of a command or a write does not establish semantic readiness.
+   Save the assessment and reason in `state.json`; leave it pending until verified,
+   or record `follow_up` and the next bounded assignment when more work is needed.
 2. Route an incomplete answer or conflicting claim to a bounded follow-up with
    the current basis. Forward primary diagnoses and evidence to the next architect.
    The orchestrator need not read every source body or repeat adequate semantic
@@ -201,6 +205,10 @@ links rather than silently dropping them to meet a length preference.
    Return failures to that author and rerank corrected
    cards. Give the successful result to the fresh final-report architect, which owns `report.md`.
    A generated ranking table is an input to that report, not its completion.
+
+After accepting the result, clear `active_assignment`, save the next step and run
+the continuation-state check before dependent work. Keep the latest host observation
+with its time/source separate from the worker's own `writing_stopped` statement.
 
 Maintain a compact orchestrator context: current objective and constraints,
 phase/assignment identities, basis, active writer, result links and unresolved

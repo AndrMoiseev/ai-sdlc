@@ -181,7 +181,7 @@ contains schema version, time, profile/parameters, scope, tool provenance and ra
 input paths relative to the audit, limitations, project results and module results.
 No collection step writes or clears the live status.
 
-After successful analysis, ranking, report and plan update, run the last command:
+After successful analysis, ranking, report and plan update, run the publication command:
 
 ```text
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --collection "<report-dir>/collection.json"
@@ -192,7 +192,9 @@ plan. It fully replaces `memory/tech-debt/status.json`, then writes `status.md` 
 rendering the same JSON structure through `assets/status.template.md`. JSON stores
 unrounded numbers and denominators; Markdown contains the project/module tables
 and diagnostic summaries. Manual additions to either status file do not survive
-the next successful full audit. Focused work does not publish status.
+the next successful full audit. Focused work does not publish status. After the
+publication result and handoff are verified, the orchestrator records completion
+in `state.json` under the [workflow](workflow.md#phase-7-project-status-and-delivery).
 
 Any earlier failure or interruption leaves both previous files untouched. Prepare
 serialization/rendering before writing, but use plain final writes: no backups,
