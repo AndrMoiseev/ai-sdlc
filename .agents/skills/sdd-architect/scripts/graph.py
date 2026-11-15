@@ -123,7 +123,7 @@ def dependency_layers(edges):
     return result
 
 
-def module_views(package_edges, modules, type_counts):
+def module_views(package_edges, modules, type_counts, policy):
     internal, boundary = Counter(), Counter()
     external = defaultdict(Counter)
     incoming, outgoing = Counter(), Counter()
@@ -153,14 +153,16 @@ def module_views(package_edges, modules, type_counts):
         shares = {owner: weight / declared for owner, weight in sorted(weights.items(), key=lambda p: str(p[0]))
                   if owner is not None and declared}
         ranked = sorted(shares.values(), reverse=True)
-        category = "grey" if not declared or declared / total < .34 else (
-            "orphan" if ranked[0] < .25 else "bridge" if len(ranked) > 1 and ranked[1] >= .33 else "leading_external")
+        thresholds = policy["measurements"]["external_affinity"]
+        category = "grey" if not declared or declared / total < thresholds["minimum_declared_fraction"] else (
+            "orphan" if ranked[0] < thresholds["minimum_leading_share"] else
+            "bridge" if len(ranked) > 1 and ranked[1] >= thresholds["minimum_bridge_share"] else "leading_external")
         affinity[package] = {"external_weight": total, "declared_weight": declared,
                              "declared_fraction": declared / total, "shares": shares, "category": category}
     martin = {}
     for package, counts in sorted(type_counts.items()):
         total, abstract = counts["types"], counts["abstract"]
-        if total < 5 or not incoming[package] + outgoing[package]:
+        if total < policy["measurements"]["martin"]["minimum_types"] or not incoming[package] + outgoing[package]:
             continue
         instability = outgoing[package] / (incoming[package] + outgoing[package])
         abstractness = abstract / total

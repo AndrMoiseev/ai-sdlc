@@ -2,7 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["tomlkit==0.13.3", "ruamel.yaml==0.18.16"]
 # ///
-"""Inspect, plan and apply project SDD settings. JSON in; JSON out."""
+"""Audit project requirements; inspect, plan and apply SDD role settings. JSON in; JSON out."""
 import sys
 sys.dont_write_bytecode = True
 import argparse
@@ -10,11 +10,16 @@ import json
 from pathlib import Path
 from setup_core import apply_plan, inspect_project, make_plan, read_json
 from setup_io import read_request, save_result
+from project_audit import audit_project
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    audit = commands.add_parser("audit", help="Read-only project requirements audit")
+    audit.add_argument("--project-root", required=True)
+    audit.add_argument("--mise-path", help="Absolute path to an existing mise executable outside PATH")
+    audit.add_argument("--output", type=Path, help="Save the audit to a new external JSON file")
     inspect = commands.add_parser("inspect")
     inspect.add_argument("--project-root", required=True)
     inspect.add_argument("--host", required=True, choices=("codex", "claude-code"))
@@ -33,7 +38,9 @@ def main():
     command = args.pop("command")
     output = args.pop("output", None)
     try:
-        if command == "inspect":
+        if command == "audit":
+            result = audit_project(**args)
+        elif command == "inspect":
             if args["available_agents"] is not None:
                 args["available_agents"] = read_json(args["available_agents"])
             result = inspect_project(**args)

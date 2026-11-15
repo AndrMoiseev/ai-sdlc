@@ -1,0 +1,237 @@
+import json
+import math
+import os
+import tempfile
+import unittest
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
+from unittest.mock import patch
+
+from analysis_policy import load_policy
+from collection import collect, map_classes, run
+from design_rule_hierarchy import decoupling_level, hierarchy, structural_metrics
+from history import collect_history, parse_history
+from kotlin_measurements import collect_kotlin
+from project_status import publish_status, render_status
+from quality_indicators import coverage_methods, coverage_summary, duplication, indicators, maintainability, qualify_kotlin
+
+
+POLICY = load_policy()
+PARAMETERS = POLICY["measurements"]["quality_indicators"]
+
+
+def file_row(path, package="example", count=10, complexity=0, texts=None):
+    return {"file": path, "package": package,
+            "tokens": [{"start": index * 2, "end": index * 2 + 1, "type": "ID", "text": token}
+                       for index, token in enumerate(texts if texts is not None else [str(n) for n in range(count)])],
+            "functions": [{"start": 0, "end": count * 2, "cognitive_complexity": complexity,
+                           "nested": False, "signature": "f()", "owner": ""}],
+            "containers": [{"kind": "function", "start": 0, "end": count * 2}]}
+
+
+def kotlin(rows):
+    return {"format": "kotlin-measurements", "version": 1, "complete": True,
+            "tool_version": "1.23.8", "files": rows}
+
+
+def jacoco():
+    return '''<report name="test"><package name="example"><class name="example/A" sourcefilename="A.kt">
+      <method name="f" desc="()I"><counter type="INSTRUCTION" covered="5" missed="5"/>
+      <counter type="BRANCH" covered="2" missed="2"/><counter type="COMPLEXITY" covered="2" missed="2"/></method>
+      <method name="g" desc="()I"><counter type="INSTRUCTION" covered="8" missed="2"/>
+      <counter type="COMPLEXITY" covered="8" missed="2"/></method></class>
+      <sourcefile name="A.kt"><line nr="1" ci="1" mi="2"/><line nr="2" ci="0" mi="2"/></sourcefile>
+      </package></report>'''
+
+
+class QualityTests(unittest.TestCase):
+    def test_explicit_class_mapping_resolves_ambiguous_sourcefile(self):
+        sources = {path: {"package": "example"} for path in ("left/A.kt", "right/A.kt")}
+        with (
+            patch.object(Path, "resolve", autospec=True, side_effect=lambda path: path),
+            patch.object(Path, "is_dir", return_value=True),
+            patch.object(Path, "rglob", return_value=[Path("A.class")]),
+            patch.object(Path, "read_bytes", return_value=b"fixture"),
+            patch("collection.class_source_file", return_value=("example.A", "A.kt")),
+        ):
+            mappings, gaps = map_classes({"class_directories": ["classes"],
+                "class_files": {"example.A": "left/A.kt"}}, Path("repository"), sources)
+        self.assertEqual(mappings, {"example.A": "left/A.kt"})
+        self.assertEqual(gaps, [])
+
+    def test_published_dl_arithmetic_and_union_of_reachability(self):
+        nodes = {str(n) for n in range(100)}
+        for size, expected in ((4, 100), (25, 50), (100, 100 * math.log(5) / math.log(100))):
+            groups = [{"layer": 1, "files": [str(n) for n in range(start, start + size)]} for start in range(0, 100, size)]
+            self.assertAlmostEqual(decoupling_level(nodes, set(), groups)["value"], expected)
+        edges = {("a", "x"), ("a", "y"), ("b", "x")}
+        value = decoupling_level(set("abxy"), edges, [{"layer": 1, "files": ["x", "y"]}, {"layer": 2, "files": ["a"]}, {"layer": 2, "files": ["b"]}])
+        self.assertEqual(value["groups"][0]["affected_lower_files"], 2)
+        self.assertEqual(value["value"], 50)
+
+    def test_hierarchy_partition_layers_recursion_and_isolates(self):
+        # Shared supplier regions and a dense controller module exercise separate DRH steps.
+        nodes = set("abcdefxyz")
+        edges = {("a", "b"), ("a", "c"), ("b", "d"), ("c", "d"), ("a", "d"), ("e", "d"), ("x", "y"), ("y", "x")}
+        groups = hierarchy(nodes, edges)
+        self.assertEqual(sorted(n for group in groups for n in group["files"]), sorted(nodes))
+        owners = {n: index for index, group in enumerate(groups) for n in group["files"]}
+        for left, right in edges:
+            if owners[left] != owners[right]:
+                self.assertGreater(groups[owners[left]]["layer"], groups[owners[right]]["layer"])
+        self.assertEqual(groups, hierarchy(reversed(sorted(nodes)), reversed(sorted(edges))))
+        for node in ("f", "z"):
+            self.assertIn({"files": [node], "layer": max(row["layer"] for row in groups)}, groups)
+        value = structural_metrics(set("abc"), {("a", "b")})
+        self.assertEqual(value["propagation_cost"], 4 / 9)
+        self.assertEqual(value["largest_scc_size"], 1)
+        self.assertEqual(value["visibility_in"]["c"], 1 / 3)
+        self.assertEqual(structural_metrics(set(), set())["decoupling_level"]["status"], "not_applicable")
+
+    def test_weighted_cognitive_and_maximum_container_penalty(self):
+        files = {"A": file_row("A", count=600, complexity=30)}
+        files["A"]["containers"].append({"kind": "class", "start": 0, "end": 1200})
+        files["A"]["functions"].append({"start": 2, "end": 10, "nested": True, "cognitive_complexity": 100})
+        value = maintainability(files, PARAMETERS)
+        self.assertEqual(value["cognitive_score"], 50)
+        self.assertEqual(value["size_score"], 50)
+        self.assertEqual(value["value"], 50)
+        self.assertEqual(value["function_count"], 1)
+        self.assertEqual(value["complex_tokens"], 600)
+        self.assertEqual(value["weighted_p95_cognitive_complexity"], 30)
+        files["A"]["functions"] = []
+        self.assertIsNone(maintainability(files, PARAMETERS)["value"])
+
+    def test_exact_clone_union_overlap_and_cross_module_exposure(self):
+        files = {path: file_row(path, count=120) for path in ("A", "B")}
+        values, boundary = duplication(files, 100, {"A": "left", "B": "right"})
+        self.assertEqual(values["A"]["tokens"], 120)
+        self.assertEqual(boundary["B"]["tokens"], 120)
+        repeated = {"A": file_row("A", count=150, texts=["same"] * 150)}
+        self.assertEqual(duplication(repeated, 100, {"A": "left"})[0]["A"]["tokens"], 0)
+        repeated["A"] = file_row("A", count=200, texts=["same"] * 200)
+        self.assertEqual(duplication(repeated, 100, {"A": "left"})[0]["A"]["tokens"], 200)
+        files["B"]["tokens"][50]["text"] = "renamed"
+        self.assertEqual(duplication(files, 100, {"A": "left", "B": "right"})[0]["A"]["tokens"], 0)
+
+    def test_method_crap_before_aggregation_and_missing_branch_counter(self):
+        sources = {"A.kt": {"package": "example"}}
+        methods, lines = coverage_methods(jacoco(), sources, {"example.A": "A.kt"})
+        value = coverage_summary({"A.kt"}, methods, lines, 1000)
+        self.assertAlmostEqual(value["total_excess"], 2.8)
+        self.assertAlmostEqual(value["total_crap"], 16.8)
+        self.assertAlmostEqual(value["E_CRAP"], 100 * 2.8 / 116)
+        self.assertEqual(value["branch"]["value"], .5)
+        self.assertEqual(value["instruction"]["value"], .65)
+        self.assertEqual(value["line"]["value"], .5)
+        with self.assertRaisesRegex(ValueError, "omits mapped"):
+            coverage_methods(jacoco(), sources, {"example.A": "A.kt", "example.Missing": "A.kt"})
+        with self.assertRaisesRegex(ValueError, "Incomplete"):
+            coverage_methods(jacoco().replace('<counter type="INSTRUCTION" covered="5" missed="5"/>', ""), sources, {"example.A": "A.kt"})
+
+    def test_module_scores_recomputed_and_boundary_cycles_remain_visible(self):
+        files = {"A": file_row("A", "left", 100), "B": file_row("B", "right", 100)}
+        value = indicators(files, {("A", "B"), ("B", "A")}, {"left": ["left"], "right": ["right"]}, [], {}, [], PARAMETERS, date(2026, 11, 15))
+        self.assertLess(value["project"]["U"], value["modules"]["left"]["U"])
+        self.assertEqual(value["project"]["structure"]["cyclic_files"], 2)
+        self.assertEqual(value["modules"]["left"]["boundary"]["outgoing_edges"], 1)
+        self.assertEqual(value["modules"]["left"]["boundary"]["cross_module_duplicate_tokens"], 100)
+        self.assertAlmostEqual(value["project"]["Q"], (value["project"]["D"] * value["project"]["L"] * value["project"]["U"]) ** (1 / 3))
+        with self.assertRaisesRegex(ValueError, "Assign production"):
+            indicators(files, set(), {"left": ["left"]}, [], {}, [], PARAMETERS, date(2026, 11, 15))
+
+    def test_kotlin_population_must_be_complete(self):
+        source = {"A": {"package": "example", "language": ".kt"}}
+        self.assertEqual(set(qualify_kotlin(kotlin([file_row("A")]), source)), {"A"})
+        with self.assertRaisesRegex(ValueError, "exactly once"):
+            qualify_kotlin(kotlin([]), source)
+
+    def test_history_tracks_renames_without_losing_changesets(self):
+        raw = "\x1ebbb\t2026-11-14\0\n1\t0\t\0src/Old.kt\0src/New.kt\0\x1eaaa\t2026-11-13\0\n2\t0\tsrc/Old.kt\0"
+        def command(argv, root, policy):
+            return b"false" if "rev-parse" in argv else raw.encode()
+        payload, argv = collect_history({"source_roots": ["src"]}, Path("."), command, POLICY, {})
+        commits = parse_history(payload.decode())
+        self.assertEqual(set(commits[1]["changes"]), {"src/New.kt"})
+        self.assertEqual(commits[0]["production_files"], 1)
+        self.assertIn("--first-parent", argv)
+        self.assertIn("--find-renames", argv)
+
+
+class PublicationTests(unittest.TestCase):
+    def test_full_audit_publication_and_failure_preserve_previous_status(self):
+        # Risk: final publication can overwrite live status before all source/report gates.
+        # One filesystem scenario verifies the actual filenames and contents; rule variants use mocks.
+        with tempfile.TemporaryDirectory(prefix="architect-publication-") as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "src/A.kt").write_text("package example\nclass A", encoding="utf-8")
+            audit = root / "memory/tech-debt/audits/2026-11-15T12-00-00Z"
+            raw = audit / "raw"
+            raw.mkdir(parents=True)
+            text = {
+                "dependencies": ("jdeps", ""),
+                "complexity": ("detekt-sarif", '{"runs": []}'),
+                "coverage": ("jacoco", jacoco()),
+                "history": ("git-history", json.dumps({"format": "git-history", "first_parent": True, "renames": True,
+                    "since": (datetime.now(timezone.utc).date() - timedelta(days=PARAMETERS["history_days"])).isoformat(),
+                    "until": datetime.now(timezone.utc).date().isoformat(), "commits": []})),
+                "sizes": ("scc", json.dumps([{"Name": "Kotlin", "Files": [{"Location": "src/A.kt", "Lines": 2, "Code": 2, "Comment": 0, "Blank": 0}]}])),
+                "kotlin": ("kotlin-measurements", json.dumps(kotlin([file_row("src/A.kt")]))),
+            }
+            config = {"source_roots": ["src"], "package_prefixes": ["example"],
+                      "class_files": {"example.A": "src/A.kt"}, "modules": {"example": ["example"]}, "artifacts": {}}
+            for name, (format_name, payload) in text.items():
+                path = raw / (name + ".input")
+                path.write_text(payload, encoding="utf-8")
+                config["artifacts"][name] = {"path": path.relative_to(root).as_posix(), "format": format_name, "tool": name, "version": "fixture", "command": [name]}
+            config["artifacts"]["coverage"].update(complete=True, test_result="passed")
+            status = root / "memory/tech-debt/status.json"
+            status.write_text("previous", encoding="utf-8")
+            description = collect(config, audit, repository=root)
+            self.assertEqual(description["status"], "complete")
+            self.assertEqual(status.read_text(), "previous")
+            with self.assertRaisesRegex(ValueError, "Finish the report"):
+                publish_status(audit / "collection.json", root)
+            self.assertEqual(status.read_text(), "previous")
+            (audit / "report.md").write_text("Finished audit", encoding="utf-8")
+            plan = root / "memory/tech-debt/plan"
+            plan.mkdir()
+            (plan / "plan.md").write_text("Finished plan update", encoding="utf-8")
+            publish_status(audit / "collection.json", root)
+            value = json.loads(status.read_text(encoding="utf-8"))
+            self.assertEqual(value["project"]["statistics"]["total"]["Code"], 2)
+            self.assertEqual((status.with_suffix(".md")).read_text(encoding="utf-8"), render_status(value))
+            before = status.read_bytes()
+            del config["artifacts"]["coverage"]
+            with self.assertRaisesRegex(ValueError, "Missing configured sources: coverage"):
+                collect(config, audit.with_name("2026-11-15T13-00-00Z"), repository=root)
+            self.assertEqual(status.read_bytes(), before)
+            self.assertEqual(json.loads((audit.with_name("2026-11-15T13-00-00Z") / "collection.json").read_text())["status"], "blocked")
+
+
+class KotlinCollectorTests(unittest.TestCase):
+    def test_actual_kotlin_parser_and_metric_with_nested_functions(self):
+        # Risk: a mock cannot detect PSI/JVM linkage errors or different token/visitor semantics.
+        # One JVM invocation covers these boundaries; arithmetic combinations stay pure above.
+        java, jar = os.environ.get("ARCHITECT_TEST_JAVA"), os.environ.get("ARCHITECT_TEST_DETEKT_JAR")
+        self.assertTrue(java and jar, "Set ARCHITECT_TEST_JAVA and ARCHITECT_TEST_DETEKT_JAR for the mandatory JVM collector check")
+        with tempfile.TemporaryDirectory(prefix="architect-kotlin-") as directory:
+            root = Path(directory)
+            (root / "A.kt").write_text('''package example
+import kotlin.math.abs
+@Suppress("CognitiveComplexMethod")
+fun zero() = 0
+fun outer(x: Int): Int {
+    fun inner(y: Int) = if (y > 0) y else 0
+    return inner(x)
+}
+class A { fun value() = "λ" }
+''', encoding="utf-8")
+            data, metadata = collect_kotlin({"A.kt": {"language": ".kt"}}, root, run, POLICY, java=java, detekt_jar=jar)
+            row = json.loads(data)["files"][0]
+            self.assertEqual(metadata["version"], "1.23.8")
+            self.assertEqual([f["cognitive_complexity"] for f in row["functions"] if f["signature"] == "zero()"], [0])
+            self.assertEqual(sum(f["nested"] for f in row["functions"]), 1)
+            self.assertTrue(any(container["kind"] == "class" for container in row["containers"]))
+            self.assertFalse(any(token["text"] in {"package", "import"} for token in row["tokens"]))

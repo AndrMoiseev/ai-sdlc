@@ -4,14 +4,39 @@
 Ответ: `{"ok":true,"result":...}` либо `{"ok":false,"code":"sdd_setup","message":...}`
 с ненулевым exit code. JSON читается как UTF-8, включая BOM.
 
-Для `inspect` и `plan` используй `--output <new-file.json>`: полный результат
+Для `audit`, `inspect` и `plan` используй `--output <new-file.json>`: полный результат
 сохраняется без оболочки, stdout содержит `result.output_file`, `sha256` файла
 и `summary` для обсуждения. Создай рабочий каталог заранее, вне проекта и
 коллекций скиллов; существующие файлы и перенаправленные пути отклоняются.
 При повторном чтении/планировании выбирай новое имя файла.
 Без `--output` сохранён прежний интерфейс: stdout содержит полный `result`.
 
-## inspect — чтение настроек
+## audit — проверка требований к проекту
+
+```text
+uv run --locked --script "<skill-root>/scripts/setup.py" audit --project-root "<project>" --output "<workspace>/audit.json"
+```
+
+Команда проверяет требования из [аудита проекта](project-audit.md) в текущей
+системе без установки и изменения настроек. `--host`, каталог агентов и
+`sdd-shared` для неё не нужны. Для существующей mise вне PATH передай
+`--mise-path <absolute-path>`; без него поиск идёт по PATH текущего процесса.
+Запускается только найденный исполняемый файл с `--version`, без shell,
+с таймаутом 10 секунд. Batch-обёртки не поддерживаются: укажи саму mise.
+
+Результат содержит `project_root`, время `checked_at`, `system`, `machine`,
+список `requirements` и общий `compliant`. Для каждого требования указаны `id`,
+`required`, `title`, `status`, `executable`, `version` и `evidence`
+(команда, код выхода, stdout, stderr, ошибка). Статусы: `satisfied`, `not_found`,
+`failed`. Сейчас реализовано обязательное требование `mise`.
+
+`ok: true` и exit code 0 означают, что аудит выполнен, в том числе с найденными
+несоответствиями. Готовность в пределах проверенных требований определяется
+полем `compliant`: оно истинно, только если все обязательные требования имеют
+статус `satisfied`. Ошибка входных данных или сохранения отчёта возвращает
+`ok: false` и ненулевой код. После исправления запускай аудит заново.
+
+## inspect — чтение настроек ролей
 
 ```text
 uv run --locked --script "<skill-root>/scripts/setup.py" inspect --project-root "<project>" --host codex --output "<workspace>/inspection.json"

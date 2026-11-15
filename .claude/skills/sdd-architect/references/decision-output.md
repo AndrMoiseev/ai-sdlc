@@ -1,99 +1,149 @@
 # Recommendation cards and priority
 
-Separate the investigation queue from implementation priority. Metrics and
-thresholds explain why a candidate was examined. Only an established mechanism
-and a feasible transformation justify an effect category.
+Prepare directions and evidence for a human to develop through `sdd-spec`.
+The report lets the reader judge which refactoring direction deserves
+that work; delivery also includes [plan maintenance](tech-debt-plan.md).
+A ready recommendation is sufficiently grounded for that discussion;
+it is not an approved design or an implementation plan.
 
 The fresh integration architect owns this work in the
-[final-report phase](workflow.md#phase-4-final-report). It reconciles bounded
-diagnoses, resolves shared causes and contradictions, and checks dependencies
-across the whole recommendation set before authoring cards.
-
-Use this ordinal profile relative to the current system:
-
-| Category | Modularity | Regression risk reduction | Development speed |
-| --- | --- | --- | --- |
-| substantial | Removes established coordinated changes across independent responsibilities or a significant implementation leak | Closes a significant concrete regression mechanism | Removes recurring coordination/manual work/wait in a representative task |
-| local | Makes one responsibility or contract more independent in a bounded scenario | Closes a local behavioral protection gap | Simplifies a bounded part of the change/check |
-| not_shown | No demonstrated improvement | No demonstrated reduction | No demonstrated acceleration |
-
-Keep `unknown` and `worsening` explicit in unresolved cards. They cannot be ranked
-as ready by substituting not_shown. Mixed modularity gains/losses require a decision
-before assigning one category. Speed claims remain qualitative: no hours saved or
-percent acceleration is calculated from churn, PC or coverage.
+[analysis phase](workflow.md#phase-3-substantive-analysis). Reconcile bounded
+diagnoses, merge shared causes, preserve important non-issues and resolve
+contradictions through primary evidence before writing cards.
 
 ## Author cards
 
-Copy [recommendations.example.json](../assets/recommendations.example.json) to
-`<report-dir>/cards.json` and replace every example. `revision` and `source_state`
-come from the snapshot. Required ready-card fields are:
+Copy [the Markdown template](../assets/recommendations.example.md) to
+`<report-dir>/recommendations/<id>.md` for each card. Write in the user's language.
+Keep the six numbered level-two headings in this order, with substantive content
+under each. The title names the direction. These are the card's six sections:
 
-- `id`, `status: "ready"`, `cause`, `action` with exact source objects and owner.
-- `source_evidence`: inspected snapshot file, declaration including signature, and
-  finding; include relevant consumers, wiring and tests in the narrative evidence.
-- `metric_evidence`: records, values/units, numerators/denominators, aggregation,
-  thresholds, suitability, M/R/S weights and shared provenance groups. Use an
-  empty list only for a source-grounded issue unsupported by a measured signal.
-- `scenario`, `mechanism`, `alternative_explanation` and the observed outcome of
-  checking it; distinguish facts from a hypothetical future scenario. In
-  `mechanism`, retain the diagnostic heuristic's file/section and explain its
-  applicability; the rule reference does not replace inspected source evidence.
-- `baseline`, `chosen_option`, responsibility/contract/dependency before/after,
-  concrete consumers, and why the smaller or no-change option was not selected.
-- `effects` for modularity, regression_risk and development_speed, plus
-  `expected_effect` explaining each category and what is still a prediction.
-- `confidence` separately for observation, diagnosis and effect, with grounds.
-- `steps`, `cost_and_risk`, `acceptance`, `revisit`, `priority_reason`.
-- `feasible: true`, `preserves_required_behavior: true`, `depends_on` IDs.
-- `boundary_change`; if true, `boundary` with packages, responsibility,
-  public_contract, allowed_dependencies, archunit_rule, import_scope,
-  forbidden_dependency and allowed_example.
+| Section | Required content |
+| --- | --- |
+| 1. What is the problem and where does it appear? | The observed construction, affected area, representative change or behavior scenario and consequence. Distinguish real and hypothetical scenarios. |
+| 2. What supports it? | Inspected source paths and declarations, consumers, wiring, tests, relevant history and keyed measurement references. Explain findings, measurement suitability and limitations; distinguish inspected facts from assumptions. |
+| 3. How does the problem arise? | The causal mechanism, existing protection, an alternative explanation and what checking it established. Retain the applicable diagnostic heuristic's file/section. State confidence in the observation and diagnosis separately. |
+| 4. Which direction is proposed? | The intended change in responsibility or dependency, its owner and affected consumers. Use a current/proposed diagram when it clarifies the direction; label the proposal and unresolved choices. Keep future packages, types and API details for `sdd-spec`. |
+| 5. Why is it worth developing? | Expected M/R/C effects and their separate grounds, confidence in those predictions, material refactoring costs, risks and dependencies, and comparison with keeping the current system or a smaller intervention. Explain the priority score and any sensitivity to uncertain effect categories. |
+| 6. What remains for `sdd-spec`? | Open design questions, required behavior and observable signs of achieving the effect. Distinguish questions that could overturn the direction from choices about its implementation. For unresolved or deferred cards, name the next discriminating check or revisit trigger. |
 
-Unresolved cards use `status: "needs_check"`, `question`, `next_action`,
-`decision_if_yes` and `decision_if_no`. Observation/rejection cards use `reason`
-and `revisit`. Keep costs as a supported range or unknown, never invented days.
+Exact references to existing declarations establish the diagnosis. They do not
+require designing future declarations. Describe a desired boundary through its
+responsibility and dependency direction. Detailed contracts, task sequences,
+test implementations and ArchUnit rule/import-scope design belong to the later
+human-involved `sdd-spec` work.
 
-The orchestrator assigns `rank` to explorer through the shared checks contract,
-using the exact cards and snapshot as its basis. Explorer returns command outcomes
-and full artifact references. The integration architect assesses failures and
-changes the cards; a changed input requires new assigned check evidence.
+Investigate an attainable answer that could change the direction. If a material
+question remains, use `needs_check` and explain the question, next check and how
+each outcome affects the recommendation. An implementation choice that does not
+change the direction can remain open in a `ready` card. For `observe` or `rejected`,
+explain the disposition and meaningful revisit condition in the same six sections;
+do not invent a problem or an effect to fill the template.
 
-`rank` checks completeness, source identity, duplicate causes, effect categories,
-boundary acceptance and prerequisite cycles. It sorts ready profiles
-lexicographically M→R→S and emits equal-profile priority groups. It cannot verify
-that the source evidence was honestly inspected or that a semantic diagnosis is
-correct; review those before invoking it.
+In section 2, address measurements by relative JSONL path and complete object key,
+not line number. Explain units, population, relevant counters, thresholds and
+shared provenance where needed to interpret the claim. Cards describe current
+sources without source-version fields. Keep costs as a supported range or unknown.
+Resolve Markdown links from the card's own directory. Measurement addresses in
+metadata remain relative to the collection's report directory.
 
-## Deliver a decision
+## Judge effects and readiness
 
-Show up to five ready recommendations in a table: priority group, concrete change,
-M/R/S effects, basis/confidence, cost/dependencies. Follow with their compact cards,
-the short investigation queue, observations and important rejections. Zero ready
-recommendations is a valid result. Save the finished report as `<report-dir>/report.md`
-and link the snapshot, analysis, diagnosis notes and authored cards with relative
-paths. State the inspected scope and material collection/diagnosis gaps, preserving
-the source references behind each recommendation. The orchestrator replies with
-the report link and a brief summary of the recommendations.
+Judge three effects relative to the current system: modularity (M), regression
+risk reduction (R), and change cost reduction (C). Use the same representative
+change scenarios and horizon when comparing directions.
 
-For every strict priority difference state “above the next because …”, referring
-to the scenario and value order. Equal effects remain tied; explain effort,
-intervention risk, prerequisites and historical exposure as execution considerations.
-Do not assign an artificial scalar score to break a tie.
+| Category | Modularity | Regression risk reduction | Change cost reduction |
+| --- | --- | --- | --- |
+| substantial | Removes established coordinated changes across independent responsibilities or a significant implementation leak | Closes a significant concrete regression mechanism | Removes a material recurring part of agent or human work needed to complete and verify representative changes |
+| local | Makes one responsibility or contract more independent in a bounded scenario | Closes a local behavioral protection gap | Reduces work in a bounded step of a representative change or its verification |
+| not_shown | No demonstrated improvement | No demonstrated reduction | No demonstrated reduction in change costs |
 
-Hotspot position and the number of heuristic deviations are investigation context,
-not an implementation ranking. A stronger type contract may reduce regression
-risk without changing graph/complexity metrics or demonstrating better modularity;
-assign only the effects established for its scenario.
+Change costs cover the whole path to an accepted result: all participating agents'
+tokens for discovery, context reading, implementation, review, checks and retries;
+human clarification, review and correction; and elapsed waiting for checks or
+coordination. Keep tokens, human effort and elapsed time separate, with the benefit
+and any displaced burden visible. A shorter generation step alone is insufficient.
+Use measured telemetry only with a comparable task, acceptance bar, model and
+execution setup. Otherwise explain the predicted mechanism qualitatively; source
+size and graph metrics do not establish token counts or a percentage saving.
+Include supported change frequency in the effect's scale and horizon, not as an
+extra score or multiplier. Show the one-time refactoring cost separately.
 
-Remove duplicate recommendations for the same cause or identify alternatives and
-select one. Preparation tests belong to their parent change. A lower-priority
-prerequisite can execute earlier without acquiring its parent's benefit; the
-script emits execution order separately from priority. If the first five cards
-depend on another card, include that prerequisite explicitly in their preparation
-and link its retained JSON card.
+For each effect, name its distinct consequence. One change can improve all three
+criteria, but one consequence earns points once: less context to read is a cost
+benefit; a separate modularity benefit needs an independently changeable
+responsibility or contract. Shared causes are allowed; duplicated benefits are not.
 
-Save generated Markdown separately from `report.md`; the integration architect
-authors the final report after receiving the ranking result. The Markdown renderer
-is a mechanical starting point. Render lists and citations
-legibly in the user's language, preserving the validated order, all critical
-conditions and uncertainty. Do not replace measured values while editing prose.
+Obtain `recommendations.effect_points` and `recommendations.criterion_weights`
+through the [policy command](analysis-policy.md) for this collection. `rank` sums
+each category's points multiplied by its criterion weight. Keep this declared
+trade-off policy separate from raw metrics, diagnostic weights and measured benefit.
+Retain the profile and rationale alongside the sum. If a plausible category change
+reverses the ordering, state that sensitivity rather than presenting a robust lead.
+
+An effect is a grounded prediction, not a measured outcome of future work.
+Keep `unknown` and `worsening` explicit in unresolved recommendations; do not rank
+them as ready by substituting `not_shown`. Resolve material trade-offs before
+assigning one category. Required product behavior is a readiness condition and
+cannot be compensated by points elsewhere. Several derivatives of one measurement
+do not independently establish an effect.
+
+Before setting `ready`, check that the six sections establish a consequential
+problem, its mechanism, an evidence-backed direction with at least one benefit,
+required behavior and the remaining design questions. A metric threshold alone
+cannot establish readiness. Final design and implementation authorization remain
+with the human-involved follow-up.
+
+## Check and rank
+
+Use [the metadata example](../assets/recommendations.example.json) for
+`<report-dir>/cards.json`. This is a small input to `rank`, not the card text.
+Each entry contains only:
+
+- `id`, `status` and `card`: the Markdown path relative to `cards.json`.
+- `source_evidence`: inspected `file` and `declaration` addresses; their explanation
+  lives in section 2. A ready card needs at least one inspected source reference.
+- `metric_evidence`: relative JSONL `path` and complete `key`; interpretation lives
+  in section 2. An empty list is valid for a source-grounded issue without a metric.
+- `effects`: `modularity`, `regression_risk`, `change_cost_reduction`, required for
+  ready recommendations. The script computes `priority_score`; authors do not supply it.
+
+Keep the explanations and diagrams in the Markdown card. Match every metadata
+address and effect to the card; do not copy narrative fields into JSON.
+
+The orchestrator assigns `rank` to explorer through the shared checks contract.
+It checks metadata, the six-section Markdown structure, current source paths,
+keyed measurement references and effect categories. It sorts ready profiles
+by descending `priority_score` and preserves equal-score priority groups even
+when their effect profiles differ. IDs order display within a tie and give no
+criterion preference. Unresolved cards receive no score. It produces
+no implementation order. The integration architect checks meaning, duplicate
+causes, evidence correspondence and cross-recommendation conflicts; the script
+cannot establish those judgments. Return failures to that author and rerun after
+changes to cards or metadata.
+
+## Deliver the report
+
+Use `recommendations.report_limit` returned by the policy command to bound the ready recommendations table: priority group, direction,
+priority score, M/R/C effects, basis/confidence and material refactoring cost/dependencies. Link each to its
+complete six-section Markdown card. Within this audit keep the full card in one place; use summaries
+and links in `report.md`, followed by the short investigation queue and a linked
+list of every `observe` and `rejected` card with its reason. Zero ready recommendations
+is a valid result. The configured display limit does not limit plan admission:
+all new `ready` and `needs_check` cards are eligible.
+
+State the inspected scope and material gaps. Link the collection description,
+specific JSONL records, diagnoses and ranking with paths relative to the report.
+For every strict priority difference explain “above the next because …” through
+the scenario, distinct effects and their summed points. Equal scores stay tied.
+Refactoring costs and dependencies inform the human's next choice; they are not
+a task sequence or a hidden tie-breaker.
+
+Save generated ranking Markdown separately from `report.md`. A fresh architect
+authors the final report, preserving validated order and uncertainty. The report
+and linked cards provide the evidence for subsequent `sdd-spec` discussion;
+completing the audit does not start that workflow. The orchestrator then updates
+the plan under its separate contract and returns both links, additions/known tasks,
+limitations and explicit notification of the excluded statuses. Audit ranking does
+not overwrite the user's current assessment or priority in the plan.

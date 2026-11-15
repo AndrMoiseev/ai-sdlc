@@ -10,6 +10,8 @@ from collections import Counter, defaultdict
 from pathlib import PurePosixPath
 from urllib.parse import unquote, urlparse
 
+from parameters import parameter_count
+
 RULES = {
     "CyclomaticComplexMethod": r"Cyclomatic Complexity \(complexity: (\d+)\)",
     "CognitiveComplexMethod": r"Cognitive Complexity \(complexity: (\d+)\)",
@@ -27,14 +29,14 @@ def relative_path(value, root):
         if re.match(r"^/[A-Za-z]:/", value):
             value = value[1:]
     value, root = value.replace("\\", "/"), str(root).replace("\\", "/").rstrip("/")
-    # A supplied original root allows imported reports from a different computer.
+    # The caller resolves the configured project-relative source root at runtime.
     if value == root:
         raise ValueError("Expected a source file, got the repository root")
     if value.startswith(root + "/"):
         value = value[len(root) + 1:]
     path = PurePosixPath(value)
     if path.is_absolute() or re.match(r"^[A-Za-z]:", value) or ".." in path.parts:
-        raise ValueError(f"Unmapped source path {value!r}; set the artifact's source_root")
+        raise ValueError(f"Unmapped source path {value!r}; supply project-relative report paths or the current checkout's paths")
     return str(path)
 
 
@@ -80,8 +82,9 @@ def detekt(text, source_root):
             seen.add(identity)
             pattern = RULES[rule]
             match = re.search(pattern, message) if pattern else None
+            value = parameter_count(message) if rule == "LongParameterList" else int(match[1]) if match else None
             findings.append({"rule": rule, "file": path, "region": region,
-                             "declaration": message, "value": int(match[1]) if match else None,
+                             "declaration": message, "value": value,
                              "suppressed": bool(row.get("suppressions")),
                              "record": f"complexity:runs/{run_index}/results/{index}"})
     return findings
@@ -92,6 +95,8 @@ def sizes(text, source_root):
     for language in json.loads(text):
         for row in language.get("Files", []):
             path = relative_path(row["Location"], source_root)
+            if path in result:
+                raise ValueError(f"Duplicate scc file: {path}")
             result[path] = {key: int(row[key]) for key in ("Lines", "Code", "Comment", "Blank")}
             if any(value < 0 for value in result[path].values()):
                 raise ValueError(f"Negative scc count for {path}")
@@ -147,8 +152,8 @@ def source_description(text, language):
     clean = re.sub(r'"""[\s\S]*?"""|"(?:\\.|[^"\\])*"|/\*[\s\S]*?\*/|//[^\n]*', " ", text)
     package = re.search(r"(?m)^\s*package\s+([\w.]+)", clean)
     declarations = re.findall(r"\b(?:(abstract)\s+)?(class|interface|object)\s+\w+", clean) if language == ".kt" else []
-    return {"package": package[1] if package else "", "types": len(declarations),
-            "abstract": sum(bool(explicit) or kind == "interface" for explicit, kind in declarations)}
+    return {"package": package[1] if package else "", "types": len(declarations) if language == ".kt" else None,
+            "abstract": sum(bool(explicit) or kind == "interface" for explicit, kind in declarations) if language == ".kt" else None}
 
 
 def class_source_file(data):
@@ -201,5 +206,5 @@ def class_source_file(data):
 def type_counts(sources):
     counts = defaultdict(Counter)
     for source in sources.values():
-        counts[source["package"]].update({key: source[key] for key in ("types", "abstract")})
+        counts[source["package"]].update({key: source[key] for key in ("types", "abstract") if source.get(key) is not None})
     return dict(counts)

@@ -1,116 +1,137 @@
-"""Validate authored judgments and order them lexicographically, without a score."""
+"""Check six-section Markdown recommendations and rank their effect metadata."""
 
-EFFECTS = {"substantial": 2, "local": 1, "not_shown": 0}
+import re
+from fractions import Fraction
+from pathlib import PurePosixPath
+
+CRITERIA = ("modularity", "regression_risk", "change_cost_reduction")
 STATUSES = {"ready", "needs_check", "observe", "rejected"}
-FIELDS = ("action", "scenario", "mechanism", "alternative_explanation", "chosen_option", "baseline",
-          "expected_effect", "steps", "cost_and_risk", "acceptance", "revisit", "priority_reason")
+FIELDS = {"id", "status", "card", "source_evidence", "metric_evidence", "effects"}
 
 
-def rank(document, snapshot):
+def validate_card(text):
+    """Check the document shape; evidence and design judgments remain with the author."""
+    title, sections, fence = None, [], None
+    for line in text.splitlines():
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if fence:
+            if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not marker[2].strip():
+                fence = None
+            elif sections and line.strip():
+                sections[-1][1] = True
+            continue
+        if marker:
+            fence = marker[1]
+            continue
+        heading = re.match(r"^ {0,3}##\s+(.+?)\s*#*\s*$", line)
+        if heading:
+            number = re.match(r"([1-6])\.\s+\S", heading[1])
+            if not number:
+                raise ValueError("Card needs exactly six numbered level-two sections (1. through 6.)")
+            sections.append([int(number[1]), False])
+        elif re.match(r"^ {0,3}#\s+\S", line):
+            if title is not None or sections:
+                raise ValueError("Card needs one title before its six sections")
+            title = line.strip()[2:].strip()
+        elif sections and line.strip() and not line.lstrip().startswith(("<!--", "#")):
+            sections[-1][1] = True
+    if not title or [number for number, _ in sections] != list(range(1, 7)):
+        raise ValueError("Card needs a title and six numbered sections in order (1. through 6.)")
+    if fence or not all(content for _, content in sections):
+        raise ValueError("Card has an unclosed fence or an empty section")
+    return title
+
+
+def rank(document, sources, resolve_metric=None, read_card=None, *, policy):
+    scoring = policy["recommendations"]
+    effect_points = scoring["effect_points"]
     cards = document["recommendations"]
-    ids, causes, ready = set(), {}, {}
+    ids, paths, ready, checked = set(), set(), [], []
     for card in cards:
         identity, status = card.get("id"), card.get("status")
         if not isinstance(identity, str) or not identity or identity in ids:
             raise ValueError("Recommendation IDs must be unique nonempty strings")
         ids.add(identity)
+        if set(card) - FIELDS:
+            raise ValueError(f"{identity}: keep narrative and design fields in the Markdown card, not ranking metadata")
         if status not in STATUSES:
             raise ValueError(f"{identity}: invalid status {status}")
-        if status != "ready":
-            required = ("question", "next_action", "decision_if_yes", "decision_if_no") if status == "needs_check" else ("reason", "revisit")
-            if any(not card.get(field) for field in required):
-                raise ValueError(f"{identity}: {status} needs {', '.join(required)}")
-            continue
-        if not snapshot.get("revision") or not snapshot.get("source_files"):
-            raise ValueError(f"{identity}: ready requires inspected sources at a known revision")
-        if document.get("revision") != snapshot["revision"] or document.get("source_state") != snapshot["source_state"]:
-            raise ValueError("Recommendation basis does not match the snapshot")
-        if any(not card.get(field) for field in FIELDS):
-            raise ValueError(f"{identity}: ready requires all recommendation fields: {', '.join(FIELDS)}")
-        cause = card.get("cause")
-        if not isinstance(cause, str) or not cause:
-            raise ValueError(f"{identity}: provide the single cause addressed")
-        if cause in causes:
-            raise ValueError(f"{identity}: duplicates cause of {causes[cause]}; merge or select one alternative")
-        causes[cause] = identity
-        if card.get("feasible") is not True or card.get("preserves_required_behavior") is not True:
-            raise ValueError(f"{identity}: resolve feasibility and required behavior before ranking")
-        if not isinstance(card.get("metric_evidence"), list) or not isinstance(card.get("boundary_change"), bool):
-            raise ValueError(f"{identity}: provide metric_evidence and an explicit boundary_change decision")
-        if not isinstance(card.get("depends_on"), list) or not all(isinstance(item, str) for item in card["depends_on"]):
-            raise ValueError(f"{identity}: depends_on must be an explicit list of recommendation IDs")
-        if set(card.get("confidence", {})) != {"observation", "diagnosis", "effect"} or not all(card["confidence"].values()):
-            raise ValueError(f"{identity}: distinguish confidence in observation, diagnosis and effect")
-        evidence = card.get("source_evidence", [])
-        if not evidence:
-            raise ValueError(f"{identity}: cite inspected declarations and consumers")
+        path = card.get("card")
+        if (not isinstance(path, str) or not path or "\\" in path or ":" in path
+                or PurePosixPath(path).is_absolute() or ".." in PurePosixPath(path).parts
+                or PurePosixPath(path).suffix != ".md"):
+            raise ValueError(f"{identity}: card must be a relative Markdown path inside the report")
+        if path in paths:
+            raise ValueError(f"{identity}: each recommendation needs its own Markdown card")
+        paths.add(path)
+        if read_card is None:
+            raise ValueError(f"{identity}: provide a Markdown card reader")
+        value = {**card, "title": validate_card(read_card(path))}
+        evidence, metrics = card.get("source_evidence"), card.get("metric_evidence")
+        if not isinstance(evidence, list) or not isinstance(metrics, list):
+            raise ValueError(f"{identity}: provide source_evidence and metric_evidence address lists")
+        if status == "ready" and (not sources or not evidence):
+            raise ValueError(f"{identity}: ready requires inspected sources")
         for reference in evidence:
-            if reference.get("file") not in snapshot["source_files"] or not reference.get("declaration") or not reference.get("finding"):
-                raise ValueError(f"{identity}: source evidence must identify a snapshot file, declaration and finding")
-        profile = card.get("effects", {})
-        if set(profile) != {"modularity", "regression_risk", "development_speed"} or any(value not in EFFECTS for value in profile.values()):
-            raise ValueError(f"{identity}: unknown or worsening effect needs a decision check before ready ranking")
-        if not any(value != "not_shown" for value in profile.values()):
-            raise ValueError(f"{identity}: no demonstrated benefit; observe or reject")
-        if card.get("boundary_change"):
-            boundary = card.get("boundary", {})
-            required = {"packages", "responsibility", "public_contract", "allowed_dependencies",
-                        "archunit_rule", "import_scope", "forbidden_dependency", "allowed_example"}
-            if not required.issubset(boundary) or not all(boundary[key] for key in required):
-                raise ValueError(f"{identity}: boundary change needs package, contract and ArchUnit acceptance details")
-        ready[identity] = card
-    for identity, card in ready.items():
-        if any(dependency not in ready for dependency in card.get("depends_on", [])):
-            raise ValueError(f"{identity}: prerequisite is absent or not ready")
-    def profile(card):
-        return tuple(EFFECTS[card["effects"][key]] for key in ("modularity", "regression_risk", "development_speed"))
-    ordered = sorted(ready.values(), key=lambda card: (tuple(-value for value in profile(card)), card["id"]))
+            if (not isinstance(reference, dict) or set(reference) != {"file", "declaration"}
+                    or reference["file"] not in sources or not reference["declaration"]):
+                raise ValueError(f"{identity}: source evidence must address a current file and declaration")
+        for reference in metrics:
+            if not isinstance(reference, dict) or set(reference) != {"path", "key"} or resolve_metric is None:
+                raise ValueError(f"{identity}: metric evidence needs a JSONL path, object key and resolver")
+            resolve_metric(reference)
+        profile = card.get("effects")
+        if status == "ready" or profile is not None:
+            allowed = set(effect_points) if status == "ready" else set(effect_points) | {"unknown", "worsening"}
+            if (not isinstance(profile, dict) or set(profile) != set(CRITERIA)
+                    or any(effect not in allowed for effect in profile.values())):
+                raise ValueError(f"{identity}: invalid effect profile; unknown or worsening effects cannot be ready")
+        if status == "ready":
+            if not any(effect != "not_shown" for effect in profile.values()):
+                raise ValueError(f"{identity}: no grounded benefit; observe or reject")
+            # Decimal configuration weights must preserve mathematically equal sums.
+            score = sum(effect_points[profile[key]] * Fraction(str(scoring["criterion_weights"][key])) for key in CRITERIA)
+            value["priority_score"] = score.numerator if score.denominator == 1 else float(score)
+            ready.append(value)
+        checked.append(value)
+    ordered = sorted(ready, key=lambda card: (-card["priority_score"], card["id"]))
     groups, previous = [], None
     for card in ordered:
-        current = profile(card)
+        current = card["priority_score"]
         if current != previous:
             groups.append([])
             previous = current
         groups[-1].append(card["id"])
-    execution, remaining = [], list(ordered)
-    while remaining:
-        available = [card for card in remaining if set(card.get("depends_on", [])) <= set(execution)]
-        if not available:
-            raise ValueError("Cyclic recommendation prerequisites; revise the decomposition")
-        card = available[0]
-        execution.append(card["id"])
-        remaining.remove(card)
-    return {**document, "priority_groups": groups, "execution_order": execution,
-            "recommendations": ordered + [card for card in cards if card["status"] != "ready"],
-            "ordering": "modularity, regression_risk, development_speed; equal profiles remain tied"}
+    return {"priority_groups": groups, "report_limit": scoring["report_limit"],
+            "effect_points": effect_points, "criterion_weights": scoring["criterion_weights"],
+            "recommendations": ordered + [card for card in checked if card["status"] != "ready"],
+            "ordering": "sum of effect_points[category] * criterion_weights[criterion]; equal scores remain tied"}
 
 
 def markdown(document):
-    lines = ["# Refactoring recommendations", "", f"Revision: `{document.get('revision')}`.", "",
-             "| Priority | Change | Modularity | Regression risk | Development speed |",
-             "| --- | --- | --- | --- | --- |"]
+    lines = ["# Refactoring directions for sdd-spec", "",
+             "| Priority | Score | Recommendation | Modularity | Regression risk reduction | Change cost reduction |",
+             "| --- | --- | --- | --- | --- | --- |"]
     priorities = {identity: index for index, group in enumerate(document["priority_groups"], 1) for identity in group}
     def cell(value):
         return str(value).replace("|", "\\|").replace("\n", " ")
+    def link(card):
+        title = cell(card["title"]).replace("[", "\\[").replace("]", "\\]")
+        return f"[{title}](<{card['card']}>)"
     ready = [card for card in document["recommendations"] if card["status"] == "ready"]
-    for card in ready[:5]:
+    limit = document["report_limit"]
+    for card in ready[:limit]:
         effects = card["effects"]
-        lines.append("| " + " | ".join(cell(value) for value in (priorities[card["id"]], card["action"],
-                     effects["modularity"], effects["regression_risk"], effects["development_speed"])) + " |")
+        lines.append("| " + " | ".join(str(value) for value in (priorities[card["id"]], card["priority_score"], link(card),
+                     effects["modularity"], effects["regression_risk"], effects["change_cost_reduction"])) + " |")
     if not ready:
-        lines.extend(["", "No implementation-ready recommendations are established."])
-    for card in ready[:5]:
-        lines.extend(["", f"## {card['id']}: {card['action']}", ""])
-        for field in (*FIELDS[1:], "source_evidence", "metric_evidence", "confidence", "boundary", "depends_on"):
-            if field in card:
-                lines.extend([f"**{field.replace('_', ' ')}**", "", str(card[field]), ""])
+        lines.extend(["", "No evidence-backed directions are ready for sdd-spec discussion."])
     for status in ("needs_check", "observe", "rejected"):
         selected = [card for card in document["recommendations"] if card["status"] == status]
         if selected:
             lines.extend(["", "## " + status.replace("_", " "), ""])
-            for card in selected:
-                lines.extend([f"- **{card['id']}**: " + "; ".join(f"{key}: {value}" for key, value in card.items() if key not in {"id", "status"})])
-    if len(ready) > 5:
-        lines.extend(["", "Further ready recommendations are retained in the JSON: " + ", ".join(card["id"] for card in ready[5:])])
-    lines.extend(["", "Execution order (including prerequisites): " + ", ".join(document["execution_order"]), ""])
-    return "\n".join(lines)
+            lines.extend("- " + link(card) for card in selected)
+    if len(ready) > limit:
+        lines.extend(["", "## Further directions", ""])
+        lines.extend("- " + link(card) for card in ready[limit:])
+    return "\n".join(lines) + "\n"

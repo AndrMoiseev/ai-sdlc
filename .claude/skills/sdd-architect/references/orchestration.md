@@ -1,13 +1,23 @@
 # Assignments and context
 
 Read this reference before dispatch, continuation or handoff. The orchestrator
-executes the [four-phase workflow](workflow.md); shared
+executes the [workflow](workflow.md); shared
 [architect](../../sdd-shared/agents/architect.md) and
 [explorer](../../sdd-shared/agents/explorer.md) instructions define the work and
 its quality. Use the existing `sdd-spec.architect` and `sdd-spec.explorer` selection
 keys directly, without loading the `sdd-spec` skill or its authoring workflow.
 Run one assignment at a time. The orchestrator owns dispatch and transitions;
 workers request additional research, checks or decisions through it.
+Project settings remain read-only for the orchestrator and all workers.
+Their modification belongs to user-initiated `sdd-setup`, never to audit-time approval.
+Before assigning work that depends on thresholds, weights or budgets, obtain the
+[analysis policy](analysis-policy.md) through `metrics.py policy`. Pass its output
+and the collection path to the worker; use saved audit values after collection.
+Workers must not read defaults or merge project overrides to obtain actual values.
+The orchestrator alone maintains the [tech debt plan](tech-debt-plan.md). Workers
+receive relevant current task cards and user decisions as read-only inputs; keep
+their write scopes inside the assigned audit. Reread user-edited plan entries before
+the orchestrator applies additions or a requested plan change.
 
 ## Save the request before dispatch
 
@@ -18,7 +28,7 @@ intact. These are saved workflow records; no additional execution engine is need
 
 | Field | Required content |
 | --- | --- |
-| `report`, `phase`, `role` | Report name; `configuration`, `evidence`, `analysis` or `report`; selected shared role key |
+| `report`, `phase`, `role` | Report name; `configuration`, `evidence`, `analysis`, `ranking`, `report` or `publication`; selected shared role key |
 | `objective`, `constraints` | One bounded outcome and the applicable user decisions, required behavior, scope, language and permission limits, with their sources |
 | `assignment` | `id`, `scope`, `basis`, `read_scope`, `outputs`, `limits`; add the explorer fields below for explorer work |
 | `instructions` | Shared role file and only the current assignment's phase instructions and required reference sections |
@@ -47,40 +57,30 @@ worker receives the role and bounded request, not the parent conversation or the
 previous worker's transcript. The orchestrator keeps the workflow map; later-phase
 instructions enter a worker's context only when that phase is assigned.
 
-## Bind the actual inputs
+## Describe the current inputs
 
-Record these in `assignment.basis`, using null with a reason for unavailable
-observations. Paths alone do not identify an input version.
+Use a nonempty `assignment.basis` containing the current scope and source,
+configuration and material paths. The shared Explorer contract leaves the contents
+of this object to the calling skill. For this audit, use:
 
-| Basis member | Evidence to retain |
+| Basis member | Content |
 | --- | --- |
-| Source | Established project path, observed `revision`, `dirty`, `source_state`, and the identity artifact when captured |
-| Configuration | Exact active configuration path and SHA-256; retained copy or immutable snapshot member with the same content |
-| Collection plan | `collection-plan.md`, exact registry revision and retained content identity used by this assignment |
-| Primary artifacts | Snapshot, analysis, shortlist/group, diagnoses, cards or previous result actually used, each with a path and content identity |
-| Decisions and constraints | Authoritative request or decision references and the exact conditions affecting this assignment |
+| `source_paths` | Current checkout and relevant source directories/declarations; empty for source-free work |
+| `configuration` | Link to this audit's `collection-input.json`; paths inside its contents are project-relative |
+| `collection_plan` | Collection-plan path; exact command-registry revision belongs to checks assignments |
+| `artifacts` | Collection description, candidate groups/queue and metric JSONL paths/keys, shortlist, diagnoses, audit cards or existing plan tasks needed for this task |
+| `decisions` | Authoritative requests, decisions and exact conditions affecting the task |
 
-Before identity capture, use the inspected configuration/source references and
-their observed versions; leave uncaptured identity fields null. Retain mutable
-inputs needed to reconstruct a request in its `inputs/` directory, including a
-configuration or cards version that will later change. Reuse an existing retained
-version rather than duplicating it. Keep source bodies at their primary locations;
-record paths, declarations and checked versions instead of copying the repository.
+Check that inputs exist and answer the assigned question. Source review uses the
+current declarations and consumers. No captured source identity, content hash,
+checksum, immutable input copy or dispatch/return version comparison is required.
+Missing or different version identifiers cannot block writing or reduce readiness.
+Retain actual substantive limitations, missing files and contradictory observations.
 
-At dispatch and return, compare the current basis with the saved request. Source
-review must match the snapshot's `source_state` and relevant input provenance.
-A known mismatch blocks dependent claims and writing until the orchestrator
-reconciles the basis and obtains current evidence. Preserve independently usable
-evidence and explain which conclusions are affected. Unknown identity limits a
-claim; it is neither a verified match nor a fabricated mismatch. Changed source
-scope or configuration requires explicit reconciliation even when an earlier
-fingerprint still matches: a fingerprint cannot prove that omitted inputs were read.
-
-Separate expected output changes from changed inputs. A new diagnosis is an output;
-changed sources or user decisions can invalidate its basis. Report-file writes may
-change Git's `dirty` flag without changing measured sources. For source-free work,
-retain the inputs' stated provenance and unknowns; the destination directory does
-not supply a source identity for imported reports.
+A new diagnosis is an output; a changed task or substantive contradiction can require
+a new bounded assignment. Recording a report in a later commit supplies ordinary
+repository history only. For source-free work, retain supplied population and tool
+provenance without attaching the destination repository's identity to those inputs.
 
 ## Register checks in the collection plan
 
@@ -91,22 +91,25 @@ required environment and tools, input basis, dependency IDs, output/log paths,
 timeout and applicable whole-suite deadline. Resolve placeholders before assigning
 checks. Retain the version used by each request when the plan changes.
 
-Use `stage: evidence` for identity, existing build/report tasks, `collect` and
-`analyze`; use `stage: report` for `rank`. Add another explicit stage only for an
+Use `stage: evidence` for existing build/report tasks and `collect`;
+use `stage: ranking` for `rank`, and `stage: publication` for the final `status`
+command after report and plan completion. Add another explicit stage only for an
 authorized focused check. Resolve each requested ID against the saved revision;
 all IDs belong to the assigned stage. Execute them in dependency order, requiring
 each prerequisite to succeed before its dependent command starts. An
 assignment identifies the exact set; the explorer executes it without substituting
 commands or dropping checks. A later configuration/provenance update forms a new
 basis for the dependent batch. When a prerequisite fails, skip its dependent
-checks and report each unexecuted check with the reason. Continue independent
+checks and report each unexecuted check with the reason. In a full audit a required
+source failure blocks further work and preserves the previous project status;
+explain the prerequisite to the user. In focused work, continue independent
 assigned checks whose prerequisites, basis and limits still hold. If the batch
 cannot continue, return its partial result; the orchestrator assigns the remaining
 independent checks under a current request without repeating verified successful
-commands. A failed measurement family does not close unrelated families.
+commands. Do not switch a blocked full audit to focused mode without a user request.
 
 Research may propose commands and inspect their configuration. Builds, tests,
-linters, identity capture and metric commands run only under a checks assignment.
+linters and metric commands run only under a checks assignment.
 The orchestrator registers a proposed follow-up before dispatching it. Preserve
 existing permission and time limits across retries or replacement workers.
 
@@ -122,10 +125,11 @@ the checks result links them instead of returning full logs in chat.
 | Assignment | Context and permitted continuation |
 | --- | --- |
 | Configuration research | Fresh explorer; bounded follow-up may continue only this research on its updated request |
-| Evidence collection | Fresh explorer, separate from configuration research; dependent batches may continue within this phase after basis revalidation |
-| Analysis shortlist | Fresh architect with qualified measurements and scope; save the shortlist before group diagnosis |
+| Evidence collection | Fresh explorer, separate from configuration research; dependent batches may continue within this phase with current task paths and scope |
+| Analysis shortlist | Fresh architect with computed candidate groups/queue, qualified measurements and scope; explain shortlist adjustments before group diagnosis |
 | One related candidate group | Fresh architect for each group, including a group selected by the shortlist author; allow bounded owner, consumer, wiring and test investigation |
-| Report integration | Fresh architect with the saved shortlist and group diagnoses; continue this author after assigned checks return current evidence |
+| Recommendation integration | Fresh architect in the analysis phase with the shortlist and group diagnoses; author cards |
+| Final report | Fresh architect with diagnoses, cards and validated ranking; author report.md |
 | Ranking or further checks | Separate explorer checks assignment; the integrating architect requests it through the orchestrator and suspends dependent writing |
 
 A group is the connected problem and its causal question, not an arbitrary file
@@ -159,6 +163,8 @@ trace, and runtime-observed model/effort. For continuation, reference the origin
 launch and record the actual delivery to that worker. Requested selection and
 observed execution remain separate; unobserved model, effort, tokens or context
 usage are null. Do not infer a numeric context limit from the chosen profile.
+Store the host worker identity in `worker_id`, or null while it is unknown;
+`state.json` host observations must name that same worker.
 
 The worker writes `assignments/<assignment-id>/result.json` and returns its path
 with a concise disposition. The saved result contains:
@@ -166,8 +172,8 @@ with a concise disposition. The saved result contains:
 | Field | Required content |
 | --- | --- |
 | `assignment_id`, `report`, `phase`, `role`, `scope` | Identity matching the request; include `kind` for explorer |
-| `basis`, `observed_basis` | Assigned inputs and the versions actually inspected; call out mismatches |
-| `status`, `completed`, `artifacts` | `completed`, `partial` or `blocked`; finished portion and actual output paths/content identities |
+| `basis`, `observed_basis` | Assigned scope/paths and the actual sources/materials inspected; call out substantive gaps |
+| `status`, `completed`, `artifacts` | `completed`, `partial` or `blocked`; finished portion; `artifacts` is an array of primary output file paths, absolute or relative to the audit directory. Keep keyed evidence references in findings. |
 | `findings`, `inspected_scope` | Facts and conclusions with primary references; separate observation, interpretation and proposal |
 | `limitations`, `remaining` | Gaps, assumptions, contradictions, capability limits and bounded next questions with decision consequences |
 | `launch`, `writing_stopped` | Saved launch reference and the worker's statement that writing has stopped |
@@ -182,9 +188,10 @@ links rather than silently dropping them to meet a length preference.
 
 ## Accept the handoff
 
-1. Read the saved result and verify artifact existence, output ownership and input
-   freshness. Keep the worker result separate from the orchestrator's assessment.
+1. Read the saved result and verify artifact existence, output ownership and relevance to the assigned question. Keep the worker result separate from the orchestrator's assessment.
    Completion of a command or a write does not establish semantic readiness.
+   Save the assessment and reason in `state.json`; leave it pending until verified,
+   or record `follow_up` and the next bounded assignment when more work is needed.
 2. Route an incomplete answer or conflicting claim to a bounded follow-up with
    the current basis. Forward primary diagnoses and evidence to the next architect.
    The orchestrator need not read every source body or repeat adequate semantic
@@ -194,11 +201,16 @@ links rather than silently dropping them to meet a length preference.
    unknown writer state blocks a successor. Preserve the completed portion and
    record the next writer's exact outputs under the
    [single-writer contract](../../sdd-shared/references/coordination.md#writing-and-handoff).
-4. During report validation, freeze the completed cards version used by `rank`.
+4. During ranking, keep the card author stopped while explorer reads the completed cards.
    Explorer owns `ranked-<n>.json` and optional `ranked-<n>.md`; the integrating
-   architect owns `cards.json` and `report.md`. Return the exact ranking result to
-   that architect, revalidate any corrected cards, then finish the semantic report.
+   architect owns `recommendations/<id>.md` and the compact `cards.json` metadata.
+   Return failures to that author and rerank corrected
+   cards. Give the successful result to the fresh final-report architect, which owns `report.md`.
    A generated ranking table is an input to that report, not its completion.
+
+After accepting the result, clear `active_assignment`, save the next step and run
+the continuation-state check before dependent work. Keep the latest host observation
+with its time/source separate from the worker's own `writing_stopped` statement.
 
 Maintain a compact orchestrator context: current objective and constraints,
 phase/assignment identities, basis, active writer, result links and unresolved

@@ -2,186 +2,176 @@
 
 ## Collection in the default full cycle
 
-Use this reference in the configuration and evidence phases of the
-[four-phase workflow](workflow.md). Explorer researches the current checkout and
-proposes inputs from its build and source tree; the orchestrator saves the
-configuration and plan. Fresh explorer executes the assigned measurement commands
-through the checks contract in the evidence phase.
+Use this reference during configuration and collection in the [workflow](workflow.md).
+Explorer researches the current checkout; the orchestrator saves this audit's configuration
+and registers exact build/report commands. A fresh explorer executes the assigned
+checks. `collect` then retains raw reports, normalizes each source once, computes
+all derived measurements and prepares keyed selections, preliminary candidate groups
+and their investigation queue before architects begin
+substantive analysis. Read individual JSONL files through `collection.json`.
 
-Inventory all five measurement families: dependencies, Git history,
-source size, complexity and coverage. Obtain each applicable family with the
-available tools and existing project tasks, recording a concrete gap for any
-unavailable family. Reuse a report only after checking its scope and source identity.
-Create the current snapshot with `collect`, then continue with `analyze`, source
-diagnosis and recommendation delivery. The collection plan and raw reports are
-intermediate results of this route.
+Inventory dependencies, history, scc statistics, Kotlin tokens/functions, detekt
+diagnostics and JaCoCo coverage. All six sources are mandatory for a full audit.
+Missing, failed or incomplete input blocks it. Explain the prerequisite and propose
+resolving it first; preserve the previous status. Only explicitly focused work may
+retain partial inputs under its narrower contract.
 
 ## Establish the scope
 
 Read the project's build scripts, architecture decisions, package conventions,
-ArchUnit checks and domain vocabulary. Propose production Kotlin/Java source roots,
-compiled class directories, variants, test tasks and exclusions from that evidence.
-Android and Multiplatform require an explicit JVM variant/source-set decision;
-do not silently treat native or common sources as a JVM bytecode graph.
+ArchUnit checks and vocabulary. Choose production Kotlin/Java source roots,
+compiled directories, variants, test tasks and exclusions from that evidence.
+Android and Multiplatform require an explicit JVM variant/source-set choice.
+Keep test/generated code separate from the measured graph; inspect generated
+wiring when it explains behavior. Assign every measured Kotlin package to a declared
+architectural module before a full audit; ambiguous or missing ownership blocks it.
+Gradle layout establishes build scope, not architectural responsibility.
 
-Keep test/generated code separate. Include generated wiring in code investigation
-when it explains runtime behavior, even if it is excluded from the measured graph.
-An undeclared package stays unassigned; it is not a shared `legacy` module.
-Infer neither package responsibilities nor architectural modules from Gradle layout.
+## Prepare audit configuration
 
-## Maintain project configuration
+The orchestrator owns `<report-dir>/collection-input.json` for every route.
+Explorer proposes its contents. Project settings, including `.sdd/` and build
+configuration, remain read-only for both roles. Their modification belongs to
+user-initiated `sdd-setup`, even when the user would approve an audit-time edit.
+If setup lacks an option, report that limitation without adding an audit workaround.
 
-Use `<project-root>/.sdd/architect/collection.json` as the project's collection
-configuration. The orchestrator applies this maintenance from explorer's sourced
-proposal on every run with a project checkout, including runs that reuse existing
-reports. Explorer returns proposed changes without editing configuration or settings:
+1. Establish the audit directory and start from
+   [collection.example.json](../assets/collection.example.json).
+   In a new audit, treat prior configurations as research leads and check every
+   reused choice against current project evidence and the current request.
+   Distinguish user constraints from an earlier researcher's choices.
+2. Establish source roots, compiled directories, package prefixes, module ownership,
+   exclusions, build scope and test tasks. The full-audit history window comes
+   from the resolved quality-indicator policy. Focused analysis may retain its own window.
+3. Express every configuration path relative to the project root using `/`;
+   `.` denotes the root. This includes imported reports, source roots, class mappings,
+   exclusions and paths inside command arguments. Absolute paths, drive-relative
+   paths, file URIs and parent traversal are rejected. Stage external reports once
+   into this audit's `raw/` before referring to them. Pass the project root and
+   external Java/detekt locations only as runtime arguments, never as configuration.
+4. Prepare candidate JSON on stdin or in external temporary storage. Save it only
+   through `metrics.py configure` under the [runtime contract](runtime.md).
+   The helper validates before writing `collection-input.json`; `collect` checks
+   it again before measurements. Save `collection-plan.md` beside it.
+   The helper allows updates before collection and preserves configuration once
+   collection has started. Recollection uses a new audit directory.
 
-1. Read the existing file. If absent, create its parent directory and initialize
-   it from [collection.example.json](../assets/collection.example.json), replacing
-   the example values with evidence from the current project.
-2. Recheck source roots, compiled directories, measurement inputs, package
-   prefixes, module ownership, exclusions, Gradle scope and test tasks against
-   the current source tree, build and architecture decisions. Reconcile additions,
-   moves and removals. Preserve deliberate boundaries, exclusions and the history
-   window unless project evidence or the requested analysis justifies changing them.
-   Leave packages with unknown ownership unassigned.
-3. Refresh checkout and artifact paths for this run. Verify reused bytecode,
-   class mappings and reports against their actual source identities; retain
-   their original provenance and leave unknown values null. Saving the
-   configuration does not make an older report current.
-4. Save the reconciled configuration and `collection-plan.md` before capturing
-   source identity. As new
-   compilation or reports establish provenance, save those verified values before
-   `collect`. Keep the configuration stable during each `identity` or `collect`
-   command. Replace only changed values; an already current file needs no rewrite.
-5. In the final report, state whether the configuration was created, updated or
-   already current, and summarize changes to the analysis scope or definitions.
+Continue an interrupted audit with its own configuration after checking current
+conditions. A new audit always gets its own configuration, even when values match.
+Explain changed scope in the report; do not promote research results to project settings.
 
-This file is maintained project configuration, separate from `.sdd/settings.json`,
-which configures SDD subagents. Save the collection plan, captured identity,
-snapshots, raw reports and logs in the current report directory following
-[report storage](runtime.md#report-storage).
-Keep the collection configuration itself out of `measurement_inputs`: it contains
-the resulting source-state identifiers, and `collect` already records its contents
-in the snapshot.
-
-All artifact paths are absolute; source roots, compiled directories and measurement
-inputs are relative to `repository`. Module prefixes match package segments; the
-longest matching prefix wins. Equal prefixes assigned to different modules are errors.
+The audit does not capture or verify a source version. It uses current sources and
+supplied reports directly, without revision, cleanliness, fingerprint or checksum
+requirements. Missing or different identifiers never reduce suitability, require
+recollection, or prevent readiness. The future commit containing audit materials
+is their ordinary repository history, not an input to this process.
 
 | Configuration field | Meaning |
 | --- | --- |
-| `repository`, `source_roots`, `exclude_paths` | Exact checkout and production source population; exclusions are case-sensitive glob patterns |
-| `measurement_inputs` | Build scripts, analyzer configurations, version catalog and other files that define the measurement; included in the source fingerprint |
-| `package_prefixes`, `exclude_classes` | Internal graph namespace and explicit class exclusions; JVM nested names are preserved |
-| `modules` | Declared module names mapped to package prefixes; use `{}` when ownership is unknown |
-| `scope` | Gradle projects, source sets, variant and test tasks as collection provenance |
-| `class_directories` | Compiled directories from the selected build; needed for jdeps and SourceFile mapping |
-| `class_files`, `class_files_source_state` | Optional verified JVM-class → repository-relative source overrides and the source identity actually checked |
-| `artifacts` | Any available subset of dependencies, history, sizes, complexity and coverage |
+| `source_roots`, `exclude_paths` | Project-relative production population; exclusions are case-sensitive glob patterns |
+| `test_roots`, `statistics_exclude_paths` | Test classification and additional exclusions for repository-wide scc statistics |
+| `package_prefixes`, `exclude_classes` | Internal graph namespace and class exclusions; nested JVM names stay distinct |
+| `modules` | Architectural module names mapped to package prefixes; complete ownership is mandatory in full audits |
+| `scope` | Gradle projects, source sets, variant and test tasks |
+| `class_directories` | Compiled directories for jdeps and JVM SourceFile mapping |
+| `class_files` | Optional explicit JVM-class to repository-relative source mapping |
+| `artifacts` | Required `dependencies`, `history`, `sizes`, `kotlin`, `complexity`, `coverage` inputs |
 
-Use `identity` before a measurement run to obtain `revision`, `dirty` and
-`source_state`. The fingerprint covers selected source contents and measurement
-inputs, including uncommitted source changes. Record the complete actual scope;
-the fingerprint cannot detect an omitted input. Keep sources and measurement
-inputs stable through compilation, tests, collection and source review. Report
-writes can change Git's dirty flag without changing the measured source identity.
-Keep `docs/reports/` out of source roots and measurement inputs.
+All configuration paths are relative to the runtime `--repository`, independently
+of cwd or the configuration's directory. The configuration has no `repository` field.
+`artifacts.*.source_root` is project-relative (`.` by default); report source paths
+must already be project-relative or refer to that root in the current checkout.
+Qualify exports from another machine before import; do not save their old absolute
+root in configuration. Source paths in JSONL use repository-relative `/` paths.
+Module prefixes match package segments; the longest prefix wins. Equal longest
+prefixes assigned to different modules block a full audit.
 
 ## Obtain missing reports
 
-The orchestrator registers the exact commands, outputs and limits in the collection
-plan and assigns them to explorer as checks. Return verified provenance to the
-orchestrator for configuration updates before dependent `collect` execution.
-If one measurement chain fails, preserve its gap and collect independent families
-whose prerequisites remain valid. Use a new current checks assignment for unfinished
-independent work when the original batch stops; reuse verified successful results.
+Resolve [analysis policy](analysis-policy.md) through the script before choosing
+collection conditions. Read numerical policy from its separate project file; preserve
+detector settings that collect a sufficiently complete population. `collect` applies
+analyzer thresholds after import, including the parameter-list threshold.
 
-1. Find the existing Gradle tasks for compilation, detekt and JaCoCo. Read their
-   configuration before running them. Do not invent task names or change the
-   consumer's dependencies merely to make the audit run. If a task is absent,
-   record the gap and propose its exact configuration as a separate follow-up.
-   Put caches and temporary build output outside
-   the source checkout when the project's supported configuration permits it.
-2. Compile the selected production code and consumers. Set `bytecode_source_state`
-   to the identity actually compiled. For `dependencies: {"collect": true}`,
-   the collector runs `jdeps -verbose:class -filter:none --ignore-missing-deps`
-   over the configured class directories. `-filter:none` is necessary to retain
-   dependencies inside an archive. Missing dependencies, DI and reflection still
-   limit graph completeness. No compilation is performed by `collect`.
-3. Set `history: {"collect": true, "since": "YYYY-MM-DD"}` for a bounded Git
-   export ending at captured HEAD; `until` is optional. The collector uses
-   `--no-merges --no-renames --numstat`. It records all changed paths before
-   filtering large commits for coupling. Rename/delete histories require manual
-   identity reconciliation; a disappeared path is not an improvement.
-4. Set `sizes: {"collect": true}` to run scc JSON with per-file rows. The
-   analysis selects `Lines`, `Code`, `Comment`, `Blank`; scc Complexity is unused.
-5. Obtain detekt SARIF for the five selected rules. The reference adapter parses
-   the recorded message forms of detekt 1.23.8. Record the actual tool version;
-   another message form leaves a value unknown instead of guessing. Collection
-   thresholds of 1 expose more of the row population, but suppressions, baselines
-   and zero-valued cognitive complexity still prevent assuming a complete series.
-   Set `complete_mcc: true` only after verifying full MCC coverage of the chosen
-   population. Record the exact configurations and exclusions.
-6. Run the selected tests and obtain one merged JaCoCo XML for the chosen scope.
-   Duplicate source rows from separate reports must be merged by the coverage
-   tool, not added by this script. Keep the tested source identity with the report.
+Register exact commands, outputs and limits in the collection plan before assigning
+checks. Existing build/report tasks run before their dependent `collect` command.
+The collector supports its fixed jdeps, Git, scc and Kotlin measurement commands; a report's stored
+command is descriptive provenance, never an executable command string.
 
-Import the detekt and coverage paths with `format: "detekt-sarif"` and
-`format: "jacoco"`. Set `revision`, `source_state`, `tool`, `version`, `command`
-and report generation time from the actual run. A later import time never proves
-that bytecode or coverage is current. Save logs/configuration paths in provenance.
+1. Discover existing Gradle compilation, detekt and JaCoCo tasks. Read their actual
+   configuration. An absent required task is a blocker; configuring it is separate work.
+   Use external caches and temporary build output where the project supports them.
+2. Compile the selected production code and consumers. `dependencies: {"collect": true}`
+   invokes `jdeps -verbose:class -filter:none --ignore-missing-deps` on configured
+   directories. DI, reflection and missing dependencies limit graph completeness.
+   `collect` does not compile the project.
+3. `history: {"collect": true}` exports the policy window through the current UTC
+   date, first-parent only, excluding merges and tracking Git-detected renames.
+   Shallow history blocks collection. Retain complete changesets and their production
+   file counts before filtering. Historical commit IDs address events only.
+   Focused collection can use `since`/`until` and the simpler `git-log` import.
+4. `sizes: {"collect": true}` invokes scc JSON with per-file rows across the repository.
+   Aggregate files, lines, code, comments and blanks by language, production/test/other
+   category and module. Exclude configured generated/build paths and `memory/tech-debt/**`.
+   scc Complexity is not cognitive complexity and is not an input to L.
+5. Obtain detekt SARIF for the five supported rules. The adapter understands the
+   recorded detekt 1.23.8 message forms; another form leaves a value unknown.
+   Retain locations, declarations and suppressions. Set `complete_mcc: true` only
+   with evidence that the selected function population was fully measured.
+6. Run selected tests and obtain one merged JaCoCo XML. Merge execution data with
+   the coverage tool; do not add duplicate source rows from separate reports.
+   Set `complete: true` and `test_result: "passed"` only after checking complete
+   production class coverage and successful execution of the configured test tasks.
+   Missing reports, classes or required counters block a full audit.
+7. `kotlin: {"collect": true}` runs the bundled token/function collector with detekt's
+   Kotlin parser and cognitive-complexity implementation. This supplies all named
+   functions, including zero values and suppressed findings, plus token positions
+   and size containers. Optional runtime `--java` and `--detekt-jar` select the JDK
+   launcher and the required detekt 1.23.8 distribution. See [runtime](runtime.md).
+   No project Kotlin version is prescribed; unsupported syntax blocks collection.
+
+Record `format`, `tool`, `version`, `command`, `source_root`, and relevant limitations
+for imports. Save original reports once in `raw/`; tools may write directly there.
+The collector reuses a raw input already in the destination instead of copying it.
+It saves a separate normalized representation in `metrics/`, never a second raw copy.
 
 ## Import existing reports
 
-Use this branch for inputs reused by the full cycle or an explicit
-[focused route](continuation.md#explicit-focused-routes). A report's existence
-does not select a focused route. With a checkout, maintain the project
-configuration before identity capture; with no sources, use the import
-configuration described below. In both cases the orchestrator records import
-scope, artifact suitability and exact `collect`/`analyze` checks in the collection
-plan and assigns them to explorer.
+For reused reports or an explicitly [focused route](continuation.md#explicit-focused-routes),
+qualify populations, tool definitions, exclusions, source paths and mapping. Assign
+`collect --focused` for an explicitly focused route; use plain `collect` for a
+full audit with every required source. Never choose focused mode to bypass a blocker.
 
-For each artifact, supply `path`, `format`, and `source_root` (the original checkout
-root encoded in file URIs). Accepted dependency input is `class-csv` (`from,to`)
-or `jdeps` text; history is `git-log`; sizes are per-file `scc` JSON; complexity
-is `detekt-sarif`; coverage is `jacoco` or `coverage-csv` with covered/total counters.
-An exported coupling table alone cannot recover exact support and is not used to
-reconstruct history. Request its original log only if the pair can change a decision.
+| Input | Accepted format |
+| --- | --- |
+| Dependencies | `class-csv` with `from,to`, or `jdeps` text |
+| History | Full audit: `git-history` JSON produced by the collector, covering the policy window; focused work also accepts `git-log` |
+| Size | `scc` per-file JSON |
+| Complexity | `detekt-sarif` |
+| Kotlin | Complete `kotlin-measurements` JSON produced by the bundled collector |
+| Coverage | Full audit: complete `jacoco` XML; focused work also accepts `coverage-csv` |
 
-Leave unknown provenance fields null. `collect` copies raw inputs, records their
-hashes and captures the current source inventory. `analyze` detects altered raw
-files, mixed source identities and mixed revisions. Unknown identity limits the
-related signal; known mismatches exclude it. Tool errors are recorded per artifact.
-Read the gap list and verify that required reports actually arrived.
-Unknown coverage remains unknown, not zero coverage. Qualify tool/configuration,
-source population, mapping and generation provenance for each intended claim;
-a current checkout does not make an older report suitable. Resolve only gaps that
-can change the focused decision through [bounded evidence](continuation.md#request-bounded-evidence).
+Set `source_root` to the checkout root encoded in imported paths. Unresolved paths
+are an adapter gap; joining by basename would invent a correspondence. A coupling
+export alone cannot recover exact support; request its log only if that could
+change the decision. Missing tool or command provenance limits interpretation,
+without any comparison to a source version.
 
-For source-free work, use the destination project directory as `repository`, with
-`source_roots: []` and `class_directories: []`. Import supplied material by absolute
-path and preserve its reported revision as provenance when known; do not invent
-a checkout revision or substitute the destination's revision for an input's identity.
-Keep the import configuration and results in the named report directory according
-to [report storage](runtime.md#report-storage).
-Graph calculations remain useful. Concrete implementation readiness is unavailable.
-Continue with bounded hypotheses and the final report; preserve input provenance
-and gaps even when every imported command succeeds.
+With no sources, pass the destination project directory as runtime `--repository`
+and use empty source/class directories. Keep configuration in `<report-dir>/collection-input.json`;
+`collection.json` is reserved for the output description. Calculations remain useful,
+but implementation readiness requires inspected current declarations and consumers.
+End source-free work with hypotheses, decision-relevant questions and `report.md`.
 
 ## Mapping and suitability
 
-JVM `SourceFile` attributes plus the exact package identify source candidates.
-This handles top-level functions, custom file facades, multiple classes per file,
-nested classes, objects and companions without equating class and file names.
-Duplicate source filenames within a package remain ambiguous across source sets.
-Inspect `mapping` before using a file hotspot or absence of a direct static edge.
-An explicit mapping override needs source/build evidence and its checked
-`class_files_source_state`. Automatically read mappings carry
-`bytecode_source_state`. Unknown mapping identity limits file joins; a known
-mismatch excludes mappings, preserving the independently usable graph/history.
+JVM SourceFile plus package identifies source candidates, including top-level
+functions, custom facades, nested classes, objects and companions. Duplicate source
+filenames within a package remain ambiguous across source sets. Explicit overrides
+require a real class/file correspondence, without a version marker.
 
-Imported reports with unresolved absolute paths fail their adapter with an explicit
-gap. Never join by basename. SARIF locations are observations at a revision, not
-stable function identities: inspect the declaration and overload signature before
-recommending a change. Report-only rows do not establish the current ownership map.
+Inspect mapping gaps before file hotspots or claims about absent direct static edges.
+A partial mapping blocks a full audit. In focused work it limits the affected claims.
+SARIF locations are observations: inspect current declarations and overload
+signatures before recommending a transformation. Use substantive evidence and the
+[measurement catalog](measurements.md) to establish applicability.
