@@ -3,7 +3,7 @@
 ## Collection in the default full cycle
 
 Use this reference during configuration and collection in the [workflow](workflow.md).
-Explorer researches the current checkout; the orchestrator saves the configuration
+Explorer researches the current checkout; the orchestrator saves this audit's configuration
 and registers exact build/report commands. A fresh explorer executes the assigned
 checks. `collect` then retains raw reports, normalizes each source once, computes
 all derived measurements and prepares keyed selections, preliminary candidate groups
@@ -27,23 +27,38 @@ wiring when it explains behavior. Assign every measured Kotlin package to a decl
 architectural module before a full audit; ambiguous or missing ownership blocks it.
 Gradle layout establishes build scope, not architectural responsibility.
 
-## Maintain project configuration
+## Prepare audit configuration
 
-The orchestrator maintains `<project-root>/.sdd/architect/collection.json` on every
-run with sources, including imports. Explorer proposes changes without editing
-project configuration or `.sdd/settings.json`.
+The orchestrator owns `<report-dir>/collection-input.json` for every route.
+Explorer proposes its contents. Project settings, including `.sdd/` and build
+configuration, remain read-only for both roles. Their modification belongs to
+user-initiated `sdd-setup`, even when the user would approve an audit-time edit.
+If setup lacks an option, report that limitation without adding an audit workaround.
 
-1. Read the configuration or initialize it from
+1. Establish the audit directory and start from
    [collection.example.json](../assets/collection.example.json).
-2. Check source roots, compiled directories, package prefixes, module ownership,
-   exclusions, build scope and test tasks against current project evidence.
-   Preserve deliberate boundaries. The full-audit history window comes from the
-   resolved quality-indicator policy. Focused analysis may retain its own window.
-3. Resolve current source and report paths. Record tool versions, actual commands,
-   populations, exclusions and extraction limitations; these describe the measurement.
-4. Save the configuration and `collection-plan.md` before the assigned collection.
-   Refresh paths or settings when the task requires them; an unchanged configuration
-   needs no rewrite. Explain scope changes in the final report.
+   In a new audit, treat prior configurations as research leads and check every
+   reused choice against current project evidence and the current request.
+   Distinguish user constraints from an earlier researcher's choices.
+2. Establish source roots, compiled directories, package prefixes, module ownership,
+   exclusions, build scope and test tasks. The full-audit history window comes
+   from the resolved quality-indicator policy. Focused analysis may retain its own window.
+3. Express every configuration path relative to the project root using `/`;
+   `.` denotes the root. This includes imported reports, source roots, class mappings,
+   exclusions and paths inside command arguments. Absolute paths, drive-relative
+   paths, file URIs and parent traversal are rejected. Stage external reports once
+   into this audit's `raw/` before referring to them. Pass the project root and
+   external Java/detekt locations only as runtime arguments, never as configuration.
+4. Prepare candidate JSON on stdin or in external temporary storage. Save it only
+   through `metrics.py configure` under the [runtime contract](runtime.md).
+   The helper validates before writing `collection-input.json`; `collect` checks
+   it again before measurements. Save `collection-plan.md` beside it.
+   The helper allows updates before collection and preserves configuration once
+   collection has started. Recollection uses a new audit directory.
+
+Continue an interrupted audit with its own configuration after checking current
+conditions. A new audit always gets its own configuration, even when values match.
+Explain changed scope in the report; do not promote research results to project settings.
 
 The audit does not capture or verify a source version. It uses current sources and
 supplied reports directly, without revision, cleanliness, fingerprint or checksum
@@ -53,7 +68,7 @@ is their ordinary repository history, not an input to this process.
 
 | Configuration field | Meaning |
 | --- | --- |
-| `repository`, `source_roots`, `exclude_paths` | Checkout and production population; exclusions are case-sensitive glob patterns |
+| `source_roots`, `exclude_paths` | Project-relative production population; exclusions are case-sensitive glob patterns |
 | `test_roots`, `statistics_exclude_paths` | Test classification and additional exclusions for repository-wide scc statistics |
 | `package_prefixes`, `exclude_classes` | Internal graph namespace and class exclusions; nested JVM names stay distinct |
 | `modules` | Architectural module names mapped to package prefixes; complete ownership is mandatory in full audits |
@@ -62,15 +77,19 @@ is their ordinary repository history, not an input to this process.
 | `class_files` | Optional explicit JVM-class to repository-relative source mapping |
 | `artifacts` | Required `dependencies`, `history`, `sizes`, `kotlin`, `complexity`, `coverage` inputs |
 
-Artifact import paths are absolute. Source roots and compiled directories are
-relative to `repository`. Source paths in JSONL use repository-relative `/` paths.
+All configuration paths are relative to the runtime `--repository`, independently
+of cwd or the configuration's directory. The configuration has no `repository` field.
+`artifacts.*.source_root` is project-relative (`.` by default); report source paths
+must already be project-relative or refer to that root in the current checkout.
+Qualify exports from another machine before import; do not save their old absolute
+root in configuration. Source paths in JSONL use repository-relative `/` paths.
 Module prefixes match package segments; the longest prefix wins. Equal longest
 prefixes assigned to different modules block a full audit.
 
 ## Obtain missing reports
 
 Resolve [analysis policy](analysis-policy.md) through the script before choosing
-collection conditions. Keep numerical policy in its separate project file; preserve
+collection conditions. Read numerical policy from its separate project file; preserve
 detector settings that collect a sufficiently complete population. `collect` applies
 analyzer thresholds after import, including the parameter-list threshold.
 
@@ -107,7 +126,7 @@ command is descriptive provenance, never an executable command string.
 7. `kotlin: {"collect": true}` runs the bundled token/function collector with detekt's
    Kotlin parser and cognitive-complexity implementation. This supplies all named
    functions, including zero values and suppressed findings, plus token positions
-   and size containers. Optional absolute `java` and `detekt_jar` select the JDK
+   and size containers. Optional runtime `--java` and `--detekt-jar` select the JDK
    launcher and the required detekt 1.23.8 distribution. See [runtime](runtime.md).
    No project Kotlin version is prescribed; unsupported syntax blocks collection.
 
@@ -138,8 +157,8 @@ export alone cannot recover exact support; request its log only if that could
 change the decision. Missing tool or command provenance limits interpretation,
 without any comparison to a source version.
 
-With no sources, use the destination project directory as `repository` and empty
-source/class directories. Keep input settings in `<report-dir>/collection-input.json`;
+With no sources, pass the destination project directory as runtime `--repository`
+and use empty source/class directories. Keep configuration in `<report-dir>/collection-input.json`;
 `collection.json` is reserved for the output description. Calculations remain useful,
 but implementation readiness requires inspected current declarations and consumers.
 End source-free work with hypotheses, decision-relevant questions and `report.md`.

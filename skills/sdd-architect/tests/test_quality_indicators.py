@@ -179,33 +179,33 @@ class PublicationTests(unittest.TestCase):
                 "sizes": ("scc", json.dumps([{"Name": "Kotlin", "Files": [{"Location": "src/A.kt", "Lines": 2, "Code": 2, "Comment": 0, "Blank": 0}]}])),
                 "kotlin": ("kotlin-measurements", json.dumps(kotlin([file_row("src/A.kt")]))),
             }
-            config = {"repository": str(root), "source_roots": ["src"], "package_prefixes": ["example"],
+            config = {"source_roots": ["src"], "package_prefixes": ["example"],
                       "class_files": {"example.A": "src/A.kt"}, "modules": {"example": ["example"]}, "artifacts": {}}
             for name, (format_name, payload) in text.items():
                 path = raw / (name + ".input")
                 path.write_text(payload, encoding="utf-8")
-                config["artifacts"][name] = {"path": str(path), "format": format_name, "tool": name, "version": "fixture", "command": [name]}
+                config["artifacts"][name] = {"path": path.relative_to(root).as_posix(), "format": format_name, "tool": name, "version": "fixture", "command": [name]}
             config["artifacts"]["coverage"].update(complete=True, test_result="passed")
             status = root / "memory/tech-debt/status.json"
             status.write_text("previous", encoding="utf-8")
-            description = collect(config, audit)
+            description = collect(config, audit, repository=root)
             self.assertEqual(description["status"], "complete")
             self.assertEqual(status.read_text(), "previous")
             with self.assertRaisesRegex(ValueError, "Finish the report"):
-                publish_status(audit / "collection.json")
+                publish_status(audit / "collection.json", root)
             self.assertEqual(status.read_text(), "previous")
             (audit / "report.md").write_text("Finished audit", encoding="utf-8")
             plan = root / "memory/tech-debt/plan"
             plan.mkdir()
             (plan / "plan.md").write_text("Finished plan update", encoding="utf-8")
-            publish_status(audit / "collection.json")
+            publish_status(audit / "collection.json", root)
             value = json.loads(status.read_text(encoding="utf-8"))
             self.assertEqual(value["project"]["statistics"]["total"]["Code"], 2)
             self.assertEqual((status.with_suffix(".md")).read_text(encoding="utf-8"), render_status(value))
             before = status.read_bytes()
             del config["artifacts"]["coverage"]
             with self.assertRaisesRegex(ValueError, "Missing configured sources: coverage"):
-                collect(config, audit.with_name("2026-11-15T13-00-00Z"))
+                collect(config, audit.with_name("2026-11-15T13-00-00Z"), repository=root)
             self.assertEqual(status.read_bytes(), before)
             self.assertEqual(json.loads((audit.with_name("2026-11-15T13-00-00Z") / "collection.json").read_text())["status"], "blocked")
 
@@ -228,7 +228,7 @@ fun outer(x: Int): Int {
 }
 class A { fun value() = "λ" }
 ''', encoding="utf-8")
-            data, metadata = collect_kotlin({"java": java, "detekt_jar": jar}, {"A.kt": {"language": ".kt"}}, root, run, POLICY)
+            data, metadata = collect_kotlin({"A.kt": {"language": ".kt"}}, root, run, POLICY, java=java, detekt_jar=jar)
             row = json.loads(data)["files"][0]
             self.assertEqual(metadata["version"], "1.23.8")
             self.assertEqual([f["cognitive_complexity"] for f in row["functions"] if f["signature"] == "zero()"], [0])

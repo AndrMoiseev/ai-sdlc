@@ -8,11 +8,12 @@ from unittest.mock import patch
 
 from analysis import prepare_measurements, suitability
 from analysis_policy import load_policy, merge_policy
+from audit_configuration import project_path, resolve_project_path, validate_audit_configuration
 from collection import collect, report_output
 from graph import graph_view, module_for, module_views
 from history import group_activity, history_view, parse_history
 from inputs import class_source_file, coverage, dependencies, detekt, relative_path, source_description
-from metrics import main, write_json
+from metrics import main, write_audit_configuration, write_json
 from measurements import CATALOG, ordered_rows, record_key, resolve_reference
 from recommendations import markdown, rank, validate_card
 
@@ -324,11 +325,53 @@ class ReportOutputTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "memory/tech-debt/audits"):
                 report_output(output, repo)
 
+class AuditConfigurationTests(unittest.TestCase):
+    def test_paths_are_project_relative_on_every_host(self):
+        for path in ("/tmp/report", "C:/work/report", r"C:\work\report", "C:report",
+                     r"\\host\share\report", "//host/share/report", r"\report",
+                     "../report", "src/../../report", "file:///tmp/report", "~/report", "%2Ftmp/report"):
+            for config in ({"source_roots": [path]}, {"test_roots": [path]},
+                           {"class_directories": [path]}, {"class_files": {"a.A": path}},
+                           {"exclude_paths": [path]}, {"statistics_exclude_paths": [path]},
+                           {"artifacts": {"complexity": {"path": path}}},
+                           {"artifacts": {"complexity": {"source_root": path}}}):
+                with self.subTest(path=path, field=next(iter(config))), self.assertRaises(ValueError):
+                    validate_audit_configuration(config)
+        for argument in ("/usr/bin/tool", "--report=/tmp/report", r"-Droot=C:\work",
+                         "file:///C:/work/report", "../tool", "@/tmp/response", r"\\host\share\tool"):
+            with self.subTest(argument=argument), self.assertRaises(ValueError):
+                validate_audit_configuration({"artifacts": {"coverage": {"command": ["tool", argument]}}})
+        for config in ({"repository": "."}, {"artifacts": {"kotlin": {"java": "tools/java"}}}):
+            with self.assertRaises(ValueError):
+                validate_audit_configuration(config)
+        self.assertEqual(project_path(".", "root"), ".")
+
+    def test_reject_before_writing_or_running_tools(self):
+        root = Path(tempfile.gettempdir()) / "architect-project"
+        report = root / "memory/tech-debt/audits/2026-11-14T14-30-00Z"
+        invalid = {"artifacts": {"coverage": {"path": "/outside/report"}}}
+        with patch("metrics.write_json") as writer, patch("collection.run") as command:
+            with self.assertRaises(ValueError):
+                write_audit_configuration(invalid, report / "collection-input.json", root)
+            with self.assertRaises(ValueError):
+                collect(invalid, report, repository=root)
+            writer.assert_not_called()
+            command.assert_not_called()
+            with self.assertRaises(ValueError):
+                write_audit_configuration({}, root / ".sdd/architect/collection-input.json", root)
+            writer.assert_not_called()
+        with patch.object(Path, "resolve", return_value=root.parent / "outside"):
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                resolve_project_path("reports/input", root, "artifact")
+
+
 class CollectionIntegrationTests(unittest.TestCase):
     def test_collect_jsonl_and_rank_current_sources(self):
         # Risk: CLI, physical JSONL files, raw retention and keyed reads can disagree.
         # This extends the existing filesystem integration; pure adapters cannot verify writes.
         with tempfile.TemporaryDirectory(prefix="sdd-architect-test-") as temporary:
+            example = json.loads((Path(__file__).parents[1] / "assets/collection.example.json").read_text(encoding="utf-8"))
+            self.assertEqual(validate_audit_configuration(example), example)
             workspace = Path(temporary)
             repo = workspace / "project"
             (repo / "src").mkdir(parents=True)
@@ -338,20 +381,29 @@ class CollectionIntegrationTests(unittest.TestCase):
             raw.mkdir(parents=True)
             (raw / "detekt.sarif").write_text(json.dumps({"runs": [{"results": [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)")]}]}), encoding="utf-8")
             (raw / "coverage.csv").write_text("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,2,10,0,0\n", encoding="utf-8")
-            config = {"repository": str(repo), "source_roots": ["src"], "modules": {"A": ["a"]},
-                      "artifacts": {"complexity": {"path": str(raw / "detekt.sarif"), "format": "detekt-sarif", "complete_mcc": True},
-                                    "coverage": {"path": str(raw / "coverage.csv"), "format": "coverage-csv"}}}
-            config_path = workspace / "collection-input.json"
-            config_path.write_text(json.dumps(config), encoding="utf-8")
+            config = {"source_roots": ["src"], "modules": {"A": ["a"]},
+                      "artifacts": {"complexity": {"path": (raw / "detekt.sarif").relative_to(repo).as_posix(), "format": "detekt-sarif", "complete_mcc": True},
+                                    "coverage": {"path": (raw / "coverage.csv").relative_to(repo).as_posix(), "format": "coverage-csv"}}}
+            config_path = report / "collection-input.json"
+            with patch("sys.stdin", io.StringIO(json.dumps(config))), patch("sys.stdout", io.StringIO()):
+                self.assertEqual(main(["configure", "--repository", str(repo), "--output", str(config_path)]), 0)
+            self.assertEqual(json.loads(config_path.read_text()), config)
+            self.assertNotIn(str(repo), config_path.read_text())
             policy_path = repo / ".sdd" / "architect" / "analysis-policy.json"
             policy_path.parent.mkdir(parents=True)
             policy_path.write_text(json.dumps({"signals": {"complexity": {"cyclomatic_minimum": 11}},
                                                "investigation": {"candidate_group_limit": 3}}), encoding="utf-8")
+            previous_settings = policy_path.read_bytes()
             with patch("sys.stdout", new_callable=io.StringIO) as stdout:
                 self.assertEqual(main(["policy", "--repository", str(repo), "--get", "signals.complexity.cyclomatic_minimum"]), 0)
                 self.assertEqual(json.loads(stdout.getvalue()), 11)
             with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO):
-                self.assertEqual(main(["collect", "--focused", "--config", str(config_path), "--output", str(report)]), 0)
+                self.assertEqual(main(["collect", "--repository", str(repo), "--focused", "--config", str(config_path), "--output", str(report)]), 0)
+            self.assertEqual(policy_path.read_bytes(), previous_settings)
+            self.assertFalse((policy_path.parent / "collection.json").exists())
+            self.assertEqual(json.loads(config_path.read_text()), config)
+            with self.assertRaisesRegex(ValueError, "Collection has started"):
+                write_audit_configuration({}, config_path, repo)
             description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
             self.assertEqual(set(description["outputs"]), set(CATALOG))
             self.assertEqual(description["status"], "complete")
@@ -394,7 +446,7 @@ class CollectionIntegrationTests(unittest.TestCase):
                                        "--get", "signals.complexity.cyclomatic_minimum"]), 0)
                 self.assertEqual(json.loads(stdout.getvalue()), 11)
             with patch("sys.stdout", new_callable=io.StringIO):
-                self.assertEqual(main(["rank", "--collection", str(report / "collection.json"),
+                self.assertEqual(main(["rank", "--repository", str(repo), "--collection", str(report / "collection.json"),
                                        "--recommendations", str(report / "cards.json"), "--output", str(report / "ranked.json"),
                                        "--markdown", str(report / "ranked.md")]), 0)
             self.assertIn("Extract price calculation", (report / "ranked.md").read_text(encoding="utf-8"))
@@ -407,7 +459,7 @@ class CollectionIntegrationTests(unittest.TestCase):
             self.assertFalse(list(report.glob("snapshot*")))
             self.assertFalse(list(report.glob("analysis-*.json")))
             with self.assertRaisesRegex(ValueError, "already exists"):
-                collect(config, report)
+                collect(config, report, repository=repo)
             with self.assertRaisesRegex(ValueError, "already exists"):
                 write_json(report / "cards.json", {}, repo)
             for invalid in ({"path": "../escape.jsonl", "key": {}}, {**ref, "key": {"file": "absent.kt"}}):
@@ -425,7 +477,7 @@ class MeasurementTests(unittest.TestCase):
               patch.object(Path, "write_text", lambda path, text, **kwargs: saved.append(json.loads(text))),
               patch("collection.inventory", side_effect=KeyboardInterrupt("Source read interrupted"))):
             with self.assertRaisesRegex(KeyboardInterrupt, "interrupted"):
-                collect({"repository": str(root)}, report)
+                collect({}, report, repository=root)
         self.assertEqual(saved[0]["status"], "incomplete")
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["outputs"].values()))
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["selections"].values()))
@@ -433,15 +485,15 @@ class MeasurementTests(unittest.TestCase):
     def test_focused_git_failure_only_limits_requested_history_chain(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
         report = root / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
-        config = {"repository": str(root), "artifacts": {
-            "history": {"collect": True}, "coverage": {"path": str(root / "coverage.csv"), "format": "coverage-csv"}}}
+        config = {"artifacts": {
+            "history": {"collect": True}, "coverage": {"path": "coverage.csv", "format": "coverage-csv"}}}
         with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),
               patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"),
               patch.object(Path, "write_text"), patch.object(Path, "write_bytes"),
               patch.object(Path, "read_bytes", return_value=b"file,line_covered,line_total,branch_covered,branch_total\nsrc/A.kt,0,2,0,0\n"),
               patch("collection.inventory", side_effect=OSError("Source read unavailable")), patch("collection.map_classes", return_value=({}, [])),
               patch("collection.write_jsonl"), patch("collection.run", side_effect=FileNotFoundError("Git unavailable")) as command):
-            value = collect(config, report, full=False)
+            value = collect(config, report, repository=root, full=False)
         self.assertEqual(value["status"], "complete")
         self.assertEqual(value["outputs"]["changes/commit"]["status"], "error")
         self.assertEqual(value["outputs"]["source-files/file"]["status"], "error")

@@ -22,7 +22,7 @@ Describe proposed boundaries through responsibilities and dependency directions.
 Detailed package contracts and ArchUnit checks belong to subsequent `sdd-spec`
 work; creating or splitting Gradle projects is outside this method.
 
-## Project configuration, audit storage and tech debt plan
+## Audit configuration, storage and tech debt plan
 
 Before using numerical settings, read [analysis policy](references/analysis-policy.md)
 and obtain actual values only through `metrics.py policy`. The script resolves bundled
@@ -30,16 +30,25 @@ defaults and `.sdd/architect/analysis-policy.json` with one schema. During an au
 use its saved collection policy; thresholds, weights and budgets are not prescribed
 numerically in these instructions.
 
-For every run with a project checkout, the orchestrator saves the researched
-configuration in `.sdd/architect/collection.json` through
-[project configuration maintenance](references/collection.md#maintain-project-configuration).
-Explorer proposes the configuration; the orchestrator owns its persistence.
-
 Before producing any materials, establish
 `<project-root>/memory/tech-debt/audits/{date-time}/` using the
 [report storage contract](references/runtime.md#report-storage). Save the final
 report and all intermediate materials there for every route, including focused
 analysis and reassessment.
+
+For every route, the orchestrator saves researched audit configuration in
+`<report-dir>/collection-input.json` through
+[audit configuration](references/collection.md#prepare-audit-configuration).
+Explorer proposes it; `metrics.py configure` validates and saves it. All configuration
+paths are project-relative; the project root and external tools are runtime arguments.
+Each new audit researches current conditions; earlier configuration is evidence to
+recheck, never an inherited authority.
+
+Keep project settings, including `.sdd/` and build configuration, read-only for
+every audit participant. Changing project settings belongs to a separate
+user-initiated `sdd-setup` process. Audit-time approval does not transfer that
+responsibility. Report unsupported setup options as limitations; do not implement
+them in this audit or invoke setup automatically.
 
 Read [tech debt plan maintenance](references/tech-debt-plan.md) before selecting
 candidates and again before completion. Reuse known diagnoses from the current
@@ -71,7 +80,7 @@ inputs to qualify within this cycle; their presence does not select a reports-on
 
 | Phase | Assigned work | Completion artifact |
 | --- | --- | --- |
-| 1. Configuration | Explorer researches scope and proposes configuration; orchestrator saves it | Project configuration and `collection-plan.md` |
+| 1. Configuration | Explorer researches scope and proposes configuration; orchestrator saves it | Audit-local `collection-input.json` and `collection-plan.md` |
 | 2. Collect | Fresh explorer executes assigned checks; `collect` calculates measurements, preliminary groups and investigation order | Raw inputs, JSONL measurements/selections, groups with overlaps and a budgeted queue; compact `collection.json` |
 | 3. Analysis | Architect refines the computed shortlist; fresh architects diagnose groups and integrate recommendations | Six-section Markdown cards with evidence and open design questions; compact ranking metadata |
 | 4. Ranking | Explorer executes assigned `rank` against the cards, collection and current sources | Checked card structure, evidence addresses and priority groups |
@@ -96,7 +105,7 @@ Kotlin/Gradle checkout.
 
 | Situation | Read at this point | Result |
 | --- | --- | --- |
-| Read or change thresholds, weights, formula parameters or budgets | [Analysis policy](references/analysis-policy.md) | Validated effective values returned by the script |
+| Read thresholds, weights, formula parameters or budgets | [Analysis policy](references/analysis-policy.md) | Validated effective values returned by the script; project settings remain read-only |
 | Research configuration or collect missing measurements | [Collection](references/collection.md), then [runtime](references/runtime.md) before any script | Justified scope, complete measurement catalog and explicit gaps |
 | Explicit request to analyze existing reports, including reports without sources | [Focused routes](references/continuation.md#explicit-focused-routes), then [collection import](references/collection.md#import-existing-reports) | Qualified JSONL evidence; source-free results remain hypotheses |
 | Calculate or interpret a signal | [Measurements](references/measurements.md) | Deterministic views and keyed signals |

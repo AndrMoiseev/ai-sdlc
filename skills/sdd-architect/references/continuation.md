@@ -40,7 +40,7 @@ objective and constraints with the actual request. Keep one continuation file.
 | --- | --- |
 | `schema_version`, `report`, `route`, `phase` | Version 1, report identity matching requests, `full` or `focused`, and the current phase. Use `complete` only after delivery artifacts and the final handoff are verified. |
 | `objective`, `constraints` | The sought result and exact conditions; each constraint has `text` and its authoritative `source`. |
-| `basis` | Current `source_paths`, `configuration`, `collection_plan`, primary `artifacts` and decision sources in `decisions`. Null means a path has not yet been established. |
+| `basis` | Current `source_paths`, `configuration` pointing to this audit's `collection-input.json`, `collection_plan`, primary `artifacts` and decision sources in `decisions`. The configuration link is audit-relative; paths inside its contents are project-relative. Null means a path has not yet been established. |
 | `assignments`, `active_assignment` | Recorded assignment IDs and the one pending assignment, or null. Read scope, outputs, limits and result facts from each assignment's primary files. |
 | `assignments[].assessment` | Orchestrator's `status`: `pending`, `accepted` or `follow_up`; retain the `reason`. Link a created follow-up through `next_assignment`. A chain must end in an accepted result before completion. |
 | `assignments[].host_observation` | `worker_id`, last observed `state` (`unknown`, `running`, `stopped`), UTC `observed_at` and host evidence `source`. Unknown observations stay null/unknown. |
@@ -125,7 +125,8 @@ explicitly. Semantic questions justify further work; source identity checks do n
 
 A focused route requires an explicit request. Bare invocation and general audit
 follow the [full workflow](workflow.md); an existing report alone does not select
-a shorter route. Maintain project configuration whenever sources are available.
+a shorter route. Save this audit's configuration through `metrics.py configure`
+for every route, including work without sources. Project settings remain read-only.
 
 | Requested route | Work and result |
 | --- | --- |

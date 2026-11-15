@@ -26,7 +26,7 @@ After the complete full audit succeeds, the final `status` command alone replace
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
 | Final report and continuation state | `report.md`, `state.json` |
-| Collection plan | `collection-plan.md` |
+| Audit configuration and collection plan | `collection-input.json`, `collection-plan.md` |
 | One retained copy of each raw input and tool logs | `raw/`, `logs/` |
 | Collection parameters, output links and outcomes; no value tables | `collection.json` |
 | Effective numerical policy | `collection.json.analysis_policy`, read through `metrics.py policy --collection` |
@@ -48,12 +48,17 @@ pre-existing `raw/` and plans, but rejects an existing `collection.json`, `metri
 or `selections/`. Further collection uses a new timestamped audit directory, linked from
 the audit being continued. Do so only for a measurement need, never a version check.
 
-The aggregate document is separate from keyed JSONL diagnostics. Do not copy source trees. Keep the current
-configuration at `.sdd/architect/collection.json`; `collection.json` in the report
-records the used measurement parameters and resolved [analysis policy](analysis-policy.md).
-Project numerical overrides live in `.sdd/architect/analysis-policy.json`. Source-free input settings instead use
-`collection-input.json` beside the output. Existing external reports are copied
-once into `raw/`; inputs already there are reused directly.
+The aggregate document is separate from keyed JSONL diagnostics. Do not copy source trees.
+Keep each audit's input in `collection-input.json` beside its output `collection.json`,
+which records used measurement parameters and resolved [analysis policy](analysis-policy.md).
+All paths in input configuration are project-relative with `/`, including report
+paths and command arguments. Pass the project root as runtime `--repository` for
+`configure`, `collect`, `rank` and `status`; cwd and the input file's location do
+not define the path base. External tool locations stay in runtime arguments.
+Project numerical overrides in `.sdd/architect/analysis-policy.json` are read-only;
+changing project settings belongs to user-initiated `sdd-setup`. Copy external
+reports once into `raw/` before saving their project-relative input paths;
+the collector reuses inputs already there.
 
 Retain partial outputs and concrete gaps. The collection description starts with
 `status: incomplete` and every planned output marked incomplete. Normal completion
@@ -85,13 +90,21 @@ lockfiles; the consuming project needs no Python environment or dependencies.
 
 ```text
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" configure --repository "<project-root>" --input "<external-temporary-dir>/collection-candidate.json" --output "<report-dir>/collection-input.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --repository "<project-root>" --config "<report-dir>/collection-input.json" --output "<report-dir>"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --collection "<report-dir>/collection.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --repository "<project-root>" --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --repository "<project-root>" --collection "<report-dir>/collection.json"
 ```
 
-`policy` is the sole numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
+`configure` reads candidate JSON from `--input` or stdin and validates before
+writing the audit's `collection-input.json`. It rejects absolute paths on either
+OS, drive-relative paths, parent traversal and host paths embedded in provenance.
+It can update the input only before collection artifacts exist; started collections
+retain their configuration. Use this helper for every configuration write.
+`collect` revalidates input and checks resolved project paths, including symlinks.
+
+`policy` is the read-only numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
 queue before substantive analysis. Its stdout reports counts, including candidate
 groups, the collection-description path and gaps. `rank` runs
 after cards are authored; it checks their six-section Markdown structure and reads
@@ -106,10 +119,10 @@ Register resolved commands, cwd, paths, expected outputs and limits in
 `collection-plan.md` before assigning checks. Execute only the exact assigned set.
 Python scripts use the standard library. The Kotlin helper executes Java source
 against detekt CLI 1.23.8 `all.jar`; it does not modify project build dependencies.
-Find Java via `artifacts.kotlin.java`, PATH or JAVA_HOME. The helper needs JDK 11+
+Find Java via runtime `--java`, PATH or JAVA_HOME. The helper needs JDK 11+
 source-launcher support. It downloads the fixed Maven distribution into
 `UV_TOOL_DIR/sdd-architect/` if absent. For offline use provide the existing jar's
-absolute path as `artifacts.kotlin.detekt_jar`. Keep the jar, temporary source
+absolute path through runtime `--detekt-jar`. Keep the jar, temporary source
 manifest and JVM caches outside the project and skill package. Record detekt's
 measurement version independently of the project's Kotlin version. A download,
 launch or syntax failure blocks collection. Keep `--locked`; update Python

@@ -14,6 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from collection import collect, run
+from analysis_policy import load_policy
+from metrics import write_audit_configuration
 
 
 def main():
@@ -59,25 +61,24 @@ class OrderServiceTest {
         path = repo / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
-    run(["git", "init", "--quiet"], repo)
-    run(["git", "add", "."], repo)
-    run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "Synthetic fixture"], repo)
+    policy = load_policy(repo)
+    run(["git", "init", "--quiet"], repo, policy)
+    run(["git", "add", "."], repo, policy)
+    run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "Synthetic fixture"], repo, policy)
     report = repo / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
     raw = report / "raw"
     raw.mkdir(parents=True)
     (raw / "dependencies.csv").write_text("from,to\nexample.order.OrderService,example.pricing.PriceCalculator\nexample.pricing.PriceCalculator,example.order.OrderService\n", encoding="utf-8")
-    config = {"repository": str(repo), "source_roots": ["src/main/kotlin"],
+    config = {"source_roots": ["src/main/kotlin"],
               "package_prefixes": ["example"], "modules": {"order": ["example.order"], "pricing": ["example.pricing"]},
               "scope": {"gradle_projects": [":"], "source_sets": ["main"], "variant": "synthetic JVM", "test_tasks": []},
               "class_files": {"example.order.OrderService": "src/main/kotlin/example/order/OrderService.kt",
                               "example.pricing.PriceCalculator": "src/main/kotlin/example/pricing/PriceCalculator.kt"},
               "artifacts": {"history": {"collect": True}}}
-    config["artifacts"]["dependencies"] = {"path": str(raw / "dependencies.csv"), "format": "class-csv", "tool": "synthetic-fixture",
+    config["artifacts"]["dependencies"] = {"path": (raw / "dependencies.csv").relative_to(repo).as_posix(), "format": "class-csv", "tool": "synthetic-fixture",
                                             "version": "1", "command": ["synthetic-explicit-edges"]}
-    configuration = repo / ".sdd" / "architect" / "collection.json"
-    configuration.parent.mkdir(parents=True)
-    configuration.write_text(json.dumps(config, indent=2), encoding="utf-8")
-    collect(config, report)
+    write_audit_configuration(config, report / "collection-input.json", repo)
+    collect(config, report, repository=repo, full=False)
     print(destination)
 
 

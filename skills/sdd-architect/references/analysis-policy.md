@@ -2,7 +2,7 @@
 
 Before using a threshold, weight, budget, formula parameter or command limit, obtain
 the effective policy through `metrics.py policy`. Use its output in assignments and
-decisions. Read JSON policy files only to edit their configuration; do not infer
+decisions. Project policy files remain read-only throughout this workflow; do not infer
 effective values by reading defaults, copying a documentation example or merging
 project overrides by hand. `collect` and `rank` use the same Python resolver.
 
@@ -17,8 +17,8 @@ uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy
 
 The command prints JSON and writes nothing. `--get` selects a dotted key. Use the
 project form before collection and the collection form throughout an existing
-audit, including diagnosis, ranking and final report. `--defaults` returns a full
-editable document when the user wants a starting configuration.
+audit, including diagnosis, ranking and final report. `--defaults` displays the
+bundled policy without creating project settings.
 
 ## Files and precedence
 
@@ -36,11 +36,13 @@ present malformed file, unknown key, invalid type, non-finite number or invalid
 range fails explicitly. Numeric strings, booleans and null are not numbers here.
 Defaults and saved audit values must be complete; project overrides may be partial.
 
-Keep collection scope, source paths and tool/report configuration in
-`.sdd/architect/collection.json`. Put numeric policy in the separate file, including
-`investigation.candidate_group_limit`. Normal audits preserve project overrides;
-change them when the user asks to change the policy. No project override file is
-needed just to run with defaults.
+Keep collection scope, source paths and tool/report configuration in the audit's
+`collection-input.json`. Numerical policy, including `investigation.candidate_group_limit`,
+is read from the separate project file. All audit participants preserve that file.
+Changing project policy belongs to a separate user-initiated `sdd-setup` process;
+approval within the audit does not authorize this workflow to edit it. Do not
+invoke setup automatically or work around an option it does not yet support.
+No project override file is needed to run with defaults.
 
 `collect` resolves policy before writing results and saves it with the collection.
 `rank` validates and uses that saved policy even if project settings have since
