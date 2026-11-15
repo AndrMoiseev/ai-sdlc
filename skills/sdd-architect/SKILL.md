@@ -1,6 +1,6 @@
 ---
 name: sdd-architect
-description: Architecture audits, source-grounded refactoring recommendations and a maintained tech debt plan for Kotlin/JVM and Gradle projects, by explicit invocation.
+description: Use when explicitly invoked for Kotlin/JVM and Gradle architecture audits, project/module quality indicators, source-grounded refactoring recommendations and tech debt plans. Do NOT use for implementing refactorings.
 disable-model-invocation: true
 ---
 
@@ -54,7 +54,7 @@ directly, without starting an audit.
 
 A bare `$sdd-architect`, `/sdd-architect`, or skill selection without additional
 task text starts **configuration → collect → analysis → ranking → final
-report → plan update**. General audit and refactoring
+report → plan update → project status**. General audit and refactoring
 requests use the same route. Start from the current project's checkout and discover
 its scope and build configuration; an omitted prompt is not a request to choose a mode.
 
@@ -74,6 +74,14 @@ inputs to qualify within this cycle; their presence does not select a reports-on
 | 4. Ranking | Explorer executes assigned `rank` against the cards, collection and current sources | Checked card structure, evidence addresses and priority groups |
 | 5. Final report | Fresh architect authors the report from diagnoses, cards and ranking | `report.md`, using the resolved recommendation display limit |
 | 6. Plan update | Orchestrator adds eligible new tasks and retains current user decisions | Updated `plan/plan.md`, new task cards and final notifications |
+| 7. Project status | After every audit phase succeeds, publish the calculated project/module indicators | Fully replaced `memory/tech-debt/status.json` and template-rendered `status.md` |
+
+Every full audit requires all measurement sources, including configured coverage
+from a successful test run. Missing, failed or incomplete required input blocks the
+audit: preserve the previous project status and tell the user which prerequisite
+to resolve. Do not continue with a reduced full-audit profile. Read the
+[quality indicator contract](references/quality-indicators.md) during configuration
+and before final publication. Focused routes do not publish project status.
 
 Use an [explicit focused route](references/continuation.md#explicit-focused-routes)
 only when the user asks for one, such as analyzing supplied reports, comparing
@@ -89,6 +97,7 @@ Kotlin/Gradle checkout.
 | Research configuration or collect missing measurements | [Collection](references/collection.md), then [runtime](references/runtime.md) before any script | Justified scope, complete measurement catalog and explicit gaps |
 | Explicit request to analyze existing reports, including reports without sources | [Focused routes](references/continuation.md#explicit-focused-routes), then [collection import](references/collection.md#import-existing-reports) | Qualified JSONL evidence; source-free results remain hypotheses |
 | Calculate or interpret a signal | [Measurements](references/measurements.md) | Deterministic views and keyed signals |
+| Collect project/module aggregates or publish the final status | [Quality indicators](references/quality-indicators.md) | scc statistics, D/L/U/Q and diagnostics; JSON as the source of rendered Markdown |
 | Prepare or refine the investigation shortlist | [Candidate groups](references/candidate-groups.md) | Computed groups and ordering; source-grounded shortlist adjustments |
 | Diagnose candidates and compare directions | [Diagnosis](references/diagnosis.md), including its explicit `sdd-code-design` call | Source-grounded findings and a justified refactoring direction |
 | Author cards, prioritize and deliver | [Decision output](references/decision-output.md) | Six-section Markdown cards, tied priority groups and evidence for `sdd-spec` |
@@ -102,7 +111,7 @@ the shared `sdd-spec.architect` and `sdd-spec.explorer`
 this audit does not invoke the `sdd-spec` planning workflow. Role instructions
 define work quality; this workflow defines assignments, documents and transitions.
 
-Assign [metrics.py](scripts/metrics.py) commands `collect` and `rank` to explorer
+Assign [metrics.py](scripts/metrics.py) commands `collect`, `rank` and the final `status` to explorer
 through the shared checks contract. Keep formulas in the
 supplied scripts. Scripts calculate observations; architects establish
 responsibilities, mechanisms and effects. The orchestrator launches all roles

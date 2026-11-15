@@ -2,7 +2,9 @@
 
 The `collect` command completes the arithmetic before substantive analysis. Values select questions; source investigation
 establishes whether there is a problem. The script outputs measurements and
-signals, not an architecture score or a refactoring verdict.
+signals. A full audit additionally calculates the separate
+[project/module quality profile](quality-indicators.md); neither output is a
+refactoring verdict or the recommendation priority score.
 Obtain all numeric policy values through the [policy command](analysis-policy.md).
 The names below refer to its resolved output; they do not prescribe defaults.
 
@@ -11,7 +13,8 @@ The names below refer to its resolved output; they do not prescribe defaults.
 The executable catalog is [scripts/measurements.py](../scripts/measurements.py).
 Adapters live in `inputs.py` and `history.py`; `analysis.py` joins normalized inputs
 and emits the catalog; `graph.py` calculates graph definitions. `collection.py`
-handles commands and storage. Each input is parsed once per collection.
+handles commands and storage. Aggregate formulas live in `quality_indicators.py`
+and `design_rule_hierarchy.py`; `project_status.py` prepares and renders their result.
 
 Every `metrics/<name>/<level>.jsonl` is UTF-8: one independent JSON object per
 nonempty line, never an array. Each row has exactly one measurement plus its key,
@@ -116,25 +119,27 @@ recommendations after source analysis and resolves only the cited metric files.
 
 ### Treatment of prior auxiliary outputs
 
-Comments, blank lines, scc Complexity and author identities remain in raw reports;
-no normalized metrics, ownership shares or author/changeset summary scores are
-emitted for them. History window and import parameters stay in artifact provenance;
+Comments and blank lines also enter the aggregate scc statistics. scc Complexity
+and author identities remain in raw reports; no author ownership/summary scores
+are emitted. History window and import parameters stay in artifact provenance;
 actual event dates remain in `changes/commit`. Group file occurrences are represented
 by summed `change-frequency`; distinct commits use `activity`. Former absent-path
 lists are recoverable from historical events and `live_production`. Mapping gaps
 live once in the collection description. Group coverage and three CRAP aggregates
-are separate outputs with explicit membership. No auxiliary monolithic export is
-retained.
+are separate outputs with explicit membership. Project status has its own aggregate
+contract and does not replace these keyed diagnostic records.
 
 ## Graph and declared modules
 
 `a → b` means a depends on b. Class edges are unique. Package/module edge weight
 counts unique class pairs crossing that boundary, not calls or runtime frequency.
 The class, package and declared-module graphs are different populations.
-Nodes are edge endpoints; isolated declarations and internal edges discarded by
+In these catalog graphs, nodes are edge endpoints; isolated declarations and internal edges discarded by
 aggregation do not enter the corresponding denominator. Retain that scope when
 comparing measurements. JVM nested classes are preserved in this implementation;
 the pilot collapsed them, so those graph series are not directly comparable.
+The aggregate D/PC profile instead uses the complete Kotlin file inventory,
+including isolated files; never reuse the catalog denominator for that profile.
 
 | View | Calculation and limit |
 | --- | --- |
@@ -214,9 +219,11 @@ for nested syntax. Unknown/ambiguous declarations remain gaps. The analyzer's
 collection threshold. See [parameter counts](analysis-policy.md#parameter-counts-and-collection-thresholds).
 Resolve overload signatures in code.
 
-Absence of a finding is not measured zero. Suppressions/baselines/exclusions and
+In the SARIF diagnostic catalog, absence of a finding is not measured zero. Suppressions/baselines/exclusions and
 thresholds constrain the population. No system median or percentile is inferred
 from a thresholded series. Full MCC coverage must be established separately.
+The aggregate L collector independently measures every named Kotlin function
+through detekt's implementation, including suppressed and zero-complexity functions.
 
 Coverage is covered/total counters for lines and branches. Group coverage is
 sum(covered)/sum(total), not the mean of percentages. A zero denominator is
@@ -230,6 +237,9 @@ This is a file adaptation, not the original method metric: splitting files can
 lower the aggregate without changing logic. Group sum/mean includes only listed
 files; report the membership and omissions. `signals.crap.minimum_value` is a
 strict reading filter, not a validated risk threshold for this adaptation.
+Aggregate CRAP_exec instead uses each JVM method's own JaCoCo complexity and
+instruction/branch counters. Compute methods first; do not reuse file CRAP or
+substitute a mean coverage fraction into a summed complexity.
 
 ## First-pass filters and evidence weights
 
@@ -273,6 +283,7 @@ Signals guide where to look; the source mechanism and feasible change
 determine whether a recommendation is justified. Report the inspected scope
 rather than treating the selected groups as a complete architecture assessment.
 
-Keep the catalog bounded: no added nesting, duplication, mutation, diff coverage,
-build-duration, Decoupling Level or architecture-rule-count metrics. Source review
+The separate aggregate profile adds duplication and Decoupling Level. Keep other
+extensions out of the catalog: no added nesting, mutation, diff coverage,
+build-duration or architecture-rule-count metrics. Source review
 and ArchUnit acceptance can explain/check a recommendation without adding a metric.

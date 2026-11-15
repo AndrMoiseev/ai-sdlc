@@ -42,6 +42,9 @@ def main(argv=None):
     sub = commands.add_parser("collect", help="Collect every catalog output under memory/tech-debt/audits/<date-time>/")
     sub.add_argument("--config", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
+    sub.add_argument("--focused", action="store_true", help="Explicit focused analysis; does not calculate or publish project status")
+    sub = commands.add_parser("status", help="Publish status.json and status.md after the full report and plan are finished")
+    sub.add_argument("--collection", required=True, type=Path)
     sub = commands.add_parser("rank", help="Check Markdown cards and rank their metadata for sdd-spec discussion")
     sub.add_argument("--collection", required=True, type=Path)
     sub.add_argument("--recommendations", required=True, type=Path)
@@ -61,12 +64,16 @@ def main(argv=None):
                     value = value[part]
             print(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False))
         elif args.command == "collect":
-            value = collect(read_json(args.config), args.output)
+            value = collect(read_json(args.config), args.output, full=not args.focused)
             print(json.dumps({"collection": str(args.output / "collection.json"),
                               "complete_outputs": sum(row["status"] == "complete" for row in value["outputs"].values()),
                               "unavailable_outputs": sum(row["status"] != "complete" for row in value["outputs"].values()),
                               "candidate_groups": value["selections"]["candidate-groups"]["records"],
                               "gaps": value["gaps"]}))
+        elif args.command == "status":
+            from project_status import publish_status
+            destination = publish_status(args.collection)
+            print(json.dumps({"json": str(destination / "status.json"), "markdown": str(destination / "status.md")}))
         else:
             collection = read_json(args.collection)
             if collection.get("status") != "complete":

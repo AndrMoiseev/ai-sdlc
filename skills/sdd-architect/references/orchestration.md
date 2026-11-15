@@ -90,18 +90,21 @@ timeout and applicable whole-suite deadline. Resolve placeholders before assigni
 checks. Retain the version used by each request when the plan changes.
 
 Use `stage: evidence` for existing build/report tasks and `collect`;
-use `stage: ranking` for `rank`. Add another explicit stage only for an
+use `stage: ranking` for `rank`, and `stage: publication` for the final `status`
+command after report and plan completion. Add another explicit stage only for an
 authorized focused check. Resolve each requested ID against the saved revision;
 all IDs belong to the assigned stage. Execute them in dependency order, requiring
 each prerequisite to succeed before its dependent command starts. An
 assignment identifies the exact set; the explorer executes it without substituting
 commands or dropping checks. A later configuration/provenance update forms a new
 basis for the dependent batch. When a prerequisite fails, skip its dependent
-checks and report each unexecuted check with the reason. Continue independent
+checks and report each unexecuted check with the reason. In a full audit a required
+source failure blocks further work and preserves the previous project status;
+explain the prerequisite to the user. In focused work, continue independent
 assigned checks whose prerequisites, basis and limits still hold. If the batch
 cannot continue, return its partial result; the orchestrator assigns the remaining
 independent checks under a current request without repeating verified successful
-commands. A failed measurement family does not close unrelated families.
+commands. Do not switch a blocked full audit to focused mode without a user request.
 
 Research may propose commands and inspect their configuration. Builds, tests,
 linters and metric commands run only under a checks assignment.

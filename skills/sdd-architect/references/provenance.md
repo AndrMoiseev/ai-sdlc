@@ -59,6 +59,14 @@ the source procedure used the local adaptation at commit
 
 ## Instrument definitions
 
+The aggregate D/L/U/Q and method CRAP_exec profile implements the project's proposal
+`docs/decisions/research/0013-kotlin-architecture-quality-metrics/quality-indicators-proposal.md`.
+The accepted initial scope uses jdeps for dependencies, ArchDRH-Re with explicit
+flattening/isolate conventions, no pinned project Kotlin version, required complete
+sources, project/module results and final-only status publication. The audit's
+existing no-source-version-binding contract remains in force. See
+[quality indicators](quality-indicators.md) for executable definitions and limits.
+
 - [JDK jdeps](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jdeps.html):
   class dependency analysis and archive-filter behavior.
 - [detekt 1.23.8 complexity rules](https://detekt.dev/docs/1.23.8/rules/complexity/):

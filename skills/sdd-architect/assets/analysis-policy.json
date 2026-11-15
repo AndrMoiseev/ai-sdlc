@@ -10,6 +10,12 @@
     "crap": {"minimum_value": 30}
   },
   "measurements": {
+    "quality_indicators": {
+      "cognitive_complexity": 15, "function_tokens": 300, "class_tokens": 3000, "file_tokens": 5000,
+      "clone_tokens": 100, "duplication_reference": 0.10, "small_group_files": 5,
+      "history_days": 180, "history_maximum_files": 30, "history_minimum_shared": 5,
+      "history_minimum_average": 5, "history_minimum_coupling": 0.30
+    },
     "history": {"maximum_changeset_size": 30, "recent_days": 30},
     "martin": {"minimum_types": 5},
     "external_affinity": {"minimum_declared_fraction": 0.34, "minimum_leading_share": 0.25, "minimum_bridge_share": 0.33},

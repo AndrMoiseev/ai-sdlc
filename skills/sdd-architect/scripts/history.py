@@ -1,6 +1,7 @@
 """Code Maat coupling semantics with unrounded support retained."""
 
 import math
+import json
 import re
 from collections import Counter, defaultdict
 from datetime import date, timedelta
@@ -11,6 +12,30 @@ HEADER = re.compile(r"^--([0-9a-f]+)--(\d{4}-\d{2}-\d{2})--(.*)$")
 
 
 def parse_history(text):
+    if text.lstrip().startswith("{"):
+        value = json.loads(text)
+        if value.get("format") != "git-history" or value.get("first_parent") is not True or value.get("renames") is not True:
+            raise ValueError("History requires first-parent collection with rename tracking")
+        if date.fromisoformat(value["since"]) > date.fromisoformat(value["until"]):
+            raise ValueError("Invalid history window")
+        revisions = set()
+        for commit in value["commits"]:
+            if commit["revision"] in revisions:
+                raise ValueError("History contains duplicate revisions")
+            revisions.add(commit["revision"])
+            date.fromisoformat(commit["date"])
+            if type(commit["production_files"]) is not int or not 0 <= commit["production_files"] <= len(commit["changes"]):
+                raise ValueError("Invalid production changeset size")
+            for name, change in commit["changes"].items():
+                path = PurePosixPath(name)
+                if path.is_absolute() or ".." in path.parts or "\\" in name or re.match(r"^[A-Za-z]:", name):
+                    raise ValueError("History path must be repository-relative")
+                if type(change["binary"]) is not bool or any(
+                    (value is not None if change["binary"] else type(value) is not int or value < 0)
+                    for value in (change["added"], change["deleted"])
+                ):
+                    raise ValueError("Invalid history numstat")
+        return value["commits"]
     commits, current = [], None
     for number, line in enumerate(text.splitlines(), 1):
         match = HEADER.match(line)
@@ -40,6 +65,56 @@ def parse_history(text):
     if len({c["revision"] for c in commits}) != len(commits):
         raise ValueError("git.log contains duplicate revisions")
     return commits
+
+
+def collect_history(config, root, run, policy, sources):
+    """Track Git-detected renames backwards to current paths, retaining whole changesets."""
+    from datetime import datetime, timezone
+    from fnmatch import fnmatchcase
+    days = policy["measurements"]["quality_indicators"]["history_days"]
+    end = datetime.now(timezone.utc).date()
+    start = end - timedelta(days=days)
+    if run(["git", "rev-parse", "--is-shallow-repository"], root, policy).decode().strip() == "true":
+        raise ValueError("History is shallow; obtain the required history before auditing")
+    argv = ["git", "-c", "core.quotePath=false", "log", "--first-parent", "--no-merges", "--find-renames",
+            "--numstat", "-z", "--format=%x1e%H%x09%cs%x00", "--since=" + start.isoformat() + "T00:00:00Z",
+            "--until=" + end.isoformat() + "T23:59:59Z"]
+    text = run(argv, root, policy).decode("utf-8")
+    aliases, commits = {}, []
+    def production(path):
+        return (path.endswith(".kt") and any(path.startswith(prefix.rstrip("/") + "/") for prefix in config["source_roots"])
+                and not any(fnmatchcase(path, pattern) for pattern in config.get("exclude_paths", [])))
+    for block in text.split("\x1e"):
+        if not block.strip("\0\r\n"):
+            continue
+        header, _, content = block.partition("\0")
+        revision, timestamp = header.split("\t")
+        parts, index = content.split("\0"), 0
+        changes, renames = {}, []
+        production_count = 0
+        while index < len(parts):
+            entry = parts[index].lstrip("\r\n")
+            index += 1
+            if not entry:
+                continue
+            added, deleted, path = entry.split("\t", 2)
+            old = None
+            if not path:
+                old, path = parts[index:index + 2]
+                index += 2
+                renames.append((old, path))
+            production_count += int(production(path) or bool(old and production(old)))
+            current = aliases.get(path, path)
+            if current in changes:
+                raise ValueError("Ambiguous historical path identity after rename tracking")
+            binary = added == "-" or deleted == "-"
+            changes[current] = {"added": None if binary else int(added), "deleted": None if binary else int(deleted), "binary": binary}
+        commits.append({"revision": revision, "date": timestamp, "author": "", "changes": changes, "production_files": production_count})
+        for old, new in renames:
+            aliases[old] = aliases.get(new, new)
+            aliases.pop(new, None)
+    return json.dumps({"format": "git-history", "first_parent": True, "renames": True,
+                       "since": start.isoformat(), "until": end.isoformat(), "commits": commits}).encode(), argv
 
 
 def history_view(commits, policy):

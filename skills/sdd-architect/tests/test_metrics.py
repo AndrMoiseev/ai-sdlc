@@ -351,7 +351,7 @@ class CollectionIntegrationTests(unittest.TestCase):
                 self.assertEqual(main(["policy", "--repository", str(repo), "--get", "signals.complexity.cyclomatic_minimum"]), 0)
                 self.assertEqual(json.loads(stdout.getvalue()), 11)
             with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO):
-                self.assertEqual(main(["collect", "--config", str(config_path), "--output", str(report)]), 0)
+                self.assertEqual(main(["collect", "--focused", "--config", str(config_path), "--output", str(report)]), 0)
             description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
             self.assertEqual(set(description["outputs"]), set(CATALOG))
             self.assertEqual(description["status"], "complete")
@@ -430,7 +430,7 @@ class MeasurementTests(unittest.TestCase):
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["outputs"].values()))
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["selections"].values()))
 
-    def test_git_failure_only_limits_requested_history_chain(self):
+    def test_focused_git_failure_only_limits_requested_history_chain(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
         report = root / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
         config = {"repository": str(root), "artifacts": {
@@ -441,7 +441,7 @@ class MeasurementTests(unittest.TestCase):
               patch.object(Path, "read_bytes", return_value=b"file,line_covered,line_total,branch_covered,branch_total\nsrc/A.kt,0,2,0,0\n"),
               patch("collection.inventory", side_effect=OSError("Source read unavailable")), patch("collection.map_classes", return_value=({}, [])),
               patch("collection.write_jsonl"), patch("collection.run", side_effect=FileNotFoundError("Git unavailable")) as command):
-            value = collect(config, report)
+            value = collect(config, report, full=False)
         self.assertEqual(value["status"], "complete")
         self.assertEqual(value["outputs"]["changes/commit"]["status"], "error")
         self.assertEqual(value["outputs"]["source-files/file"]["status"], "error")

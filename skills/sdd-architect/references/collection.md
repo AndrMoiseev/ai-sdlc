@@ -10,10 +10,11 @@ all derived measurements and prepares keyed selections, preliminary candidate gr
 and their investigation queue before architects begin
 substantive analysis. Read individual JSONL files through `collection.json`.
 
-Inventory dependencies, history, size, complexity and coverage. Each catalog output
-ends with a result or a concrete reason for unavailability. A failing source limits
-its dependent calculations; independent chains continue. Successful execution does
-not imply that all observations were available or complete.
+Inventory dependencies, history, scc statistics, Kotlin tokens/functions, detekt
+diagnostics and JaCoCo coverage. All six sources are mandatory for a full audit.
+Missing, failed or incomplete input blocks it. Explain the prerequisite and propose
+resolving it first; preserve the previous status. Only explicitly focused work may
+retain partial inputs under its narrower contract.
 
 ## Establish the scope
 
@@ -22,7 +23,8 @@ ArchUnit checks and vocabulary. Choose production Kotlin/Java source roots,
 compiled directories, variants, test tasks and exclusions from that evidence.
 Android and Multiplatform require an explicit JVM variant/source-set choice.
 Keep test/generated code separate from the measured graph; inspect generated
-wiring when it explains behavior. Undeclared packages remain unassigned.
+wiring when it explains behavior. Assign every measured Kotlin package to a declared
+architectural module before a full audit; ambiguous or missing ownership blocks it.
 Gradle layout establishes build scope, not architectural responsibility.
 
 ## Maintain project configuration
@@ -35,8 +37,8 @@ project configuration or `.sdd/settings.json`.
    [collection.example.json](../assets/collection.example.json).
 2. Check source roots, compiled directories, package prefixes, module ownership,
    exclusions, build scope and test tasks against current project evidence.
-   Preserve deliberate boundaries and the history window unless the task calls
-   for a different measurement population. Unknown ownership remains unassigned.
+   Preserve deliberate boundaries. The full-audit history window comes from the
+   resolved quality-indicator policy. Focused analysis may retain its own window.
 3. Resolve current source and report paths. Record tool versions, actual commands,
    populations, exclusions and extraction limitations; these describe the measurement.
 4. Save the configuration and `collection-plan.md` before the assigned collection.
@@ -52,17 +54,18 @@ is their ordinary repository history, not an input to this process.
 | Configuration field | Meaning |
 | --- | --- |
 | `repository`, `source_roots`, `exclude_paths` | Checkout and production population; exclusions are case-sensitive glob patterns |
+| `test_roots`, `statistics_exclude_paths` | Test classification and additional exclusions for repository-wide scc statistics |
 | `package_prefixes`, `exclude_classes` | Internal graph namespace and class exclusions; nested JVM names stay distinct |
-| `modules` | Declared module names mapped to package prefixes; `{}` means ownership is unknown |
+| `modules` | Architectural module names mapped to package prefixes; complete ownership is mandatory in full audits |
 | `scope` | Gradle projects, source sets, variant and test tasks |
 | `class_directories` | Compiled directories for jdeps and JVM SourceFile mapping |
 | `class_files` | Optional explicit JVM-class to repository-relative source mapping |
-| `artifacts` | Available dependencies, history, sizes, complexity and coverage inputs |
+| `artifacts` | Required `dependencies`, `history`, `sizes`, `kotlin`, `complexity`, `coverage` inputs |
 
 Artifact import paths are absolute. Source roots and compiled directories are
 relative to `repository`. Source paths in JSONL use repository-relative `/` paths.
 Module prefixes match package segments; the longest prefix wins. Equal longest
-prefixes assigned to different modules make module-dependent calculations unavailable.
+prefixes assigned to different modules block a full audit.
 
 ## Obtain missing reports
 
@@ -73,28 +76,40 @@ analyzer thresholds after import, including the parameter-list threshold.
 
 Register exact commands, outputs and limits in the collection plan before assigning
 checks. Existing build/report tasks run before their dependent `collect` command.
-The collector supports its fixed jdeps, Git and scc commands; a report's stored
+The collector supports its fixed jdeps, Git, scc and Kotlin measurement commands; a report's stored
 command is descriptive provenance, never an executable command string.
 
 1. Discover existing Gradle compilation, detekt and JaCoCo tasks. Read their actual
-   configuration. Record an absent task as a gap; configuring it is separate work.
+   configuration. An absent required task is a blocker; configuring it is separate work.
    Use external caches and temporary build output where the project supports them.
 2. Compile the selected production code and consumers. `dependencies: {"collect": true}`
    invokes `jdeps -verbose:class -filter:none --ignore-missing-deps` on configured
    directories. DI, reflection and missing dependencies limit graph completeness.
    `collect` does not compile the project.
-3. `history: {"collect": true, "since": "YYYY-MM-DD"}` exports available Git history
-   with `--no-merges --no-renames --numstat`; `until` is optional. Preserve full
-   changeset sizes before filtering co-change support. A historical commit ID
-   addresses a change event only. Git is needed solely for this collection branch.
-4. `sizes: {"collect": true}` invokes scc JSON with per-file rows. Normalize `Code`
-   and `Lines`; comments, blanks and scc Complexity remain outside the core catalog.
+3. `history: {"collect": true}` exports the policy window through the current UTC
+   date, first-parent only, excluding merges and tracking Git-detected renames.
+   Shallow history blocks collection. Retain complete changesets and their production
+   file counts before filtering. Historical commit IDs address events only.
+   Focused collection can use `since`/`until` and the simpler `git-log` import.
+4. `sizes: {"collect": true}` invokes scc JSON with per-file rows across the repository.
+   Aggregate files, lines, code, comments and blanks by language, production/test/other
+   category and module. Exclude configured generated/build paths and `memory/tech-debt/**`.
+   scc Complexity is not cognitive complexity and is not an input to L.
 5. Obtain detekt SARIF for the five supported rules. The adapter understands the
    recorded detekt 1.23.8 message forms; another form leaves a value unknown.
    Retain locations, declarations and suppressions. Set `complete_mcc: true` only
    with evidence that the selected function population was fully measured.
 6. Run selected tests and obtain one merged JaCoCo XML. Merge execution data with
    the coverage tool; do not add duplicate source rows from separate reports.
+   Set `complete: true` and `test_result: "passed"` only after checking complete
+   production class coverage and successful execution of the configured test tasks.
+   Missing reports, classes or required counters block a full audit.
+7. `kotlin: {"collect": true}` runs the bundled token/function collector with detekt's
+   Kotlin parser and cognitive-complexity implementation. This supplies all named
+   functions, including zero values and suppressed findings, plus token positions
+   and size containers. Optional absolute `java` and `detekt_jar` select the JDK
+   launcher and the required detekt 1.23.8 distribution. See [runtime](runtime.md).
+   No project Kotlin version is prescribed; unsupported syntax blocks collection.
 
 Record `format`, `tool`, `version`, `command`, `source_root`, and relevant limitations
 for imports. Save original reports once in `raw/`; tools may write directly there.
@@ -105,15 +120,17 @@ It saves a separate normalized representation in `metrics/`, never a second raw 
 
 For reused reports or an explicitly [focused route](continuation.md#explicit-focused-routes),
 qualify populations, tool definitions, exclusions, source paths and mapping. Assign
-`collect` to complete normalization and calculation before source interpretation.
+`collect --focused` for an explicitly focused route; use plain `collect` for a
+full audit with every required source. Never choose focused mode to bypass a blocker.
 
 | Input | Accepted format |
 | --- | --- |
 | Dependencies | `class-csv` with `from,to`, or `jdeps` text |
-| History | `git-log` with complete changesets and numstat |
+| History | Full audit: `git-history` JSON produced by the collector, covering the policy window; focused work also accepts `git-log` |
 | Size | `scc` per-file JSON |
 | Complexity | `detekt-sarif` |
-| Coverage | `jacoco` XML or `coverage-csv` with covered/total counters |
+| Kotlin | Complete `kotlin-measurements` JSON produced by the bundled collector |
+| Coverage | Full audit: complete `jacoco` XML; focused work also accepts `coverage-csv` |
 
 Set `source_root` to the checkout root encoded in imported paths. Unresolved paths
 are an adapter gap; joining by basename would invent a correspondence. A coupling
@@ -135,7 +152,7 @@ filenames within a package remain ambiguous across source sets. Explicit overrid
 require a real class/file correspondence, without a version marker.
 
 Inspect mapping gaps before file hotspots or claims about absent direct static edges.
-A partial mapping limits those claims while leaving independent graph/history results
-available. SARIF locations are observations: inspect current declarations and overload
+A partial mapping blocks a full audit. In focused work it limits the affected claims.
+SARIF locations are observations: inspect current declarations and overload
 signatures before recommending a transformation. Use substantive evidence and the
 [measurement catalog](measurements.md) to establish applicability.
