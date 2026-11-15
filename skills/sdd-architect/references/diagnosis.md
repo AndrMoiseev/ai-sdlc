@@ -63,7 +63,7 @@ uninspected areas from areas without findings. A rule deviation becomes a
 recommendation only when the scenario, mechanism and direction of improvement are
 established. Keep the heuristic
 file/section with the mechanism; do not count rule matches or deviations as a
-quality score. Assign readiness and M/R/S effects here, then prioritize through
+quality score. Assign readiness and separately grounded M/R/C effects here, then prioritize through
 [decision output](decision-output.md). Zero justified recommendations is valid.
 
 For each selected candidate, answer five questions with inspectable evidence:

@@ -285,7 +285,9 @@ def prepare_selections(rows, outcomes, artifacts):
         for identifier, _ in references:
             limited |= any(suitability(artifacts[name]) != "usable" for name in CATALOG[identifier]["inputs"] if name in artifacts)
         signals.append({"family": family, "condition": condition, "references": [reference(name, row) for name, row in references],
-                        "suitability": "limited" if limited else "usable", "weights_MRS": [min(weight, 1) for weight in WEIGHTS[family]] if limited else WEIGHTS[family]})
+                        "suitability": "limited" if limited else "usable",
+                        "evidence_weights": dict(zip(("modularity", "regression_risk", "change_cost_reduction"),
+                                                     [min(weight, 1) for weight in WEIGHTS[family]] if limited else WEIGHTS[family]))})
 
     for identifier in sorted(rows):
         if outcomes[identifier]["status"] != "complete":

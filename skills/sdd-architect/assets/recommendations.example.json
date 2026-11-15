@@ -7,7 +7,12 @@
       "source_evidence": [],
       "metric_evidence": [
         {"path": "metrics/dependencies/package.jsonl", "key": {"from": "example.orders", "to": "example.pricing"}}
-      ]
+      ],
+      "effects": {
+        "modularity": "unknown",
+        "regression_risk": "unknown",
+        "change_cost_reduction": "unknown"
+      }
     }
   ]
 }

@@ -139,7 +139,7 @@ the pilot collapsed them, so those graph series are not directly comparable.
 | SCC | Maximal mutually reachable set; cyclic groups have more than one member. A package SCC does not establish a class cycle. |
 | Fan-in / fan-out | Distinct immediate consumers / suppliers; weighted totals are separate. |
 | Visibility in / out | Reachable consumers / suppliers, including the node itself, divided by N. |
-| Propagation cost | Reachable ordered pairs including the diagonal / N²; undefined for N=0. It is neither regression probability nor development speed. |
+| Propagation cost | Reachable ordered pairs including the diagonal / N²; undefined for N=0. It measures neither regression probability nor the work or tokens needed for a change. |
 | Layers | Peel nodes without suppliers; if none, without consumers; otherwise the largest SCC. Layer count has no better/worse direction. |
 | Cohesion | Internal inter-package edge weight / (internal + incoming and outgoing boundary weight). Internal edges count once. Same-package class edges are absent. |
 | External affinity | Package's incoming+outgoing weight to each other declared module / weight to all other declared modules. Own-module links are excluded. |
@@ -221,7 +221,7 @@ risk threshold for this adaptation.
 
 ## First-pass filters and evidence weights
 
-| Signal/filter | M | R | S |
+| Signal/filter | M | R | C |
 | --- | --- | --- | --- |
 | SCC >1 member | 2 | 1 | 1 |
 | Fan-in/out, visibility, PC individually | 1 | 1 | 0 |
@@ -238,8 +238,13 @@ risk threshold for this adaptation.
 2 means a primary diagnostic signal, 1 supporting context, 0 no evidence for
 that goal. Usable evidence retains the matrix weight; limited evidence is capped
 at 1; unusable evidence is excluded without replacing its value by zero.
-Weights are ordinal and never added. Shared provenance prevents double counting.
-All speed weights are ≤1 because this metric set contains no speed measurements.
+`evidence_weights` names these roles by `modularity`, `regression_risk` and
+`change_cost_reduction`. Weights are ordinal and never added. Shared provenance
+prevents double counting. All change-cost weights are ≤1 because this metric set
+contains no measurements of agent tokens, human effort or end-to-end change time.
+The queue sums capped evidence-family contributions under its separate policy;
+`rank` sums grounded effect preference points after diagnosis. Neither sum uses
+the diagnostic weights in this table.
 
 Use the [computed groups and queue](candidate-groups.md) for preliminary selection.
 That contract defines exact-scope grouping, contained signals, overlaps, ordering,

@@ -4,6 +4,7 @@ import re
 from pathlib import PurePosixPath
 
 EFFECTS = {"substantial": 2, "local": 1, "not_shown": 0}
+CRITERIA = ("modularity", "regression_risk", "change_cost_reduction")
 STATUSES = {"ready", "needs_check", "observe", "rejected"}
 FIELDS = {"id", "status", "card", "source_evidence", "metric_evidence", "effects"}
 
@@ -80,33 +81,33 @@ def rank(document, sources, resolve_metric=None, read_card=None):
         profile = card.get("effects")
         if status == "ready" or profile is not None:
             allowed = set(EFFECTS) if status == "ready" else set(EFFECTS) | {"unknown", "worsening"}
-            if (not isinstance(profile, dict) or set(profile) != {"modularity", "regression_risk", "development_speed"}
+            if (not isinstance(profile, dict) or set(profile) != set(CRITERIA)
                     or any(effect not in allowed for effect in profile.values())):
                 raise ValueError(f"{identity}: invalid effect profile; unknown or worsening effects cannot be ready")
         if status == "ready":
             if not any(effect != "not_shown" for effect in profile.values()):
                 raise ValueError(f"{identity}: no grounded benefit; observe or reject")
+            value["priority_score"] = sum(EFFECTS[profile[key]] for key in CRITERIA)
             ready.append(value)
         checked.append(value)
-    def profile(card):
-        return tuple(EFFECTS[card["effects"][key]] for key in ("modularity", "regression_risk", "development_speed"))
-    ordered = sorted(ready, key=lambda card: (tuple(-value for value in profile(card)), card["id"]))
+    ordered = sorted(ready, key=lambda card: (-card["priority_score"], card["id"]))
     groups, previous = [], None
     for card in ordered:
-        current = profile(card)
+        current = card["priority_score"]
         if current != previous:
             groups.append([])
             previous = current
         groups[-1].append(card["id"])
     return {"priority_groups": groups,
             "recommendations": ordered + [card for card in checked if card["status"] != "ready"],
-            "ordering": "modularity, regression_risk, development_speed; equal profiles remain tied"}
+            "ordering": "sum of equally weighted modularity, regression_risk, change_cost_reduction "
+                        "(not_shown=0, local=1, substantial=2); equal scores remain tied"}
 
 
 def markdown(document):
     lines = ["# Refactoring directions for sdd-spec", "",
-             "| Priority | Recommendation | Modularity | Regression risk | Development speed |",
-             "| --- | --- | --- | --- | --- |"]
+             "| Priority | Score | Recommendation | Modularity | Regression risk reduction | Change cost reduction |",
+             "| --- | --- | --- | --- | --- | --- |"]
     priorities = {identity: index for index, group in enumerate(document["priority_groups"], 1) for identity in group}
     def cell(value):
         return str(value).replace("|", "\\|").replace("\n", " ")
@@ -116,8 +117,8 @@ def markdown(document):
     ready = [card for card in document["recommendations"] if card["status"] == "ready"]
     for card in ready[:5]:
         effects = card["effects"]
-        lines.append("| " + " | ".join(str(value) for value in (priorities[card["id"]], link(card),
-                     effects["modularity"], effects["regression_risk"], effects["development_speed"])) + " |")
+        lines.append("| " + " | ".join(str(value) for value in (priorities[card["id"]], card["priority_score"], link(card),
+                     effects["modularity"], effects["regression_risk"], effects["change_cost_reduction"])) + " |")
     if not ready:
         lines.extend(["", "No evidence-backed directions are ready for sdd-spec discussion."])
     for status in ("needs_check", "observe", "rejected"):

@@ -9,6 +9,9 @@ from measurements import CATALOG, key_text, record_key
 
 SELECTION_NAMES = ("rankings", "signals", "candidate-groups", "investigation-queue")
 DEFAULT_CANDIDATE_GROUP_LIMIT = 12
+EVIDENCE_FAMILIES = {"cycle": "dependency_structure", "boundary": "dependency_structure",
+                     "coupling": "change_patterns", "hotspot": "change_patterns",
+                     "complexity": "code_risk", "coverage": "code_risk", "crap": "code_risk", "shape": "code_risk"}
 
 
 def candidate_group_limit(config):
@@ -66,12 +69,11 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
                 unresolved.append({"level": level, "object": member})
         return files, sorted(unresolved, key=key_text)
 
-    scopes, signal_rows, provisional = {}, {}, {}
+    scopes, provisional = {}, {}
     for signal in signals:
-        files, unresolved, observations = set(), {}, []
+        files, unresolved = set(), {}
         for ref in signal["references"]:
             identifier, row = measurements[(ref["path"], key_text(ref["key"]))]
-            observations.append((identifier, row))
             found, missing = objects(identifier, row)
             files.update(found)
             for value in missing:
@@ -85,7 +87,6 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
         group = provisional.setdefault(scope_key, {"scope": scope, "seed_signals": []})
         group["seed_signals"].append(signal["signal"])
         scopes[signal["signal"]] = scope
-        signal_rows[signal["signal"]] = observations
 
     groups = [{"group": f"group-{index:04d}", **provisional[key]}
               for index, key in enumerate(sorted(provisional), 1)]
@@ -115,30 +116,17 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
         overlaps[left].append({"group": right, "shared_files": sorted(files)})
         overlaps[right].append({"group": left, "shared_files": sorted(files)})
 
-    def signal_order(identity):
-        signal, observations = by_signal[identity], signal_rows[identity]
-        family = signal["family"]
-        category = "structural" if family in {"cycle", "coupling", "hotspot"} else (
-            "risk" if family in {"complexity", "coverage", "crap"} else "supporting")
-        rule = {"cycle": 0, "coupling": 3, "hotspot": 2, "complexity": 0,
-                "coverage": 1, "crap": 2, "shape": 0, "boundary": 1}[family]
-        if family == "coupling" and max(row["value"] for _, row in observations) >= 60:
-            rule = 1
-        identifier, row = next(((name, value) for name, value in observations
-                                if name == "line-coverage/file"), observations[0])
-        value = len(row["members"]) if family == "cycle" else row.get("value")
-        magnitude = (value is None, (value if family == "coverage" else -value) if value is not None else 0)
-        # Numbers are compared only within the same rule and measurement definition.
-        return (("structural", "risk", "supporting").index(category),
-                signal["suitability"] != "usable", rule, identifier, magnitude, identity), category
-
-    orders = {}
     for group in groups:
-        best = min(group["seed_signals"], key=lambda identity: signal_order(identity)[0])
-        order, category = signal_order(best)
-        orders[group["group"]] = (order, group["group"])
-        group["category"] = category
-        group["ordering_signal"] = selection_reference("signals", "signal", best)
+        families = {}
+        for identity in sorted(attached[group["group"]]):
+            signal = by_signal[identity]
+            family = families.setdefault(EVIDENCE_FAMILIES[signal["family"]], {"points": 0, "signals": []})
+            # Cap related observations at one contribution; raw metric magnitudes
+            # and diagnostic evidence weights never become comparable severity.
+            family["points"] = max(family["points"], 2 if signal["suitability"] == "usable" else 1)
+            family["signals"].append(selection_reference("signals", "signal", identity))
+        group["evidence_families"] = dict(sorted(families.items()))
+        group["investigation_score"] = sum(family["points"] for family in families.values())
         missing = sorted(set(group["scope"]["files"]) - sources.keys())
         group["source_available"] = bool(group["scope"]["files"]) and not missing and not group["scope"].get("unresolved_objects")
         group["limitations"] = []
@@ -152,7 +140,7 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
         group["overlaps"] = sorted(overlaps[group["group"]], key=lambda overlap: overlap["group"])
 
     queue, covered, selected_count = [], {}, 0
-    for position, group in enumerate(sorted(groups, key=lambda group: orders[group["group"]]), 1):
+    for position, group in enumerate(sorted(groups, key=lambda group: (-group["investigation_score"], group["group"])), 1):
         seeds = set(group["seed_signals"])
         covered_by = sorted({covered[identity] for identity in seeds if identity in covered})
         if seeds <= covered.keys():
@@ -161,14 +149,14 @@ def prepare_candidate_groups(config, rows, outcomes, signals):
             selected, reason = False, "Candidate group limit reached; absence from the shortlist is not evidence of safety"
             covered_by = []
         else:
-            selected, reason = True, "Next uncovered group in the structural, risk, supporting investigation order"
+            selected, reason = True, "Next uncovered group by investigation score; equal scores use canonical scope order"
             selected_count += 1
             covered_by = []
             for identity in attached[group["group"]]:
                 covered.setdefault(identity, group["group"])
         queue.append({"candidate_group": selection_reference("candidate-groups", "group", group["group"]),
-                      "position": position, "category": group["category"], "selected": selected,
-                      "reason": reason, "covered_by": covered_by, "ordering_signal": group["ordering_signal"]})
+                      "position": position, "investigation_score": group["investigation_score"], "selected": selected,
+                      "reason": reason, "covered_by": covered_by, "evidence_families": group["evidence_families"]})
 
     for group in groups:
         group["seed_signals"] = [selection_reference("signals", "signal", identity) for identity in sorted(group["seed_signals"])]

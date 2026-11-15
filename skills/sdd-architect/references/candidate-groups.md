@@ -8,7 +8,7 @@ groups and ordering regardless of input iteration order.
 
 Read these outputs before the first architect shortlist. They bound the initial
 source investigation; they do not establish a common cause, readiness or expected
-M/R/S effects. Recommendation priority still belongs to `rank` after diagnosis.
+M/R/C effects. Recommendation priority still belongs to `rank` after diagnosis.
 
 ## Inputs and addressing
 
@@ -56,36 +56,42 @@ Each `selections/candidate-groups.jsonl` record contains:
 | `seed_signals` | Keyed signal references that created this exact scope |
 | `signals` | Deduplicated seed and contained signal references |
 | `overlaps` | Other group IDs and their exact shared files |
-| `category`, `ordering_signal` | Investigation category and seed used for ordering |
+| `evidence_families` | Each evidence family's capped points and keyed signal references |
+| `investigation_score` | Sum of those family contributions, used for investigation ordering |
 | `source_available`, `limitations` | Current source availability and evidence/mapping gaps |
 
 No metric values are copied into groups. Multiple transformations of one input
-remain related evidence; neither signal counts nor M/R/S weights are summed.
+remain related evidence; neither raw signal counts nor diagnostic evidence weights are summed.
 Source availability does not establish diagnosis quality or implementation readiness.
 
 ## Order and select
 
-Give each group the earliest position supported by one of its seed signals under
-the following comparison. Attached context does not change its category.
+Use seed and fully contained signals to calculate one capped contribution per
+evidence family. Partial mappings retain only their own seed signals.
 
-1. Category: structural, then risk, then supporting.
-2. Within a category: usable evidence before limited evidence.
-3. Within that suitability: the rule order below.
-4. Within a rule: measurement identifier lexically, then its numeric value descending.
-   Coverage uses its fraction ascending; cycles use member count descending. Unknown
-   counts follow measured values of the same metric and tie by key, without an
-   invented measurement.
-5. Break remaining ties by the canonical signal ID, then group ID.
-
-| Category | Rule order |
+| Evidence family | Related signal families |
 | --- | --- |
-| Structural | Cycles; co-change at least 60%; hotspots; remaining supported co-change |
-| Risk | Function complexity; low coverage with change activity; file CRAP |
-| Supporting | Declaration shape, including parameter findings; Martin distance |
+| `dependency_structure` | Cycles at all granularities; Martin distance |
+| `change_patterns` | Co-change, including implicit co-change; all structural hotspots |
+| `code_risk` | Function complexity; declaration shape; low coverage with change activity; file CRAP |
 
-Values from different measurements are never compared as a common severity score.
-The category policy can exhaust the budget on structural groups; retained deferred
-risk/supporting groups make that limitation visible for the architect to assess.
+Each family contributes 2 points when any of its signals is usable, or 1 when
+only limited signals are present. An absent family contributes no points and
+supplies no evidence of safety. Record only present families, with their points
+and all keyed signal references. Sum the capped contributions as
+`investigation_score` (1–6 for a nonempty group). These are investigation preference
+points; they are separate from the diagnostic evidence weights and recommendation
+effects. The conservative families keep graph derivatives together, hotspots with
+their change-history context, and CRAP with its complexity/coverage inputs.
+They do not assert independent causes or statistical independence.
+
+Order groups by descending score. Equal scores mean equal investigation priority;
+canonical scope/group ID determines only reproducible display and budget selection.
+There is no structural-before-risk rule or metric-magnitude tie-breaker. Multiple
+functions, granularities, copies or derivatives in one family cannot inflate its
+contribution; a larger file scope gains no points merely for its size. Distinct
+families in one group raise its investigation priority without establishing a common
+cause. Overlapping groups retain their own scopes and shared evidence references.
 
 Walk this ordering once. Select a group when its seed signals are not all already
 included in selected groups and the budget has room. Mark a group covered when
@@ -97,7 +103,7 @@ Otherwise mark it deferred by the budget. Every group gets a row in
 | --- | --- |
 | `candidate_group` | JSONL path and full `{"group":"group-0001"}` key |
 | `position` | Position in the complete ordered queue |
-| `category`, `ordering_signal` | Explain the deterministic ordering |
+| `investigation_score`, `evidence_families` | Explain the score and its capped contributions |
 | `selected` | Whether this group consumes an automatic investigation slot |
 | `reason`, `covered_by` | Selection, budget deferral or coverage by selected groups |
 

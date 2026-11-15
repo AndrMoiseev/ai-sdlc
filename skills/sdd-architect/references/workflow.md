@@ -81,7 +81,7 @@ current source paths, limitations, existing plan tasks and known change/behavior
    Check dependencies and conflicting directions across recommendations.
    Apply [Decision output](decision-output.md) to author six-section Markdown cards
    in `recommendations/` and compact `cards.json` metadata with readiness and grounded
-   M/R/S effects. Keep detailed design questions for human-involved `sdd-spec` work.
+   M/R/C effects. Keep detailed design questions for human-involved `sdd-spec` work.
    Request bounded research/checks through the orchestrator
    only when an attainable answer can change the decision.
 

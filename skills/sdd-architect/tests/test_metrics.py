@@ -26,7 +26,7 @@ def card(identity, effect):
     return {"id": identity, "status": "ready", "card": f"recommendations/{identity}.md",
             "metric_evidence": [],
             "source_evidence": [{"file": "src/Price.kt", "declaration": "price(lines: List<Line>): Money"}],
-            "effects": dict(zip(("modularity", "regression_risk", "development_speed"), effect))}
+            "effects": dict(zip(("modularity", "regression_risk", "change_cost_reduction"), effect))}
 
 
 def card_markdown(identity):
@@ -190,11 +190,19 @@ class RecommendationTests(unittest.TestCase):
         return rank(self.document, self.sources if sources is None else sources, resolve_metric,
                     lambda path: card_markdown(Path(path).stem))
 
-    def test_modularity_precedes_large_risk_improvement_and_ties_remain(self):
-        self.document["recommendations"] = [card("R", ("not_shown", "substantial", "local")),
-                                             card("M", ("local", "local", "not_shown")),
-                                             card("T", ("local", "local", "not_shown"))]
-        self.assertEqual(self.rank()["priority_groups"], [["M", "T"], ["R"]])
+    def test_three_local_effects_beat_one_substantial_and_equal_sums_tie(self):
+        self.document["recommendations"] = [card("M", ("substantial", "not_shown", "not_shown")),
+                                             card("R", ("not_shown", "substantial", "not_shown")),
+                                             card("C", ("not_shown", "not_shown", "substantial")),
+                                             card("L", ("local", "local", "not_shown")),
+                                             card("T", ("local", "local", "local")),
+                                             card("B", ("not_shown", "substantial", "substantial"))]
+        result = self.rank()
+        self.assertEqual(result["priority_groups"], [["B"], ["T"], ["C", "L", "M", "R"]])
+        self.assertEqual({value["id"]: value["priority_score"] for value in result["recommendations"]},
+                         {"B": 4, "T": 3, "C": 2, "L": 2, "M": 2, "R": 2})
+        self.document["recommendations"].reverse()
+        self.assertEqual(self.rank(), result)
 
     def test_direction_with_open_design_questions_is_ready_and_links_its_card(self):
         self.document["recommendations"] = [card("R1", ("local", "local", "not_shown"))]
@@ -203,6 +211,8 @@ class RecommendationTests(unittest.TestCase):
         self.assertNotIn("execution_order", value)
         rendered = markdown(value)
         self.assertIn("[R1: Extract price calculation](<recommendations/R1.md>)", rendered)
+        self.assertIn("| 1 | 2 |", rendered)
+        self.assertIn("Change cost reduction", rendered)
         self.assertNotIn("implementation-ready", rendered)
         self.assertNotIn("Choose the API", json.dumps(value))
 
@@ -210,12 +220,24 @@ class RecommendationTests(unittest.TestCase):
         self.document["recommendations"] = [card("M", ("local", "local", "not_shown"))]
         with self.assertRaisesRegex(ValueError, "inspected sources"):
             self.rank(sources={})
-        for effect in ("unknown", "worsening"):
-            self.document["recommendations"][0]["effects"]["modularity"] = effect
-            with self.subTest(effect=effect), self.assertRaisesRegex(ValueError, "cannot be ready"):
-                self.rank()
+        for criterion in ("modularity", "regression_risk", "change_cost_reduction"):
+            for effect in ("unknown", "worsening"):
+                self.document["recommendations"] = [card("M", ("local", "local", "local"))]
+                self.document["recommendations"][0]["effects"][criterion] = effect
+                with self.subTest(criterion=criterion, effect=effect), self.assertRaisesRegex(ValueError, "cannot be ready"):
+                    self.rank()
         self.document["recommendations"][0]["status"] = "needs_check"
         self.assertEqual(self.rank()["priority_groups"], [])
+        self.assertNotIn("priority_score", self.rank()["recommendations"][0])
+
+    def test_zero_benefit_and_author_supplied_score_cannot_enter_ranking(self):
+        self.document["recommendations"] = [card("Z", ("not_shown", "not_shown", "not_shown"))]
+        with self.assertRaisesRegex(ValueError, "no grounded benefit"):
+            self.rank()
+        self.document["recommendations"] = [card("A", ("local", "local", "local"))]
+        self.document["recommendations"][0]["priority_score"] = 10
+        with self.assertRaisesRegex(ValueError, "ranking metadata"):
+            self.rank()
 
     def test_narrative_and_design_stay_out_of_ranking_metadata(self):
         value = card("M", ("local", "local", "not_shown"))
@@ -421,7 +443,8 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(rows["line-coverage/package"][0]["omitted_files"], ["src/Missing.kt"])
         self.assertEqual(rows["branch-coverage/package"][0]["status"], "unknown")
         self.assertEqual(rows["crap-sum/package"][0]["incomplete_files"], ["src/Price.kt"])
-        self.assertEqual(next(row for row in value["selections"]["signals"] if row["family"] == "crap")["weights_MRS"], [0, 1, 0])
+        self.assertEqual(next(row for row in value["selections"]["signals"] if row["family"] == "crap")["evidence_weights"],
+                         {"modularity": 0, "regression_risk": 1, "change_cost_reduction": 0})
 
     def test_empty_unavailable_error_and_zero_are_distinct(self):
         empty = prepare_memory({"dependencies": ("from,to\n", {"format": "class-csv"}),
