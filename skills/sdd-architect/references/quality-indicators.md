@@ -184,7 +184,7 @@ No collection step writes or clears the live status.
 After successful analysis, ranking, report and plan update, run the publication command:
 
 ```text
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --collection "<report-dir>/collection.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --repository "<project-root>" --collection "<report-dir>/collection.json"
 ```
 
 The command requires a complete full collection, calculated aggregates, report and

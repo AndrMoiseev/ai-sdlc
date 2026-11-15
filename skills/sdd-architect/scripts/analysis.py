@@ -2,6 +2,7 @@
 
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from pathlib import Path
 
 from candidate_groups import prepare_candidate_groups
 from graph import aggregate, graph_view, module_for, module_views, package_of
@@ -20,7 +21,7 @@ def number(value, reason="Input is unavailable", **extra):
             **({"reason": reason} if value is None else {}), **extra}
 
 
-def prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error=None):
+def prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error=None, *, repository="."):
     """Pure calculation boundary: all filesystem and command I/O belongs to collect."""
     gaps = [{"artifact": "mapping", **gap} for gap in mapping_gaps]
 
@@ -39,9 +40,11 @@ def prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts
         return dependencies(text, artifacts["dependencies"]["format"], config["package_prefixes"], config.get("exclude_classes", []))
 
     edges = parse("dependencies", parse_dependencies, None)
-    findings = parse("complexity", lambda text: detekt(text, artifacts["complexity"]["source_root"]), [])
-    size_rows = parse("sizes", lambda text: sizes(text, artifacts["sizes"]["source_root"]), {})
-    coverage_rows, coverage_gaps = parse("coverage", lambda text: coverage(text, artifacts["coverage"]["format"], artifacts["coverage"]["source_root"], sources), ({}, []))
+    def source_root(name):
+        return Path(repository) / artifacts[name]["source_root"]
+    findings = parse("complexity", lambda text: detekt(text, source_root("complexity")), [])
+    size_rows = parse("sizes", lambda text: sizes(text, source_root("sizes")), {})
+    coverage_rows, coverage_gaps = parse("coverage", lambda text: coverage(text, artifacts["coverage"]["format"], source_root("coverage"), sources), ({}, []))
     commits = parse("history", parse_history, None)
     history = history_view(commits, policy) if commits is not None else None
     if history is not None:

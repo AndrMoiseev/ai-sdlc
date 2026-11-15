@@ -8,6 +8,8 @@ its quality. Use the existing `sdd-spec.architect` and `sdd-spec.explorer` selec
 keys directly, without loading the `sdd-spec` skill or its authoring workflow.
 Run one assignment at a time. The orchestrator owns dispatch and transitions;
 workers request additional research, checks or decisions through it.
+Project settings remain read-only for the orchestrator and all workers.
+Their modification belongs to user-initiated `sdd-setup`, never to audit-time approval.
 Before assigning work that depends on thresholds, weights or budgets, obtain the
 [analysis policy](analysis-policy.md) through `metrics.py policy`. Pass its output
 and the collection path to the worker; use saved audit values after collection.
@@ -64,7 +66,7 @@ of this object to the calling skill. For this audit, use:
 | Basis member | Content |
 | --- | --- |
 | `source_paths` | Current checkout and relevant source directories/declarations; empty for source-free work |
-| `configuration` | Current configuration path |
+| `configuration` | Link to this audit's `collection-input.json`; paths inside its contents are project-relative |
 | `collection_plan` | Collection-plan path; exact command-registry revision belongs to checks assignments |
 | `artifacts` | Collection description, candidate groups/queue and metric JSONL paths/keys, shortlist, diagnoses, audit cards or existing plan tasks needed for this task |
 | `decisions` | Authoritative requests, decisions and exact conditions affecting the task |

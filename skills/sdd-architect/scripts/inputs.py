@@ -29,14 +29,14 @@ def relative_path(value, root):
         if re.match(r"^/[A-Za-z]:/", value):
             value = value[1:]
     value, root = value.replace("\\", "/"), str(root).replace("\\", "/").rstrip("/")
-    # A supplied original root allows imported reports from a different computer.
+    # The caller resolves the configured project-relative source root at runtime.
     if value == root:
         raise ValueError("Expected a source file, got the repository root")
     if value.startswith(root + "/"):
         value = value[len(root) + 1:]
     path = PurePosixPath(value)
     if path.is_absolute() or re.match(r"^[A-Za-z]:", value) or ".." in path.parts:
-        raise ValueError(f"Unmapped source path {value!r}; set the artifact's source_root")
+        raise ValueError(f"Unmapped source path {value!r}; supply project-relative report paths or the current checkout's paths")
     return str(path)
 
 

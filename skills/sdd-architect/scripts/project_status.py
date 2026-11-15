@@ -49,7 +49,7 @@ def statistics(text, config, sources, root, source_root=None):
     return {"project": project, "modules": modules, "exclusions": exclusions}
 
 
-def prepare_status(config, sources, mappings, raw, artifacts, policy):
+def prepare_status(config, sources, mappings, raw, artifacts, policy, *, repository):
     files = qualify_kotlin(json.loads(raw["kotlin"]), sources)
     class_edges = dependencies(raw["dependencies"], artifacts["dependencies"]["format"],
                                config["package_prefixes"], config.get("exclude_classes", []))
@@ -71,7 +71,8 @@ def prepare_status(config, sources, mappings, raw, artifacts, policy):
         raise ValueError("History does not cover the configured observation window; collect the required history")
     result = indicators(files, edges, config["modules"], methods, lines, parse_history(raw["history"]),
                         policy["measurements"]["quality_indicators"], as_of)
-    size = statistics(raw["sizes"], config, sources, Path(config["repository"]), artifacts["sizes"].get("source_root"))
+    root = Path(repository)
+    size = statistics(raw["sizes"], config, sources, root, root / artifacts["sizes"].get("source_root", "."))
     result["project"]["statistics"] = size["project"]
     for name, value in result["modules"].items():
         value["statistics"] = size["modules"][name]
@@ -147,9 +148,9 @@ def render_status(value):
         limitations="\n".join("- " + text for text in value["limitations"]))
 
 
-def publish_status(collection_path):
+def publish_status(collection_path, repository):
     description = json.loads(collection_path.read_text(encoding="utf-8-sig"))
-    root = Path(description["repository"]).resolve()
+    root = Path(repository).resolve()
     audit = collection_path.resolve().parent
     from collection import report_output
     report_output(audit, root, directory=True)

@@ -8,16 +8,16 @@ import urllib.request
 import zipfile
 
 
-def collect_kotlin(config, sources, root, run, policy):
-    executable = config.get("java") or shutil.which("java")
+def collect_kotlin(sources, root, run, policy, *, java=None, detekt_jar=None):
+    executable = str(Path(java).resolve()) if java else shutil.which("java")
     if not executable and os.environ.get("JAVA_HOME"):
         executable = str(Path(os.environ["JAVA_HOME"]) / "bin" / ("java.exe" if os.name == "nt" else "java"))
     if not executable or not Path(executable).is_file():
-        raise ValueError("Kotlin measurement needs a JDK: set JAVA_HOME or artifacts.kotlin.java")
+        raise ValueError("Kotlin measurement needs a JDK: set JAVA_HOME or pass --java")
     cache = Path(os.environ.get("UV_TOOL_DIR", Path(tempfile.gettempdir()) / "uv-runtime" / "tools")) / "sdd-architect"
-    jar = Path(config["detekt_jar"]) if config.get("detekt_jar") else cache / "detekt-cli-1.23.8-all.jar"
+    jar = Path(detekt_jar).resolve() if detekt_jar else cache / "detekt-cli-1.23.8-all.jar"
     if not jar.is_file():
-        if config.get("detekt_jar"):
+        if detekt_jar:
             raise ValueError(f"Configured detekt jar is missing: {jar}")
         cache.mkdir(parents=True, exist_ok=True)
         url = "https://repo.maven.apache.org/maven2/io/gitlab/arturbosch/detekt/detekt-cli/1.23.8/detekt-cli-1.23.8-all.jar"

@@ -11,6 +11,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 
 from analysis_policy import load_policy
+from audit_configuration import resolve_project_path, validate_audit_configuration
 from inputs import class_source_file, relative_path, source_description
 from measurements import CATALOG, write_jsonl
 
@@ -116,21 +117,29 @@ def map_classes(config, root, sources):
     return dict(sorted(mappings.items())), unresolved
 
 
-def collect(config, output, *, full=True):
+def collect(config, output, *, repository, full=True, java=None, detekt_jar=None):
     from analysis import prepare_measurements
     from candidate_groups import SELECTION_NAMES
 
-    if "candidate_group_limit" in config:
-        raise ValueError("Set investigation.candidate_group_limit in .sdd/architect/analysis-policy.json")
-    root = Path(config["repository"]).resolve()
+    validate_audit_configuration(config)
+    root = Path(repository).resolve()
     if not root.is_dir():
         raise ValueError(f"Repository not found: {root}")
+    for field in ("source_roots", "test_roots", "class_directories"):
+        for path in config.get(field, []):
+            resolve_project_path(path, root, field)
+    for path in config.get("class_files", {}).values():
+        resolve_project_path(path, root, "class_files")
+    for name, spec in config.get("artifacts", {}).items():
+        for field in ("path", "source_root"):
+            if field in spec:
+                resolve_project_path(spec[field], root, f"artifacts.{name}.{field}")
     policy = load_policy(root)
     output = report_output(output, root, directory=True)
     if any((output / name).exists() for name in ("collection.json", "metrics", "selections")):
         raise ValueError("Collection output already exists; choose a new report directory")
     output.mkdir(parents=True, exist_ok=True)
-    description = {"repository": str(root), "status": "incomplete", "route": "full" if full else "focused", "analysis_policy": policy,
+    description = {"status": "incomplete", "route": "full" if full else "focused", "analysis_policy": policy,
                    "parameters": {key: config.get(key, default) for key, default in (
                        ("source_roots", []), ("exclude_paths", []), ("package_prefixes", []),
                        ("exclude_classes", []), ("class_directories", []), ("modules", {}), ("scope", {}))},
@@ -190,7 +199,7 @@ def collect(config, output, *, full=True):
             if spec.get("collect"):
                 if name == "kotlin":
                     from kotlin_measurements import collect_kotlin
-                    data, details = collect_kotlin(spec, sources, root, run, policy)
+                    data, details = collect_kotlin(sources, root, run, policy, java=java, detekt_jar=detekt_jar)
                     metadata.update(details)
                     argv = details["command"]
                 elif name == "history" and full:
@@ -206,14 +215,14 @@ def collect(config, output, *, full=True):
                     data = run(argv, root, policy)
                     metadata.update(format="git-log", tool="git", version=run(["git", "--version"], root, policy).decode().strip())
                 elif name == "dependencies":
-                    directories = [str((root / p).resolve()) for p in config.get("class_directories", [])]
+                    directories = config.get("class_directories", [])
                     if not directories:
                         raise ValueError("jdeps collection needs class_directories from the selected Gradle source sets")
                     argv = ["jdeps", "-verbose:class", "-filter:none", "--ignore-missing-deps", *directories]
                     data = run(argv, root, policy)
                     metadata.update(format="jdeps", tool="jdeps", version=run(["jdeps", "--version"], root, policy).decode().strip())
                 elif name == "sizes":
-                    roots = [str(root)] if full else [str((root / p).resolve()) for p in config.get("source_roots", [])]
+                    roots = ["."] if full else config.get("source_roots", [])
                     if not roots:
                         raise ValueError("scc collection needs source_roots")
                     argv = ["scc", "--by-file", "--format", "json", "--no-cocomo", *roots]
@@ -226,10 +235,7 @@ def collect(config, output, *, full=True):
             else:
                 if spec.get("format") not in formats[name]:
                     raise ValueError(f"Unsupported {name} format: {spec.get('format')}")
-                path = Path(spec["path"])
-                if not path.is_absolute():
-                    raise ValueError(f"Artifact path must be absolute: {name}")
-                path = path.resolve()
+                path = resolve_project_path(spec["path"], root, f"artifacts.{name}.path")
                 data = path.read_bytes()
             raw_directory = (output / "raw").resolve()
             if not raw_directory.is_relative_to(output):
@@ -250,14 +256,15 @@ def collect(config, output, *, full=True):
                 retained[path] = raw_path
             metadata.update(path=raw_path.relative_to(output).as_posix(), status="complete",
                             collected_at=datetime.now(timezone.utc).isoformat())
-            metadata.setdefault("source_root", str(root))
+            metadata.setdefault("source_root", ".")
             raw[name] = data.decode("utf-8-sig")
         except (OSError, ValueError) as error:
             metadata.update(status="error", reason=str(error))
         artifacts[name] = metadata
         if full and metadata.get("status") != "complete":
             block(f"{name}: {metadata.get('reason', 'source unavailable')}")
-    measurements, outcomes, selections, gaps = prepare_measurements(config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error)
+    measurements, outcomes, selections, gaps = prepare_measurements(
+        config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error, repository=root)
     description["gaps"] = gaps
     if full:
         failed = [name for name, metadata in artifacts.items() if metadata.get("status") != "complete"]
@@ -265,7 +272,7 @@ def collect(config, output, *, full=True):
             block("Invalid measurement sources: " + ", ".join(failed))
         from project_status import prepare_status
         try:
-            quality = prepare_status(config, sources, mappings, raw, artifacts, policy)
+            quality = prepare_status(config, sources, mappings, raw, artifacts, policy, repository=root)
         except (OSError, ValueError, KeyError, TypeError, SyntaxError) as error:
             block(str(error))
         quality_path = output / "metrics" / "quality-indicators.json"

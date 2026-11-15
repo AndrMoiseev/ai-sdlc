@@ -4,7 +4,9 @@ Run **configuration → collect → substantive analysis → ranking → final r
 The orchestrator owns assignments and transitions under
 [assignments and context](orchestration.md). Execute assignments sequentially with
 fresh contexts at phase and diagnosis-group boundaries. Architects author findings;
-explorers research or execute exact checks. Product sources remain read-only.
+explorers research or execute exact checks. Product sources and project settings
+remain read-only for every audit participant. Project settings change only in a
+separate user-initiated `sdd-setup` process.
 
 A bare invocation authorizes the complete audit and plan update without extra
 approvals between phases. Read [runtime](runtime.md) before producing artifacts.
@@ -14,7 +16,7 @@ paths and task scope. No phase binds the audit to a source version.
 
 ## Phase 1: Configuration
 
-**Input:** checkout, requested scope and constraints, existing configuration,
+**Input:** checkout, requested scope and constraints, read-only project settings,
 architecture decisions, the current tech debt plan and build/source evidence.
 
 Read the [current plan and relevant cards](tech-debt-plan.md#read-the-plan-before-investigation)
@@ -27,10 +29,12 @@ before commissioning research. Carry user assessments and known problems into th
    Inventory dependencies, history, scc statistics, Kotlin tokens/functions,
    complexity and coverage under [quality indicators](quality-indicators.md). Record exact
    commands or input paths and known limitations; unknown ownership stays explicit.
-3. The orchestrator saves `.sdd/architect/collection.json` and `collection-plan.md`.
+3. The orchestrator uses `metrics.py configure` to save project-relative
+   `<report-dir>/collection-input.json`, then writes `collection-plan.md` beside it.
    Register executable commands with dependencies, destinations and limits under
    the [checks contract](orchestration.md#register-checks-in-the-collection-plan).
-   Explorer proposes changes but does not edit project configuration or settings.
+   Earlier audit configurations are research inputs to recheck. Neither role
+   changes project settings or treats prior inferred boundaries as user constraints.
 
 **Exit:** saved scope, population, exclusions and module ownership are justified;
 every required source has an executable collection path or a qualified complete
@@ -48,7 +52,8 @@ running collection. Preserve low detector thresholds used to collect observation
 1. Start a fresh explorer with a checks assignment containing the registered IDs,
    stage and command-registry revision. Execute existing build/report tasks and
    then `collect` in dependency order. Return tool/report facts to the orchestrator
-   for necessary path/configuration updates before a dependent batch.
+   for necessary audit-configuration updates before collection; later recollection
+   uses a new audit directory with its own configuration.
 2. `collect` retains each raw report once, normalizes available inputs, calculates
    all [catalog outputs](measurements.md) in dependency order and saves selections.
    It then [builds candidate groups](candidate-groups.md), attaches contained signals,
