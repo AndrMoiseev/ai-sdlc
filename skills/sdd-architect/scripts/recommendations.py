@@ -1,9 +1,9 @@
 """Check six-section Markdown recommendations and rank their effect metadata."""
 
 import re
+from fractions import Fraction
 from pathlib import PurePosixPath
 
-EFFECTS = {"substantial": 2, "local": 1, "not_shown": 0}
 CRITERIA = ("modularity", "regression_risk", "change_cost_reduction")
 STATUSES = {"ready", "needs_check", "observe", "rejected"}
 FIELDS = {"id", "status", "card", "source_evidence", "metric_evidence", "effects"}
@@ -42,7 +42,9 @@ def validate_card(text):
     return title
 
 
-def rank(document, sources, resolve_metric=None, read_card=None):
+def rank(document, sources, resolve_metric=None, read_card=None, *, policy):
+    scoring = policy["recommendations"]
+    effect_points = scoring["effect_points"]
     cards = document["recommendations"]
     ids, paths, ready, checked = set(), set(), [], []
     for card in cards:
@@ -80,14 +82,16 @@ def rank(document, sources, resolve_metric=None, read_card=None):
             resolve_metric(reference)
         profile = card.get("effects")
         if status == "ready" or profile is not None:
-            allowed = set(EFFECTS) if status == "ready" else set(EFFECTS) | {"unknown", "worsening"}
+            allowed = set(effect_points) if status == "ready" else set(effect_points) | {"unknown", "worsening"}
             if (not isinstance(profile, dict) or set(profile) != set(CRITERIA)
                     or any(effect not in allowed for effect in profile.values())):
                 raise ValueError(f"{identity}: invalid effect profile; unknown or worsening effects cannot be ready")
         if status == "ready":
             if not any(effect != "not_shown" for effect in profile.values()):
                 raise ValueError(f"{identity}: no grounded benefit; observe or reject")
-            value["priority_score"] = sum(EFFECTS[profile[key]] for key in CRITERIA)
+            # Decimal configuration weights must preserve mathematically equal sums.
+            score = sum(effect_points[profile[key]] * Fraction(str(scoring["criterion_weights"][key])) for key in CRITERIA)
+            value["priority_score"] = score.numerator if score.denominator == 1 else float(score)
             ready.append(value)
         checked.append(value)
     ordered = sorted(ready, key=lambda card: (-card["priority_score"], card["id"]))
@@ -98,10 +102,10 @@ def rank(document, sources, resolve_metric=None, read_card=None):
             groups.append([])
             previous = current
         groups[-1].append(card["id"])
-    return {"priority_groups": groups,
+    return {"priority_groups": groups, "report_limit": scoring["report_limit"],
+            "effect_points": effect_points, "criterion_weights": scoring["criterion_weights"],
             "recommendations": ordered + [card for card in checked if card["status"] != "ready"],
-            "ordering": "sum of equally weighted modularity, regression_risk, change_cost_reduction "
-                        "(not_shown=0, local=1, substantial=2); equal scores remain tied"}
+            "ordering": "sum of effect_points[category] * criterion_weights[criterion]; equal scores remain tied"}
 
 
 def markdown(document):
@@ -115,7 +119,8 @@ def markdown(document):
         title = cell(card["title"]).replace("[", "\\[").replace("]", "\\]")
         return f"[{title}](<{card['card']}>)"
     ready = [card for card in document["recommendations"] if card["status"] == "ready"]
-    for card in ready[:5]:
+    limit = document["report_limit"]
+    for card in ready[:limit]:
         effects = card["effects"]
         lines.append("| " + " | ".join(str(value) for value in (priorities[card["id"]], card["priority_score"], link(card),
                      effects["modularity"], effects["regression_risk"], effects["change_cost_reduction"])) + " |")
@@ -126,7 +131,7 @@ def markdown(document):
         if selected:
             lines.extend(["", "## " + status.replace("_", " "), ""])
             lines.extend("- " + link(card) for card in selected)
-    if len(ready) > 5:
+    if len(ready) > limit:
         lines.extend(["", "## Further directions", ""])
-        lines.extend("- " + link(card) for card in ready[5:])
+        lines.extend("- " + link(card) for card in ready[limit:])
     return "\n".join(lines) + "\n"

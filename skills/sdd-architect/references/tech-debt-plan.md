@@ -9,7 +9,7 @@ audit artifacts. The user can change the plan at any time.
 
 An audit records what its investigation established. Keep completed audit materials
 in `memory/tech-debt/audits/<date-time>/` under the [storage contract](runtime.md#report-storage).
-The plan accumulates work across audits. It has no five-task limit and is not an
+The plan accumulates work across audits without the report's display limit. It is not an
 SDD implementation plan or authorization to execute a refactoring.
 
 Use this layout:
@@ -64,7 +64,7 @@ source-version checks do not participate in this decision.
 
 ## Add new tasks after the report
 
-Use the complete validated card set, including cards beyond the report's top five.
+Use the complete validated card set, including cards beyond the report's display limit.
 Apply the same procedure to the first and every subsequent audit:
 
 | Audit card status | Automatic plan action |
@@ -96,9 +96,10 @@ On the first audit use validated ready ordering, followed by the audit's needs-c
 investigation order. Unknown effects remain unknown and do not promote a needs-check
 task above a ready task. On later audits
 insert only new tasks and preserve the relative order of existing tasks within each
-status group. Compare new directions using the equal-weight M/R/C sum from
+status group. Compare new directions using the configured weighted M/R/C sum from
 [decision output](decision-output.md#judge-effects-and-readiness) and current user priority decisions;
-do not import audit-local rank numbers as global priorities. If the available grounds
+do not import audit-local rank numbers as global priorities. Compare effect categories
+under the same policy before using points from different audits. If the available grounds
 cannot place a new task more precisely, append it within its status group and explain
 the uncertainty. Preserve equal-score ties, including different effect profiles,
 unless a user decision distinguishes them. Keep unknown effects explicit and leave

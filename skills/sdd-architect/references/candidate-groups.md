@@ -13,9 +13,9 @@ M/R/C effects. Recommendation priority still belongs to `rank` after diagnosis.
 ## Inputs and addressing
 
 The existing [signal filters](measurements.md#first-pass-filters-and-evidence-weights)
-remain the starting population. They include unsuppressed `LongParameterList`
-findings even when their numeric count is unknown, and Martin distance at least
-0.7 as supporting context. No numeric zero is invented for an unknown count.
+remain the starting population. They include measured, unsuppressed parameter lists
+meeting the analyzer threshold and Martin distance meeting its configured threshold.
+Unknown parameter counts remain measurement gaps, without numeric threshold selection.
 
 Exact duplicate signals are removed. Each signal has a collection-local `signal`
 ID assigned after canonical sorting of its family, condition, keyed references,
@@ -23,10 +23,11 @@ suitability and ordinal weights. It is addressed by
 `{"path":"selections/signals.jsonl","key":{"signal":"signal-0001"}}`.
 These IDs address retained records only; they are not durable source identities.
 
-`candidate_group_limit` in project configuration is a positive integer, default
-12. The resolved value is retained in `collection.json.parameters`. It limits
+`investigation.candidate_group_limit` in the [analysis policy](analysis-policy.md)
+sets the automatic budget. Obtain its actual value through `metrics.py policy`.
+The resolved value is retained in `collection.json.analysis_policy`. It limits
 automatic selection, not the number of groups retained or an architect's justified
-adjustment. Fewer available groups need no artificial additions to reach eight.
+adjustment. Fewer available groups need no artificial additions to fill the budget.
 
 ## Build groups
 
@@ -75,11 +76,11 @@ evidence family. Partial mappings retain only their own seed signals.
 | `change_patterns` | Co-change, including implicit co-change; all structural hotspots |
 | `code_risk` | Function complexity; declaration shape; low coverage with change activity; file CRAP |
 
-Each family contributes 2 points when any of its signals is usable, or 1 when
-only limited signals are present. An absent family contributes no points and
+Each family contributes its configured `investigation.family_points.usable` when
+any signal is usable, or `limited` when only limited signals are present. An absent family contributes no points and
 supplies no evidence of safety. Record only present families, with their points
 and all keyed signal references. Sum the capped contributions as
-`investigation_score` (1–6 for a nonempty group). These are investigation preference
+`investigation_score`. These are investigation preference
 points; they are separate from the diagnostic evidence weights and recommendation
 effects. The conservative families keep graph derivatives together, hotspots with
 their change-history context, and CRAP with its complexity/coverage inputs.

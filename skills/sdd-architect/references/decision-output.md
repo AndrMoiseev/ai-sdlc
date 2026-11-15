@@ -75,11 +75,10 @@ criteria, but one consequence earns points once: less context to read is a cost
 benefit; a separate modularity benefit needs an independently changeable
 responsibility or contract. Shared causes are allowed; duplicated benefits are not.
 
-The priority policy assigns `not_shown=0`, `local=1`, `substantial=2` with equal
-criterion weights. Sum these preference points, not raw metrics or evidence weights.
-Three local effects (3) outrank one substantial effect (2); two local effects tie
-one substantial effect (2), including across different criteria. This is a declared
-trade-off policy, not a claim that measured benefit has equal intervals or doubles.
+Obtain `recommendations.effect_points` and `recommendations.criterion_weights`
+through the [policy command](analysis-policy.md) for this collection. `rank` sums
+each category's points multiplied by its criterion weight. Keep this declared
+trade-off policy separate from raw metrics, diagnostic weights and measured benefit.
 Retain the profile and rationale alongside the sum. If a plausible category change
 reverses the ordering, state that sensitivity rather than presenting a robust lead.
 
@@ -126,12 +125,12 @@ changes to cards or metadata.
 
 ## Deliver the report
 
-Show up to five ready recommendations in a table: priority group, direction,
+Use `recommendations.report_limit` returned by the policy command to bound the ready recommendations table: priority group, direction,
 priority score, M/R/C effects, basis/confidence and material refactoring cost/dependencies. Link each to its
 complete six-section Markdown card. Within this audit keep the full card in one place; use summaries
 and links in `report.md`, followed by the short investigation queue and a linked
 list of every `observe` and `rejected` card with its reason. Zero ready recommendations
-is a valid result. The five-direction display limit does not limit plan admission:
+is a valid result. The configured display limit does not limit plan admission:
 all new `ready` and `needs_check` cards are eligible.
 
 State the inspected scope and material gaps. Link the collection description,

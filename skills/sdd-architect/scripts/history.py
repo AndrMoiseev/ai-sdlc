@@ -42,7 +42,8 @@ def parse_history(text):
     return commits
 
 
-def history_view(commits, max_changeset=30):
+def history_view(commits, policy):
+    max_changeset = policy["measurements"]["history"]["maximum_changeset_size"]
     revisions, filtered, shared = Counter(), Counter(), Counter()
     churn = defaultdict(lambda: {"added": 0, "deleted": 0, "binary_changes": 0})
     for commit in commits:
@@ -69,15 +70,15 @@ def history_view(commits, max_changeset=30):
             "coupling": sorted(coupling, key=lambda row: (-row["degree"], -row["average_revisions"], row["left"], row["right"]))}
 
 
-def group_activity(commits, owner_for_file):
+def group_activity(commits, owner_for_file, policy):
     if not commits:
         return {}
-    cutoff = date.fromisoformat(max(c["date"] for c in commits)) - timedelta(days=30)
-    groups = defaultdict(lambda: {"commits": 0, "commits_last_30_days": 0, "file_occurrences": 0})
+    cutoff = date.fromisoformat(max(c["date"] for c in commits)) - timedelta(days=policy["measurements"]["history"]["recent_days"])
+    groups = defaultdict(lambda: {"commits": 0, "recent_commits": 0, "file_occurrences": 0})
     for commit in commits:
         counts = Counter(owner_for_file[path] for path in commit["changes"] if owner_for_file.get(path) is not None)
         for owner, count in counts.items():
             groups[owner]["commits"] += 1
-            groups[owner]["commits_last_30_days"] += int(date.fromisoformat(commit["date"]) >= cutoff)
+            groups[owner]["recent_commits"] += int(date.fromisoformat(commit["date"]) >= cutoff)
             groups[owner]["file_occurrences"] += count
     return dict(sorted(groups.items()))

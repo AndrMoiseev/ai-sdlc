@@ -45,6 +45,8 @@ separate from the orchestrator's assessment. Retain unknown observations as unkn
 1. Read state, the active request, collection plan and linked primary artifacts.
    Check their existence and relevance to the remaining task. A summary cannot
    prove a missing result or executed check.
+   Resolve the saved collection's [analysis policy](analysis-policy.md) through the
+   script; project overrides edited later do not replace it during continuation.
 2. Ask the host for the recorded worker's state. Verify that a previous writer
    has stopped before transferring an output; a saved ID alone does not prove it.
 3. Read the current sources needed for the pending question. Use the saved scope,

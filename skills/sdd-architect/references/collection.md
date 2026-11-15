@@ -57,7 +57,6 @@ is their ordinary repository history, not an input to this process.
 | `scope` | Gradle projects, source sets, variant and test tasks |
 | `class_directories` | Compiled directories for jdeps and JVM SourceFile mapping |
 | `class_files` | Optional explicit JVM-class to repository-relative source mapping |
-| `candidate_group_limit` | Positive integer, default 12; automatic investigation budget under [candidate groups](candidate-groups.md) |
 | `artifacts` | Available dependencies, history, sizes, complexity and coverage inputs |
 
 Artifact import paths are absolute. Source roots and compiled directories are
@@ -66,6 +65,11 @@ Module prefixes match package segments; the longest prefix wins. Equal longest
 prefixes assigned to different modules make module-dependent calculations unavailable.
 
 ## Obtain missing reports
+
+Resolve [analysis policy](analysis-policy.md) through the script before choosing
+collection conditions. Keep numerical policy in its separate project file; preserve
+detector settings that collect a sufficiently complete population. `collect` applies
+analyzer thresholds after import, including the parameter-list threshold.
 
 Register exact commands, outputs and limits in the collection plan before assigning
 checks. Existing build/report tasks run before their dependent `collect` command.

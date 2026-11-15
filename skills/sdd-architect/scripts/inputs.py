@@ -10,6 +10,8 @@ from collections import Counter, defaultdict
 from pathlib import PurePosixPath
 from urllib.parse import unquote, urlparse
 
+from parameters import parameter_count
+
 RULES = {
     "CyclomaticComplexMethod": r"Cyclomatic Complexity \(complexity: (\d+)\)",
     "CognitiveComplexMethod": r"Cognitive Complexity \(complexity: (\d+)\)",
@@ -80,8 +82,9 @@ def detekt(text, source_root):
             seen.add(identity)
             pattern = RULES[rule]
             match = re.search(pattern, message) if pattern else None
+            value = parameter_count(message) if rule == "LongParameterList" else int(match[1]) if match else None
             findings.append({"rule": rule, "file": path, "region": region,
-                             "declaration": message, "value": int(match[1]) if match else None,
+                             "declaration": message, "value": value,
                              "suppressed": bool(row.get("suppressions")),
                              "record": f"complexity:runs/{run_index}/results/{index}"})
     return findings

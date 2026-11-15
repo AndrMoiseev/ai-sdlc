@@ -8,6 +8,10 @@ its quality. Use the existing `sdd-spec.architect` and `sdd-spec.explorer` selec
 keys directly, without loading the `sdd-spec` skill or its authoring workflow.
 Run one assignment at a time. The orchestrator owns dispatch and transitions;
 workers request additional research, checks or decisions through it.
+Before assigning work that depends on thresholds, weights or budgets, obtain the
+[analysis policy](analysis-policy.md) through `metrics.py policy`. Pass its output
+and the collection path to the worker; use saved audit values after collection.
+Workers must not read defaults or merge project overrides to obtain actual values.
 The orchestrator alone maintains the [tech debt plan](tech-debt-plan.md). Workers
 receive relevant current task cards and user decisions as read-only inputs; keep
 their write scopes inside the assigned audit. Reread user-edited plan entries before

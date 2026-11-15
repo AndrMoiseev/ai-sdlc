@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from analysis import prepare_measurements, suitability
+from analysis_policy import load_policy, merge_policy
 from collection import collect, report_output
 from graph import graph_view, module_for, module_views
 from history import group_activity, history_view, parse_history
@@ -14,6 +15,13 @@ from inputs import class_source_file, coverage, dependencies, detekt, relative_p
 from metrics import main, write_json
 from measurements import CATALOG, ordered_rows, record_key, resolve_reference
 from recommendations import markdown, rank, validate_card
+
+
+DEFAULT_POLICY = load_policy()
+
+
+def resolved_policy(overrides=None):
+    return merge_policy(DEFAULT_POLICY, overrides or {})
 
 
 def finding(rule, message, line=10):
@@ -53,12 +61,12 @@ a policy change should no longer require changing the transport consumer.
 """
 
 
-def prepare_memory(payloads, sources=None, mappings=None, config=None):
+def prepare_memory(payloads, sources=None, mappings=None, config=None, policy=None):
     artifacts = {name: {"status": "complete", "tool": name, "version": "fixture", "command": [name],
                         "source_root": "/checkout", **spec} for name, (_, spec) in payloads.items()}
     rows, outcomes, selections, gaps = prepare_measurements(
         {"package_prefixes": ["a", "b"], **(config or {})}, sources or {}, mappings or {}, [],
-        {name: text for name, (text, _) in payloads.items()}, artifacts)
+        {name: text for name, (text, _) in payloads.items()}, artifacts, resolved_policy(policy))
     return {"rows": rows, "outcomes": outcomes, "selections": selections, "gaps": gaps, "artifacts": artifacts}
 
 
@@ -82,7 +90,7 @@ class GraphTests(unittest.TestCase):
 
     def test_cohesion_affinity_and_weighted_martin(self):
         modules = {"left": ["a"], "right": ["b"], "empty": ["z"]}
-        view = module_views({("a.x", "a.y"): 90, ("a.x", "b.x"): 10}, modules, {"a.x": {"types": 5, "abstract": 1}})
+        view = module_views({("a.x", "a.y"): 90, ("a.x", "b.x"): 10}, modules, {"a.x": {"types": 5, "abstract": 1}}, DEFAULT_POLICY)
         self.assertEqual(view["cohesion"]["left"]["value"], .9)
         self.assertEqual(view["cohesion"]["right"]["value"], 0)
         self.assertIsNone(view["cohesion"]["empty"]["value"])
@@ -107,7 +115,7 @@ class HistoryTests(unittest.TestCase):
                             "changes": {path: {"added": 1, "deleted": 2, "binary": False} for path in paths}})
         commits.append({"revision": "mass", "date": "2026-01-02", "author": "a",
                         "changes": {path: {"added": 1, "deleted": 0, "binary": False} for path in ["B.kt", "C.kt"] + [str(i) for i in range(29)]}})
-        value = history_view(commits)
+        value = history_view(commits, DEFAULT_POLICY)
         pair = value["coupling"][0]
         self.assertEqual((pair["left_revisions"], pair["right_revisions"], pair["shared"], pair["degree"]), (10, 30, 10, 50))
         self.assertEqual(value["revisions"]["B.kt"], 11)
@@ -116,9 +124,9 @@ class HistoryTests(unittest.TestCase):
     def test_unique_group_commits_and_inclusive_window(self):
         text = "--abc--2026-01-01--a\n1\t2\tA.kt\n1\t1\tB.kt\n--def--2026-01-31--b\n-\t-\timage.bin\n0\t1\tA.kt\n"
         commits = parse_history(text)
-        groups = group_activity(commits, {"A.kt": "one", "B.kt": "one"})
-        self.assertEqual(groups["one"], {"commits": 2, "commits_last_30_days": 2, "file_occurrences": 3})
-        self.assertEqual(history_view(commits)["churn"]["image.bin"]["binary_changes"], 1)
+        groups = group_activity(commits, {"A.kt": "one", "B.kt": "one"}, DEFAULT_POLICY)
+        self.assertEqual(groups["one"], {"commits": 2, "recent_commits": 2, "file_occurrences": 3})
+        self.assertEqual(history_view(commits, DEFAULT_POLICY)["churn"]["image.bin"]["binary_changes"], 1)
 
     def test_ambiguous_rename_is_not_silently_joined(self):
         with self.assertRaisesRegex(ValueError, "no-renames"):
@@ -188,7 +196,7 @@ class RecommendationTests(unittest.TestCase):
 
     def rank(self, sources=None, resolve_metric=None):
         return rank(self.document, self.sources if sources is None else sources, resolve_metric,
-                    lambda path: card_markdown(Path(path).stem))
+                    lambda path: card_markdown(Path(path).stem), policy=DEFAULT_POLICY)
 
     def test_three_local_effects_beat_one_substantial_and_equal_sums_tie(self):
         self.document["recommendations"] = [card("M", ("substantial", "not_shown", "not_shown")),
@@ -335,12 +343,20 @@ class CollectionIntegrationTests(unittest.TestCase):
                                     "coverage": {"path": str(raw / "coverage.csv"), "format": "coverage-csv"}}}
             config_path = workspace / "collection-input.json"
             config_path.write_text(json.dumps(config), encoding="utf-8")
+            policy_path = repo / ".sdd" / "architect" / "analysis-policy.json"
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text(json.dumps({"signals": {"complexity": {"cyclomatic_minimum": 11}},
+                                               "investigation": {"candidate_group_limit": 3}}), encoding="utf-8")
+            with patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(main(["policy", "--repository", str(repo), "--get", "signals.complexity.cyclomatic_minimum"]), 0)
+                self.assertEqual(json.loads(stdout.getvalue()), 11)
             with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO):
                 self.assertEqual(main(["collect", "--config", str(config_path), "--output", str(report)]), 0)
             description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
             self.assertEqual(set(description["outputs"]), set(CATALOG))
             self.assertEqual(description["status"], "complete")
-            self.assertEqual(description["parameters"]["candidate_group_limit"], 12)
+            self.assertEqual(description["analysis_policy"]["investigation"]["candidate_group_limit"], 3)
+            self.assertNotIn("candidate_group_limit", description["parameters"])
             self.assertEqual(set(description["selections"]), {"rankings", "signals", "candidate-groups", "investigation-queue"})
             groups = [json.loads(line) for line in (report / "selections/candidate-groups.jsonl").read_text(encoding="utf-8").splitlines()]
             queue = [json.loads(line) for line in (report / "selections/investigation-queue.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -371,6 +387,12 @@ class CollectionIntegrationTests(unittest.TestCase):
             (report / "recommendations").mkdir()
             (report / ready["card"]).write_text(card_markdown("R1"), encoding="utf-8")
             write_json(report / "cards.json", {"recommendations": [ready]}, repo)
+            # Project edits cannot silently change the policy of an existing audit.
+            policy_path.write_text(json.dumps({"recommendations": {"effect_points": {"local": 7, "substantial": 9}}}), encoding="utf-8")
+            with patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(main(["policy", "--collection", str(report / "collection.json"),
+                                       "--get", "signals.complexity.cyclomatic_minimum"]), 0)
+                self.assertEqual(json.loads(stdout.getvalue()), 11)
             with patch("sys.stdout", new_callable=io.StringIO):
                 self.assertEqual(main(["rank", "--collection", str(report / "collection.json"),
                                        "--recommendations", str(report / "cards.json"), "--output", str(report / "ranked.json"),
@@ -378,6 +400,7 @@ class CollectionIntegrationTests(unittest.TestCase):
             self.assertIn("Extract price calculation", (report / "ranked.md").read_text(encoding="utf-8"))
             self.assertIn("recommendations/R1.md", (report / "ranked.md").read_text(encoding="utf-8"))
             self.assertEqual(json.loads((report / "ranked.json").read_text(encoding="utf-8"))["priority_groups"], [["R1"]])
+            self.assertEqual(json.loads((report / "ranked.json").read_text(encoding="utf-8"))["recommendations"][0]["priority_score"], 2)
             self.assertNotIn("source_files", description)
             for field in ("revision", "dirty", "source_state", "sha256"):
                 self.assertNotIn(field, json.dumps(description))
@@ -518,15 +541,15 @@ class MeasurementTests(unittest.TestCase):
         self.assertIsNone(parameter["value"])
         self.assertEqual(parameter["region"], {"startLine": 10})
         self.assertEqual(value["rows"]["function-count/declaration"][0]["value"], 12)
-        self.assertEqual(len(value["selections"]["signals"]), 1)
-        self.assertEqual(value["selections"]["signals"][0]["references"][0]["path"], "metrics/parameter-list/declaration.jsonl")
+        self.assertEqual(value["selections"]["signals"], [])
+        self.assertTrue(any("Parameter count is unknown" in gap.get("reason", "") for gap in value["gaps"]))
         self.assertEqual(len({spec["path"] for spec in CATALOG.values()}), len(CATALOG))
         for identifier, spec in CATALOG.items():
             self.assertTrue(all(spec[field] for field in ("key", "unit", "kind", "inputs", "meaning")), identifier)
         with self.assertRaisesRegex(ValueError, "Duplicate"):
             ordered_rows("code-lines/file", [{"file": "a", "value": 1}, {"file": "a", "value": 2}])
 
-    def test_cli_has_only_collection_and_ranking(self):
+    def test_cli_rejects_unrelated_operations(self):
         for removed in ("identity", "analyze"):
             with self.subTest(command=removed), patch("sys.stderr", new_callable=io.StringIO), self.assertRaises(SystemExit):
                 main([removed])
