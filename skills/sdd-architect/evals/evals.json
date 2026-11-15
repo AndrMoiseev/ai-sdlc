@@ -5,7 +5,7 @@
       "id": 1,
       "name": "source-free-signals",
       "category": "limited-evidence",
-      "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Приоритеты: модульность, риск регрессий, скорость. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
+      "prompt": "Подготовь конкретные рекомендации по рефакторингу Kotlin/Gradle. Критерии: модульность, снижение риска регрессий и снижение затрат на изменение; веса равные. Исходников сейчас нет, только отчёты: package graph A→B B→C C→B D→C E→D; coupling B.kt/C.kt degree 50 average-revs 20; для Hot.kt сумма MCC 12, coverage отсутствует, revisions 20; StableId имеет V_in 80%, revisions 1, I=0.1 A=0 D=0.9. Хочу очередь первых изменений и ожидаемый эффект. Все пакеты сейчас в одном подпроекте Gradle.",
       "expected_output": "Bounded investigation queue; no ready directions without source evidence or Gradle split.",
       "expectations": [
         "Absent sources prevent implementation readiness; source-version metadata is not required.",
@@ -13,14 +13,14 @@
         "No recommendation to create or split Gradle projects.",
         "Coupling average-revs is not treated as exact shared support.",
         "StableId is not refactored only for centrality or Martin distance.",
-        "No new build-time metric or numerical speed benefit is added."
+        "No token saving, change-time saving or human-effort saving is invented from static metrics."
       ]
     },
     {
       "id": 2,
       "name": "source-grounded-boundary",
       "category": "core",
-      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/memory/tech-debt/audits/2026-11-14T14-30-00Z/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи этот аудит в каталоге проекта project. Приоритеты: модульность, риск регрессий, скорость. Заверши отчёт и обнови план техдолга.",
+      "prompt": "В этом синтетическом Kotlin/Gradle-проекте подготовь рекомендации по рефакторингу по project/memory/tech-debt/audits/2026-11-14T14-30-00Z/collection.json и исходникам. Цены и налоговые правила принадлежат pricing, order отвечает за проведение заказа. Ближайшее изменение: новая ставка для одного региона. Сохрани текущее поведение; исходники не меняй. Продолжи этот аудит в каталоге проекта project. Критерии: модульность, снижение риска регрессий и снижение затрат на изменение; веса равные. Заверши отчёт и обнови план техдолга.",
       "expected_output": "Read prepared JSONL measurements; inspect both sides; propose an evidenced responsibility-transfer direction in a six-section Markdown card for human-involved sdd-spec work, with validated ordering.",
       "files": ["evals/prepare_fixture.py"],
       "expectations": [
@@ -42,13 +42,13 @@
       "id": 3,
       "name": "priority-and-uncertainty",
       "category": "priority",
-      "prompt": "Для того же проекта упорядочи предложения: A устраняет подтверждённые совместные изменения двух ответственностей (модульность существенная, риск локальный, скорость локальная); B отделяет чистый расчёт от I/O (все эффекты локальные); C закрывает значимый непроверенный сценарий (модульность не показана, риск существенный, скорость не показана); D имеет возможный большой выигрыш модульности, но механизм ещё не установлен. Затраты A/B/C сопоставимы. Для C MCC=12, покрытие изменится с 20% до 80%. Дай порядок, корректный расчёт CRAP_file и следующий шаг для D; не выдумывай недостающие пути исходников.",
-      "expected_output": "A>B>C, D as a check, CRAP file 85.728 to 13.152 as conditional arithmetic.",
+      "prompt": "Для того же проекта упорядочи предложения: A устраняет подтверждённые совместные изменения двух ответственностей (модульность существенная, снижение риска и затрат на изменение не показано); B отделяет чистый расчёт от I/O (все три эффекта локальные и обоснованы отдельно); C закрывает значимый непроверенный сценарий (модульность не показана, снижение риска существенное, снижение затрат на изменение не показано); D имеет возможный большой выигрыш модульности, но механизм ещё не установлен; E локально улучшает модульность и снижает риск, снижение затрат на изменение не показано. Затраты самого рефакторинга A/B/C/E сопоставимы. Для C MCC=12, покрытие изменится с 20% до 80%. Дай порядок, корректный расчёт CRAP_file и следующий шаг для D; не выдумывай недостающие пути исходников.",
+      "expected_output": "B scores 3 above tied A/C/E scoring 2; D remains unscored pending a check; CRAP file 85.728 to 13.152 as conditional arithmetic.",
       "expectations": [
-        "Uses lexicographic priority A above B above C without summed metric weights.",
+        "Uses equally weighted effect points: B=3 above A=C=E=2; ties remain despite different effect profiles, and raw metric/evidence weights are not summed.",
         "Keeps D in an investigation queue instead of treating unknown as no effect.",
         "Computes CRAP_file as 85.728 and 13.152 without relabeling it a method metric.",
-        "Does not infer a modularity or speed improvement from reduced CRAP.",
+        "Does not infer a modularity or change-cost reduction from reduced CRAP, and does not invent token telemetry.",
         "Treats supplied effects as scenario assumptions, not inspected source evidence."
       ]
     }

@@ -57,7 +57,11 @@ then assign these checks within the relevant scope:
 If an outcome differs from the prediction, identify whether the data, diagnosis,
 chosen transformation or implementation was wrong. Record revised recommendations
 in the new audit and link their predecessors; retain the original audit cards.
-More coverage does not demonstrate modularity; lower PC does not measure speed.
+More coverage does not demonstrate modularity; lower PC does not measure change
+cost reduction. Compare representative accepted changes before and after when
+token, human-effort or elapsed-time telemetry exists; preserve comparable model,
+execution setup and acceptance conditions. Otherwise retain a qualitative effect
+claim and its limits.
 Reopen the audit after a meaningful contract change, new problem or the project's
 chosen review cycle, proportionate to the cost of collection.
 

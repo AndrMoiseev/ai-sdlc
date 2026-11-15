@@ -11,9 +11,10 @@ of this skill. Follow-up messages continue the selected workflow without another
 
 Deliver up to five source-grounded refactoring directions for human-involved
 development through `sdd-spec`, a short investigation
-queue, and the important rejected candidates. Prioritize **modularity → regression
-risk reduction → development speed**. Preserve uncertainty instead of manufacturing
-a quality score.
+queue, and the important rejected candidates. Rank ready directions by the equal-weight
+sum of **modularity, regression risk reduction and change cost reduction**, using
+the [effect and scoring contract](references/decision-output.md#judge-effects-and-readiness).
+Preserve uncertainty and distinguish priority points from measured quality.
 
 An architectural module is a declared group of packages with a responsibility,
 public contract and dependency rules. Gradle projects describe collection scope.
@@ -116,7 +117,8 @@ a finished design or implementation plan and never follows from a metric thresho
 - End this task with directions and evidence. Start detailed design or implementation only under a separate instruction.
 - Preserve required product behavior. Add compatibility work only when explicitly required.
 - Treat SCC, PC and visibility as related observations of one graph; treat MCC,
-  coverage and file CRAP as related inputs. Their weights are not additive.
+  coverage and file CRAP as related inputs. Cap related investigation signals by
+  evidence family; sum only distinct recommendation effects under the scoring contract.
 - Keep zero, unknown and not-applicable distinct. Keep source locations and declarations;
   resolve overload signatures from code before publishing a card.
 - Request more evidence only when a feasible check can change the decision.

@@ -26,10 +26,14 @@ class CandidateGroupTests(unittest.TestCase):
         self.assertEqual(len(signals), len(selections["signals"]))
         self.assertEqual(len(groups), len(selections["candidate-groups"]))
         for group in groups.values():
-            for ref in group["seed_signals"] + group["signals"] + [group["ordering_signal"]]:
+            for ref in group["seed_signals"] + group["signals"]:
                 self.assertEqual(ref["path"], "selections/signals.jsonl")
                 self.assertIn(ref["key"]["signal"], signals)
             self.assertEqual(len(group["signals"]), len({ref["key"]["signal"] for ref in group["signals"]}))
+            family_signals = [ref for family in group["evidence_families"].values() for ref in family["signals"]]
+            self.assertEqual(sorted(ref["key"]["signal"] for ref in family_signals),
+                             sorted(ref["key"]["signal"] for ref in group["signals"]))
+            self.assertEqual(group["investigation_score"], sum(family["points"] for family in group["evidence_families"].values()))
             for overlap in group["overlaps"]:
                 other = groups[overlap["group"]]
                 self.assertEqual(overlap["shared_files"], sorted(set(group["scope"]["files"]) & set(other["scope"]["files"])))
@@ -37,6 +41,9 @@ class CandidateGroupTests(unittest.TestCase):
             self.assertEqual(row["candidate_group"]["path"], "selections/candidate-groups.jsonl")
             self.assertIn(row["candidate_group"]["key"]["group"], groups)
             self.assertTrue(set(row["covered_by"]) <= groups.keys())
+            group = groups[row["candidate_group"]["key"]["group"]]
+            self.assertEqual(row["investigation_score"], group["investigation_score"])
+            self.assertEqual(row["evidence_families"], group["evidence_families"])
 
     def test_exact_scopes_merge_but_overlaps_do_not_expand(self):
         sources = {f"src/{name}.kt": {"package": name.lower()} for name in "ABC"}
@@ -59,7 +66,7 @@ class CandidateGroupTests(unittest.TestCase):
         self.assertTrue(deferred["covered_by"])
         self.assert_references(selections)
 
-    def test_budget_preserves_deferred_groups_and_risk_order(self):
+    def test_budget_preserves_deferred_groups_and_canonical_order_for_ties(self):
         sources = {f"src/{name}.kt": {"package": name.lower()} for name in ("A", "B", "High", "Low")}
         value = prepare_memory({
             "dependencies": ("from,to\na.A,b.B\nb.B,a.A\n", {"format": "class-csv"}),
@@ -73,6 +80,7 @@ class CandidateGroupTests(unittest.TestCase):
         self.assertFalse(queue[-1]["selected"])
         self.assertIn("limit reached", queue[-1]["reason"])
         self.assertEqual(queue[-1]["covered_by"], [])
+        self.assertEqual([row["investigation_score"] for row in queue], [2, 2, 2])
 
     def test_granularities_are_retained_when_the_file_scope_matches(self):
         value = prepare_memory({"dependencies": ("from,to\na.A,b.B\nb.B,a.A\n", {"format": "class-csv"})},
@@ -83,9 +91,11 @@ class CandidateGroupTests(unittest.TestCase):
         self.assertEqual({row["references"][0]["path"] for row in selections["signals"]},
                          {f"metrics/cyclic-components/{level}.jsonl" for level in ("class", "package", "module")})
         self.assertTrue(selections["candidate-groups"][0]["source_available"])
+        self.assertEqual(selections["candidate-groups"][0]["investigation_score"], 2)
+        self.assertEqual(set(selections["candidate-groups"][0]["evidence_families"]), {"dependency_structure"})
         self.assert_references(selections)
 
-    def test_strong_coupling_precedes_hotspots_and_weak_coupling(self):
+    def test_related_change_signals_share_priority_despite_magnitude(self):
         sources = {f"src/{name}.kt": {"package": name.lower()} for name in "ABC"}
         pairs = [["src/A.kt", "src/B.kt"]] * 5 + [["src/B.kt", "src/C.kt"]] * 5 + [["src/A.kt"]] * 10
         value = prepare_memory({
@@ -95,21 +105,57 @@ class CandidateGroupTests(unittest.TestCase):
         groups = {row["group"]: row for row in value["selections"]["candidate-groups"]}
         queue = value["selections"]["investigation-queue"]
         selected = [groups[row["candidate_group"]["key"]["group"]]["scope"]["files"] for row in queue if row["selected"]]
-        self.assertEqual(selected, [["src/B.kt", "src/C.kt"], ["src/A.kt"]])
-        weak = next(row for row in queue if groups[row["candidate_group"]["key"]["group"]]["scope"]["files"] == ["src/A.kt", "src/B.kt"])
-        self.assertIn("limit reached", weak["reason"])
+        self.assertEqual(selected, [["src/A.kt", "src/B.kt"], ["src/B.kt", "src/C.kt"]])
+        self.assertTrue(all(row["investigation_score"] == 2 for row in queue))
+        hotspot = next(row for row in queue if groups[row["candidate_group"]["key"]["group"]]["scope"]["files"] == ["src/A.kt"])
+        self.assertFalse(hotspot["selected"])
+        self.assertTrue(hotspot["covered_by"])
 
-    def test_usable_evidence_precedes_limited_evidence_within_a_category(self):
+    def test_usable_evidence_contributes_more_than_limited_evidence(self):
         value = prepare_memory({"complexity": (complexity({"src/High.kt": 30, "src/Low.kt": 12}), {})})
         signals = [{key: field for key, field in row.items() if key != "signal"} for row in value["selections"]["signals"]]
         for signal in signals:
             if signal["references"][0]["key"]["file"] == "src/High.kt":
                 signal["suitability"] = "limited"
-                signal["weights_MRS"] = [1, 1, 1]
+                signal["evidence_weights"] = {"modularity": 1, "regression_risk": 1, "change_cost_reduction": 1}
         selections = prepare_candidate_groups({"candidate_group_limit": 1}, value["rows"], value["outcomes"], signals)
         selected = next(row for row in selections["investigation-queue"] if row["selected"])
         group = next(row for row in selections["candidate-groups"] if row["group"] == selected["candidate_group"]["key"]["group"])
         self.assertEqual(group["scope"]["files"], ["src/Low.kt"])
+        self.assertEqual([row["investigation_score"] for row in selections["investigation-queue"]], [2, 1])
+
+    def test_change_patterns_and_contained_risk_outrank_an_isolated_cycle(self):
+        sources = {f"src/{name}.kt": {"package": name.lower()} for name in ("A", "B", "Y", "Z")}
+        value = prepare_memory({
+            "dependencies": ("from,to\na.A,b.B\nb.B,a.A\n", {"format": "class-csv"}),
+            "history": (history([["src/Y.kt", "src/Z.kt"]] * 5), {}),
+            "complexity": (complexity({"src/Z.kt": 14}), {})}, sources,
+            {"a.A": "src/A.kt", "b.B": "src/B.kt"}, {"candidate_group_limit": 1})
+        selections = value["selections"]
+        groups = {row["group"]: row for row in selections["candidate-groups"]}
+        queue = selections["investigation-queue"]
+        selected = groups[queue[0]["candidate_group"]["key"]["group"]]
+        self.assertEqual(selected["scope"]["files"], ["src/Y.kt", "src/Z.kt"])
+        self.assertEqual(selected["investigation_score"], 4)
+        self.assertEqual(set(selected["evidence_families"]), {"change_patterns", "code_risk"})
+        cycle = next(row for row in queue if groups[row["candidate_group"]["key"]["group"]]["scope"]["files"] == ["src/A.kt", "src/B.kt"])
+        self.assertEqual(cycle["investigation_score"], 2)
+        self.assertFalse(cycle["selected"])
+        self.assert_references(selections)
+
+    def test_complexity_coverage_and_crap_share_one_capped_contribution(self):
+        value = prepare_memory({
+            "complexity": (complexity({"src/Price.kt": 12}), {"complete_mcc": True}),
+            "coverage": ("file,line_covered,line_total,branch_covered,branch_total\nsrc/Price.kt,2,10,0,0\n", {"format": "coverage-csv"}),
+            "history": (history([["src/Price.kt"]] * 13), {})}, {"src/Price.kt": {"package": "a"}})
+        selections = value["selections"]
+        self.assertEqual({row["family"] for row in selections["signals"]}, {"complexity", "coverage", "crap"})
+        self.assertEqual(len(selections["candidate-groups"]), 1)
+        group = selections["candidate-groups"][0]
+        self.assertEqual(group["investigation_score"], 2)
+        self.assertEqual(set(group["evidence_families"]), {"code_risk"})
+        self.assertEqual(len(group["evidence_families"]["code_risk"]["signals"]), 3)
+        self.assert_references(selections)
 
     def test_martin_distance_is_supporting_evidence_with_package_membership(self):
         value = prepare_memory({"dependencies": ("from,to\na.A,b.B\n", {"format": "class-csv"})},
@@ -119,7 +165,7 @@ class CandidateGroupTests(unittest.TestCase):
         self.assertEqual(signal["references"][0]["key"], {"package": "b"})
         group = value["selections"]["candidate-groups"][0]
         self.assertEqual(group["scope"]["files"], ["src/B.kt"])
-        self.assertEqual(group["category"], "supporting")
+        self.assertEqual(set(group["evidence_families"]), {"dependency_structure"})
 
     def test_partial_mapping_never_merges_by_its_known_subset(self):
         value = prepare_memory({
@@ -140,7 +186,7 @@ class CandidateGroupTests(unittest.TestCase):
         value = prepare_memory({"complexity": (json.dumps({"runs": [{"results": [row]}]}), {})})
         group = value["selections"]["candidate-groups"][0]
         self.assertFalse(group["source_available"])
-        self.assertEqual(group["category"], "supporting")
+        self.assertEqual(set(group["evidence_families"]), {"code_risk"})
         self.assertIsNone(value["rows"]["parameter-list/declaration"][0]["value"])
         self.assertTrue(group["limitations"])
         self.assertTrue(value["selections"]["investigation-queue"][0]["selected"])

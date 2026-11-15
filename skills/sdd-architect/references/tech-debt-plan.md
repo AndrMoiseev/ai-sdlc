@@ -32,7 +32,7 @@ task paths when titles, source locations or priorities change.
 `plan.md` is the current assessment and priority authority. Its active task table
 has these columns, in the user's language:
 
-| Task | Status | M/R/S assessment | Priority rationale / dependencies | Source audit |
+| Task | Status | M/R/C assessment / priority score | Priority rationale / dependencies | Source audit |
 | --- | --- | --- | --- | --- |
 
 Link each task to `tasks/<task-name>/task.md` and its source audit to the historical
@@ -96,10 +96,13 @@ On the first audit use validated ready ordering, followed by the audit's needs-c
 investigation order. Unknown effects remain unknown and do not promote a needs-check
 task above a ready task. On later audits
 insert only new tasks and preserve the relative order of existing tasks within each
-status group. Compare new directions using M/R/S and current user priority decisions;
+status group. Compare new directions using the equal-weight M/R/C sum from
+[decision output](decision-output.md#judge-effects-and-readiness) and current user priority decisions;
 do not import audit-local rank numbers as global priorities. If the available grounds
 cannot place a new task more precisely, append it within its status group and explain
-the uncertainty. Preserve ties from the audit unless a user decision distinguishes them.
+the uncertainty. Preserve equal-score ties, including different effect profiles,
+unless a user decision distinguishes them. Keep unknown effects explicit and leave
+unresolved tasks unscored.
 
 Every `ready` row precedes every `needs_check` row, regardless of predicted effect,
 cost or within-group priority. Use current plan statuses for existing tasks and audit

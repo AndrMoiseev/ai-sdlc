@@ -25,6 +25,10 @@ engineering terms rather than requiring a framework-specific report:
   cost, prerequisites and overlapping benefits.
 - C.11.DUA: ask for evidence only when its attainable answer can change the choice.
 - C.43: return realized outcomes to diagnosis and revise mistaken expectations.
+- PSDA.6: distinguish separately valued consequences and declare the compensatory
+  policy: equal criterion weights, local=1, substantial=2, equal sums tied.
+- PSDA.8: retain consequence profiles, shared burdens and unresolved effects beside
+  the comparison; separate an investigation score from a recommendation's benefit.
 
 FPF: Anatoly Levenchuk, [First Principles Framework](https://github.com/ailev/FPF),
 the source procedure used the local adaptation at commit
@@ -45,7 +49,7 @@ the source procedure used the local adaptation at commit
 | Diagnosis | A scoped explanation of a consequential mechanism, alternatives and uncertainty grounded in inspected source |
 | Finding | One source-grounded issue with its mechanism, existing protection and uncertainty |
 | Recommendation | One evidenced refactoring direction addressing an established cause, documented in six sections for human-involved `sdd-spec` work |
-| Priority group | Recommendations indistinguishable by the supported M/R/S effect profile |
+| Priority group | Ready recommendations with the same priority score, including different M/R/C effect profiles |
 
 ## Instrument definitions
 
