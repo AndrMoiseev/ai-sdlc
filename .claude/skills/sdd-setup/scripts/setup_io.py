@@ -79,7 +79,12 @@ def output_path(path, project):
 
 
 def save_result(result, path, command):
-    summary = inspect_summary(result) if command == "inspect" else plan_summary(result)
+    if command == "audit":
+        summary = result
+    elif command == "inspect":
+        summary = inspect_summary(result)
+    else:
+        summary = plan_summary(result)
     path = output_path(path, summary["project_root"])
     raw = (json.dumps(result, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     # Exclusive creation also protects a file appearing after validation.

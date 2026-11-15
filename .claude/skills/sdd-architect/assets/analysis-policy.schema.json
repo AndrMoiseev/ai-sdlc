@@ -1,0 +1,478 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDD Architect analysis policy (full defaults or partial project overrides)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cycle": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_members": {
+              "type": "integer",
+              "minimum": 2
+            }
+          }
+        },
+        "complexity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cyclomatic_minimum": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cognitive_minimum": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "shape": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method_length_minimum": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "function_count_minimum": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "parameter_list_minimum": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "distance_minimum": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "coupling": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_degree": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "minimum_average_frequency": {
+              "type": "number",
+              "minimum": 0
+            },
+            "minimum_shared_commits": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "hotspot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minimum_score": {
+              "type": "number",
+              "minimum": 0
+            },
+            "minimum_frequency": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minimum_visibility": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_frequency": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maximum_line_coverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "crap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_value": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "quality_indicators": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "cognitive_complexity": {"type": "number", "exclusiveMinimum": 0},
+            "function_tokens": {"type": "integer", "minimum": 1},
+            "class_tokens": {"type": "integer", "minimum": 1},
+            "file_tokens": {"type": "integer", "minimum": 1},
+            "clone_tokens": {"type": "integer", "minimum": 1},
+            "duplication_reference": {"type": "number", "exclusiveMinimum": 0},
+            "small_group_files": {"type": "integer", "minimum": 2},
+            "history_days": {"type": "integer", "minimum": 1},
+            "history_maximum_files": {"type": "integer", "minimum": 1},
+            "history_minimum_shared": {"type": "integer", "minimum": 1},
+            "history_minimum_average": {"type": "number", "exclusiveMinimum": 0},
+            "history_minimum_coupling": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "history": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maximum_changeset_size": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "recent_days": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "martin": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_types": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "external_affinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_declared_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimum_leading_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimum_bridge_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "changes_per_code": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimum_frequency": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minimum_code_lines": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "code_line_unit": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "crap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "complexity_exponent": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "uncovered_exponent": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limited_weight_cap": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cycle": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "coupling": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "hotspot": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "complexity": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "shape": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "coverage": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "crap": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "boundary": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "modularity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "regression_risk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "change_cost_reduction": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "investigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "candidate_group_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "family_points": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "usable": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "limited": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "report_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "effect_points": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "not_shown": {
+              "type": "integer",
+              "const": 0
+            },
+            "local": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "substantial": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "criterion_weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "modularity": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "regression_risk": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "change_cost_reduction": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "stderr_tail_characters": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuditState",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "report", "route", "phase", "objective", "constraints", "basis", "assignments", "active_assignment", "plan", "remaining", "blockers", "next_step"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "report": {"$ref": "#/$defs/text"},
+    "route": {"type": "string", "enum": ["full", "focused"]},
+    "phase": {"type": "string", "enum": ["configuration", "evidence", "analysis", "ranking", "report", "plan", "publication", "complete"]},
+    "objective": {"$ref": "#/$defs/text"},
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["text", "source"],
+        "properties": {"text": {"$ref": "#/$defs/text"}, "source": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "basis": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_paths", "configuration", "collection_plan", "artifacts", "decisions"],
+      "properties": {
+        "source_paths": {"$ref": "#/$defs/texts"},
+        "configuration": {"$ref": "#/$defs/optional_text"},
+        "collection_plan": {"$ref": "#/$defs/optional_text"},
+        "artifacts": {"$ref": "#/$defs/texts"},
+        "decisions": {"$ref": "#/$defs/texts"}
+      }
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "assessment", "host_observation"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "assessment": {
+            "title": "AssignmentAssessment",
+            "type": "object", "additionalProperties": false,
+            "required": ["status", "reason", "next_assignment"],
+            "properties": {
+              "status": {"type": "string", "enum": ["pending", "accepted", "follow_up"]},
+              "reason": {"$ref": "#/$defs/optional_text"},
+              "next_assignment": {"$ref": "#/$defs/optional_id"}
+            }
+          },
+          "host_observation": {
+            "type": "object", "additionalProperties": false,
+            "required": ["worker_id", "state", "observed_at", "source"],
+            "properties": {
+              "worker_id": {"$ref": "#/$defs/optional_text"},
+              "state": {"type": "string", "enum": ["unknown", "running", "stopped"]},
+              "observed_at": {"$ref": "#/$defs/optional_text"},
+              "source": {"$ref": "#/$defs/optional_text"}
+            }
+          }
+        }
+      }
+    },
+    "active_assignment": {"$ref": "#/$defs/optional_id"},
+    "plan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "matched_tasks", "added_tasks", "remaining"],
+      "properties": {
+        "path": {"$ref": "#/$defs/optional_text"},
+        "matched_tasks": {"$ref": "#/$defs/texts"},
+        "added_tasks": {"$ref": "#/$defs/texts"},
+        "remaining": {"$ref": "#/$defs/texts"}
+      }
+    },
+    "remaining": {"$ref": "#/$defs/texts"},
+    "blockers": {"$ref": "#/$defs/texts"},
+    "next_step": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["action", "assignment", "prerequisite"],
+      "properties": {
+        "action": {"$ref": "#/$defs/text"},
+        "assignment": {"$ref": "#/$defs/optional_id"},
+        "prerequisite": {"$ref": "#/$defs/optional_text"}
+      }
+    }
+  },
+  "$defs": {
+    "text": {"type": "string", "pattern": "\\S"},
+    "optional_text": {"type": ["string", "null"], "pattern": "\\S"},
+    "texts": {"type": "array", "items": {"$ref": "#/$defs/text"}},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"},
+    "optional_id": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"}
+  }
+}

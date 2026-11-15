@@ -71,6 +71,14 @@ def test_cli_file_roundtrip_keeps_exact_diff_recovery_and_legacy_contract(tmp_pa
         assert selected["effort"] == row["profile_default"]["effort"]
     assert len(json.dumps(planned)) < len(json.dumps(plan)) * 0.6
     assert not list(project.iterdir())
+    # Reuse the existing external-output fixture for the audit transport branch.
+    audit = {"project_root": str(project), "compliant": False,
+             "requirements": [{"id": "mise", "required": True, "status": "not_found"}]}
+    audit_path = tmp_path / "audit.json"
+    audit_receipt = setup_io.save_result(audit, audit_path, "audit")
+    assert core.read_json(audit_path) == audit_receipt["summary"] == audit
+    assert audit_receipt["sha256"] == core.digest(audit_path.read_bytes())
+    assert not list(project.iterdir())
     # Plans are self-contained; neither request nor source artifact is needed at apply.
     artifact.unlink()
     request_path.unlink()

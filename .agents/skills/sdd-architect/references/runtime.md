@@ -1,110 +1,175 @@
 # Runtime and storage
 
-Use `uv` and a system Python 3.11+; Git is needed only for history and revision
-identity. JDK `jdeps` and `scc` are needed only for their selected collection
-branches. detekt and JaCoCo tasks belong to the consuming project's build.
-Missing a tool limits that branch; preserve the other available evidence.
+Use `uv` and a system Python 3.11+. Full audits require Git, jdeps, scc, a JDK source
+launcher, the bundled Kotlin measurement helper and complete detekt/JaCoCo reports.
+Gradle build/test/report tasks belong to the consuming project. Missing tools or
+mandatory sources block a full audit. Explicit focused routes can use partial inputs.
 
 ## Report storage
 
-Resolve `<project-root>` to the consuming project's absolute path. Before collecting
-or drafting anything, create `<project-root>/docs/reports/{report-name}/` and use
-that absolute path as `<report-dir>` throughout the run. Use the user's report name;
-when none is given, choose a descriptive kebab-case name such as
-`2026-11-08-pricing-audit`. Keep it a single directory component. If an unrelated
-report already uses that name, choose an unused numeric suffix. Resume the same
-report only when continuing that analysis; keep existing snapshots and use new
-numbered outputs for further collection or comparison.
+Before producing materials, establish
+`<project-root>/memory/tech-debt/audits/<date-time>/` and use its absolute path as
+`<report-dir>`. Use a UTC start timestamp `YYYY-MM-DDTHH-mm-ssZ`, for example
+`2026-11-14T14-30-00Z`. For a collision use fractional seconds before `Z` (up to
+six digits) and create an unused directory. Keep a descriptive audit title inside
+the report. Resume an unfinished audit in its existing directory. Retain completed
+audit materials; later investigations use a new timestamp and link their predecessors.
 
-Keep all retained materials in `<report-dir>`:
+The current plan is separate: `memory/tech-debt/plan/plan.md` and
+`memory/tech-debt/plan/tasks/<task-name>/task.md`. Follow
+[plan maintenance](tech-debt-plan.md) for automatic additions and user changes.
+Measurement and ranking commands write only inside audit directories.
+After the complete full audit succeeds, the final `status` command alone replaces
+`memory/tech-debt/status.json` and `status.md` under the
+[publication contract](quality-indicators.md#publication).
 
 | Material | Location relative to `<report-dir>` |
 | --- | --- |
-| Final report | `report.md` |
-| Continuation state maintained by the orchestrator | `state.md` |
-| Collection plan and captured identity | `collection-plan.md`, `identity-1.json` |
-| Tool logs and generated input reports | `logs/`, `raw/` |
-| Immutable snapshots and their raw input copies/configuration | `snapshot-1/`, `snapshot-2/`, ... |
-| Calculated views | `analysis-1.json`, `analysis-2.json`, ... |
+| Final report and continuation state | `report.md`, `state.json` |
+| Audit configuration and collection plan | `collection-input.json`, `collection-plan.md` |
+| One retained copy of each raw input and tool logs | `raw/`, `logs/` |
+| Collection parameters, output links and outcomes; no value tables | `collection.json` |
+| Effective numerical policy | `collection.json.analysis_policy`, read through `metrics.py policy --collection` |
+| Calculated project/module aggregates, awaiting final publication | `metrics/quality-indicators.json` |
+| One metric at one granularity | `metrics/<metric>/<granularity>.jsonl` |
+| Keyed sorting and threshold selections | `selections/rankings.jsonl`, `selections/signals.jsonl` |
+| Preliminary groups with overlaps and complete investigation queue | `selections/candidate-groups.jsonl`, `selections/investigation-queue.jsonl` |
 | Candidate shortlist and diagnosis index | `diagnosis.md` |
-| Separate source diagnosis for each candidate group | `diagnoses/<group-id>/diagnosis-1.md`, `diagnosis-2.md`, ... |
-| Saved assignment, actual launch and worker result | `assignments/<assignment-id>/request.json`, `launch.json`, `result.json` |
-| Retained versions of mutable assignment inputs | `assignments/<assignment-id>/inputs/` |
-| Authored cards, validated ordering and optional generated Markdown | `cards.json`, `ranked-1.json`, `ranked-1.md` |
+| Separate bounded diagnoses | `diagnoses/<group-id>/diagnosis-<n>.md` |
+| Saved assignment, launch and worker result | `assignments/<assignment-id>/request.json`, `launch.json`, `result.json` |
+| Six-section Markdown recommendation cards | `recommendations/<id>.md` |
+| Compact ranking metadata, validated ordering and optional rendered table | `cards.json`, `ranked-<n>.json`, `ranked-<n>.md` |
 
-Retain materials as they are produced, including incomplete results and collection
-gaps. Direct report-producing tools here when supported; otherwise copy their
-reports and logs here immediately, preserving original provenance. Existing inputs
-may originate elsewhere; `collect` retains their raw copies in the snapshot.
-Link retained evidence from `report.md` with relative paths so the report directory
-can be reviewed as a unit. New outputs must resolve inside this directory, including
-through symlinks. Do not overwrite an earlier run's artifacts.
+Source paths are relative to the project with `/`. Markdown links are relative to
+the containing document; measurement addresses are relative to the report directory,
+and the metadata's `card` path is relative to `cards.json`. Resolve writes inside the intended report,
+including symlinks. `collect --output` accepts the report directory itself, including
+pre-existing `raw/` and plans, but rejects an existing `collection.json`, `metrics/`
+or `selections/`. Further collection uses a new timestamped audit directory, linked from
+the audit being continued. Do so only for a measurement need, never a version check.
 
-Follow the [assignment and context contract](orchestration.md) for these records.
-Keep [continuation state](continuation.md#save-continuation-state) linked to actual
-requests, launches, results and primary artifacts; verify them when resuming.
-The orchestrator writes requests, launch evidence and collection plans; the
-assigned worker writes its result and named outputs. Keep assignment IDs and group
-IDs stable, distinct and safe single directory components. Retain the input versions
-behind a request before changing configuration, plans or cards. A completed group
-diagnosis stays intact; a further diagnosis uses a new numbered output and the
-index links the applicable result. Transfer an output only after the previous
-writer's stopped state is verified. All retained audit records belong here;
-caches and disposable execution state use external runtime storage below.
+The aggregate document is separate from keyed JSONL diagnostics. Do not copy source trees.
+Keep each audit's input in `collection-input.json` beside its output `collection.json`,
+which records used measurement parameters and resolved [analysis policy](analysis-policy.md).
+All paths in input configuration are project-relative with `/`, including report
+paths and command arguments. Pass the project root as runtime `--repository` for
+`configure`, `collect`, `rank` and `status`; cwd and the input file's location do
+not define the path base. External tool locations stay in runtime arguments.
+Project numerical overrides in `.sdd/architect/analysis-policy.json` are read-only;
+changing project settings belongs to user-initiated `sdd-setup`. Copy external
+reports once into `raw/` before saving their project-relative input paths;
+the collector reuses inputs already there.
 
-Maintain `<project-root>/.sdd/architect/collection.json` through
-[Collection](collection.md#maintain-project-configuration). It is reusable project
-configuration; each snapshot retains the configuration used for that collection.
-For source-free work, use the destination project directory as `<project-root>`;
-ask for it only when the working context provides none. Save the import configuration
-as `<report-dir>/collection.json` and point its `repository` at `<project-root>`.
+Retain partial outputs and concrete gaps. The collection description starts with
+`status: incomplete` and every planned output marked incomplete. Normal completion
+accounts for each output as `complete`, `unavailable` or `error`; an interrupted
+calculation remains distinguishable from a successful empty JSONL file. Outcome
+metadata, parameters and gaps stay outside metric rows.
+In a full audit, a required source failure sets collection `status: blocked` and
+raises an actionable error. No live status file is touched. Independent partial
+chains are allowed only for explicitly focused work.
+
+Use the [assignment contract](orchestration.md) for roles and output ownership.
+The orchestrator writes requests, launch evidence, plans and continuation state;
+workers write named outputs. Retain finished diagnoses; further work uses a new
+numbered diagnosis. Verify the previous writer has stopped before transferring
+an output. Current inputs are described by scope and paths, without content hashes.
 
 ## Execution environment
 
 Keep environments, caches, disposable fixtures and temporary build workspaces
-outside the consuming project and all skill collections. Preserve inherited
-`UV_CACHE_DIR` and `UV_TOOL_DIR`.
-If absent, resolve the OS temporary directory through its API and set absolute
-`uv-runtime/cache` and `uv-runtime/tools` paths for the current process. Create
-them and check `uv cache dir` plus actual create/write/read/list access. Reapply
-these variables and `PYTHONDONTWRITEBYTECODE=1` in new shells.
+outside the consuming project and skill collections. Preserve inherited
+`UV_CACHE_DIR` and `UV_TOOL_DIR`. If absent, resolve the OS temporary directory
+through its API and set absolute `uv-runtime/cache` and `uv-runtime/tools` paths
+for the process. Create them and check `uv cache dir` plus actual create/write/read/list
+access. Reapply these variables and `PYTHONDONTWRITEBYTECODE=1` in new shells.
 
 Find Python once: `uv python find --system --no-managed-python ">=3.11"`.
-Use its absolute path in every run. Entry points have PEP 723 metadata and
-adjacent lockfiles; no project environment or dependency setup is required.
+Use its absolute path in every run. Entry points have PEP 723 metadata and adjacent
+lockfiles; the consuming project needs no Python environment or dependencies.
 
 ```text
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" identity --config "<project-root>/.sdd/architect/collection.json"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --config "<project-root>/.sdd/architect/collection.json" --output "<report-dir>/snapshot-1"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" analyze --snapshot "<report-dir>/snapshot-1/snapshot.json" --output "<report-dir>/analysis-1.json"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --snapshot "<report-dir>/snapshot-1/snapshot.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" configure --repository "<project-root>" --input "<external-temporary-dir>/collection-candidate.json" --output "<report-dir>/collection-input.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --repository "<project-root>" --config "<report-dir>/collection-input.json" --output "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --repository "<project-root>" --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --repository "<project-root>" --collection "<report-dir>/collection.json"
 ```
 
-Resolve placeholders before execution. Existing output paths are rejected to
-retain the prior snapshot. JSON is the complete result; the Markdown output is
-a starting report in the user's language, with at most five ready cards. Keep that
-generated file separate from the integration architect's final `report.md`.
-Inspect gaps in successful JSON results: success does not mean every measurement exists.
+`configure` reads candidate JSON from `--input` or stdin and validates before
+writing the audit's `collection-input.json`. It rejects absolute paths on either
+OS, drive-relative paths, parent traversal and host paths embedded in provenance.
+It can update the input only before collection artifacts exist; started collections
+retain their configuration. Use this helper for every configuration write.
+`collect` revalidates input and checks resolved project paths, including symlinks.
 
-Register the resolved commands, cwd, exact input basis, outputs and limits in
-`collection-plan.md` before assigning them to explorer. Register `identity` stdout
-as a captured artifact such as `identity-1.json`; it has no `--output` option.
-For `rank`, retain the exact completed cards version with the assignment and keep
-it stable until the command returns. Further checks use unused numbered outputs;
-link the relevant result from the authored report. The examples show command shape,
-not permission for a research assignment to execute checks.
+`policy` is the read-only numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
+queue before substantive analysis. Its stdout reports counts, including candidate
+groups, the collection-description path and gaps. `rank` runs
+after cards are authored; it checks their six-section Markdown structure and reads
+only cited metric files and current source paths. Narrative stays in the Markdown
+cards; JSON carries addresses, statuses and effects for ranking.
+Generated Markdown is an input to the final report; the assigned architect authors
+`report.md`. Existing ranked output files are rejected to preserve retained results.
+`status` runs only after report and plan completion. For an explicitly focused route,
+add `--focused` to `collect`; that collection cannot publish project status.
 
-The scripts use only the standard library. Cached and empty-cache execution
-therefore require no package download, including deliberate `--offline` runs.
-Keep `--locked`; update a lock only as an intentional dependency change.
+Register resolved commands, cwd, paths, expected outputs and limits in
+`collection-plan.md` before assigning checks. Execute only the exact assigned set.
+Python scripts use the standard library. The Kotlin helper executes Java source
+against detekt CLI 1.23.8 `all.jar`; it does not modify project build dependencies.
+Find Java via runtime `--java`, PATH or JAVA_HOME. The helper needs JDK 11+
+source-launcher support. It downloads the fixed Maven distribution into
+`UV_TOOL_DIR/sdd-architect/` if absent. For offline use provide the existing jar's
+absolute path through runtime `--detekt-jar`. Keep the jar, temporary source
+manifest and JVM caches outside the project and skill package. Record detekt's
+measurement version independently of the project's Kotlin version. A download,
+launch or syntax failure blocks collection. Keep `--locked`; update Python
+lockfiles only for an intentional dependency change.
 
-On filesystem errors, report the first failing path. Probe access with the same
-interpreter and launch method; use the host's normal approval mechanism when
-needed. Preserve the sandbox and ACLs. Windows commands launched by the collector
-are hidden and terminate their process tree on timeout. It does not run arbitrary
-command strings from a report or configuration.
+On filesystem errors, report the first failing path. Probe with the same interpreter
+and launch method, then use the host's normal permission mechanism if necessary.
+Preserve sandbox and ACLs. Windows commands launched by the collector are hidden;
+timeouts stop their process trees. Report command text is never executed implicitly.
 
-Developer validation: run `scripts/test.py` through the same `uv --python ...
---locked --script ...` command. The full sequential suite has a 120-second
-wall-clock budget including launch and setup. Stop the whole process tree if it
-exceeds that budget. Keep evaluation results outside the package.
+## Continuation state commands
+
+The orchestrator runs this helper directly; it does not dispatch state maintenance
+to a worker. These commands are the exclusive agent interface to saved `state.json`:
+read through `read`, prepare the changed document, and persist through `write`.
+Use `check` for material consistency. Use the same system Python and uv environment
+as the metric commands:
+
+```text
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" read --report-dir "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" check --report-dir "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/audit_state.py" write --report-dir "<report-dir>" --input "<external-temporary-dir>/state-input.json"
+```
+
+`write` also accepts the whole JSON document on stdin when `--input` is omitted.
+Prepare candidates outside the project/package, preserve exact user constraints,
+and use `write` for each update. It validates the schema and internal relationships,
+flushes a temporary sibling in the audit directory and atomically replaces
+`state.json`; it cleans up the sibling when the operation returns. A failure before
+replacement preserves the old file. The orchestrator is the only writer.
+
+`read` validates and returns the saved JSON. `check` additionally verifies linked
+material through the [continuation contract](continuation.md#save-continuation-state)
+and returns `valid` and `issues`, with a nonzero exit code for issues. `write` applies
+these material checks before saving `phase: complete`. Saving unfinished state is
+possible while linked evidence is unavailable, so recovery work can be retained.
+Run `check` before dependent work and obtain fresh host observations on resumption.
+
+## Developer validation
+
+Run `scripts/test.py` with the same uv invocation. Set
+`ARCHITECT_TEST_JAVA` to the JDK launcher and `ARCHITECT_TEST_DETEKT_JAR` to the
+detekt 1.23.8 `all.jar`, both absolute paths outside the package. The mandatory
+single JVM scenario verifies actual parser/metric integration; the remaining
+formula/rule combinations run without subprocesses. The publication scenario
+checks real status files in an external temporary directory. The full
+sequential deterministic suite has a 120-second wall-clock budget including setup
+and launch. Stop its process tree and work if the limit is exceeded. Keep test logs
+and fixtures outside the project and package. Behavior scenarios require separate
+explicit consent under project instructions.

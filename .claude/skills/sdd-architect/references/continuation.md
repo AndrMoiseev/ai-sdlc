@@ -1,134 +1,148 @@
 # Continue or focus an architecture audit
 
-Read this reference for an evidence request, interrupted audit, changed basis or
-explicit focused route. Use [orchestration](orchestration.md) for assignment,
-launch, result and context contracts; this reference defines which work to resume.
+Use [orchestration](orchestration.md) for assignments, launch records, results and
+writer ownership. Continue work from current source paths, task scope and saved
+primary materials; do not reconstruct, compare or require an earlier source version.
 
 ## Request bounded evidence
 
-An architect requests further evidence through the orchestrator. Retain the request
-with the affected diagnosis or integration result, stating:
+An architect requests additional evidence through the orchestrator with:
 
 | Part | Required content |
 | --- | --- |
-| Question | One unresolved causal or acceptance question, with the affected group or card |
-| Evidence | The needed observation, source or artifact and what existing evidence already establishes |
-| Decision | What a positive answer changes, what a negative answer changes, and what remains unknown without an answer |
-| Bounds | Owners, consumers, wiring or tests to inspect, required output and feasible stopping condition |
+| Question | One unresolved causal or acceptance question and its affected group/card |
+| Evidence | Needed observation, source or artifact; what existing records establish |
+| Decision | What positive and negative answers change, and what remains unknown |
+| Bounds | Owners/consumers/wiring/tests, named output and feasible stopping condition |
 
-The orchestrator first checks whether retained primary evidence answers the
-question. Otherwise assign explorer `research` for source/artifact inspection or
-`checks` for execution of exact registered commands. Register a proposed command
-before dispatch. Put the question and decision branches in the request's existing
-instructions and expected result; keep the shared assignment shape unchanged.
-Expand read scope only when an identified dependency can answer that question,
-and record the reason and new basis. An unrelated cause gets its own assignment.
-
-Suspend only conclusions and writing that depend on the answer. On return, verify
-the result and basis, then give its primary references to the responsible architect
-under the context policy in [orchestration](orchestration.md#choose-the-context-boundary).
-Distinguish a checked negative answer from absent evidence. Missing inputs,
-unavailable capability, exhausted limits and incomplete execution are gaps, not
-successful checks. Save useful partial results, unresolved decision branches and
-the attainable next step; preserve inherited limits across retries. Continue
-unaffected work instead of restarting the whole audit. A failed measurement chain
-blocks its dependent checks; collect independent families under a current checks
-assignment without repeating verified successful commands.
+First inspect retained primary evidence. Assign explorer research for source/report
+inspection or checks for exact registered commands. Expand scope only when an
+identified dependency can answer the question; give an unrelated cause its own
+assignment. Suspend only dependent conclusions and continue independent work.
+This independent-chain rule applies to explicitly focused work. A missing or failed
+mandatory source blocks the full audit: retain intermediate materials and the
+previous live status, explain the prerequisite and propose fixing it first.
+Missing execution is a gap, not a successful check.
 
 ## Save continuation state
 
-The orchestrator maintains `<report-dir>/state.md` before dispatch, after accepting
-a handoff, and before interruption or context replacement. Update it when the
-basis or next step changes. Use a short navigation record with these contents:
+The orchestrator owns `<report-dir>/state.json`. Save it before dispatch, after
+recording the actual launch, after assessing a handoff and before context replacement.
+Access the saved file exclusively through `audit_state.py read`, `write` and `check`
+under the [runtime contract](runtime.md#continuation-state-commands). For an update,
+read through the helper, prepare the changed JSON and pass it to `write`.
+Direct file reads, editor patches and shell overwrites bypass this contract.
+The [schema](../assets/audit-state.schema.json) defines its fields; start with the
+[initial example](../assets/audit-state.example.json), replacing its identity,
+objective and constraints with the actual request. Keep one continuation file.
 
-| Content | Required links or observations |
+| Field | Content and authority |
 | --- | --- |
-| Work | Report identity, selected route, current phase, objective, scope and applicable user constraints |
-| Basis | Original and active revision/source state, configuration and collection-plan versions; link their retained identities and decision sources |
-| Assignments | Completed and unfinished IDs; current worker identity, output ownership and last host-observed state |
-| Evidence | Actual request, launch and result paths, primary outputs and the orchestrator's assessment of each handoff |
-| Open work | Affected groups/cards, open or unexecuted checks, gaps, unresolved decisions and remaining limits |
-| Next step | Exact phase/assignment to continue and its prerequisite or blocker |
+| `schema_version`, `report`, `route`, `phase` | Version 1, report identity matching requests, `full` or `focused`, and the current phase. Use `complete` only after delivery artifacts and the final handoff are verified. |
+| `objective`, `constraints` | The sought result and exact conditions; each constraint has `text` and its authoritative `source`. |
+| `basis` | Current `source_paths`, `configuration` pointing to this audit's `collection-input.json`, `collection_plan`, primary `artifacts` and decision sources in `decisions`. The configuration link is audit-relative; paths inside its contents are project-relative. Null means a path has not yet been established. |
+| `assignments`, `active_assignment` | Recorded assignment IDs and the one pending assignment, or null. Read scope, outputs, limits and result facts from each assignment's primary files. |
+| `assignments[].assessment` | Orchestrator's `status`: `pending`, `accepted` or `follow_up`; retain the `reason`. Link a created follow-up through `next_assignment`. A chain must end in an accepted result before completion. |
+| `assignments[].host_observation` | `worker_id`, last observed `state` (`unknown`, `running`, `stopped`), UTC `observed_at` and host evidence `source`. Unknown observations stay null/unknown. |
+| `plan` | Current `path`, `matched_tasks`, `added_tasks` and `remaining` operations. The current plan remains authoritative for user decisions. |
+| `remaining`, `blockers` | Unfinished groups/checks, missing evidence and open decisions. Preserve relevant object keys and their primary-artifact paths in these short descriptions. |
+| `next_step` | One `action`, its recorded `assignment` or null, and its `prerequisite` or null. Complete work has null here. |
 
-Link the saved records from [orchestration](orchestration.md); state is not a
-replacement for them. Keep worker-reported completion separate from the
-orchestrator's verified assessment. Save unknown observations as unknown. This
-file is a continuation index, not a second execution engine or approval registry.
+Artifact paths are absolute or relative to the audit directory. Source paths name
+directories. Primary records are always `assignments/<id>/request.json`,
+`launch.json` and `result.json`; the ID supplies their addresses. Use only existing
+file paths in `basis.artifacts`, without Markdown anchors or JSONL keys. Keep those
+keys in the relevant `remaining` description or the linked diagnosis. Decision and
+host sources can identify conversation/tool observations; they are not file-path fields.
+
+Keep full requests, measurements and results in their primary files. An accepted
+assessment records a semantic decision by the orchestrator; a worker's `completed`
+status alone leaves the assessment pending. For a partial or blocked result, record
+the usable portion and remaining question in the reason, then link the new bounded
+assignment. Retain prior assessments and their request/result files.
+
+`write` validates the shape and internal references and replaces the file atomically.
+It can save unfinished recovery work while primary evidence is missing. Writing
+`phase: complete` also requires all material checks to pass. Before dispatch,
+phase transition or resumption, run `check`: it also reads primary records, checks
+their identities, required paths, assessment evidence and writer observations.
+Resolve reported issues before dependent work; preserve blockers and recovery steps
+in state meanwhile. A successful check establishes structural consistency only.
+The orchestrator still judges meaning, current host state, permissions and plan rows.
+It can investigate a reported gap without repeating completed independent work.
 
 ## Resume after interruption
 
-1. Read `state.md`, the active request and collection plan, then the linked launch,
-   result and primary artifacts needed for the remaining work. Check their actual
-   existence, content identity, scope and source/configuration basis. A summary
-   cannot prove a missing result, successful launch or completed check.
-2. Ask the host for the recorded worker's actual state. A saved worker ID or
-   `writing_stopped` claim alone does not establish that it is live or stopped.
-   Verify the previous writer has stopped before assigning a successor its output;
-   an unknown writer state blocks that transfer.
-3. Reconcile the current checkout, decisions, configuration and artifacts with
-   the saved basis using the rule below. Preserve unavailable artifacts as gaps;
-   recover evidence through a bounded assignment instead of reconstructing it
-   from conversational claims.
-4. Continue a verified live worker only within its phase and bounded problem,
-   after revalidating inputs and the completed portion. Changed scope, inputs,
-   outputs or limits receive a new saved assignment. A new phase, new group or
-   replacement worker receives a fresh context with primary references under
-   [context policy](orchestration.md#choose-the-context-boundary).
-5. Update state with the verified completed portion, open checks and next step.
-   Resume at the earliest affected phase and carry the selected route through its
-   final `report.md`. Preserve useful completed work and outstanding limits.
+1. Use `audit_state.py read` and `check`, then open the active request, collection
+   plan and primary artifacts needed for the next action. A missing record is a
+   gap to resolve; its saved assessment cannot prove the lost evidence. Keep the
+   next recovery action and blockers in state. A summary cannot prove an executed check.
+   Resolve the saved collection's [analysis policy](analysis-policy.md) through the
+   script; project overrides edited later do not replace it during continuation.
+2. Ask the host for the recorded worker's state and save the new observation.
+   Verify that a previous writer has stopped before transferring an output; the
+   saved observation is historical even when `check` passes. If interruption left
+   an active request without a launch/worker ID, inspect host launch evidence before
+   redispatch; absence of a launch file does not establish that no worker started.
+   Unknown writer state blocks a successor.
+3. Read the current sources needed for the pending question. Use the saved scope,
+   paths, conclusions and limitations directly. Missing artifacts remain gaps.
+4. Continue a live worker only within its bounded phase; new phases/groups and
+   replacement workers receive fresh contexts with primary references. Assign a
+   new request when the task scope, outputs or limits change.
+5. Reread the current plan; reconcile user edits and partially completed additions
+   under [plan maintenance](tech-debt-plan.md#apply-user-changes-and-resume-safely).
+   Save the completed portion and next step, then finish report and plan delivery.
+   For a full audit, publish project status only after all preceding phases succeed.
+   Save `phase: complete` after the publication result and final handoff are verified;
+   a focused audit completes after its report and plan are verified. Clear the active
+   assignment and next step only when their work is finished.
+   After a source blocker is resolved, collection uses a new timestamped directory
+   as required by runtime; link it from the continued audit and use its aggregate
+   input. Never publish stale aggregates from the failed attempt.
+
+No comparison of source revisions, fingerprints or material checksums participates
+in resumption. Their absence or difference does not trigger a stop, downgrade,
+`needs_check`, recollection or repetition of completed work.
 
 ## Reconcile a changed basis
 
-When decisions, sources, configuration or measurement definitions change, identify
-the dependent observations, diagnoses, cards and ranking before continuing them.
-Retain previous numbered snapshots, analyses, diagnoses and assignment results for
-provenance. Mark their applicability in state and the diagnosis index; issue new
-affected contributions instead of overwriting their evidence.
+Here, basis means task scope, paths and applicable decisions. Revisit a conclusion
+when current substantive evidence contradicts it or the requested question changes.
 
-| Changed input | Required reassessment |
+| Substantive change | Follow-up |
 | --- | --- |
-| User decision, required behavior or candidate scope | Revisit affected mechanisms, alternatives, acceptance and cross-card dependencies |
-| Source, owner, consumer, wiring or test | Recheck affected source evidence and measurement provenance; collect current identity/evidence where the old basis no longer applies |
-| Configuration, source population, mapping or tool definitions | Reconcile the collection plan; recollect/reanalyze affected inputs and compare definitions before comparing values |
-| Diagnosis, cards or prerequisite | Reintegrate dependent claims and rerun `rank` for the exact changed cards and snapshot |
+| Required behavior, scenario or user decision | Revisit affected mechanism, alternatives, acceptance and dependencies |
+| A contradictory current declaration, consumer or wiring fact | Inspect the affected mechanism and correct the claim |
+| Measurement population, mapping or instrument definition | Explain comparability; collect an affected measurement only when needed for the question |
+| Diagnosis, card or prerequisite | Reintegrate affected claims and rank corrected cards |
 
-Keep an unaffected contribution only after recording why its source, inputs and
-decision basis still apply. A local edit can change graph reachability, SCC/PC or
-global populations, so the affected set can exceed the changed files. Recollect
-or reanalyze the complete relevant graph/population when required by the measure.
-Before a ready card refers to the current snapshot, verify its cited declarations,
-consumers and evidence against that snapshot. Copying an old `source_state`, or
-replacing it with the new value without inspection, does not establish readiness.
-If comparability or identity remains unknown, preserve that limit in the claim.
+Keep useful completed diagnoses and their primary links. A graph calculation may
+need a whole affected graph because reachability is global. Define that population
+explicitly. Semantic questions justify further work; source identity checks do not.
 
 ## Explicit focused routes
 
-A focused route requires an explicit task: analyze supplied reports, review a diff
-or reassess an implemented recommendation. A bare invocation or general audit
-always follows the [full cycle](workflow.md); an existing report alone never
-changes that route. For every focused run with a checkout, perform
-[configuration maintenance](collection.md#maintain-project-configuration) before
-identity capture, even when every measurement is imported.
+A focused route requires an explicit request. Bare invocation and general audit
+follow the [full workflow](workflow.md); an existing report alone does not select
+a shorter route. Save this audit's configuration through `metrics.py configure`
+for every route, including work without sources. Project settings remain read-only.
 
-| Requested route | Entry conditions and phases |
+| Requested route | Work and result |
 | --- | --- |
-| Existing reports with sources | Locate the requested reports and corresponding checkout. Configuration qualifies their scope/provenance; evidence imports suitable inputs and runs `collect`/`analyze`, filling only decision-relevant gaps. Analysis diagnoses the requested groups against matching sources; a fresh architect integrates and delivers through the final-report phase. |
-| Source-free reports | Identify supplied artifacts and a destination directory. Configuration records import scope and unknown identities in the report-local configuration/plan; evidence imports and analyzes them. Analysis records hypotheses and bounded questions without claiming source diagnosis. Final report retains those limits; implementation-ready recommendations are unavailable. |
-| Diff review | Fix base and target revisions/working states and the requested change. Configuration and evidence establish comparable scopes and separate snapshots; analysis inspects changed contracts and affected consumers, including those outside the diff. Use [reassessment](reassessment.md) and final-report integration for grounded findings. |
-| Reassessment | Identify the earlier recommendation, its evidence/acceptance and the implementation to verify. Reconcile configuration and collect current relevant evidence; reuse prior contributions only after basis validation. Analyze acceptance, consequences and dependent recommendations, then deliver a fresh integrated report using [reassessment](reassessment.md). |
+| Existing reports with sources | Qualify populations and mappings; `collect --focused` prepares JSONL evidence. Diagnose requested groups using current declarations, then rank and deliver. |
+| Source-free reports | Record input paths and known limitations in `collection-input.json`. `collect --focused` calculates available outputs; analysis returns hypotheses and bounded questions, followed by the report. |
+| Proposal comparison | Read the named cards, evidence and current sources. Compare mechanisms and effects; rank justified corrected cards and explain ties or gaps. |
+| Diff review | Use the supplied diff or requested Git comparison to locate changes. Inspect current contracts and consumers beyond the diff, then follow [reassessment](reassessment.md). No source-version gate is introduced. |
+| Reassessment | Read the earlier card, evidence and acceptance. Inspect the current implementation and relevant measurements; report supported, contradicted and untested effects. |
+| Plan-only change | Apply the user's assessment/status/priority changes under [plan maintenance](tech-debt-plan.md#apply-user-changes-and-resume-safely), keeping ready before needs_check. Return the plan link; no audit or collection is needed. |
 
-Qualify imported artifacts through [collection](collection.md#import-existing-reports):
-original source identity, generation provenance, selected population, definitions
-and mapping matter. Unknown coverage is not zero. Unknown source identity limits
-readiness even when sources are present; source-free calculations cannot establish
-current ownership or feasible implementation. A gap never becomes measured merely
-because the import or analysis command succeeded.
-
-Use the [phase contracts](workflow.md) for the selected scope, with the same fresh
-contexts and exact checks. A narrow request can yield fewer than 8–12 distinct
-groups; record that scope bound in the shortlist. Explain phases or measurement
-families omitted by the explicit focus. All routes retain requests, results and
-evidence in `<report-dir>`, finish with its authored `report.md`, and return that
-link. Cards and ranking remain inputs to the report. End with recommendations or
-verification findings; implementation requires a separate instruction.
+Qualify populations, tools, extraction limits and source/class mapping through
+[collection](collection.md#import-existing-reports). Missing coverage stays unknown.
+Source-free evidence cannot establish current ownership or implementation feasibility.
+Use the same fresh-context and checks contracts for the chosen scope, explaining
+any omitted phase or measurement family. Every audit route retains its materials
+and finishes with report and plan delivery, including excluded-status notification.
+Plan-only changes update the plan directly. Implementing recommendations requires
+a separate task.
+Focused routes never overwrite project status or substitute for a blocked full audit.

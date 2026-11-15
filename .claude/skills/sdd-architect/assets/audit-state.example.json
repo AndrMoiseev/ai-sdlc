@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "report": "2026-11-15T12-00-00Z",
+  "route": "full",
+  "phase": "configuration",
+  "objective": "Audit the current Kotlin project and deliver the report, tech debt plan and project status.",
+  "constraints": [],
+  "basis": {
+    "source_paths": [],
+    "configuration": null,
+    "collection_plan": null,
+    "artifacts": [],
+    "decisions": []
+  },
+  "assignments": [],
+  "active_assignment": null,
+  "plan": {"path": null, "matched_tasks": [], "added_tasks": [], "remaining": []},
+  "remaining": [],
+  "blockers": [],
+  "next_step": {
+    "action": "Read the current tech debt plan and prepare configuration research.",
+    "assignment": null,
+    "prerequisite": null
+  }
+}
