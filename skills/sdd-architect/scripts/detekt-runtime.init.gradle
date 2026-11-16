@@ -1,0 +1,28 @@
+// Read the selected project's existing detekt configuration for this invocation only.
+import groovy.json.JsonOutput
+
+gradle.projectsEvaluated {
+    def taskName = 'sddArchitectDetektRuntime'
+    if (rootProject.tasks.findByName(taskName) != null) {
+        throw new GradleException("Reserved audit task already exists: ${taskName}")
+    }
+    rootProject.tasks.register(taskName) {
+        doLast {
+            def projectPath = System.getProperty('sdd.architect.detekt.project', ':')
+            def selected = rootProject.findProject(projectPath)
+            def configuration = selected?.configurations?.findByName('detekt')
+            if (configuration == null) {
+                throw new GradleException("No existing detekt configuration in ${projectPath}; select a configured project with --detekt-project")
+            }
+            def cli = configuration.resolvedConfiguration.resolvedArtifacts.findAll {
+                it.name == 'detekt-cli' && it.moduleVersion.id.group in ['io.gitlab.arturbosch.detekt', 'dev.detekt']
+            }
+            if (cli.size() != 1) throw new GradleException("Expected one configured detekt-cli, found ${cli.size()}")
+            def artifact = cli[0].moduleVersion.id
+            def value = [version: artifact.version,
+                         classpath: configuration.files.collect { it.canonicalPath }.sort(),
+                         main_class: artifact.group == 'dev.detekt' ? 'dev.detekt.cli.Main' : 'io.gitlab.arturbosch.detekt.cli.Main']
+            new File(System.getProperty('sdd.architect.detekt.runtime')).setText(JsonOutput.toJson(value), 'UTF-8')
+        }
+    }
+}

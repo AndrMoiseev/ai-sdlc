@@ -22,15 +22,20 @@ required counters stops the audit. Tell the user what to resolve before restarti
 Do not turn unavailable inputs into zero, a reduced denominator or a partial Q.
 An actually empty denominator is `not_applicable`, encoded as null with its counters.
 
-Kotlin measurements use the lexer, PSI and cognitive complexity from detekt 1.23.8.
-This pins the measurement definition, not the consuming project's Kotlin version.
-The collector rejects syntax errors. It does not infer dependencies from imports
+Kotlin measurements use the existing detekt runtime's lexer, PSI and cognitive
+complexity through the bundled plugin. The JSON schema and measurement profile
+are declared in [plugins.json](../bin/plugins.json), separately from the runtime.
+Retain actual detekt, Kotlin parser and plugin versions: changing the host can
+change tokenization or complexity results, so inspect those versions when comparing
+audits. Select the adapter by major and minimum version; no exact runtime is pinned.
+The plugin rejects syntax errors. It does not infer dependencies from imports
 or substitute its parser for jdeps. Syntax compatibility must hold for the actual
-project; a newer unsupported construct is a prerequisite failure.
+project; a construct unsupported by that project's detekt is a prerequisite failure.
 
 Code tokens exclude whitespace, comments and package/import directives. Token type,
 identifier and literal spelling remain intact. Positions are UTF-16 offsets after
-LF normalization and optional UTF-8 BOM removal. Named functions with bodies carry
+LF normalization and optional UTF-8 BOM removal when accepted by the host parser.
+The plugin does not reparse or repair sources rejected by detekt. Named functions with bodies carry
 signature, owner, cognitive complexity and nesting. Classes/objects and function
 bodies supply size containers. Suppressions and detector warning thresholds do not
 remove functions from these aggregate measurements.

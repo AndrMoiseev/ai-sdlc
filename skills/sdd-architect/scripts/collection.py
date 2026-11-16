@@ -32,7 +32,11 @@ def run(argv, cwd, policy):
         process.communicate()
         raise ValueError(f"Command timed out after {timeout}s: {argv[0]}") from None
     if process.returncode:
-        detail = stderr.decode('utf-8', errors='replace')[-policy["runtime"]["stderr_tail_characters"]:]
+        # detekt also writes launch/configuration failures to stdout.
+        limit = policy["runtime"]["stderr_tail_characters"]
+        detail = stderr.decode('utf-8', errors='replace')[-limit:]
+        if stdout:
+            detail = stdout.decode('utf-8', errors='replace')[:limit] + "\n" + detail
         raise ValueError(f"Command failed ({process.returncode}): {argv!r}\n{detail}")
     return stdout
 
@@ -117,7 +121,7 @@ def map_classes(config, root, sources):
     return dict(sorted(mappings.items())), unresolved
 
 
-def collect(config, output, *, repository, full=True, java=None, detekt_jar=None):
+def collect(config, output, *, repository, full=True, java=None, detekt_jar=None, detekt_project=":"):
     from analysis import prepare_measurements
     from candidate_groups import SELECTION_NAMES
 
@@ -199,7 +203,8 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
             if spec.get("collect"):
                 if name == "kotlin":
                     from kotlin_measurements import collect_kotlin
-                    data, details = collect_kotlin(sources, root, run, policy, java=java, detekt_jar=detekt_jar)
+                    data, details = collect_kotlin(sources, root, run, policy, java=java,
+                                                  detekt_jar=detekt_jar, detekt_project=detekt_project)
                     metadata.update(details)
                     argv = details["command"]
                 elif name == "history" and full:

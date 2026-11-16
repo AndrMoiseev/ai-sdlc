@@ -123,12 +123,15 @@ command is descriptive provenance, never an executable command string.
    Set `complete: true` and `test_result: "passed"` only after checking complete
    production class coverage and successful execution of the configured test tasks.
    Missing reports, classes or required counters block a full audit.
-7. `kotlin: {"collect": true}` runs the bundled token/function collector with detekt's
-   Kotlin parser and cognitive-complexity implementation. This supplies all named
+7. `kotlin: {"collect": true}` loads the bundled measurement plugin into the existing
+   detekt runtime, using its Kotlin parser and cognitive-complexity implementation. This supplies all named
    functions, including zero values and suppressed findings, plus token positions
-   and size containers. Optional runtime `--java` and `--detekt-jar` select the JDK
-   launcher and the required detekt 1.23.8 distribution. See [runtime](runtime.md).
-   No project Kotlin version is prescribed; unsupported syntax blocks collection.
+   and size containers. Resolve detekt from the existing Gradle configuration;
+   `--detekt-project :server` selects its project. Optional `--java` selects JDK 17+;
+   `--detekt-jar` selects an existing CLI distribution. The detected major and minimum
+   version select the plugin. See [runtime](runtime.md) for supported versions.
+   No exact detekt or project Kotlin version is prescribed; unsupported syntax or
+   plugin loading failure blocks collection.
 
 Record `format`, `tool`, `version`, `command`, `source_root`, and relevant limitations
 for imports. Save original reports once in `raw/`; tools may write directly there.
@@ -148,7 +151,7 @@ full audit with every required source. Never choose focused mode to bypass a blo
 | History | Full audit: `git-history` JSON produced by the collector, covering the policy window; focused work also accepts `git-log` |
 | Size | `scc` per-file JSON |
 | Complexity | `detekt-sarif` |
-| Kotlin | Complete `kotlin-measurements` JSON produced by the bundled collector |
+| Kotlin | Complete `kotlin-measurements` JSON, schema 2 and the declared measurement profile, produced by the bundled plugin |
 | Coverage | Full audit: complete `jacoco` XML; focused work also accepts `coverage-csv` |
 
 Set `source_root` to the checkout root encoded in imported paths. Unresolved paths

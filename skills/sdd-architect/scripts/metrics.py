@@ -60,7 +60,8 @@ def main(argv=None):
     sub.add_argument("--config", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
     sub.add_argument("--java", type=Path, help="Runtime JDK launcher outside the audit configuration")
-    sub.add_argument("--detekt-jar", type=Path, help="Runtime detekt CLI all.jar outside the audit configuration")
+    sub.add_argument("--detekt-jar", type=Path, help="Existing detekt CLI distribution; otherwise use the project's Gradle configuration")
+    sub.add_argument("--detekt-project", default=":", help="Gradle project whose existing detekt configuration to use, e.g. :server")
     sub.add_argument("--focused", action="store_true", help="Explicit focused analysis; does not calculate or publish project status")
     sub = commands.add_parser("status", help="Publish status.json and status.md after the full report and plan are finished")
     sub.add_argument("--repository", required=True, type=Path)
@@ -94,7 +95,8 @@ def main(argv=None):
             if args.config.resolve() != args.output.resolve() / "collection-input.json":
                 raise ValueError("Use collection-input.json from the selected audit directory")
             value = collect(read_json(args.config), args.output, repository=args.repository,
-                            full=not args.focused, java=args.java, detekt_jar=args.detekt_jar)
+                            full=not args.focused, java=args.java, detekt_jar=args.detekt_jar,
+                            detekt_project=args.detekt_project)
             print(json.dumps({"collection": str(args.output / "collection.json"),
                               "complete_outputs": sum(row["status"] == "complete" for row in value["outputs"].values()),
                               "unavailable_outputs": sum(row["status"] != "complete" for row in value["outputs"].values()),

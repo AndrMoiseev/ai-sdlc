@@ -26,9 +26,14 @@ def fraction(numerator, denominator):
 
 
 def qualify_kotlin(value, sources):
-    if (value.get("format") != "kotlin-measurements" or value.get("version") != 1
-            or value.get("complete") is not True or value.get("tool_version") != "1.23.8"):
-        raise ValueError("Kotlin measurements are missing or incomplete; run the bundled Kotlin collector")
+    from detekt_runtime import plugin_metadata, select_plugin
+    metadata = plugin_metadata()
+    if (value.get("format") != "kotlin-measurements" or value.get("version") != metadata["schema_version"]
+            or value.get("complete") is not True
+            or value.get("measurement_profile") != metadata["measurement_profile"]
+            or not isinstance(value.get("tool_version"), str)):
+        raise ValueError("Kotlin measurements are missing or incomplete; run detekt with the bundled measurement plugin")
+    select_plugin(value["tool_version"])
     rows = value.get("files", [])
     files = {row["file"]: row for row in rows}
     expected = {path for path, source in sources.items() if source["language"] == ".kt"}

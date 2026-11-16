@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "measurement_profile": "kotlin-tokens-functions-1",
+  "plugin_version": "1.0.0",
+  "adapters": {
+    "1": {
+      "minimum_version": "1.23.8",
+      "jar": "detekt-measurements-1.jar",
+      "main_class": "io.gitlab.arturbosch.detekt.cli.Main"
+    },
+    "2": {
+      "minimum_version": "2.0.0-alpha.6",
+      "jar": "detekt-measurements-2.jar",
+      "main_class": "dev.detekt.cli.Main"
+    }
+  }
+}
