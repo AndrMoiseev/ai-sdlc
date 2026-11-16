@@ -50,6 +50,10 @@ user-initiated `sdd-setup` process. Audit-time approval does not transfer that
 responsibility. Report unsupported setup options as limitations; do not implement
 them in this audit or invoke setup automatically.
 
+For Kotlin measurements, use the project's existing detekt with the bundled
+version-appropriate plugin. Follow [runtime selection](references/runtime.md#execution-environment);
+do not download a separate parser or change build configuration during collection.
+
 Read [tech debt plan maintenance](references/tech-debt-plan.md) before selecting
 candidates and again before completion. Reuse known diagnoses from the current
 plan. Automatically copy only new `ready` and `needs_check` cards into

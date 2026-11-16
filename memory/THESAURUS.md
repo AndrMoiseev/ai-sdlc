@@ -105,6 +105,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Основание** `Basis` kind:value
 - **Пакет скиллов** `SkillPackage` kind:concept
 - **Память проекта** `ProjectMemory` kind:concept
+- **Плагин измерений** `MeasurementPlugin` kind:concept
 - **План** `Plan` kind:entity
 - **План техдолга** `TechDebtPlan` kind:entity
 - **Поручение исследователю** `Assignment` kind:entity
@@ -203,6 +204,11 @@ baseline проверок. Совпадение имён само по себе 
 - **Изменения на единицу объёма кода** `ChangesPerCode` kind:value
 
 ## Terms
+
+### Плагин измерений
+
+- **Definition**: Расширение detekt, которое собирает полные измерения Kotlin из уже разобранных файлов и выдаёт отчёт для архитектурного аудита; общий исходный код собирается с адаптером API выбранной основной версии detekt.
+- **Source**: [плагин detekt](../tools/detekt-measurements/README.md).
 
 ### Статус проекта
 

@@ -1,6 +1,5 @@
 import json
 import math
-import os
 import tempfile
 import unittest
 from datetime import date, datetime, timedelta, timezone
@@ -8,10 +7,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from analysis_policy import load_policy
-from collection import collect, map_classes, run
+from collection import collect, map_classes
 from design_rule_hierarchy import decoupling_level, hierarchy, structural_metrics
 from history import collect_history, parse_history
-from kotlin_measurements import collect_kotlin
 from project_status import publish_status, render_status
 from quality_indicators import coverage_methods, coverage_summary, duplication, indicators, maintainability, qualify_kotlin
 
@@ -30,7 +28,8 @@ def file_row(path, package="example", count=10, complexity=0, texts=None):
 
 
 def kotlin(rows):
-    return {"format": "kotlin-measurements", "version": 1, "complete": True,
+    return {"format": "kotlin-measurements", "version": 2, "complete": True,
+            "measurement_profile": "kotlin-tokens-functions-1",
             "tool_version": "1.23.8", "files": rows}
 
 
@@ -208,30 +207,3 @@ class PublicationTests(unittest.TestCase):
                 collect(config, audit.with_name("2026-11-15T13-00-00Z"), repository=root)
             self.assertEqual(status.read_bytes(), before)
             self.assertEqual(json.loads((audit.with_name("2026-11-15T13-00-00Z") / "collection.json").read_text())["status"], "blocked")
-
-
-class KotlinCollectorTests(unittest.TestCase):
-    def test_actual_kotlin_parser_and_metric_with_nested_functions(self):
-        # Risk: a mock cannot detect PSI/JVM linkage errors or different token/visitor semantics.
-        # One JVM invocation covers these boundaries; arithmetic combinations stay pure above.
-        java, jar = os.environ.get("ARCHITECT_TEST_JAVA"), os.environ.get("ARCHITECT_TEST_DETEKT_JAR")
-        self.assertTrue(java and jar, "Set ARCHITECT_TEST_JAVA and ARCHITECT_TEST_DETEKT_JAR for the mandatory JVM collector check")
-        with tempfile.TemporaryDirectory(prefix="architect-kotlin-") as directory:
-            root = Path(directory)
-            (root / "A.kt").write_text('''package example
-import kotlin.math.abs
-@Suppress("CognitiveComplexMethod")
-fun zero() = 0
-fun outer(x: Int): Int {
-    fun inner(y: Int) = if (y > 0) y else 0
-    return inner(x)
-}
-class A { fun value() = "λ" }
-''', encoding="utf-8")
-            data, metadata = collect_kotlin({"A.kt": {"language": ".kt"}}, root, run, POLICY, java=java, detekt_jar=jar)
-            row = json.loads(data)["files"][0]
-            self.assertEqual(metadata["version"], "1.23.8")
-            self.assertEqual([f["cognitive_complexity"] for f in row["functions"] if f["signature"] == "zero()"], [0])
-            self.assertEqual(sum(f["nested"] for f in row["functions"]), 1)
-            self.assertTrue(any(container["kind"] == "class" for container in row["containers"]))
-            self.assertFalse(any(token["text"] in {"package", "import"} for token in row["tokens"]))
