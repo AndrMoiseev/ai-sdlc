@@ -90,7 +90,7 @@ inputs to qualify within this cycle; their presence does not select a reports-on
 | 4. Ranking | Explorer executes assigned `rank` against the cards, collection and current sources | Checked card structure, evidence addresses and priority groups |
 | 5. Final report | Fresh architect authors the report from diagnoses, cards and ranking | `report.md`, using the resolved recommendation display limit |
 | 6. Plan update | Orchestrator adds eligible new tasks and retains current user decisions | Updated `plan/plan.md`, new task cards and final notifications |
-| 7. Project status | After every audit phase succeeds, publish the calculated project/module indicators | Fully replaced `memory/tech-debt/status.json` and template-rendered `status.md` |
+| 7. Project status | After every audit phase succeeds, publish the calculated project/module indicators | `memory/tech-debt/status.json`, rendered `status.md` and its companion indicator guide |
 
 Every full audit requires all measurement sources, including configured coverage
 from a successful test run. Missing, failed or incomplete required input blocks the

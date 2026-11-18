@@ -155,15 +155,16 @@ The orchestrator verifies that all preceding phases succeeded, saves
 `phase: publication` and its pending assignment in `state.json`, and assigns
 the final `metrics.py status --collection <report-dir>/collection.json`
 under the checks contract. The command replaces `memory/tech-debt/status.json` and
-renders `status.md` from that JSON structure and the bundled template. Never edit
-the Markdown values manually. This is the last audit phase;
+renders `status.md` from that JSON structure. It also copies the bundled indicator
+guide beside the report for readers. Keep the guide out of every agent's context.
+This is the last audit phase;
 see [publication](quality-indicators.md#publication). After verifying its result and
 the writer's stop, record the accepted handoff and `phase: complete` in `state.json`,
 clear finished work and run the continuation-state check. Interrupted or failed
 publication leaves the audit unfinished.
 
 If any earlier phase fails or is interrupted, stop without touching the previous
-status. A failure during the two final writes requires no rollback, backup or
+status. A failure during the final writes requires no rollback, backup or
 recovery protocol; earlier committed values remain in Git.
 
 **Exit:** the final response links report, plan and status. Notify the user about

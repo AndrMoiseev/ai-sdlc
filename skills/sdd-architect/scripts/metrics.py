@@ -63,7 +63,7 @@ def main(argv=None):
     sub.add_argument("--detekt-jar", type=Path, help="Existing detekt CLI distribution; otherwise use the project's Gradle configuration")
     sub.add_argument("--detekt-project", default=":", help="Gradle project whose existing detekt configuration to use, e.g. :server")
     sub.add_argument("--focused", action="store_true", help="Explicit focused analysis; does not calculate or publish project status")
-    sub = commands.add_parser("status", help="Publish status.json and status.md after the full report and plan are finished")
+    sub = commands.add_parser("status", help="Publish status.json, status.md and the indicator guide after the full report and plan are finished")
     sub.add_argument("--repository", required=True, type=Path)
     sub.add_argument("--collection", required=True, type=Path)
     sub = commands.add_parser("rank", help="Check Markdown cards and rank their metadata for sdd-spec discussion")
@@ -105,7 +105,8 @@ def main(argv=None):
         elif args.command == "status":
             from project_status import publish_status
             destination = publish_status(args.collection, args.repository)
-            print(json.dumps({"json": str(destination / "status.json"), "markdown": str(destination / "status.md")}))
+            print(json.dumps({"json": str(destination / "status.json"), "markdown": str(destination / "status.md"),
+                              "guide": str(destination / "status-indicators.md")}))
         else:
             collection = read_json(args.collection)
             report_output(args.collection, args.repository)

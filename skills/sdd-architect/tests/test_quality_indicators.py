@@ -1,5 +1,6 @@
 import json
 import math
+import re
 import tempfile
 import unittest
 from datetime import date, datetime, timedelta, timezone
@@ -187,12 +188,15 @@ class PublicationTests(unittest.TestCase):
             config["artifacts"]["coverage"].update(complete=True, test_result="passed")
             status = root / "memory/tech-debt/status.json"
             status.write_text("previous", encoding="utf-8")
+            guide = status.with_name("status-indicators.md")
+            guide.write_text("previous guide", encoding="utf-8")
             description = collect(config, audit, repository=root)
             self.assertEqual(description["status"], "complete")
             self.assertEqual(status.read_text(), "previous")
             with self.assertRaisesRegex(ValueError, "Finish the report"):
                 publish_status(audit / "collection.json", root)
             self.assertEqual(status.read_text(), "previous")
+            self.assertEqual(guide.read_text(), "previous guide")
             (audit / "report.md").write_text("Finished audit", encoding="utf-8")
             plan = root / "memory/tech-debt/plan"
             plan.mkdir()
@@ -200,7 +204,19 @@ class PublicationTests(unittest.TestCase):
             publish_status(audit / "collection.json", root)
             value = json.loads(status.read_text(encoding="utf-8"))
             self.assertEqual(value["project"]["statistics"]["total"]["Code"], 2)
-            self.assertEqual((status.with_suffix(".md")).read_text(encoding="utf-8"), render_status(value))
+            markdown = status.with_suffix(".md").read_text(encoding="utf-8")
+            self.assertEqual(markdown, render_status(value))
+            bundled = Path(__file__).resolve().parents[1] / "assets" / guide.name
+            self.assertEqual(guide.read_bytes(), bundled.read_bytes())
+            targets = re.findall(r"\]\(status-indicators\.md#([^)]*)\)", markdown)
+            guide_text = guide.read_text(encoding="utf-8")
+            headings = re.findall(r"^### (.+)$", guide_text, re.MULTILINE)
+            for heading in headings:
+                self.assertRegex(heading, r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+                self.assertRegex(guide_text, rf"(?m)^### {heading}\n\n\*\*[^*\n]+\*\*$")
+            self.assertTrue(targets)
+            self.assertEqual(set(targets), set(headings))
+            self.assertEqual(len(headings), len(set(headings)))
             before = status.read_bytes()
             del config["artifacts"]["coverage"]
             with self.assertRaisesRegex(ValueError, "Missing configured sources: coverage"):

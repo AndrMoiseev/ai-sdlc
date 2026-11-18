@@ -193,15 +193,15 @@ uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status
 ```
 
 The command requires a complete full collection, calculated aggregates, report and
-plan. It fully replaces `memory/tech-debt/status.json`, then writes `status.md` by
-rendering the same JSON structure through `assets/status.template.md`. JSON stores
-unrounded numbers and denominators; Markdown contains the project/module tables
-and diagnostic summaries. Manual additions to either status file do not survive
-the next successful full audit. Focused work does not publish status. After the
+plan. It publishes `status.json`, template-rendered `status.md` and a verbatim copy
+of `assets/status-indicators.md` together in `memory/tech-debt/`. JSON stores
+unrounded numbers and denominators. The Markdown tables link each indicator to
+its section in the companion guide. The command refreshes all three files on
+each successful full audit. Focused work does not publish status. After the
 publication result and handoff are verified, the orchestrator records completion
 in `state.json` under the [workflow](workflow.md#phase-7-project-status-and-delivery).
 
-Any earlier failure or interruption leaves both previous files untouched. Prepare
+Any earlier failure or interruption leaves the previous publication untouched. Prepare
 serialization/rendering before writing, but use plain final writes: no backups,
 transactions, rollback or special recovery. If the final write itself fails,
 report the failure; earlier committed values are available in Git.

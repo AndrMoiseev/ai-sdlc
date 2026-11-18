@@ -1,6 +1,7 @@
 """Build complete aggregate results; publish only as the final successful audit action."""
 
 import json
+import shutil
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from fnmatch import fnmatchcase
@@ -11,6 +12,9 @@ from graph import module_for
 from history import parse_history
 from inputs import dependencies, relative_path, source_description
 from quality_indicators import coverage_methods, indicators, qualify_kotlin
+
+
+ASSETS = Path(__file__).resolve().parents[1] / "assets"
 
 
 def statistics(text, config, sources, root, source_root=None):
@@ -105,46 +109,38 @@ def render_status(value):
     def label(name):
         return str(name).replace("|", "\\|").replace("\n", " ")
     summaries = [("Проект", value["project"]), *value["modules"].items()]
-    scores = ["| Область Kotlin | Файлы Kotlin | Токены | D | L | U | Q |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: |"]
+    scores, sizes, diagnostics, boundaries = [], [], [], []
+    diagnostic_template = Template((ASSETS / "status-diagnostics.template.md").read_text(encoding="utf-8"))
     for name, row in summaries:
-        scores.append("| " + " | ".join([label(name), str(row["files"]), str(row["tokens"]), *(number(row[key]) for key in ("D", "L", "U", "Q"))]) + " |")
-    sizes = ["| Область / категория / язык | Файлы | Строки | Код | Комментарии | Пустые |", "| --- | ---: | ---: | ---: | ---: | ---: |"]
-    for name, row in summaries:
+        scores.append("| " + " | ".join([label(name), str(row["files"]), str(row["tokens"]),
+                                         *(number(row[key]) for key in ("D", "L", "U", "Q"))]) + " |")
         stats = row["statistics"]
         for suffix, counts in [("всего", stats["total"]), *sorted(stats["by_category"].items()), *sorted(stats["by_language"].items())]:
             sizes.append("| " + label(name + " / " + suffix) + " | " + " | ".join(str(counts[key]) for key in ("Files", "Lines", "Code", "Comment", "Blank")) + " |")
-    diagnostics = []
-    for name, row in summaries:
         structure, local, coverage, history = (row[key] for key in ("structure", "local_maintainability", "coverage", "history"))
-        values = [
-            ("PC", percent(structure["propagation_cost"])), ("Циклические файлы", str(structure["cyclic_files"])),
-            ("Доля циклических файлов", percent(structure["cyclic_file_fraction"])), ("Крупнейшая SCC", str(structure["largest_scc_size"])),
-            ("Рёбра", str(structure["edge_count"])), ("C_score", number(local["cognitive_score"])), ("S_score", number(local["size_score"])),
-            ("Функции / токены функций / вне функций", f'{local["function_count"]} / {local["function_tokens"]} / {local["outside_function_tokens"]}'),
-            ("Максимум / взвешенный p95 cognitive complexity", f'{number(local["maximum_cognitive_complexity"])} / {number(local["weighted_p95_cognitive_complexity"])}'),
-            ("Сложные токены / доля", f'{local["complex_tokens"]} / {percent(local["complex_token_fraction"]["value"])}'),
-            ("Повторяющиеся токены / доля", f'{row["duplication"]["tokens"]} / {percent(row["duplication"]["fraction"]["value"])}'),
-            ("Покрытие ветвей / инструкций / строк", " / ".join(percent(coverage[key]["value"]) for key in ("branch", "instruction", "line"))),
-            ("Методы CRAP_exec", str(coverage["method_count"])), ("Сумма CRAP_exec / превышение", f'{number(coverage["total_crap"])} / {number(coverage["total_excess"])}'),
-            ("Превышение на 1000 токенов / E_CRAP / p95", " / ".join(number(coverage[key]) for key in ("excess_density", "E_CRAP", "p95_crap_exec"))),
-            ("История: наблюдения / исключённые крупные коммиты", f'{history["observations"]} / {history["excluded_large_commits"]} ({history["status"]})'),
-            ("Совместные изменения: файлы / токены / доля", f'{history["coupled_files"]} / {history["coupled_tokens"]} / {percent(history["coupled_token_fraction"]["value"])}'),
-        ]
+        diagnostics.append(diagnostic_template.substitute(
+            name=label(name), pc=percent(structure["propagation_cost"]),
+            cyclic_files=structure["cyclic_files"], cyclic_file_fraction=percent(structure["cyclic_file_fraction"]),
+            largest_scc_size=structure["largest_scc_size"], edge_count=structure["edge_count"],
+            function_count=local["function_count"], function_tokens=local["function_tokens"],
+            outside_function_tokens=local["outside_function_tokens"], complex_tokens=local["complex_tokens"],
+            complex_token_fraction=percent(local["complex_token_fraction"]["value"]),
+            duplicate_tokens=row["duplication"]["tokens"], duplicate_token_fraction=percent(row["duplication"]["fraction"]["value"]),
+            method_count=coverage["method_count"], observations=history["observations"], history_status=history["status"],
+            excluded_large_commits=history["excluded_large_commits"], coupled_files=history["coupled_files"],
+            coupled_tokens=history["coupled_tokens"], coupled_token_fraction=percent(history["coupled_token_fraction"]["value"]),
+            **{key: number(local[key]) for key in ("cognitive_score", "size_score", "maximum_cognitive_complexity", "weighted_p95_cognitive_complexity")},
+            **{key: percent(coverage[key]["value"]) for key in ("branch", "instruction", "line")},
+            **{key: number(coverage[key]) for key in ("total_crap", "total_excess", "excess_density", "E_CRAP", "p95_crap_exec")},
+        ).rstrip())
         if "boundary" in row:
             boundary = row["boundary"]
-            values.extend([("Внешние входящие / исходящие рёбра", f'{boundary["incoming_edges"]} / {boundary["outgoing_edges"]}'),
-                           ("Файлы в циклах полного графа проекта", str(boundary["project_cyclic_files"])),
-                           ("Токены файлов с совместными изменениями через границу", str(boundary["cross_module_coupled_tokens"])),
-                           ("Токены в межмодульных повторах", str(boundary["cross_module_duplicate_tokens"]))])
-        diagnostics.extend(["### " + label(name), "", "| Показатель | Значение |", "| --- | ---: |",
-                            *(f"| {key} | {item} |" for key, item in values), ""])
-    template = Path(__file__).resolve().parents[1] / "assets" / "status.template.md"
-    return Template(template.read_text(encoding="utf-8")).substitute(
-        collected_at=value["collected_at"], audit=value["audit"], profile=value["profile"]["name"],
-        scope=(f'{value["scope"]["kotlin_files"]} файлов Kotlin; {value["scope"]["other_production_files"]} прочих production-файлов. '
-               f'Связи Kotlin с прочим production-кодом: входящих {value["scope"]["incoming_non_kotlin_edges"]}, '
-               f'исходящих {value["scope"]["outgoing_non_kotlin_edges"]}.'),
-        scores="\n".join(scores), statistics="\n".join(sizes), diagnostics="\n".join(diagnostics),
+            counts = (boundary[key] for key in ("incoming_edges", "outgoing_edges", "project_cyclic_files",
+                                                "cross_module_coupled_tokens", "cross_module_duplicate_tokens"))
+            boundaries.append("| " + " | ".join([label(name), *map(str, counts)]) + " |")
+    return Template((ASSETS / "status.template.md").read_text(encoding="utf-8")).substitute(
+        collected_at=value["collected_at"], audit=value["audit"], profile=value["profile"]["name"], **value["scope"],
+        scores="\n".join(scores), statistics="\n".join(sizes), diagnostics="\n\n".join(diagnostics), boundaries="\n".join(boundaries),
         limitations="\n".join("- " + text for text in value["limitations"]))
 
 
@@ -173,9 +169,11 @@ def publish_status(collection_path, repository):
     # Prepare rendering before the final plain writes; no backup or rollback protocol.
     markdown = render_status(value)
     destination = root / "memory/tech-debt"
-    for target in (destination / "status.json", destination / "status.md"):
+    guide = destination / "status-indicators.md"
+    for target in (destination / "status.json", destination / "status.md", guide):
         if not target.resolve().is_relative_to(destination.resolve()):
             raise ValueError("Status output leaves memory/tech-debt")
+    shutil.copyfile(ASSETS / guide.name, guide)
     (destination / "status.json").write_text(encoded, encoding="utf-8")
     (destination / "status.md").write_text(markdown, encoding="utf-8")
     return destination
