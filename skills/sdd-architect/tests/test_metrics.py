@@ -394,17 +394,27 @@ class CollectionIntegrationTests(unittest.TestCase):
             policy_path.write_text(json.dumps({"signals": {"complexity": {"cyclomatic_minimum": 11}},
                                                "investigation": {"candidate_group_limit": 3}}), encoding="utf-8")
             previous_settings = policy_path.read_bytes()
+            policy_output = report / "resolved-policy.json"
+            with patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(main(["policy", "--repository", str(repo), "--output", str(policy_output)]), 0)
+                self.assertEqual(json.loads(stdout.getvalue()), {"output": str(policy_output)})
+            saved_policy = json.loads(policy_output.read_text(encoding="utf-8"))
             with patch("sys.stdout", new_callable=io.StringIO) as stdout:
                 self.assertEqual(main(["policy", "--repository", str(repo), "--get", "signals.complexity.cyclomatic_minimum"]), 0)
                 self.assertEqual(json.loads(stdout.getvalue()), 11)
-            with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO):
+            with patch("collection.run", side_effect=AssertionError("Git or another command was unexpectedly invoked")), patch("sys.stdout", new_callable=io.StringIO) as stdout:
                 self.assertEqual(main(["collect", "--repository", str(repo), "--focused", "--config", str(config_path), "--output", str(report)]), 0)
+                summary = json.loads(stdout.getvalue())
             self.assertEqual(policy_path.read_bytes(), previous_settings)
             self.assertFalse((policy_path.parent / "collection.json").exists())
             self.assertEqual(json.loads(config_path.read_text()), config)
             with self.assertRaisesRegex(ValueError, "Collection has started"):
                 write_audit_configuration({}, config_path, repo)
             description = json.loads((report / "collection.json").read_text(encoding="utf-8"))
+            self.assertEqual(saved_policy, description["analysis_policy"])
+            self.assertTrue(description["gaps"])
+            self.assertEqual(summary["gaps"], len(description["gaps"]))
+            self.assertEqual(Path(summary["collection"]), report / "collection.json")
             self.assertEqual(set(description["outputs"]), set(CATALOG))
             self.assertEqual(description["status"], "complete")
             self.assertEqual(description["analysis_policy"]["investigation"]["candidate_group_limit"], 3)

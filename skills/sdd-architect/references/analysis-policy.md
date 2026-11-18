@@ -9,16 +9,16 @@ project overrides by hand. `collect` and `rank` use the same Python resolver.
 Follow [runtime](runtime.md#execution-environment) before executing these commands:
 
 ```text
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>" --get signals.shape.parameter_list_minimum
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --defaults
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json" --get recommendations.report_limit
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>" --output "<report-dir>/resolved-policy.json"
 ```
 
-The command prints JSON and writes nothing. `--get` selects a dotted key. Use the
-project form before collection and the collection form throughout an existing
-audit, including diagnosis, ranking and final report. `--defaults` displays the
-bundled policy without creating project settings.
+Use `--get` with a numeric leaf for a decision that needs one value. Use project
+values before collection and `--collection` throughout the saved audit.
+For a calculation that consumes a group or the whole policy, supply
+`--repository` and `--output` and pass the saved JSON path to the consumer.
+Add `--get` to save just the selected group. `--defaults` selects bundled values.
 
 ## Files and precedence
 

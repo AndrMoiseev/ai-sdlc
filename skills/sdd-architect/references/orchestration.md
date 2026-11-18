@@ -11,8 +11,9 @@ workers request additional research, checks or decisions through it.
 Project settings remain read-only for the orchestrator and all workers.
 Their modification belongs to user-initiated `sdd-setup`, never to audit-time approval.
 Before assigning work that depends on thresholds, weights or budgets, obtain the
-[analysis policy](analysis-policy.md) through `metrics.py policy`. Pass its output
-and the collection path to the worker; use saved audit values after collection.
+[analysis policy](analysis-policy.md) through `metrics.py policy`. Pass the
+required values or saved file path to the worker. Use the collection as the
+policy source after collection.
 Workers must not read defaults or merge project overrides to obtain actual values.
 The orchestrator alone maintains the [tech debt plan](tech-debt-plan.md). Workers
 receive relevant current task cards and user decisions as read-only inputs; keep

@@ -45,12 +45,13 @@ def write_audit_configuration(value, path, repository):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    sub = commands.add_parser("policy", help="Resolve numeric policy through the script; print JSON without writing files")
-    basis = sub.add_mutually_exclusive_group(required=True)
+    sub = commands.add_parser("policy", help="Look up a numeric setting or save resolved policy JSON")
+    sub.add_argument("--repository", type=Path, help="Project root for overrides and audit output files")
+    basis = sub.add_mutually_exclusive_group()
     basis.add_argument("--defaults", action="store_true")
-    basis.add_argument("--repository", type=Path)
     basis.add_argument("--collection", type=Path)
-    sub.add_argument("--get", help="Optional dotted policy key")
+    sub.add_argument("--get", help="Dotted policy key to select")
+    sub.add_argument("--output", type=Path, help="New JSON file in the audit directory; required for objects")
     sub = commands.add_parser("configure", help="Validate and save this audit's project-relative input; never edit project settings")
     sub.add_argument("--repository", required=True, type=Path)
     sub.add_argument("--input", type=Path, help="External candidate JSON; reads stdin when omitted")
@@ -75,16 +76,26 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == "policy":
+            if not (args.repository or args.defaults or args.collection):
+                raise ValueError("Select --repository, --defaults or --collection for the policy")
             if args.repository is not None and not args.repository.is_dir():
                 raise ValueError(f"Repository not found: {args.repository}")
             value = (validate_policy(read_json(args.collection)["analysis_policy"], complete=True)
-                     if args.collection else load_policy(args.repository))
+                     if args.collection else load_policy(None if args.defaults else args.repository))
             if args.get:
                 for part in args.get.split("."):
                     if not isinstance(value, dict) or part not in value:
                         raise ValueError(f"Unknown policy key: {args.get}")
                     value = value[part]
-            print(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False))
+            if args.output:
+                if not args.repository:
+                    raise ValueError("Supply --repository with --output to locate the audit directory")
+                write_json(args.output, value, args.repository)
+                print(json.dumps({"output": str(args.output)}))
+            elif isinstance(value, dict):
+                raise ValueError("Use --get with a numeric key or save the policy with --repository and --output")
+            else:
+                print(json.dumps(value, allow_nan=False))
         elif args.command == "configure":
             if not args.repository.is_dir():
                 raise ValueError(f"Repository not found: {args.repository}")
@@ -101,7 +112,7 @@ def main(argv=None):
                               "complete_outputs": sum(row["status"] == "complete" for row in value["outputs"].values()),
                               "unavailable_outputs": sum(row["status"] != "complete" for row in value["outputs"].values()),
                               "candidate_groups": value["selections"]["candidate-groups"]["records"],
-                              "gaps": value["gaps"]}))
+                              "gaps": len(value["gaps"])}))
         elif args.command == "status":
             from project_status import publish_status
             destination = publish_status(args.collection, args.repository)

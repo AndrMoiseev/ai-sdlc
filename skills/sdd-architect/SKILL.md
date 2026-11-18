@@ -133,6 +133,12 @@ supplied scripts. Scripts calculate observations; architects establish
 responsibilities, mechanisms and effects. The orchestrator launches all roles
 and handles requests for further research or checks.
 
+For additional measurement commands and one-off scripts, write result tables,
+per-file records and intermediate datasets directly to an assigned file under
+`<report-dir>`. Pass its path to the next step. Keep successful console output to
+paths, counts or a value needed for the current decision. On failure, surface
+the diagnostic on stderr and return a nonzero exit code.
+
 Use current source paths, task scope and keyed JSONL evidence throughout the audit,
 including continuation and reassessment. The audit has no source-version binding:
 do not capture or compare commit IDs, working-tree cleanliness, source fingerprints
