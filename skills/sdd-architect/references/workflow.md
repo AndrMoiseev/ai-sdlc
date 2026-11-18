@@ -60,9 +60,8 @@ running collection. Preserve low detector thresholds used to collect observation
    records overlaps and prepares the budgeted investigation queue.
    It also computes project and module aggregates in `metrics/quality-indicators.json`.
    Any failed required source blocks the full audit. The live status remains untouched.
-3. Return the compact `collection.json` description, output counts and gaps. Read
-   only the JSONL files relevant to the next investigation; do not send the complete
-   metric population to the orchestrator.
+3. Return the path to `collection.json` and the counts from `collect`. Read the
+   gap details or keyed JSONL records needed for the next investigation.
 
 **Exit:** every required source and aggregate calculation is complete. A valid
 empty population can yield `not_applicable`; a missing source cannot.

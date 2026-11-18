@@ -89,10 +89,10 @@ Use its absolute path in every run. Entry points have PEP 723 metadata and adjac
 lockfiles; the consuming project needs no Python environment or dependencies.
 
 ```text
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>" --get investigation.candidate_group_limit
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" configure --repository "<project-root>" --input "<external-temporary-dir>/collection-candidate.json" --output "<report-dir>/collection-input.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --repository "<project-root>" --config "<report-dir>/collection-input.json" --output "<report-dir>"
-uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json" --get recommendations.report_limit
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --repository "<project-root>" --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --repository "<project-root>" --collection "<report-dir>/collection.json"
 ```
@@ -105,8 +105,8 @@ retain their configuration. Use this helper for every configuration write.
 `collect` revalidates input and checks resolved project paths, including symlinks.
 
 `policy` is the read-only numerical-settings interface for agents. `collect` prepares the complete catalog, selections, preliminary groups and their
-queue before substantive analysis. Its stdout reports counts, including candidate
-groups, the collection-description path and gaps. `rank` runs
+queue before substantive analysis. Its stdout gives the path to `collection.json`
+and counts of outputs, candidate groups and gaps. Gap details are in the file. `rank` runs
 after cards are authored; it checks their six-section Markdown structure and reads
 only cited metric files and current source paths. Narrative stays in the Markdown
 cards; JSON carries addresses, statuses and effects for ranking.

@@ -76,13 +76,14 @@ class AnalysisPolicyTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "malformed policy"):
                 load_policy("project")
 
-    def test_policy_cli_returns_reusable_json_and_rejects_unknown_key(self):
-        with patch("sys.stdout", new_callable=io.StringIO) as stdout:
-            self.assertEqual(main(["policy", "--defaults"]), 0)
-            self.assertEqual(json.loads(stdout.getvalue()), DEFAULT_POLICY)
-        with patch("sys.stderr", new_callable=io.StringIO) as stderr:
-            self.assertEqual(main(["policy", "--defaults", "--get", "signals.shape.typo"]), 2)
-            self.assertIn("Unknown policy key", stderr.getvalue())
+    def test_policy_cli_requires_a_file_for_objects_and_reports_errors_on_stderr(self):
+        for selection, diagnostic in (([], "--output"), (["--get", "signals"], "--output"),
+                                      (["--get", "signals.shape.typo"], "Unknown policy key")):
+            with self.subTest(selection=selection), patch("sys.stdout", new_callable=io.StringIO) as stdout, \
+                    patch("sys.stderr", new_callable=io.StringIO) as stderr:
+                self.assertEqual(main(["policy", "--defaults", *selection]), 2)
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn(diagnostic, stderr.getvalue())
 
     def test_numeric_filters_use_overrides_and_keep_inclusive_and_strict_boundaries(self):
         mappings = [
