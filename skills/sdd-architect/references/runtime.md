@@ -20,7 +20,7 @@ The current plan is separate: `memory/tech-debt/plan/plan.md` and
 [plan maintenance](tech-debt-plan.md) for automatic additions and user changes.
 Measurement and ranking commands write only inside audit directories.
 After the complete full audit succeeds, the final `status` command alone replaces
-`memory/tech-debt/status.json` and `status.md` under the
+`memory/tech-debt/status.json`, `status.md` and `status-indicators.md` under the
 [publication contract](quality-indicators.md#publication).
 
 | Material | Location relative to `<report-dir>` |
