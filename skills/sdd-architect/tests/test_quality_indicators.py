@@ -33,13 +33,15 @@ def kotlin(rows):
             "tool_version": "1.23.8", "files": rows}
 
 
-def jacoco():
-    return '''<report name="test"><package name="example"><class name="example/A" sourcefilename="A.kt">
+def jacoco(*, with_lines=True):
+    lines = ('''<line nr="3" ci="1" mi="2"/><line nr="17" ci="0" mi="2"/>
+      <counter type="LINE" covered="1" missed="1"/>''' if with_lines else "")
+    return f'''<report name="test"><package name="example"><class name="example/A" sourcefilename="A.kt">
       <method name="f" desc="()I"><counter type="INSTRUCTION" covered="5" missed="5"/>
       <counter type="BRANCH" covered="2" missed="2"/><counter type="COMPLEXITY" covered="2" missed="2"/></method>
       <method name="g" desc="()I"><counter type="INSTRUCTION" covered="8" missed="2"/>
       <counter type="COMPLEXITY" covered="8" missed="2"/></method></class>
-      <sourcefile name="A.kt"><line nr="1" ci="1" mi="2"/><line nr="2" ci="0" mi="2"/></sourcefile>
+      <sourcefile name="A.kt">{lines}</sourcefile>
       </package></report>'''
 
 
@@ -123,10 +125,27 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(value["branch"]["value"], .5)
         self.assertEqual(value["instruction"]["value"], .65)
         self.assertEqual(value["line"]["value"], .5)
-        with self.assertRaisesRegex(ValueError, "omits mapped"):
-            coverage_methods(jacoco(), sources, {"example.A": "A.kt", "example.Missing": "A.kt"})
+        self.assertEqual(lines, {("A.kt", 3): True, ("A.kt", 17): False})
         with self.assertRaisesRegex(ValueError, "Incomplete"):
             coverage_methods(jacoco().replace('<counter type="INSTRUCTION" covered="5" missed="5"/>', ""), sources, {"example.A": "A.kt"})
+
+    def test_coverage_uses_reported_classes_and_lines_within_each_scope(self):
+        sources = {path: {"package": "example"} for path in ("A.kt", "B.kt")}
+        mappings = {"example.A": "A.kt", "example.Filtered": "A.kt", "example.B": "B.kt"}
+        methods, lines = coverage_methods(jacoco(), sources, mappings)
+        self.assertEqual(len(methods), 2)
+        self.assertEqual(coverage_summary(set(sources), methods, lines, 100)["line"], {
+            "value": .5, "numerator": 1, "denominator": 2, "status": "measured_subset", "omitted_files": ["B.kt"]})
+        self.assertEqual(coverage_summary({"A.kt"}, methods, lines, 50)["line"]["status"], "known")
+        self.assertEqual(coverage_summary({"B.kt"}, methods, lines, 50)["line"]["status"], "unknown")
+        self.assertEqual(coverage_summary(set(), methods, lines, 0)["line"]["status"], "not_applicable")
+
+    def test_sourcefile_line_counter_must_match_covered_and_missed_records(self):
+        xml = jacoco()
+        for invalid in (xml.replace('<line nr="17" ci="0" mi="2"/>', ''),
+                        xml.replace('type="LINE" covered="1" missed="1"', 'type="LINE" covered="2" missed="0"')):
+            with self.subTest(xml=invalid), self.assertRaisesRegex(ValueError, "LINE counter mismatch for A.kt"):
+                coverage_methods(invalid, {"A.kt": {"package": "example"}}, {"example.A": "A.kt"})
 
     def test_module_scores_recomputed_and_boundary_cycles_remain_visible(self):
         files = {"A": file_row("A", "left", 100), "B": file_row("B", "right", 100)}
@@ -160,7 +179,7 @@ class PublicationTests(unittest.TestCase):
             text = {
                 "dependencies": ("jdeps", ""),
                 "complexity": ("detekt-sarif", '{"runs": []}'),
-                "coverage": ("jacoco", jacoco()),
+                "coverage": ("jacoco", jacoco(with_lines=False)),
                 "history": ("git-history", json.dumps({"format": "git-history", "first_parent": True, "renames": True,
                     "since": (datetime.now(timezone.utc).date() - timedelta(days=PARAMETERS["history_days"])).isoformat(),
                     "until": datetime.now(timezone.utc).date().isoformat(), "commits": []})),
@@ -168,7 +187,8 @@ class PublicationTests(unittest.TestCase):
                 "kotlin": ("kotlin-measurements", json.dumps(kotlin([file_row("src/A.kt")]))),
             }
             config = {"source_roots": ["src"], "package_prefixes": ["example"],
-                      "class_files": {"example.A": "src/A.kt"}, "modules": {"example": ["example"]}, "artifacts": {}}
+                      "class_files": {"example.A": "src/A.kt", "example.Filtered": "src/A.kt"},
+                      "modules": {"example": ["example"]}, "artifacts": {}}
             for name, (format_name, payload) in text.items():
                 path = raw / (name + ".input")
                 path.write_text(payload, encoding="utf-8")
@@ -200,7 +220,17 @@ class PublicationTests(unittest.TestCase):
             publish_status(audit / "collection.json", root)
             value = json.loads(status.read_text(encoding="utf-8"))
             self.assertEqual(value["project"]["statistics"]["total"]["Code"], 2)
+            for scope in (value["project"], value["modules"]["example"]):
+                coverage = scope["coverage"]
+                self.assertIsNone(coverage["line"]["value"])
+                self.assertEqual(coverage["line"]["status"], "unknown")
+                self.assertEqual(coverage["line"]["omitted_files"], ["src/A.kt"])
+                self.assertEqual(coverage["instruction"]["value"], .65)
+                self.assertEqual(coverage["branch"]["value"], .5)
+                self.assertAlmostEqual(coverage["total_crap"], 16.8)
             markdown = status.with_suffix(".md").read_text(encoding="utf-8")
+            self.assertIn("Нет данных", markdown)
+            self.assertIn("- src/A.kt", markdown)
             self.assertEqual(markdown, render_status(value))
             bundled = Path(__file__).resolve().parents[1] / "assets" / guide.name
             self.assertEqual(guide.read_bytes(), bundled.read_bytes())

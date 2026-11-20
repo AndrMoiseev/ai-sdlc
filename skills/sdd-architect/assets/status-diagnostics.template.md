@@ -17,3 +17,4 @@
 | [Превышение на 1000 токенов](status-indicators.md#excess-density) / [E_CRAP](status-indicators.md#e-crap) / [p95 CRAP_exec](status-indicators.md#p95-crap-exec) | $excess_density / $E_CRAP / $p95_crap_exec |
 | История — [наблюдения](status-indicators.md#observations) / [исключённые крупные коммиты](status-indicators.md#excluded-large-commits) ([статус](status-indicators.md#history-status)) | $observations / $excluded_large_commits ($history_status) |
 | Совместные изменения — [файлы](status-indicators.md#coupled-files) / [токены](status-indicators.md#coupled-tokens) / [доля](status-indicators.md#coupled-token-fraction) | $coupled_files / $coupled_tokens / $coupled_token_fraction |
+$omitted_files

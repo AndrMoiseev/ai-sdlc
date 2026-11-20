@@ -19,7 +19,7 @@ Git history for the policy window, repository-wide scc per-file data, complete
 Kotlin token/function measurements, detekt SARIF and merged JaCoCo XML from passed
 selected tests. Failure, unconfigured coverage, unresolved mapping or missing
 required counters stops the audit. Tell the user what to resolve before restarting.
-Do not turn unavailable inputs into zero, a reduced denominator or a partial Q.
+Keep missing inputs explicit. Calculate Q only with all its required components.
 An actually empty denominator is `not_applicable`, encoded as null with its counters.
 
 Kotlin measurements use the existing detekt runtime's lexer, PSI and cognitive
@@ -126,9 +126,15 @@ change their weights. Preserve full precision in JSON; round only for Markdown.
 
 Coverage uses summed covered/total branch and instruction counters from included
 JVM methods, plus unique executable source lines from JaCoCo sourcefile records.
-Require every mapped production Kotlin class in the merged report, even when
-JaCoCo filters all of its methods. Every included executable method needs positive
-instruction and COMPLEXITY totals; executable files need source-line data.
+Use the mapped classes present in the merged report. Every included executable
+method needs positive instruction and COMPLEXITY totals, including methods with
+no line information. Count only reported source lines. Gaps between line numbers
+are valid. When a sourcefile declares a LINE counter, its covered and missed counts
+must match its line records. A line with any covered instructions counts as covered.
+List Kotlin files without line records in `coverage.line.omitted_files` for each
+project and module summary. Mark a measured fraction over a subset as
+`measured_subset`. Use `unknown` and a null value when all files lack line
+records, and `not_applicable` for an empty scope.
 JaCoCo's [XML exporter](https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/internal/xml/XMLCoverageWriter.java)
 omits zero-total counters, so absent BRANCH means zero branches only for this
 qualified complete XML format. This rule does not apply to arbitrary missing data.

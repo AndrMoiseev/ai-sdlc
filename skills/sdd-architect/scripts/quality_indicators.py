@@ -199,7 +199,9 @@ def coverage_methods(text, sources, mappings):
             if not paths:
                 continue
             path = paths[0]
-            for line in source.findall("line"):
+            source_lines = source.findall("line")
+            covered_lines = 0
+            for line in source_lines:
                 key = (path, int(line.attrib["nr"]))
                 if key in lines:
                     raise ValueError("Duplicate JaCoCo source line; merge execution data before XML export")
@@ -207,6 +209,17 @@ def coverage_methods(text, sources, mappings):
                 if key[1] < 1 or min(covered, missed) < 0 or covered + missed == 0:
                     raise ValueError("Invalid JaCoCo executable source line")
                 lines[key] = covered > 0
+                covered_lines += lines[key]
+            line_counters = source.findall("counter[@type='LINE']")
+            if len(line_counters) > 1:
+                raise ValueError(f"Duplicate JaCoCo sourcefile LINE counter for {path}")
+            if line_counters:
+                counter = line_counters[0]
+                declared = (int(counter.attrib["covered"]), int(counter.attrib["missed"]))
+                observed = (covered_lines, len(source_lines) - covered_lines)
+                if declared != observed:
+                    raise ValueError(f"JaCoCo LINE counter mismatch for {path}: "
+                                     f"declared covered/missed {declared}, line records give {observed}")
         for clazz in package.findall("class"):
             name = clazz.attrib["name"].replace("/", ".")
             path = mappings.get(name)
@@ -242,12 +255,6 @@ def coverage_methods(text, sources, mappings):
                                 "instructions": instructions, "total_instructions": total_instructions,
                                 "branches": branches, "total_branches": total_branches,
                                 "complexity": complexity, "crap_exec": complexity + excess, "excess": excess}
-    expected = {name for name, path in mappings.items() if path in sources}
-    if expected - classes:
-        raise ValueError("JaCoCo omits mapped production classes: " + ", ".join(sorted(expected - classes)[:10]))
-    missing_lines = {row["file"] for row in methods.values()} - {path for path, _ in lines}
-    if missing_lines:
-        raise ValueError("JaCoCo omits executable source lines: " + ", ".join(sorted(missing_lines)[:10]))
     return list(methods.values()), lines
 
 
@@ -255,11 +262,22 @@ def coverage_summary(paths, methods, lines, tokens):
     selected = [row for row in methods if row["file"] in paths]
     excess = math.fsum(row["excess"] for row in selected)
     squared = sum(row["complexity"] ** 2 for row in selected)
-    source_lines = [covered for (path, _), covered in lines.items() if path in paths]
+    measured_files = set()
+    covered_lines = total_lines = 0
+    for (path, _), covered in lines.items():
+        if path in paths:
+            measured_files.add(path)
+            total_lines += 1
+            covered_lines += covered
+    line_coverage = fraction(covered_lines, total_lines)
+    omitted = sorted(paths - measured_files)
+    line_coverage["omitted_files"] = omitted
+    if omitted:
+        line_coverage["status"] = "measured_subset" if total_lines else "unknown"
     return {"method_count": len(selected),
             "branch": fraction(sum(row["branches"] for row in selected), sum(row["total_branches"] for row in selected)),
             "instruction": fraction(sum(row["instructions"] for row in selected), sum(row["total_instructions"] for row in selected)),
-            "line": fraction(sum(source_lines), len(source_lines)),
+            "line": line_coverage,
             "total_crap": math.fsum(row["crap_exec"] for row in selected), "total_excess": excess,
             "excess_density": 1000 * excess / tokens if tokens else None,
             "E_CRAP": 100 * excess / squared if squared else None,
