@@ -49,20 +49,16 @@ or metadata changes. Installation of skills is a separate operation.
 
 ## Invocation and report
 
-The skill resolves the existing Gradle `detekt` configuration using an invocation-only
-init script and launches its CLI, or accepts an explicitly supplied existing
-CLI `all.jar`. It selects the adapter using the actual `--version` output.
-See the [runtime contract](../../skills/sdd-architect/references/runtime.md) for
-`--detekt-project`, `--detekt-jar`, prerequisites and failure behavior.
-
-The CLI receives `--plugins <selected-jar>`, `--disable-default-rulesets` and
-`--report sdd-architect-measurements:<output.json>`. The collector supplies:
+The project task configures the measurement plugin and requests both SARIF and
+`sdd-architect-measurements` from its detekt. See the
+[setup contract](../../skills/sdd-setup/references/collection.md). Supply these
+properties to the JVM that executes detekt.
 
 | JVM property | Value |
 | --- | --- |
 | `sdd.architect.repository` | Absolute repository root |
 | `sdd.architect.sourceManifest` | External UTF-8 file containing one repository-relative Kotlin path per line |
-| `sdd.architect.detekt.version` | Version verified by invoking the host CLI |
+| `sdd.architect.detekt.version` | Actual detekt version from the project build |
 
 The complete JSON report includes schema/profile, plugin version, actual detekt
 and parser versions, and an exact inventory of measured files. Suppressions and
@@ -77,7 +73,6 @@ The mandatory sequential suite is `skills/sdd-architect/scripts/test.py`. Set:
 
 - `ARCHITECT_TEST_JAVA`: absolute Java launcher path.
 - `ARCHITECT_TEST_DETEKT1_JAR`, `ARCHITECT_TEST_DETEKT2_JAR`: existing baseline CLI distributions.
-- `ARCHITECT_TEST_GRADLE_WRAPPER`: existing wrapper JAR with adjacent properties.
 
 ```text
 uv run --python "<python>" --locked --script "<repo>/skills/sdd-architect/scripts/test.py"
@@ -85,7 +80,7 @@ uv run --python "<python>" --locked --script "<repo>/skills/sdd-architect/script
 
 It validates plugin packaging, selection boundaries, both actual host APIs,
 suppressed and zero-complexity functions, nested functions, Unicode/CRLF positions,
-new context parameters, and runtime discovery from a Gradle subproject. Other
+and new context parameters. Other
 metric and audit contracts run in the same suite. Keep fixtures and logs external.
 The entire sequential run, including setup/build when performed together, must
 finish within the repository's 120-second limit. Agent behavior evaluations

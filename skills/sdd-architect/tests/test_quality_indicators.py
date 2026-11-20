@@ -10,7 +10,6 @@ from unittest.mock import patch
 from analysis_policy import load_policy
 from collection import collect, map_classes
 from design_rule_hierarchy import decoupling_level, hierarchy, structural_metrics
-from history import collect_history, parse_history
 from project_status import publish_status, render_status
 from quality_indicators import coverage_methods, coverage_summary, duplication, indicators, maintainability, qualify_kotlin
 
@@ -146,17 +145,6 @@ class QualityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exactly once"):
             qualify_kotlin(kotlin([]), source)
 
-    def test_history_tracks_renames_without_losing_changesets(self):
-        raw = "\x1ebbb\t2026-11-14\0\n1\t0\t\0src/Old.kt\0src/New.kt\0\x1eaaa\t2026-11-13\0\n2\t0\tsrc/Old.kt\0"
-        def command(argv, root, policy):
-            return b"false" if "rev-parse" in argv else raw.encode()
-        payload, argv = collect_history({"source_roots": ["src"]}, Path("."), command, POLICY, {})
-        commits = parse_history(payload.decode())
-        self.assertEqual(set(commits[1]["changes"]), {"src/New.kt"})
-        self.assertEqual(commits[0]["production_files"], 1)
-        self.assertIn("--first-parent", argv)
-        self.assertIn("--find-renames", argv)
-
 
 class PublicationTests(unittest.TestCase):
     def test_full_audit_publication_and_failure_preserve_previous_status(self):
@@ -190,7 +178,15 @@ class PublicationTests(unittest.TestCase):
             status.write_text("previous", encoding="utf-8")
             guide = status.with_name("status-indicators.md")
             guide.write_text("previous guide", encoding="utf-8")
-            description = collect(config, audit, repository=root)
+            collection = {"command": ["project-task", "audit inputs"], "artifacts": config.pop("artifacts")}
+            settings = root / ".sdd/settings.json"
+            settings.parent.mkdir()
+            def save_settings():
+                settings.write_text(json.dumps({"schema_version": 1, "architect": {"collection": collection}}))
+            save_settings()
+            with patch("collection.run") as execute:
+                description = collect(config, audit, repository=root)
+            execute.assert_called_once_with(collection["command"], root, POLICY)
             self.assertEqual(description["status"], "complete")
             self.assertEqual(status.read_text(), "previous")
             with self.assertRaisesRegex(ValueError, "Finish the report"):
@@ -218,8 +214,9 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual(set(targets), set(headings))
             self.assertEqual(len(headings), len(set(headings)))
             before = status.read_bytes()
-            del config["artifacts"]["coverage"]
-            with self.assertRaisesRegex(ValueError, "Missing configured sources: coverage"):
+            del collection["artifacts"]["coverage"]
+            save_settings()
+            with self.assertRaisesRegex(ValueError, "sdd-setup.*coverage"):
                 collect(config, audit.with_name("2026-11-15T13-00-00Z"), repository=root)
             self.assertEqual(status.read_bytes(), before)
             self.assertEqual(json.loads((audit.with_name("2026-11-15T13-00-00Z") / "collection.json").read_text())["status"], "blocked")

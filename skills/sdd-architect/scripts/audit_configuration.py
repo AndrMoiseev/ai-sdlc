@@ -1,5 +1,6 @@
 """Validate audit inputs without persisting host paths or changing project settings."""
 
+import json
 import re
 from pathlib import PurePosixPath, PureWindowsPath
 from urllib.parse import unquote
@@ -33,7 +34,7 @@ def validate_audit_configuration(value):
     unknown = value.keys() - fields
     if unknown:
         raise ValueError(f"Unknown audit configuration fields: {sorted(unknown)}; "
-                         "pass the repository and external tools as runtime arguments")
+                         "pass the repository as a runtime argument")
     for field in ("source_roots", "test_roots", "exclude_paths",
                   "statistics_exclude_paths", "class_directories"):
         paths = value.get(field, [])
@@ -49,12 +50,12 @@ def validate_audit_configuration(value):
     artifacts = value.get("artifacts", {})
     if not isinstance(artifacts, dict):
         raise ValueError("artifacts: expected an object")
-    fields = {"collect", "path", "format", "tool", "version", "parser_version",
+    fields = {"path", "format", "tool", "version", "parser_version",
               "command", "source_root", "complete_mcc", "complete", "test_result",
               "limitations", "since", "until"}
     for name, spec in artifacts.items():
         if not isinstance(spec, dict) or spec.keys() - fields:
-            raise ValueError(f"artifacts.{name}: unsupported fields; external tools are runtime arguments")
+            raise ValueError(f"artifacts.{name}: unsupported artifact fields")
         for field in ("path", "source_root"):
             if field in spec:
                 project_path(spec[field], f"artifacts.{name}.{field}")
@@ -79,3 +80,42 @@ def validate_audit_configuration(value):
                     raise ValueError(f"{field}: absolute paths and parent traversal are not audit configuration")
     inspect(value, "configuration")
     return value
+
+
+FULL_FORMATS = {"dependencies": {"jdeps", "class-csv"}, "history": {"git-history"},
+                "sizes": {"scc"}, "kotlin": {"kotlin-measurements"},
+                "complexity": {"detekt-sarif"}, "coverage": {"jacoco"}}
+
+
+def validate_collection_settings(value, root):
+    """Validate the executable contract before any project process starts."""
+    if not isinstance(value, dict) or set(value) != {"command", "artifacts"}:
+        raise ValueError("architect.collection requires command and artifacts")
+    command = value["command"]
+    if not isinstance(command, list) or not command or not all(
+        isinstance(arg, str) and arg.strip() and not any(ord(c) < 32 for c in arg) for arg in command
+    ):
+        raise ValueError("command must be a nonempty argument array")
+    artifacts = value["artifacts"]
+    validate_audit_configuration({"artifacts": artifacts})
+    if artifacts.keys() != FULL_FORMATS.keys():
+        raise ValueError(f"Missing configured sources: {sorted(FULL_FORMATS.keys() - artifacts.keys())}; "
+                         f"unexpected sources: {sorted(artifacts.keys() - FULL_FORMATS.keys())}")
+    for name, spec in artifacts.items():
+        if spec.get("format") not in FULL_FORMATS[name]:
+            raise ValueError(f"artifacts.{name}: expected {sorted(FULL_FORMATS[name])}")
+        resolve_project_path(spec.get("path"), root, f"artifacts.{name}.path")
+        resolve_project_path(spec.get("source_root", "."), root, f"artifacts.{name}.source_root")
+    if artifacts["coverage"].get("complete") is not True or artifacts["coverage"].get("test_result") != "passed":
+        raise ValueError("coverage must come from complete JaCoCo reporting after successful tests")
+    return value
+
+
+def project_collection(root):
+    try:
+        settings = json.loads(resolve_project_path(".sdd/settings.json", root, "settings").read_text(encoding="utf-8-sig"))
+        if not isinstance(settings, dict) or type(settings.get("schema_version")) is not int or settings["schema_version"] != 1:
+            raise ValueError("expected settings schema_version 1")
+        return validate_collection_settings(settings["architect"]["collection"], root)
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"Configure architect.collection in .sdd/settings.json with sdd-setup: {error}") from error

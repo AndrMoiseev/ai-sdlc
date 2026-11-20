@@ -1,4 +1,5 @@
 """Deterministic project setup. No model calls, global writes or permission changes."""
+from contextlib import contextmanager
 import copy
 import difflib
 import hashlib
@@ -355,16 +356,13 @@ def apply_plan(plan):
     project = Path(plan["request"]["inspection"]["project_root"])
     if not plan["operations"]:
         return {"changed": [], "plan_id": plan["plan_id"], "warnings": plan["warnings"]}
-    lock = safe_target(project, ".sdd/.setup.lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        handle = lock.open("x", encoding="utf-8")
-    except FileExistsError as exc:
-        raise ValueError("Another setup owns .sdd/.setup.lock; inspect the owner before removing a stale lock") from exc
+    with setup_lock(project, plan["plan_id"]):
+        return apply_operations(project, plan)
+
+
+def apply_operations(project, plan):
     completed = []
     try:
-        with handle:
-            handle.write(json.dumps({"pid": os.getpid(), "plan_id": plan["plan_id"]}))
         require(make_plan(plan["request"]) == plan, "Inputs changed while acquiring setup lock")
         for operation in plan["operations"]:
             path = safe_target(project, operation["path"])
@@ -389,6 +387,20 @@ def apply_plan(plan):
                 conflicts.append(str(path))
         suffix = f"; rollback needs manual reconciliation: {conflicts}" if conflicts else "; completed file writes rolled back"
         raise ValueError(str(exc) + suffix) from exc
+    return {"changed": [op["path"] for op in plan["operations"]], "plan_id": plan["plan_id"], "warnings": plan["warnings"]}
+
+
+@contextmanager
+def setup_lock(project, operation):
+    lock = safe_target(project, ".sdd/.setup.lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        handle = lock.open("x", encoding="utf-8")
+    except FileExistsError as exc:
+        raise ValueError("Another setup owns .sdd/.setup.lock; inspect the owner before removing a stale lock") from exc
+    try:
+        with handle:
+            handle.write(json.dumps({"pid": os.getpid(), "operation": operation}))
+        yield
     finally:
         lock.unlink()
-    return {"changed": [op["path"] for op in plan["operations"]], "plan_id": plan["plan_id"], "warnings": plan["warnings"]}

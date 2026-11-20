@@ -13,7 +13,8 @@ import json
 from pathlib import Path
 
 from analysis_policy import load_policy, validate_policy
-from audit_configuration import validate_audit_configuration
+from audit_configuration import project_collection, validate_audit_configuration
+from candidate_evidence import candidate_evidence
 from collection import collect, inventory, report_output
 from measurements import resolve_reference
 from recommendations import markdown, rank
@@ -52,6 +53,8 @@ def main(argv=None):
     basis.add_argument("--collection", type=Path)
     sub.add_argument("--get", help="Dotted policy key to select")
     sub.add_argument("--output", type=Path, help="New JSON file in the audit directory; required for objects")
+    sub = commands.add_parser("collection-settings", help="Read and validate the project collection contract")
+    sub.add_argument("--repository", required=True, type=Path)
     sub = commands.add_parser("configure", help="Validate and save this audit's project-relative input; never edit project settings")
     sub.add_argument("--repository", required=True, type=Path)
     sub.add_argument("--input", type=Path, help="External candidate JSON; reads stdin when omitted")
@@ -60,10 +63,17 @@ def main(argv=None):
     sub.add_argument("--repository", required=True, type=Path)
     sub.add_argument("--config", required=True, type=Path)
     sub.add_argument("--output", required=True, type=Path)
-    sub.add_argument("--java", type=Path, help="Runtime JDK launcher outside the audit configuration")
-    sub.add_argument("--detekt-jar", type=Path, help="Existing detekt CLI distribution; otherwise use the project's Gradle configuration")
-    sub.add_argument("--detekt-project", default=":", help="Gradle project whose existing detekt configuration to use, e.g. :server")
+    sub.add_argument("--fresh", action="store_true", help="Obtain new project reports during focused analysis")
     sub.add_argument("--focused", action="store_true", help="Explicit focused analysis; does not calculate or publish project status")
+    sub = commands.add_parser("evidence", help="Select facts for a diagnosis from a saved collection")
+    sub.add_argument("--repository", required=True, type=Path)
+    sub.add_argument("--collection", required=True, type=Path)
+    sub.add_argument("--output", required=True, type=Path, help="New JSON file in the same audit")
+    query = sub.add_mutually_exclusive_group(required=True)
+    query.add_argument("--group", help="Resolve the candidate group, signals and cited measurements")
+    query.add_argument("--files", nargs="+", help="Look up retained observations for contextual source paths")
+    query.add_argument("--co-change", nargs=2, metavar=("LEFT", "RIGHT"), help="Find historical changes touching both files")
+    query.add_argument("--dependencies", nargs="+", help="Find direct consumer/supplier edges touching mapped files")
     sub = commands.add_parser("status", help="Publish status.json, status.md and the indicator guide after the full report and plan are finished")
     sub.add_argument("--repository", required=True, type=Path)
     sub.add_argument("--collection", required=True, type=Path)
@@ -96,6 +106,8 @@ def main(argv=None):
                 raise ValueError("Use --get with a numeric key or save the policy with --repository and --output")
             else:
                 print(json.dumps(value, allow_nan=False))
+        elif args.command == "collection-settings":
+            print(json.dumps(project_collection(args.repository.resolve()), ensure_ascii=False))
         elif args.command == "configure":
             if not args.repository.is_dir():
                 raise ValueError(f"Repository not found: {args.repository}")
@@ -106,13 +118,23 @@ def main(argv=None):
             if args.config.resolve() != args.output.resolve() / "collection-input.json":
                 raise ValueError("Use collection-input.json from the selected audit directory")
             value = collect(read_json(args.config), args.output, repository=args.repository,
-                            full=not args.focused, java=args.java, detekt_jar=args.detekt_jar,
-                            detekt_project=args.detekt_project)
+                            full=not args.focused, fresh=args.fresh)
             print(json.dumps({"collection": str(args.output / "collection.json"),
                               "complete_outputs": sum(row["status"] == "complete" for row in value["outputs"].values()),
                               "unavailable_outputs": sum(row["status"] != "complete" for row in value["outputs"].values()),
                               "candidate_groups": value["selections"]["candidate-groups"]["records"],
                               "gaps": len(value["gaps"])}))
+        elif args.command == "evidence":
+            basis = report_output(args.collection, args.repository)
+            audit_root = args.repository.resolve() / "memory/tech-debt/audits"
+            if basis.name != "collection.json" or basis.parent.parent != audit_root:
+                raise ValueError("Select collection.json in its audit directory")
+            output = report_output(args.output, args.repository)
+            if not output.is_relative_to(basis.parent):
+                raise ValueError("Save evidence in the same audit as the collection")
+            value = candidate_evidence(read_json(basis), basis.parent, args)
+            write_json(output, value, args.repository)
+            print(json.dumps({"output": str(output)}))
         elif args.command == "status":
             from project_status import publish_status
             destination = publish_status(args.collection, args.repository)

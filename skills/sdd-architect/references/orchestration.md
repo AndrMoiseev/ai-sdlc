@@ -92,8 +92,9 @@ required environment and tools, input basis, dependency IDs, output/log paths,
 timeout and applicable whole-suite deadline. Resolve placeholders before assigning
 checks. Retain the version used by each request when the plan changes.
 
-Use `stage: evidence` for existing build/report tasks and `collect`;
-use `stage: ranking` for `rank`, and `stage: publication` for the final `status`
+Use `stage: evidence` for `collect`, which owns the single project command invocation,
+`stage: analysis` for `evidence` queries on retained records,
+`stage: ranking` for `rank`, and `stage: publication` for the final `status`
 command after report and plan completion. Add another explicit stage only for an
 authorized focused check. Resolve each requested ID against the saved revision;
 all IDs belong to the assigned stage. Execute them in dependency order, requiring
@@ -109,8 +110,8 @@ cannot continue, return its partial result; the orchestrator assigns the remaini
 independent checks under a current request without repeating verified successful
 commands. Do not switch a blocked full audit to focused mode without a user request.
 
-Research may propose commands and inspect their configuration. Builds, tests,
-linters and metric commands run only under a checks assignment.
+Research may inspect the configured command. Fresh primary measurements always use the
+configured command through `collect`. Register subsequent calculations on retained evidence separately.
 The orchestrator registers a proposed follow-up before dispatching it. Preserve
 existing permission and time limits across retries or replacement workers.
 

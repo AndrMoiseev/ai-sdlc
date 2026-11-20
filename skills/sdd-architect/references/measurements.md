@@ -222,8 +222,7 @@ Resolve overload signatures in code.
 In the SARIF diagnostic catalog, absence of a finding is not measured zero. Suppressions/baselines/exclusions and
 thresholds constrain the population. No system median or percentile is inferred
 from a thresholded series. Full MCC coverage must be established separately.
-The aggregate L collector independently measures every named Kotlin function
-through detekt's implementation, including suppressed and zero-complexity functions.
+The project detekt report measures every named Kotlin function for aggregate L, including suppressed and zero-complexity functions.
 
 Coverage is covered/total counters for lines and branches. Group coverage is
 sum(covered)/sum(total), not the mean of percentages. A zero denominator is

@@ -69,12 +69,14 @@ class OrderServiceTest {
     raw = report / "raw"
     raw.mkdir(parents=True)
     (raw / "dependencies.csv").write_text("from,to\nexample.order.OrderService,example.pricing.PriceCalculator\nexample.pricing.PriceCalculator,example.order.OrderService\n", encoding="utf-8")
+    (raw / "history.log").write_bytes(run(["git", "log", "--no-merges", "--no-renames", "--date=short",
+                                         "--format=--%H--%ad--%an", "--numstat"], repo, policy))
     config = {"source_roots": ["src/main/kotlin"],
               "package_prefixes": ["example"], "modules": {"order": ["example.order"], "pricing": ["example.pricing"]},
               "scope": {"gradle_projects": [":"], "source_sets": ["main"], "variant": "synthetic JVM", "test_tasks": []},
               "class_files": {"example.order.OrderService": "src/main/kotlin/example/order/OrderService.kt",
                               "example.pricing.PriceCalculator": "src/main/kotlin/example/pricing/PriceCalculator.kt"},
-              "artifacts": {"history": {"collect": True}}}
+              "artifacts": {"history": {"path": (raw / "history.log").relative_to(repo).as_posix(), "format": "git-log"}}}
     config["artifacts"]["dependencies"] = {"path": (raw / "dependencies.csv").relative_to(repo).as_posix(), "format": "class-csv", "tool": "synthetic-fixture",
                                             "version": "1", "command": ["synthetic-explicit-edges"]}
     write_audit_configuration(config, report / "collection-input.json", repo)

@@ -346,6 +346,31 @@ class AuditConfigurationTests(unittest.TestCase):
                 validate_audit_configuration(config)
         self.assertEqual(project_path(".", "root"), ".")
 
+    def test_missing_settings_block_full_and_fresh_focused_before_project_command(self):
+        root = Path(tempfile.gettempdir()).resolve()
+        report = root / "memory/tech-debt/audits/2026-11-14T14-30-00Z"
+        with (patch.object(Path, "mkdir"), patch.object(Path, "exists", return_value=False),
+              patch.object(Path, "write_text"), patch.object(Path, "read_text", side_effect=FileNotFoundError),
+              patch("collection.load_policy", return_value=DEFAULT_POLICY), patch("collection.run") as execute):
+            for full in (True, False):
+                with self.subTest(full=full), self.assertRaisesRegex(ValueError, "sdd-setup"):
+                    collect({}, report, repository=root, full=full, fresh=not full)
+            execute.assert_not_called()
+
+    def test_focused_fresh_propagates_command_failure_without_importing_old_reports(self):
+        root = Path(tempfile.gettempdir()).resolve()
+        report = root / "memory/tech-debt/audits/2026-11-14T14-30-00Z"
+        command = ["project-task", "reports with spaces"]
+        with (patch.object(Path, "mkdir"), patch.object(Path, "exists", return_value=False),
+              patch.object(Path, "write_text"), patch("collection.load_policy", return_value=DEFAULT_POLICY),
+              patch("collection.project_collection", return_value={"command": command}),
+              patch("collection.run", side_effect=ValueError("selected tests failed")) as execute,
+              patch("collection.inventory") as inventory):
+            with self.assertRaisesRegex(ValueError, "selected tests failed"):
+                collect({}, report, repository=root, full=False, fresh=True)
+            execute.assert_called_once_with(command, root, DEFAULT_POLICY)
+            inventory.assert_not_called()
+
     def test_reject_before_writing_or_running_tools(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
         report = root / "memory/tech-debt/audits/2026-11-14T14-30-00Z"
@@ -425,6 +450,34 @@ class CollectionIntegrationTests(unittest.TestCase):
             self.assertEqual(groups[0]["scope"]["files"], ["src/Price.kt"])
             self.assertEqual(queue[0]["candidate_group"]["key"]["group"], groups[0]["group"])
             self.assertTrue(queue[0]["selected"])
+            # Exercise the evidence CLI on this same collection. Its selection and metric
+            # keys must resolve against the actual JSONL emitted by collect.
+            evidence_output = report / "diagnoses" / "evidence.json"
+            evidence_args = ["evidence", "--repository", str(repo), "--collection", str(report / "collection.json")]
+            with patch("sys.stdout", io.StringIO()):
+                self.assertEqual(main([*evidence_args, "--group", groups[0]["group"], "--output", str(evidence_output)]), 0)
+            evidence = json.loads(evidence_output.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["origin"], queue[0]["candidate_group"])
+            self.assertEqual(evidence["candidate_group"], groups[0])
+            self.assertEqual([row["signal"] for row in evidence["signals"]], [ref["key"]["signal"] for ref in groups[0]["signals"]])
+            refs = [ref for signal in evidence["signals"] for ref in signal["references"]]
+            self.assertCountEqual([entry["reference"] for entry in evidence["measurements"]],
+                                  [json.loads(key) for key in {json.dumps(ref, sort_keys=True) for ref in refs}])
+            for entry in evidence["measurements"]:
+                self.assertEqual(entry["row"], resolve_reference(entry["reference"], description, report))
+            for query, arguments in (("files", ["src/Price.kt", "incident.kt"]),
+                                     ("co-change", ["src/Price.kt", "incident.kt"]), ("dependencies", ["incident.kt"])):
+                destination = report / f"{query}.json"
+                with patch("sys.stdout", io.StringIO()):
+                    self.assertEqual(main([*evidence_args, "--" + query, *arguments, "--output", str(destination)]), 0)
+                selected = json.loads(destination.read_text(encoding="utf-8"))
+                self.assertIn("incident.kt", selected["files"])
+                if query == "files":
+                    self.assertIn(0.2, [entry["row"].get("value") for entry in selected["measurements"]])
+                elif query == "co-change":
+                    self.assertEqual(selected["output"]["status"], "unavailable")
+                else:
+                    self.assertEqual(selected["outputs"]["dependencies/class"]["status"], "unavailable")
             self.assertEqual(len(list(raw.iterdir())), 2)
             for name, spec in CATALOG.items():
                 content = (report / spec["path"]).read_text(encoding="utf-8")
@@ -487,16 +540,16 @@ class MeasurementTests(unittest.TestCase):
               patch.object(Path, "write_text", lambda path, text, **kwargs: saved.append(json.loads(text))),
               patch("collection.inventory", side_effect=KeyboardInterrupt("Source read interrupted"))):
             with self.assertRaisesRegex(KeyboardInterrupt, "interrupted"):
-                collect({}, report, repository=root)
+                collect({}, report, repository=root, full=False)
         self.assertEqual(saved[0]["status"], "incomplete")
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["outputs"].values()))
         self.assertTrue(all(row["status"] == "incomplete" for row in saved[0]["selections"].values()))
 
-    def test_focused_git_failure_only_limits_requested_history_chain(self):
+    def test_focused_invalid_history_only_limits_requested_history_chain(self):
         root = Path(tempfile.gettempdir()) / "architect-project"
         report = root / "memory" / "tech-debt" / "audits" / "2026-11-14T14-30-00Z"
         config = {"artifacts": {
-            "history": {"collect": True}, "coverage": {"path": "coverage.csv", "format": "coverage-csv"}}}
+            "history": {"path": "history.log", "format": "git-log"}, "coverage": {"path": "coverage.csv", "format": "coverage-csv"}}}
         with (patch.object(Path, "resolve", lambda path: path), patch.object(Path, "is_dir", return_value=True),
               patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir"),
               patch.object(Path, "write_text"), patch.object(Path, "write_bytes"),
@@ -508,9 +561,7 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(value["outputs"]["changes/commit"]["status"], "error")
         self.assertEqual(value["outputs"]["source-files/file"]["status"], "error")
         self.assertEqual(value["outputs"]["line-coverage/file"]["status"], "complete")
-        self.assertEqual(command.call_count, 1)
-        self.assertIn("log", command.call_args.args[0])
-        self.assertNotIn("HEAD", command.call_args.args[0])
+        command.assert_not_called()
 
     def test_missing_mcc_and_partial_coverage_remain_visible(self):
         findings = [finding("CyclomaticComplexMethod", "Cyclomatic Complexity (complexity: 12)"),

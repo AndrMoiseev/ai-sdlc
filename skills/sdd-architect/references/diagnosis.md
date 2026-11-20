@@ -1,5 +1,31 @@
 # From a candidate to an evidenced refactoring direction
 
+## Prepare evidence for one group
+
+Use `metrics.py evidence` on the saved collection. For each computed origin in the
+shortlist, select `--group <group-id>` once. The result contains the original scope,
+seed and attached signal references, overlaps, limitations, and distinct measurement
+rows with their full keys and counters. Reuse the result when a shortlist adjustment
+splits an origin. For merged groups pass the results for all origins. For a contextual
+addition select `--files <path> ...` to look up inventory, change frequency and line
+coverage. Keep the supplied scenario and paths even when the collection has no rows.
+
+Request either of these additional queries when it can distinguish explanations:
+
+- `--co-change <left-file> <right-file>` lists retained commits touching both files,
+  their dates, full changeset sizes, both files' line counters and whether each commit
+  met the collection's size filter for coupling. Inspect the actual changes to decide
+  whether the files changed together for a substantive reason.
+- `--dependencies <file> ...` selects direct class edges incident on mapped files.
+  The key runs from consumer to supplier. A null endpoint path, a file without mapped
+  classes or gaps in JVM mapping limits the conclusions. Check wiring and uses in code.
+
+Paths use the collection's project-relative spelling. Check the output descriptors
+before interpreting an empty optional query. Unavailable history or class data leaves
+the question open. Cite the original metric path/key from the result. The orchestrator
+registers these reads for explorer, saves each result under the audit and passes its
+path to the architect. See the [runtime invocation](runtime.md#execution-environment).
+
 ## Request focused code diagnosis
 
 Follow the analysis and final-report phases in the [workflow](workflow.md).
