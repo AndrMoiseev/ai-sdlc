@@ -61,7 +61,10 @@ def dependencies(text, format_name, prefixes, excludes=()):
 
 def detekt(text, source_root):
     findings, seen = [], set()
-    for run_index, run in enumerate(json.loads(text).get("runs", [])):
+    report = json.loads(text)
+    if not isinstance(report, dict) or not isinstance(report.get("runs"), list):
+        raise ValueError("detekt SARIF requires a runs array")
+    for run_index, run in enumerate(report["runs"]):
         for index, row in enumerate(run.get("results", [])):
             rule = row.get("ruleId", "").split(".")[-1]
             if rule not in RULES:

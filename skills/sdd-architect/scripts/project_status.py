@@ -97,7 +97,7 @@ def prepare_status(config, sources, mappings, raw, artifacts, policy, *, reposit
                             "Module D/PC describe internal structure; cross-module edges are reported separately",
                             "Module Q values are recomputed and must not be averaged into project Q",
                             "Exact token clones preserve identifiers and literals; renamed clones may be missed"],
-            "tools": {name: {key: metadata[key] for key in ("tool", "version", "parser_version", "command", "collected_at", "path") if key in metadata}
+            "tools": {name: {key: metadata[key] for key in ("tool", "version", "parser_version", "plugin_version", "command", "collected_at", "path") if key in metadata}
                       for name, metadata in artifacts.items()}, **result}
 
 

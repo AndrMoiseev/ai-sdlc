@@ -138,6 +138,7 @@ baseline проверок. Совпадение имён само по себе 
 - **Эвристика** `Heuristic` kind:concept
 
 - **Сбор измерений** `Collection` kind:process
+- **Команда сбора** `CollectionCommand` kind:command
 - **Политика анализа** `AnalysisPolicy` kind:value
 - **Измерение** `Measurement` kind:value
 - **Гранулярность** `Granularity` kind:value
@@ -315,6 +316,11 @@ baseline проверок. Совпадение имён само по себе 
 
 - **Definition**: Сбор текущих свидетельств, нормализация и расчёт всех предусмотренных измерений; `collection.json` описывает параметры и исходы без таблиц значений и идентификаторов версии исходников.
 - **Source**: [каталог измерений архитектуры](../skills/sdd-architect/references/measurements.md).
+
+### Команда сбора
+
+- **Definition**: Одна команда проекта, которая из корня проекта получает все первичные данные для архитектурного аудита. `sdd-setup` проверяет её и записывает команду и расположение отчётов в `.sdd/settings.json`. `sdd-architect` запускает команду, когда требуются свежие измерения.
+- **Source**: [настройка сбора](../skills/sdd-setup/references/collection.md).
 
 ### Измерение
 

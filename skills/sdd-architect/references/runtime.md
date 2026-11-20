@@ -1,9 +1,7 @@
 # Runtime and storage
 
-Use `uv` and a system Python 3.11+. Full audits require Git, jdeps, scc, JDK 17+,
-an existing detekt runtime, the bundled measurement plugin and complete detekt/JaCoCo reports.
-Gradle build/test/report tasks belong to the consuming project. Missing tools or
-mandatory sources block a full audit. Explicit focused routes can use partial inputs.
+Use `uv` and a system Python 3.11+ for the skill scripts. Fresh measurements use the
+configured [project collection command](collection.md#project-collection-command).
 
 ## Report storage
 
@@ -53,8 +51,8 @@ Keep each audit's input in `collection-input.json` beside its output `collection
 which records used measurement parameters and resolved [analysis policy](analysis-policy.md).
 All paths in input configuration are project-relative with `/`, including report
 paths and command arguments. Pass the project root as runtime `--repository` for
-`configure`, `collect`, `rank` and `status`; cwd and the input file's location do
-not define the path base. External tool locations stay in runtime arguments.
+`configure`, `collect`, `evidence`, `rank` and `status`; cwd and the input file's location do
+not define the path base.
 Project numerical overrides in `.sdd/architect/analysis-policy.json` are read-only;
 changing project settings belongs to user-initiated `sdd-setup`. Copy external
 reports once into `raw/` before saving their project-relative input paths;
@@ -92,6 +90,7 @@ lockfiles; the consuming project needs no Python environment or dependencies.
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --repository "<project-root>" --get investigation.candidate_group_limit
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" configure --repository "<project-root>" --input "<external-temporary-dir>/collection-candidate.json" --output "<report-dir>/collection-input.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" collect --repository "<project-root>" --config "<report-dir>/collection-input.json" --output "<report-dir>"
+uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" evidence --repository "<project-root>" --collection "<report-dir>/collection.json" --group group-0001 --output "<report-dir>/diagnoses/group-0001/evidence-1.json"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" policy --collection "<report-dir>/collection.json" --get recommendations.report_limit
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" rank --repository "<project-root>" --collection "<report-dir>/collection.json" --recommendations "<report-dir>/cards.json" --output "<report-dir>/ranked-1.json" --markdown "<report-dir>/ranked-1.md"
 uv run --python "<python>" --locked --script "<skill>/scripts/metrics.py" status --repository "<project-root>" --collection "<report-dir>/collection.json"
@@ -118,39 +117,11 @@ add `--focused` to `collect`; that collection cannot publish project status.
 Register resolved commands, cwd, paths, expected outputs and limits in
 `collection-plan.md` before assigning checks. Execute only the exact assigned set.
 Python scripts use the standard library. Keep `--locked`; update Python lockfiles
-only for an intentional dependency change. Find Java via runtime `--java`, PATH or
-JAVA_HOME. Kotlin collection uses JDK 17+ and one of the existing detekt runtimes:
+only for an intentional dependency change.
 
-- By default, use the project's Gradle wrapper. The invocation-only
-  `detekt-runtime.init.gradle` exports the selected project's existing `detekt`
-  dependency configuration. `--detekt-project :server` selects a subproject;
-  the default is `:`. No plugin, dependency or task is written to the project.
-  Gradle may resolve missing dependencies using the project's configured repositories.
-- `--detekt-jar <absolute-path>` selects an existing detekt CLI `all.jar` directly.
-  It is an explicit runtime selection for projects without a usable wrapper or
-  Gradle configuration. The collector never downloads a replacement detekt.
-
-Probe the actual runtime with `--version`. Select the matching JAR from `bin/`
-using [plugins.json](../bin/plugins.json): detekt 1.x needs at least 1.23.8;
-detekt 2.x needs at least 2.0.0-alpha.6. Later releases of the same major are admitted
-without an exact version pin. A lower version or an unknown major is an error.
-The minimum versions are also the API baselines used to build the adapters;
-admission of a later release is not evidence that its ABI was tested.
-
-Run the resolved detekt CLI with the selected plugin and the exact Kotlin source
-inventory. The plugin receives the host's parsed files through `FileProcessListener`
-and emits `sdd-architect-measurements` through `OutputReport`. This separate measurement
-invocation disables default rule sets and does not inherit warning thresholds,
-baselines or suppressions that would remove functions from the population. The
-project's ordinary detekt SARIF remains a separate input.
-
-Record actual detekt, Kotlin parser and plugin versions plus the measurement profile
-in the report. Runtime resolution, plugin loading, syntax errors or incomplete
-file coverage block collection. Do not switch runtimes to bypass an error. JVM
-argument files, the source manifest, exported runtime, Gradle project cache and
-temporary report stay outside the project/package; retain the accepted report
-once in the audit's `raw/`. The two bundled plugin JARs are deliberate package
-artifacts; other build output and third-party JARs remain external.
+The collector launches the project's configured argument array directly in the project
+root. Its runtime policy bounds the command. Treat per-report commands only as
+provenance. Focused import of supplied reports requires no project command.
 
 On filesystem errors, report the first failing path. Probe with the same interpreter
 and launch method, then use the host's normal permission mechanism if necessary.
@@ -189,11 +160,9 @@ Run `check` before dependent work and obtain fresh host observations on resumpti
 
 Run `scripts/test.py` with the same uv invocation. Set absolute external paths:
 `ARCHITECT_TEST_JAVA` to JDK 17+, `ARCHITECT_TEST_DETEKT1_JAR` and
-`ARCHITECT_TEST_DETEKT2_JAR` to the two baseline CLI `all.jar` distributions,
-and `ARCHITECT_TEST_GRADLE_WRAPPER` to an existing wrapper JAR with adjacent
-wrapper properties. The mandatory JVM scenarios verify both SPI/PSI APIs and
-new context parameters; one Gradle subproject verifies runtime discovery.
-Version boundaries and formula/rule combinations run without subprocesses.
+`ARCHITECT_TEST_DETEKT2_JAR` to the two baseline CLI `all.jar` distributions. The mandatory JVM scenarios verify both SPI/PSI APIs and
+new context parameters. Project task selection is covered through the command adapter.
+Version boundaries and formula/rule combinations run in memory.
 Plugin sources and the reproducible build command live in the repository's
 `tools/detekt-measurements/`; rebuild both bundled JARs after changing those sources.
 The publication scenario

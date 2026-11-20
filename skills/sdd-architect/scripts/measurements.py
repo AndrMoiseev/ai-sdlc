@@ -110,26 +110,51 @@ def write_jsonl(path, rows):
             stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True, allow_nan=False) + "\n")
 
 
-def resolve_reference(reference, collection, directory):
-    """Read only the cited measurement, addressed by its complete object key."""
-    path, key = reference.get("path"), reference.get("key")
-    identifier = next((name for name, spec in CATALOG.items() if spec["path"] == path), None)
-    if identifier is None or not isinstance(key, dict) or set(key) != set(CATALOG[identifier]["key"]):
-        raise ValueError("Metric evidence needs a catalog path and its complete record key")
-    output = collection["outputs"].get(identifier, {})
-    if output.get("status") != "complete":
-        raise ValueError(f"Metric evidence is unavailable: {identifier}")
+def read_jsonl(directory, path):
     directory = Path(directory).resolve()
     target = (directory / path).resolve()
     if not target.is_relative_to(directory):
-        raise ValueError("Metric evidence leaves report directory")
-    matches = []
+        raise ValueError("Evidence leaves report directory")
     with target.open(encoding="utf-8") as stream:
         for line in stream:
             if line.strip():
-                row = json.loads(line)
-                if record_key(identifier, row) == key:
-                    matches.append(row)
-    if len(matches) != 1:
-        raise ValueError(f"Metric evidence key must resolve to one record: {identifier} {key}")
-    return matches[0]
+                yield json.loads(line)
+
+
+def read_keyed_rows(directory, path, fields, keys):
+    wanted = set()
+    for key in keys:
+        if not isinstance(key, dict) or set(key) != set(fields):
+            raise ValueError(f"Evidence needs a complete record key: {path} {key}")
+        wanted.add(key_text(key))
+    matches = {}
+    for row in read_jsonl(directory, path):
+        key = key_text({field: row[field] for field in fields})
+        if key in wanted:
+            if key in matches:
+                raise ValueError(f"Duplicate evidence key: {path} {key}")
+            matches[key] = row
+    missing = wanted - matches.keys()
+    if missing:
+        raise ValueError(f"Missing evidence key: {path} {min(missing)}")
+    return list(matches.values())
+
+
+def resolve_measurements(references, collection, directory):
+    """Resolve all cited keys in one pass per metric file."""
+    by_path = {}
+    for ref in references:
+        by_path.setdefault(ref["path"], []).append(ref["key"])
+    catalog_paths = {spec["path"]: name for name, spec in CATALOG.items()}
+    for path, keys in sorted(by_path.items()):
+        identifier = catalog_paths.get(path)
+        if identifier is None:
+            raise ValueError(f"Metric evidence needs a catalog path: {path}")
+        if collection["outputs"][identifier]["status"] != "complete":
+            raise ValueError(f"Metric evidence is unavailable: {identifier}")
+        for row in read_keyed_rows(directory, path, CATALOG[identifier]["key"], keys):
+            yield identifier, row
+
+
+def resolve_reference(reference, collection, directory):
+    return next(resolve_measurements([reference], collection, directory))[1]

@@ -11,7 +11,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 
 from analysis_policy import load_policy
-from audit_configuration import resolve_project_path, validate_audit_configuration
+from audit_configuration import FULL_FORMATS, project_collection, resolve_project_path, validate_audit_configuration
 from inputs import class_source_file, relative_path, source_description
 from measurements import CATALOG, write_jsonl
 
@@ -32,7 +32,7 @@ def run(argv, cwd, policy):
         process.communicate()
         raise ValueError(f"Command timed out after {timeout}s: {argv[0]}") from None
     if process.returncode:
-        # detekt also writes launch/configuration failures to stdout.
+        # Build tools may report failures on either stream.
         limit = policy["runtime"]["stderr_tail_characters"]
         detail = stderr.decode('utf-8', errors='replace')[-limit:]
         if stdout:
@@ -121,7 +121,7 @@ def map_classes(config, root, sources):
     return dict(sorted(mappings.items())), unresolved
 
 
-def collect(config, output, *, repository, full=True, java=None, detekt_jar=None, detekt_project=":"):
+def collect(config, output, *, repository, full=True, fresh=False):
     from analysis import prepare_measurements
     from candidate_groups import SELECTION_NAMES
 
@@ -164,6 +164,19 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
         raise ValueError(reason + "; stop the audit and resolve this prerequisite before continuing")
 
     save_description()
+    if full or fresh:
+        try:
+            settings = project_collection(root)
+            description["command"] = settings["command"]
+            if config.get("artifacts"):
+                raise ValueError("Use audit-local artifacts only for focused import of existing reports")
+            run(settings["command"], root, policy)
+            config = {**config, "artifacts": settings["artifacts"]}
+            for name, spec in settings["artifacts"].items():
+                if not resolve_project_path(spec["path"], root, name).is_file():
+                    raise ValueError(f"Project command did not produce {name}: {spec['path']}")
+        except (OSError, ValueError) as error:
+            block(str(error))
     source_error = None
     try:
         sources = inventory(config, root)
@@ -174,7 +187,7 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
     except (OSError, ValueError) as error:
         mappings, mapping_gaps = {}, [{"reason": str(error)}]
     artifacts, raw = description["artifacts"], {}
-    supported = {"dependencies", "history", "sizes", "complexity", "coverage", "kotlin"}
+    supported = FULL_FORMATS.keys()
     unknown = set(config.get("artifacts", {})) - supported
     if unknown:
         raise ValueError(f"Unknown artifacts: {sorted(unknown)}")
@@ -190,8 +203,7 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
             block("Compile production code and configure its JVM class directories")
     extensions = {"jdeps": ".txt", "class-csv": ".csv", "git-log": ".log", "scc": ".json",
                   "detekt-sarif": ".sarif", "jacoco": ".xml", "coverage-csv": ".csv", "kotlin-measurements": ".json", "git-history": ".json"}
-    formats = {"dependencies": {"jdeps", "class-csv"}, "history": {"git-log", "git-history"}, "sizes": {"scc"},
-               "complexity": {"detekt-sarif"}, "coverage": {"jacoco", "coverage-csv"}, "kotlin": {"kotlin-measurements"}}
+    formats = {**FULL_FORMATS, "history": {"git-log", "git-history"}, "coverage": {"jacoco", "coverage-csv"}}
     retained = {}
     for name in sorted(supported):
         spec = config.get("artifacts", {}).get(name)
@@ -200,54 +212,16 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
             continue
         metadata = {key: spec[key] for key in ("format", "tool", "version", "parser_version", "command", "source_root", "complete_mcc", "complete", "test_result", "limitations", "since", "until") if key in spec}
         try:
-            if spec.get("collect"):
-                if name == "kotlin":
-                    from kotlin_measurements import collect_kotlin
-                    data, details = collect_kotlin(sources, root, run, policy, java=java,
-                                                  detekt_jar=detekt_jar, detekt_project=detekt_project)
-                    metadata.update(details)
-                    argv = details["command"]
-                elif name == "history" and full:
-                    from history import collect_history
-                    data, argv = collect_history(config, root, run, policy, sources)
-                    metadata.update(format="git-history", tool="git", version=run(["git", "--version"], root, policy).decode().strip())
-                elif name == "history":
-                    argv = ["git", "-c", "core.quotePath=false", "log", "--no-merges", "--no-renames",
-                            "--date=short", "--format=--%H--%ad--%an", "--numstat"]
-                    for key in ("since", "until"):
-                        if spec.get(key):
-                            argv.append(f"--{key}={spec[key]}")
-                    data = run(argv, root, policy)
-                    metadata.update(format="git-log", tool="git", version=run(["git", "--version"], root, policy).decode().strip())
-                elif name == "dependencies":
-                    directories = config.get("class_directories", [])
-                    if not directories:
-                        raise ValueError("jdeps collection needs class_directories from the selected Gradle source sets")
-                    argv = ["jdeps", "-verbose:class", "-filter:none", "--ignore-missing-deps", *directories]
-                    data = run(argv, root, policy)
-                    metadata.update(format="jdeps", tool="jdeps", version=run(["jdeps", "--version"], root, policy).decode().strip())
-                elif name == "sizes":
-                    roots = ["."] if full else config.get("source_roots", [])
-                    if not roots:
-                        raise ValueError("scc collection needs source_roots")
-                    argv = ["scc", "--by-file", "--format", "json", "--no-cocomo", *roots]
-                    data = run(argv, root, policy)
-                    metadata.update(format="scc", tool="scc", version=run(["scc", "--version"], root, policy).decode().strip())
-                else:
-                    raise ValueError(f"{name}: run the project's selected Gradle task and import its report")
-                metadata["command"] = argv
-                path = None
-            else:
-                if spec.get("format") not in formats[name]:
-                    raise ValueError(f"Unsupported {name} format: {spec.get('format')}")
-                path = resolve_project_path(spec["path"], root, f"artifacts.{name}.path")
-                data = path.read_bytes()
+            if spec.get("format") not in formats[name]:
+                raise ValueError(f"Unsupported {name} format: {spec.get('format')}")
+            path = resolve_project_path(spec["path"], root, f"artifacts.{name}.path")
+            data = path.read_bytes()
             raw_directory = (output / "raw").resolve()
             if not raw_directory.is_relative_to(output):
                 raise ValueError("Raw report directory leaves the selected report")
-            if path is not None and path.is_relative_to(raw_directory):
+            if path.is_relative_to(raw_directory):
                 raw_path = path
-            elif path is not None and path in retained:
+            elif path in retained:
                 raw_path = retained[path]
             else:
                 raw_path = (raw_directory / (name + extensions[metadata["format"]])).resolve()
@@ -257,16 +231,23 @@ def collect(config, output, *, repository, full=True, java=None, detekt_jar=None
                     raise ValueError(f"Raw report output already exists: {raw_path}")
                 raw_path.parent.mkdir(parents=True, exist_ok=True)
                 raw_path.write_bytes(data)
-            if path is not None:
-                retained[path] = raw_path
+            retained[path] = raw_path
             metadata.update(path=raw_path.relative_to(output).as_posix(), status="complete",
                             collected_at=datetime.now(timezone.utc).isoformat())
             metadata.setdefault("source_root", ".")
             raw[name] = data.decode("utf-8-sig")
+            if name == "kotlin":
+                report = json.loads(raw[name])
+                if not isinstance(report, dict):
+                    raise ValueError("Expected a Kotlin measurement report object")
+                for field, key in (("tool", "tool"), ("tool_version", "version"),
+                                   ("parser_version", "parser_version"), ("plugin_version", "plugin_version")):
+                    if field in report:
+                        metadata[key] = report[field]
         except (OSError, ValueError) as error:
             metadata.update(status="error", reason=str(error))
         artifacts[name] = metadata
-        if full and metadata.get("status") != "complete":
+        if (full or fresh) and metadata.get("status") != "complete":
             block(f"{name}: {metadata.get('reason', 'source unavailable')}")
     measurements, outcomes, selections, gaps = prepare_measurements(
         config, sources, mappings, mapping_gaps, raw, artifacts, policy, source_error, repository=root)

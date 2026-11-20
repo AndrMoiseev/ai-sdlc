@@ -4,7 +4,7 @@
 
 Use this reference during configuration and collection in the [workflow](workflow.md).
 Explorer researches the current checkout; the orchestrator saves this audit's configuration
-and registers exact build/report commands. A fresh explorer executes the assigned
+and registers the collection check. A fresh explorer executes the assigned
 checks. `collect` then retains raw reports, normalizes each source once, computes
 all derived measurements and prepares keyed selections, preliminary candidate groups
 and their investigation queue before architects begin
@@ -47,8 +47,8 @@ If setup lacks an option, report that limitation without adding an audit workaro
    `.` denotes the root. This includes imported reports, source roots, class mappings,
    exclusions and paths inside command arguments. Absolute paths, drive-relative
    paths, file URIs and parent traversal are rejected. Stage external reports once
-   into this audit's `raw/` before referring to them. Pass the project root and
-   external Java/detekt locations only as runtime arguments, never as configuration.
+   into this audit's `raw/` before referring to them. Always
+   pass the project root as a runtime argument.
 4. Prepare candidate JSON on stdin or in external temporary storage. Save it only
    through `metrics.py configure` under the [runtime contract](runtime.md).
    The helper validates before writing `collection-input.json`; `collect` checks
@@ -75,7 +75,7 @@ is their ordinary repository history, not an input to this process.
 | `scope` | Gradle projects, source sets, variant and test tasks |
 | `class_directories` | Compiled directories for jdeps and JVM SourceFile mapping |
 | `class_files` | Optional explicit JVM-class to repository-relative source mapping |
-| `artifacts` | Required `dependencies`, `history`, `sizes`, `kotlin`, `complexity`, `coverage` inputs |
+| `artifacts` | Supplied report descriptors for focused import only. Omit for fresh collection. |
 
 All configuration paths are relative to the runtime `--repository`, independently
 of cwd or the configuration's directory. The configuration has no `repository` field.
@@ -86,57 +86,26 @@ root in configuration. Source paths in JSONL use repository-relative `/` paths.
 Module prefixes match package segments; the longest prefix wins. Equal longest
 prefixes assigned to different modules block a full audit.
 
-## Obtain missing reports
+## Project collection command
 
-Resolve [analysis policy](analysis-policy.md) through the script before choosing
-collection conditions. Read numerical policy from its separate project file; preserve
-detector settings that collect a sufficiently complete population. `collect` applies
-analyzer thresholds after import, including the parameter-list threshold.
+Full audits and focused work that needs fresh measurements read
+`architect.collection` from `.sdd/settings.json` (schema version 1). It contains
+`command`, an executable and its arguments as a JSON array, and `artifacts`,
+a map of the six named reports to project-relative paths, formats and qualifications.
+Read it with `metrics.py collection-settings --repository <project-root>` before starting
+fresh collection. Only `sdd-setup` writes this setting. Missing or invalid settings stop fresh collection
+before the command starts. Direct the user to run `sdd-setup` to configure audit collection.
 
-Register exact commands, outputs and limits in the collection plan before assigning
-checks. Existing build/report tasks run before their dependent `collect` command.
-The collector supports its fixed jdeps, Git, scc and Kotlin measurement commands; a report's stored
-command is descriptive provenance, never an executable command string.
+Save only the researched scope in the audit configuration for fresh collection.
+Register `metrics.py collect` as one check. It invokes the saved argument array
+once from the project root, then imports the six reports. Do not separately invoke
+the command, a build task, a report producer or a per-source fallback. Record the
+actual failure if the command exits unsuccessfully. A missing output identifies
+the report name and path to fix. Preserve the previous published status.
 
-1. Discover existing Gradle compilation, detekt and JaCoCo tasks. Read their actual
-   configuration. An absent required task is a blocker; configuring it is separate work.
-   Use external caches and temporary build output where the project supports them.
-2. Compile the selected production code and consumers. `dependencies: {"collect": true}`
-   invokes `jdeps -verbose:class -filter:none --ignore-missing-deps` on configured
-   directories. DI, reflection and missing dependencies limit graph completeness.
-   `collect` does not compile the project.
-3. `history: {"collect": true}` exports the policy window through the current UTC
-   date, first-parent only, excluding merges and tracking Git-detected renames.
-   Shallow history blocks collection. Retain complete changesets and their production
-   file counts before filtering. Historical commit IDs address events only.
-   Focused collection can use `since`/`until` and the simpler `git-log` import.
-4. `sizes: {"collect": true}` invokes scc JSON with per-file rows across the repository.
-   Aggregate files, lines, code, comments and blanks by language, production/test/other
-   category and module. Exclude configured generated/build paths and `memory/tech-debt/**`.
-   scc Complexity is not cognitive complexity and is not an input to L.
-5. Obtain detekt SARIF for the five supported rules. The adapter understands the
-   recorded detekt 1.23.8 message forms; another form leaves a value unknown.
-   Retain locations, declarations and suppressions. Set `complete_mcc: true` only
-   with evidence that the selected function population was fully measured.
-6. Run selected tests and obtain one merged JaCoCo XML. Merge execution data with
-   the coverage tool; do not add duplicate source rows from separate reports.
-   Set `complete: true` and `test_result: "passed"` only after checking complete
-   production class coverage and successful execution of the configured test tasks.
-   Missing reports, classes or required counters block a full audit.
-7. `kotlin: {"collect": true}` loads the bundled measurement plugin into the existing
-   detekt runtime, using its Kotlin parser and cognitive-complexity implementation. This supplies all named
-   functions, including zero values and suppressed findings, plus token positions
-   and size containers. Resolve detekt from the existing Gradle configuration;
-   `--detekt-project :server` selects its project. Optional `--java` selects JDK 17+;
-   `--detekt-jar` selects an existing CLI distribution. The detected major and minimum
-   version select the plugin. See [runtime](runtime.md) for supported versions.
-   No exact detekt or project Kotlin version is prescribed; unsupported syntax or
-   plugin loading failure blocks collection.
-
-Record `format`, `tool`, `version`, `command`, `source_root`, and relevant limitations
-for imports. Save original reports once in `raw/`; tools may write directly there.
-The collector reuses a raw input already in the destination instead of copying it.
-It saves a separate normalized representation in `metrics/`, never a second raw copy.
+Use `collect --focused --fresh` when focused work actually needs new measurements.
+Use `collect --focused` with audit-local `artifacts` for supplied reports. Reading
+retained evidence and resuming later phases do not rerun the command.
 
 ## Import existing reports
 
@@ -148,10 +117,10 @@ full audit with every required source. Never choose focused mode to bypass a blo
 | Input | Accepted format |
 | --- | --- |
 | Dependencies | `class-csv` with `from,to`, or `jdeps` text |
-| History | Full audit: `git-history` JSON produced by the collector, covering the policy window; focused work also accepts `git-log` |
+| History | Full audit: `git-history` JSON produced by the project command, covering the policy window; focused work also accepts `git-log` |
 | Size | `scc` per-file JSON |
 | Complexity | `detekt-sarif` |
-| Kotlin | Complete `kotlin-measurements` JSON, schema 2 and the declared measurement profile, produced by the bundled plugin |
+| Kotlin | Complete `kotlin-measurements` JSON, schema 2 and the declared measurement profile, from the project detekt measurement report |
 | Coverage | Full audit: complete `jacoco` XML; focused work also accepts `coverage-csv` |
 
 Set `source_root` to the checkout root encoded in imported paths. Unresolved paths

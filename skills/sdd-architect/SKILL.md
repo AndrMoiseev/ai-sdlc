@@ -40,7 +40,7 @@ For every route, the orchestrator saves researched audit configuration in
 `<report-dir>/collection-input.json` through
 [audit configuration](references/collection.md#prepare-audit-configuration).
 Explorer proposes it; `metrics.py configure` validates and saves it. All configuration
-paths are project-relative; the project root and external tools are runtime arguments.
+paths are project-relative; the project root is a runtime argument.
 Each new audit researches current conditions; earlier configuration is evidence to
 recheck, never an inherited authority.
 
@@ -50,9 +50,11 @@ user-initiated `sdd-setup` process. Audit-time approval does not transfer that
 responsibility. Report unsupported setup options as limitations; do not implement
 them in this audit or invoke setup automatically.
 
-For Kotlin measurements, use the project's existing detekt with the bundled
-version-appropriate plugin. Follow [runtime selection](references/runtime.md#execution-environment);
-do not download a separate parser or change build configuration during collection.
+For a full audit or a focused request needing fresh measurements, first check
+`architect.collection` in `.sdd/settings.json` under the [collection contract](references/collection.md#project-collection-command).
+If absent or incomplete, stop and ask the user to configure collection with `sdd-setup`.
+`metrics.py collect` runs the configured project command once and imports its reports.
+Focused analysis of supplied reports, saved evidence and plan edits need no collection settings.
 
 Read [tech debt plan maintenance](references/tech-debt-plan.md) before selecting
 candidates and again before completion. Reuse known diagnoses from the current
@@ -127,13 +129,13 @@ the shared `sdd-spec.architect` and `sdd-spec.explorer`
 this audit does not invoke the `sdd-spec` planning workflow. Role instructions
 define work quality; this workflow defines assignments, documents and transitions.
 
-Assign [metrics.py](scripts/metrics.py) commands `collect`, `rank` and the final `status` to explorer
+Assign [metrics.py](scripts/metrics.py) commands `collect`, `evidence`, `rank` and the final `status` to explorer
 through the shared checks contract. Keep formulas in the
 supplied scripts. Scripts calculate observations; architects establish
 responsibilities, mechanisms and effects. The orchestrator launches all roles
 and handles requests for further research or checks.
 
-For additional measurement commands and one-off scripts, write result tables,
+For calculations on already collected evidence, write result tables,
 per-file records and intermediate datasets directly to an assigned file under
 `<report-dir>`. Pass its path to the next step. Keep successful console output to
 paths, counts or a value needed for the current decision. On failure, surface

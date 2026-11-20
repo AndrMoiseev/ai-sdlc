@@ -27,7 +27,7 @@ complexity through the bundled plugin. The JSON schema and measurement profile
 are declared in [plugins.json](../bin/plugins.json), separately from the runtime.
 Retain actual detekt, Kotlin parser and plugin versions: changing the host can
 change tokenization or complexity results, so inspect those versions when comparing
-audits. Select the adapter by major and minimum version; no exact runtime is pinned.
+audits. The project task supplies the report from its configured adapter.
 The plugin rejects syntax errors. It does not infer dependencies from imports
 or substitute its parser for jdeps. Syntax compatibility must hold for the actual
 project; a construct unsupported by that project's detekt is a prerequisite failure.

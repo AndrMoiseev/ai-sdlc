@@ -20,6 +20,9 @@ def main():
     audit.add_argument("--project-root", required=True)
     audit.add_argument("--mise-path", help="Absolute path to an existing mise executable outside PATH")
     audit.add_argument("--output", type=Path, help="Save the audit to a new external JSON file")
+    collection = commands.add_parser("collection", help="Verify and save the project audit command")
+    collection.add_argument("--project-root", required=True, type=Path)
+    collection.add_argument("--request", required=True, type=Path)
     inspect = commands.add_parser("inspect")
     inspect.add_argument("--project-root", required=True)
     inspect.add_argument("--host", required=True, choices=("codex", "claude-code"))
@@ -40,6 +43,9 @@ def main():
     try:
         if command == "audit":
             result = audit_project(**args)
+        elif command == "collection":
+            from setup_collection import configure_collection
+            result = configure_collection(args["project_root"], read_json(args["request"]))
         elif command == "inspect":
             if args["available_agents"] is not None:
                 args["available_agents"] = read_json(args["available_agents"])

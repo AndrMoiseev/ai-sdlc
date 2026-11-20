@@ -1,0 +1,104 @@
+{
+  "collection": {
+    "command": [
+      "mise",
+      "run",
+      "architecture-reports"
+    ],
+    "artifacts": {
+      "dependencies": {
+        "path": "build/reports/architecture/dependencies.txt",
+        "format": "jdeps"
+      },
+      "history": {
+        "path": "build/reports/architecture/history.json",
+        "format": "git-history"
+      },
+      "sizes": {
+        "path": "build/reports/architecture/sizes.json",
+        "format": "scc"
+      },
+      "kotlin": {
+        "path": "build/reports/architecture/kotlin.json",
+        "format": "kotlin-measurements"
+      },
+      "complexity": {
+        "path": "app/build/reports/detekt/detekt.sarif",
+        "format": "detekt-sarif",
+        "source_root": ".",
+        "tool": "detekt",
+        "version": null,
+        "command": [],
+        "complete_mcc": false
+      },
+      "coverage": {
+        "path": "app/build/reports/jacoco/test/jacocoTestReport.xml",
+        "format": "jacoco",
+        "source_root": ".",
+        "tool": "JaCoCo",
+        "version": null,
+        "command": [],
+        "complete": true,
+        "test_result": "passed"
+      }
+    }
+  },
+  "tools": {
+    "git": [
+      "git"
+    ],
+    "java": [
+      "java",
+      "jdeps"
+    ],
+    "scc": [
+      "scc"
+    ]
+  },
+  "scope": {
+    "source_roots": [
+      "app/src/main/kotlin"
+    ],
+    "test_roots": [
+      "app/src/test/kotlin"
+    ],
+    "statistics_exclude_paths": [
+      "**/build/**",
+      ".gradle/**",
+      "**/node_modules/**"
+    ],
+    "exclude_paths": [
+      "**/generated/**"
+    ],
+    "package_prefixes": [
+      "example"
+    ],
+    "exclude_classes": [
+      "example.generated.*"
+    ],
+    "modules": {
+      "orders": [
+        "example.orders"
+      ],
+      "pricing": [
+        "example.pricing"
+      ]
+    },
+    "class_directories": [
+      "app/build/classes/kotlin/main",
+      "app/build/classes/java/main"
+    ],
+    "scope": {
+      "gradle_projects": [
+        ":app"
+      ],
+      "source_sets": [
+        "main"
+      ],
+      "variant": "JVM",
+      "test_tasks": [
+        ":app:test"
+      ]
+    }
+  }
+}

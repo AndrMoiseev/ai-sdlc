@@ -20,15 +20,15 @@ paths and task scope. No phase binds the audit to a source version.
 architecture decisions, the current tech debt plan and build/source evidence.
 
 Read the [current plan and relevant cards](tech-debt-plan.md#read-the-plan-before-investigation)
-before commissioning research. Carry user assessments and known problems into the scope.
+before commissioning research. For fresh collection, first check the project collection settings. Missing or incomplete settings require user-initiated `sdd-setup`. Carry user assessments and known problems into the scope.
 
 1. Start a fresh explorer to research production roots, Gradle projects/variants,
-   compiled outputs, existing measurement and test tasks, exclusions and package
+   compiled outputs, the configured measurement scope, exclusions and package
    ownership. Apply [Collection](collection.md), including supplied report inputs.
 2. Require proposed configuration and a plan justified by source references.
    Inventory dependencies, history, scc statistics, Kotlin tokens/functions,
    complexity and coverage under [quality indicators](quality-indicators.md). Record exact
-   commands or input paths and known limitations; unknown ownership stays explicit.
+   configured command and report paths and known limitations; unknown ownership stays explicit.
 3. The orchestrator uses `metrics.py configure` to save project-relative
    `<report-dir>/collection-input.json`, then writes `collection-plan.md` beside it.
    Register executable commands with dependencies, destinations and limits under
@@ -37,8 +37,7 @@ before commissioning research. Carry user assessments and known problems into th
    changes project settings or treats prior inferred boundaries as user constraints.
 
 **Exit:** saved scope, population, exclusions and module ownership are justified;
-every required source has an executable collection path or a qualified complete
-report. Missing coverage, tools or other prerequisites block the full audit.
+the configured project command accounts for every required source. Missing coverage, tools or other prerequisites block the full audit.
 Explain the concrete problem and propose resolving it before restarting; do not
 silently configure the project's tests or continue with missing sources.
 
@@ -50,10 +49,8 @@ Resolve the project [analysis policy](analysis-policy.md) through the script bef
 running collection. Preserve low detector thresholds used to collect observations.
 
 1. Start a fresh explorer with a checks assignment containing the registered IDs,
-   stage and command-registry revision. Execute existing build/report tasks and
-   then `collect` in dependency order. Return tool/report facts to the orchestrator
-   for necessary audit-configuration updates before collection; later recollection
-   uses a new audit directory with its own configuration.
+   stage and command-registry revision. Execute `collect` once. It runs the project command and imports the outputs.
+   Recollection uses a new audit directory with its own configuration.
 2. `collect` retains each raw report once, normalizes available inputs, calculates
    all [catalog outputs](measurements.md) in dependency order and saves selections.
    It then [builds candidate groups](candidate-groups.md), attaches contained signals,
@@ -82,8 +79,10 @@ current source paths, limitations, existing plan tasks and known change/behavior
    shortlist in `diagnosis.md` with keyed origins and reasons for each adjustment.
    Match current plan tasks by mechanism and responsibility. Link adequate known
    diagnoses instead of repeating them; retain new problems in the same code area.
-2. Record each group's source paths/declarations, JSONL paths and object keys,
-   scenario, owners, consumers, wiring and tests. A cold dependency can own the cause.
+2. After shortlist refinement, register the [evidence queries](diagnosis.md#prepare-evidence-for-one-group)
+   for the selected origins together in one explorer checks assignment. Pass the
+   corresponding saved results to each group architect with the scenario and scope
+   adjustments. A cold dependency can own the cause.
 3. Start a fresh architect for each bounded group. Apply the explicit
    [sdd-code-design diagnosis call](diagnosis.md), inspect mechanisms and consumers,
    and save `diagnoses/<group-id>/diagnosis-<n>.md`. Require alternative explanations,

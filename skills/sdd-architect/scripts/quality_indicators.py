@@ -32,7 +32,7 @@ def qualify_kotlin(value, sources):
             or value.get("complete") is not True
             or value.get("measurement_profile") != metadata["measurement_profile"]
             or not isinstance(value.get("tool_version"), str)):
-        raise ValueError("Kotlin measurements are missing or incomplete; run detekt with the bundled measurement plugin")
+        raise ValueError("Kotlin measurements are missing or incomplete; check the project collection task and its Kotlin report")
     select_plugin(value["tool_version"])
     rows = value.get("files", [])
     files = {row["file"]: row for row in rows}
