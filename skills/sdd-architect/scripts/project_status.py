@@ -118,6 +118,11 @@ def render_status(value):
         for suffix, counts in [("всего", stats["total"]), *sorted(stats["by_category"].items()), *sorted(stats["by_language"].items())]:
             sizes.append("| " + label(name + " / " + suffix) + " | " + " | ".join(str(counts[key]) for key in ("Files", "Lines", "Code", "Comment", "Blank")) + " |")
         structure, local, coverage, history = (row[key] for key in ("structure", "local_maintainability", "coverage", "history"))
+        line = coverage["line"]
+        omitted = line["omitted_files"]
+        line_value = "Нет данных" if line["status"] == "unknown" else percent(line["value"])
+        if line["status"] == "measured_subset":
+            line_value += " (по части файлов)"
         diagnostics.append(diagnostic_template.substitute(
             name=label(name), pc=percent(structure["propagation_cost"]),
             cyclic_files=structure["cyclic_files"], cyclic_file_fraction=percent(structure["cyclic_file_fraction"]),
@@ -130,7 +135,9 @@ def render_status(value):
             excluded_large_commits=history["excluded_large_commits"], coupled_files=history["coupled_files"],
             coupled_tokens=history["coupled_tokens"], coupled_token_fraction=percent(history["coupled_token_fraction"]["value"]),
             **{key: number(local[key]) for key in ("cognitive_score", "size_score", "maximum_cognitive_complexity", "weighted_p95_cognitive_complexity")},
-            **{key: percent(coverage[key]["value"]) for key in ("branch", "instruction", "line")},
+            branch=percent(coverage["branch"]["value"]), instruction=percent(coverage["instruction"]["value"]),
+            line=line_value, omitted_files=("\nФайлы без построчных данных JaCoCo\n\n" +
+                                          "\n".join("- " + label(path) for path in omitted)) if omitted else "",
             **{key: number(coverage[key]) for key in ("total_crap", "total_excess", "excess_density", "E_CRAP", "p95_crap_exec")},
         ).rstrip())
         if "boundary" in row:
