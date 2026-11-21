@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from .common import contained, digest, require
+from .common import contained, digest, require, validate_symlink
 
 
 class GitRepository:
@@ -40,11 +40,14 @@ class GitRepository:
     def status(self, exclude=(), include_ignored=False):
         """Use Git's index cache; retain path names, never a source-file manifest."""
         indexed = self._run("ls-files", "-v", "--stage", "-z").stdout.decode("utf-8").split("\0")
+        indexed_links = set()
         for record in filter(None, indexed):
             tag, metadata = record[0], record[2:]
             mode = metadata.split(" ", 1)[0]
-            require(not tag.islower() and tag != "S" and mode in {"100644", "100755"}, "unsupported_index",
-                    "Clear assume-unchanged/skip-worktree flags; links and submodules need an explicit verification contract")
+            if mode == "120000":
+                indexed_links.add(metadata.split("\t", 1)[1])
+            require(not tag.islower() and tag != "S" and mode in {"100644", "100755", "120000"}, "unsupported_index",
+                    f"Unsupported index mode or assume-unchanged/skip-worktree flag: {record}")
         pathspec = ("--", ".", *(f":(top,exclude,literal){name}" for name in exclude))
         records = self._run("-c", "core.fsmonitor=false", "-c", "core.ignoreStat=false",
                             *(["-c", "core.fileMode=true"] if os.name != "nt" else []),
@@ -73,6 +76,14 @@ class GitRepository:
                 dirty.append(name)
                 if code == "?":
                     untracked.append(name)
+        dirty_paths = set(dirty)
+        for name in indexed_links | dirty_paths:
+            path = self.root / name
+            if path.is_symlink():
+                validate_symlink(self.root, path)
+            else:
+                require(name not in indexed_links or name in dirty_paths, "invalid_symlink",
+                        f"Git symlink is not materialized in this worktree: {name}")
         require(head and head != "(initial)", "git_failed", "Repository has no HEAD commit")
         return dict(head=head, branch=branch, dirty_paths=sorted(dirty),
                     untracked_paths=sorted(untracked), ignored_paths=sorted(ignored))
@@ -107,7 +118,7 @@ class GitRepository:
                     metadata, name = record.split("\t", 1)
                     mode, _, stage = metadata.split()
                     require(stage == "0", "unmerged_index", name)
-                    if (self.root / name).is_file():
+                    if mode in {"100644", "100755"} and (self.root / name).is_file():
                         self._run("update-index", "--chmod=" + ("+x" if mode == "100755" else "-x"), "--", name, env=env)
             return self._text("write-tree", env=env)
 
