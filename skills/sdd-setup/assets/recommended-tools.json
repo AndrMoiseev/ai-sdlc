@@ -1,0 +1,9 @@
+{
+  "uv": "uv@latest",
+  "git": "conda:git@latest",
+  "scc": "github:boyter/scc@latest",
+  "rg": "ripgrep@latest",
+  "node": "node@latest",
+  "rga": "ripgrep-all@latest",
+  "apm": "apm@latest"
+}

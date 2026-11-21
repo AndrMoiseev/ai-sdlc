@@ -78,6 +78,9 @@ def test_cli_file_roundtrip_keeps_exact_diff_recovery_and_legacy_contract(tmp_pa
     audit_receipt = setup_io.save_result(audit, audit_path, "audit")
     assert core.read_json(audit_path) == audit_receipt["summary"] == audit
     assert audit_receipt["sha256"] == core.digest(audit_path.read_bytes())
+    typespec = {"project_root": str(project), "status": "missing"}
+    receipt = setup_io.save_result(typespec, tmp_path / "typespec.json", "typespec")
+    assert core.read_json(receipt["output_file"]) == receipt["summary"] == typespec
     assert not list(project.iterdir())
     # Plans are self-contained; neither request nor source artifact is needed at apply.
     artifact.unlink()
