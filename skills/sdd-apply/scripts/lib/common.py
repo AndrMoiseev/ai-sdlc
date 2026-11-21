@@ -28,6 +28,17 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+def validate_symlink(root, path):
+    try:
+        target = resolve(path, strict=True)
+    except (OSError, RuntimeError) as exc:
+        raise Rejected("invalid_symlink", f"Cannot resolve symlink {path}: {exc}") from exc
+    require(target.is_relative_to(root), "path_escape", f"Symlink leaves worktree: {path} -> {target}")
+    require(".git" not in (part.lower() for part in target.relative_to(root).parts),
+            "git_path", f"Symlink points into Git metadata: {path}")
+    require(target.is_file() or target.is_dir(), "invalid_symlink", f"Expected file or directory: {path}")
+
+
 def contained(root, relative):
     return next(contained_paths(root, [relative]))
 

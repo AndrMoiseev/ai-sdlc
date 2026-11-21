@@ -75,6 +75,10 @@ refactoring directory, excluding its execution directory. It does not create
 per-file source hashes or full working-copy inventories elsewhere. Cleanup uses
 Git ownership and status checks and preserves unknown or ignored data.
 
+Git symlinks must resolve to existing files or directories inside the current
+worktree, outside Git metadata. A change-document snapshot records the link
+target as written and skips traversal through directory links.
+
 Historical source snapshots stay readable as historical evidence. They do not
 establish commit identity and cannot be reused for a new commit candidate. Keep
 their objects intact and obtain fresh evidence through the supported workflow.

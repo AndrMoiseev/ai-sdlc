@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import uuid
 import re
-from .common import contained, digest, now, require, write_json
+from .common import contained, digest, now, require, validate_symlink, write_json
 
 from .state_storage import storage
 from .path_resolution import resolve
@@ -148,9 +148,11 @@ def snapshot(state, root=None):
                 if directory == change and entry.name == "execution":
                     continue
                 path = Path(entry.path)
-                require(not entry.is_symlink() and not (hasattr(entry, "is_junction") and entry.is_junction()),
-                        "unsupported_file", str(path))
-                if entry.is_dir(follow_symlinks=False):
+                require(not (hasattr(entry, "is_junction") and entry.is_junction()), "unsupported_file", str(path))
+                if entry.is_symlink():
+                    validate_symlink(root, path)
+                    files[(relative / path.relative_to(change)).as_posix()] = {"symlink": str(path.readlink())}
+                elif entry.is_dir(follow_symlinks=False):
                     pending.append(path)
                 elif entry.is_file(follow_symlinks=False):
                     files[(relative / path.relative_to(change)).as_posix()] = {"sha256": digest(path.read_bytes())}
