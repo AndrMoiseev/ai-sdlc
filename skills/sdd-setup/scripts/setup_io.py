@@ -79,7 +79,7 @@ def output_path(path, project):
 
 
 def save_result(result, path, command):
-    if command == "audit":
+    if command in {"audit", "typespec"}:
         summary = result
     elif command == "inspect":
         summary = inspect_summary(result)

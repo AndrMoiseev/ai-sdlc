@@ -18,8 +18,16 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     audit = commands.add_parser("audit", help="Read-only project requirements audit")
     audit.add_argument("--project-root", required=True)
-    audit.add_argument("--mise-path", help="Absolute path to an existing mise executable outside PATH")
+    stack = audit.add_mutually_exclusive_group(required=True)
+    stack.add_argument("--jvm", dest="java_version", nargs="?", const="", metavar="JDK",
+                       help="Check the source-declared JDK. Omit its value if unresolved.")
+    stack.add_argument("--no-jvm", dest="java_version", action="store_const", const=None,
+                       help="The audited project does not target the JVM")
     audit.add_argument("--output", type=Path, help="Save the audit to a new external JSON file")
+    typespec = commands.add_parser("typespec", help="Inspect local TypeSpec after mise tool setup")
+    typespec.add_argument("--project-root", required=True, type=Path)
+    typespec.add_argument("--package-dir", type=Path, help="Package or workspace directory relative to project root")
+    typespec.add_argument("--output", type=Path, help="Save the inspection to a new external JSON file")
     collection = commands.add_parser("collection", help="Verify and save the project audit command")
     collection.add_argument("--project-root", required=True, type=Path)
     collection.add_argument("--request", required=True, type=Path)
@@ -43,6 +51,9 @@ def main():
     try:
         if command == "audit":
             result = audit_project(**args)
+        elif command == "typespec":
+            from typespec_audit import inspect_typespec
+            result = inspect_typespec(**args)
         elif command == "collection":
             from setup_collection import configure_collection
             result = configure_collection(args["project_root"], read_json(args["request"]))
