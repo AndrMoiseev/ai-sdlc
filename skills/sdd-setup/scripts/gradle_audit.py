@@ -56,7 +56,7 @@ def stable_gradle_release():
     return release["version"]
 
 
-def check_gradle(project, execute):
+def check_gradle(project, execute, project_root=None):
     try:
         wrapper = gradle_wrapper(project)
     except OSError as exc:
@@ -65,7 +65,7 @@ def check_gradle(project, execute):
     if execute is not None:
         try:
             provider = execute(["mise", "which", "gradle", "--plugin"]).decode().strip()
-            check_tools({provider: ["gradle"]}, project, execute)
+            check_tools({provider: ["gradle"]}, project_root or project, execute)
             version = execute(["mise", "which", "gradle", "--version"]).decode().strip()
             if not version:
                 raise ValueError("mise returned no Gradle version")

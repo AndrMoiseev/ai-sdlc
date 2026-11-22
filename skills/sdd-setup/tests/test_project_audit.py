@@ -1,4 +1,5 @@
 """Audit decisions use fake process/filesystem adapters; no mise installation or network."""
+import io
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,16 @@ from unittest.mock import MagicMock, Mock
 import pytest
 import project_audit
 import setup as setup_cli
+
+
+@pytest.fixture
+def releases(monkeypatch):
+    metadata = b"""<metadata><groupId>com.tngtech.archunit</groupId><artifactId>archunit</artifactId>
+      <versioning><versions><version>1.9.2</version><version>1.10.0</version>
+      <version>2.0.0-rc1</version><version>2.1.0-SNAPSHOT</version></versions></versioning></metadata>"""
+    lookup = Mock(side_effect=lambda *args, **kwargs: io.BytesIO(metadata))
+    monkeypatch.setattr(project_audit, "urlopen", lookup)
+    return lookup
 
 
 @pytest.fixture
@@ -105,28 +116,93 @@ def test_repeat_probe_observes_repair_and_later_failure(process):
     ]
 
 
-@pytest.mark.parametrize("status,compliant", [("satisfied", True), ("not_found", False), ("failed", False)])
-def test_audit_reports_compliance_from_observed_requirement(monkeypatch, status, compliant):
-    project = MagicMock()
-    project.is_dir.return_value = True
-    project.__str__.return_value = "resolved-project"
-    monkeypatch.setattr(project_audit, "Path", Mock(return_value=Mock(resolve=Mock(return_value=project))))
-    row = {"id": "mise", "required": True, "status": status}
-    check = Mock(return_value=row)
-    monkeypatch.setattr(project_audit, "check_mise", check)
-    result = project_audit.audit_project("project", None)
-    check.assert_called_once_with(project)
-    assert result["project_root"] == "resolved-project"
-    assert result["requirements"] == [row] and result["compliant"] is compliant
-    tools = result["recommended_tools"]
-    assert {tool["binary"]: tool["tool_request"] for tool in tools} == {
-        "uv": "uv@latest", "git": "conda:git@latest",
-        "scc": "github:boyter/scc@latest", "rg": "ripgrep@latest",
-        "node": "node@latest", "rga": "ripgrep-all@latest", "apm": "apm@latest",
+@pytest.mark.parametrize("mise_status,broken", [
+    ("not_found", None), ("failed", None), ("satisfied", None), ("satisfied", "rga"),
+])
+def test_audit_checks_each_required_tool_before_jvm(monkeypatch, releases, mise_status, broken):
+    project = Path.cwd()
+    monkeypatch.setattr(project_audit, "check_mise", lambda _: {"id": "mise", "required": True, "status": mise_status})
+    def execute(argv):
+        if argv == ["mise", "exec", "--", broken, "--version"]:
+            raise OSError("Cannot start tool")
+        return b"1.2.3"
+    monkeypatch.setattr(project_audit, "mise_reader", lambda _, row: execute if row["status"] == "satisfied" else None)
+    monkeypatch.setattr(project_audit, "check_tools", Mock())
+    ready = mise_status == "satisfied" and broken is None
+    java = Mock(return_value={"id": "java", "required": True, "status": "satisfied"})
+    gradle = Mock(return_value={"id": "gradle", "required": True, "status": "satisfied"})
+    monkeypatch.setattr(project_audit, "check_java", java)
+    monkeypatch.setattr(project_audit, "check_gradle", gradle)
+    result = project_audit.audit_project(project, "21", archunit=[("1.10.0", "testRuntimeClasspath")],
+                                        jacoco_modules=[":app"], jacoco=[(":app", "satisfied", "CI aggregate XML")],
+                                        junit=[("5.12.1", "Jupiter test results")])
+    tools = {row["id"]: row for row in result["requirements"] if "tool_request" in row}
+    assert {name: row["tool_request"] for name, row in tools.items()} == {
+        "uv": "uv@latest", "git": "conda:git@latest", "scc": "github:boyter/scc@latest",
+        "rg": "ripgrep@latest", "node": "node@latest", "rga": "ripgrep-all@latest", "apm": "apm@latest",
     }
-    for tool in tools:
-        assert tool["use_command"] == ["mise", "use", "--path", "resolved-project", tool["tool_request"]]
-    assert result["checked_at"] and result["system"]
+    for name, row in tools.items():
+        assert row["required"] and row["use_command"] == ["mise", "use", "--path", str(project), row["tool_request"]]
+        expected = "unverified" if mise_status != "satisfied" else "failed" if name == broken else "satisfied"
+        assert row["status"] == expected
+    assert result["compliant"] is ready
+    assert java.called == gradle.called == ready
+    assert releases.called == ready
+    assert {r["id"] for r in result["requirements"]} & {"junit", "archunit"} == ({"junit", "archunit"} if ready else set())
+
+
+@pytest.mark.parametrize("versions,status", [
+    ([], "unverified"), (["missing"], "failed"), (["1.9.2", "1.10.0"], "failed"),
+    (["1.10.0"], "satisfied"), (["2.0.0-rc1"], "failed"),
+])
+def test_archunit_requires_latest_published_stable_dependency(releases, versions, status):
+    result = project_audit.check_archunit([(v, "test dependencies") for v in versions])
+    assert result["required"] and result["status"] == status and result["latest_stable"] == "1.10.0"
+    releases.assert_called_once_with(project_audit.ARCHUNIT_METADATA, timeout=5)
+
+
+def test_archunit_unavailable_release_is_not_reported_as_current(releases):
+    releases.side_effect = OSError("offline")
+    result = project_audit.check_archunit([("1.10.0", "project test dependency")])
+    assert result["status"] == "unverified" and result["evidence"]["release_error"] == "offline"
+
+
+@pytest.mark.parametrize("versions,status", [
+    ([], "unverified"), (["5.12.1"], "satisfied"), (["5.12.1", "4.13.2"], "failed"),
+    (["5.12.1", "failed"], "failed"), (["6.0.0"], "failed"), (["missing"], "failed"),
+    (["5.12.1", "unverified"], "unverified"),
+])
+def test_each_jvm_test_scope_requires_jupiter_5(versions, status):
+    result = project_audit.check_junit([(version, "test scope") for version in versions])
+    assert result["required"] and result["status"] == status
+
+
+@pytest.mark.parametrize("library_status,expected", [
+    (None, "unverified"), ("unverified", "unverified"), ("failed", "failed"), ("satisfied", "satisfied"),
+])
+def test_jacoco_requires_coverage_evidence_for_modules_without_tests(monkeypatch, capsys, library_status, expected):
+    args = ["setup.py", "jvm-step", "jacoco", "--project-root", ".",
+            "--jacoco-module", ":app", "--jacoco-module", ":lib",
+            "--jacoco", ":app", "satisfied", "Test results and application classes verified in aggregate XML"]
+    if library_status:
+        args.extend(["--jacoco", ":lib", library_status, "Compared library production classes with aggregate XML"])
+    monkeypatch.setattr(setup_cli.sys, "argv", args)
+    assert setup_cli.main() == 0
+    result = json.loads(capsys.readouterr().out)["result"]
+    assert result["status"] == expected
+    assert result["evidence"]["missing_modules"] == ([":lib"] if library_status is None else [])
+
+
+@pytest.mark.parametrize("status", ["satisfied", "failed", "unverified"])
+def test_kotlin_observations_affect_compliance_per_scope(monkeypatch, status):
+    monkeypatch.setattr(project_audit, "check_mise", lambda _: {"required": True, "status": "satisfied"})
+    monkeypatch.setattr(project_audit, "check_required_tools", lambda *_: [])
+    result = project_audit.audit_project(Path.cwd(), None, ktlint=[(":api", "satisfied", "ktlintCheck ran")],
+                                         detekt=[("backend", status, "Observed Gradle task result")])
+    assert [(row["id"], row["scope"], row["status"]) for row in result["requirements"][1:]] == [
+        ("ktlint", ":api", "satisfied"), ("detekt", "backend", status)]
+    assert result["compliant"] is (status == "satisfied")
+    assert not any(row.get("id") in {"archunit", "junit"} for row in result["requirements"])
 
 
 def test_invalid_project_is_not_reported_as_compliant(monkeypatch):
@@ -144,7 +220,8 @@ def test_invalid_project_is_not_reported_as_compliant(monkeypatch):
     ("temurin-21", "zulu-21", "zulu-21", False),
     ("21", "21", "17", False),
 ])
-def test_jvm_requires_project_jdk_and_matching_compiler(monkeypatch, requested, active, compiler, expected):
+def test_jvm_requires_project_jdk_and_matching_compiler(monkeypatch, releases, requested, active, compiler, expected):
+    monkeypatch.setattr(project_audit, "check_required_tools", lambda *_: [])
     mise = {"required": True, "status": "satisfied", "executable": "mise"}
     monkeypatch.setattr(project_audit, "check_mise", Mock(return_value=mise))
     gradle = {"id": "gradle", "required": True, "status": "satisfied"}
@@ -156,7 +233,9 @@ def test_jvm_requires_project_jdk_and_matching_compiler(monkeypatch, requested, 
     project = MagicMock()
     project.is_dir.return_value = True
     monkeypatch.setattr(project_audit, "Path", Mock(return_value=Mock(resolve=Mock(return_value=project))))
-    result = project_audit.audit_project("project", requested)
+    result = project_audit.audit_project("project", requested, archunit=[("1.10.0", "test dependency")],
+                                        jacoco_modules=[":app"], jacoco=[(":app", "satisfied", "CI aggregate XML")],
+                                        junit=[("5.12.1", "Jupiter test results")])
     java = result["requirements"][1]
     assert gradle in result["requirements"]
     assert installed.call_args.args[:2] == ({"java": ["java", "javac"]}, project)
@@ -193,9 +272,19 @@ def test_cli_audit_needs_no_host_and_distinguishes_execution_from_compliance(mon
     saved = Mock(return_value={"summary": audit.return_value, "output_file": "audit.json"})
     monkeypatch.setattr(setup_cli, "save_result", saved)
     args = ["setup.py", "audit", "--project-root", "project", "--jvm" if output else "--no-jvm"]
+    args.extend(["--ktlint", ":api", "unverified", "CI evidence pending"] if output else ["--no-ktlint"])
+    args.append("--no-detekt")
+    if output:
+        args.extend(["--junit", "4.13.2", "legacy tests", "--archunit", "missing", "test dependency graph"])
+        args.extend(["--jacoco-module", ":app", "--jacoco", ":app", "failed", "Class missing in XML"])
     monkeypatch.setattr(setup_cli.sys, "argv", args + (["--output", "audit.json"] if output else []))
     assert setup_cli.main() == 0
-    audit.assert_called_once_with(project_root="project", java_version="" if output else None)
+    audit.assert_called_once_with(project_root="project", build_root=None, java_version="" if output else None,
+                                  ktlint=[[":api", "unverified", "CI evidence pending"]] if output else (), detekt=(),
+                                  archunit=[["missing", "test dependency graph"]] if output else [],
+                                  jacoco_modules=[":app"] if output else [],
+                                  jacoco=[[":app", "failed", "Class missing in XML"]] if output else [],
+                                  junit=[["4.13.2", "legacy tests"]] if output else [])
     body = json.loads(capsys.readouterr().out)
     assert body["ok"] is True
     if output:
@@ -204,3 +293,17 @@ def test_cli_audit_needs_no_host_and_distinguishes_execution_from_compliance(mon
     else:
         saved.assert_not_called()
         assert body["result"]["compliant"] is False
+
+
+def test_cli_requires_explicit_kotlin_applicability(monkeypatch):
+    monkeypatch.setattr(setup_cli.sys, "argv", ["setup.py", "audit", "--project-root", ".", "--jvm", "21"])
+    with pytest.raises(SystemExit) as exc:
+        setup_cli.main()
+    assert exc.value.code == 2
+
+
+def test_resuming_one_jvm_step_skips_unrelated_checks(monkeypatch):
+    for name in ("check_mise", "check_gradle", "check_required_tools", "check_archunit"):
+        monkeypatch.setattr(project_audit, name, Mock(side_effect=AssertionError("Unexpected repeated check")))
+    result = project_audit.audit_jvm_step("junit5", Path.cwd(), observation=[("5.12.1", "Jupiter results")])
+    assert result["status"] == "satisfied" and result["id"] == "junit"

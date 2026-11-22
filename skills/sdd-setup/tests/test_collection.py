@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from setup_collection import check_tools, configure_collection
+from setup_progress import progress
 from setup_core import PACKAGE
 
 
@@ -63,9 +64,13 @@ def test_collection_settings_round_trip_and_failed_rerun(tmp_path, monkeypatch):
     monkeypatch.setattr(collection, "run", execute)
     monkeypatch.setattr("setup_collection.check_tools", lambda *args: None)
     assert configure_collection(project, request)["changed"]
+    applicable = ["collection", "mise-tasks", "roles"]
+    assert progress(project, applicable=applicable, complete="collection", project_changed=True)["stop"]
+    assert progress(project, applicable=applicable)["pending_steps"] == ["mise-tasks", "roles"]
     assert project_collection(project) == request["collection"]
     saved = json.loads(settings.read_bytes())
     assert saved["subagents"] == original["subagents"] and saved["architect"]["other"] == 3
+    assert saved["setup"] == {"completed_steps": ["collection"]}
     assert not configure_collection(project, request)["changed"]
     before = settings.read_bytes()
     reports["complexity"] = "{}"

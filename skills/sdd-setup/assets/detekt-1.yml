@@ -1,0 +1,36 @@
+# Встроенные правила detekt 1.23.8, отсутствующие под тем же именем в другой ветке.
+comments:
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
+
+empty-blocks:
+  EmptyKtFile:
+    active: true
+
+naming:
+  FunctionMaxLength:
+    active: false
+  FunctionMinLength:
+    active: false
+
+style:
+  MayBeConst:
+    active: true
+  PreferToOverPairSyntax:
+    active: true
+  RedundantVisibilityModifierRule:
+    active: false
+  SpacingBetweenPackageAndImports:
+    active: false
+  UnnecessaryAbstractClass:
+    active: true
+  UnnecessaryAnnotationUseSiteTarget:
+    active: false
+  UntilInsteadOfRangeTo:
+    active: true
+  UnusedImports:
+    active: false
+  UnusedPrivateMember:
+    active: true
