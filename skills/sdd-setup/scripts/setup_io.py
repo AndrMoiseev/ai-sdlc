@@ -81,6 +81,9 @@ def output_path(path, project):
 def save_result(result, path, command):
     if command in {"audit", "typespec"}:
         summary = result
+    elif command == "detekt":
+        summary = {key: result[key] for key in ("project_root", "version", "explicit_matches")}
+        summary.update({key: len(result[key]) for key in ("pin", "differences")})
     elif command == "inspect":
         summary = inspect_summary(result)
     else:

@@ -1,0 +1,78 @@
+# Встроенные правила detekt 2.0.0-alpha.6, отсутствующие под тем же именем в другой ветке.
+comments:
+  DocumentationOverPrivateFunction:
+    active: false
+  DocumentationOverPrivateProperty:
+    active: false
+
+coroutines:
+  CoroutineLaunchedInTestWithoutRunTest:
+    active: false
+  SuspendFunInFinallySection:
+    active: false
+
+empty-blocks:
+  EmptyKotlinFile:
+    active: true
+
+exceptions:
+  ErrorUsageWithThrowable:
+    active: true
+
+naming:
+  FunctionNameMaxLength:
+    active: false
+  FunctionNameMinLength:
+    active: false
+
+performance:
+  UnnecessaryInitOnArray:
+    active: true
+  UnnecessaryTypeCasting:
+    active: true
+
+potential-bugs:
+  CharArrayToStringCall:
+    active: true
+  MissingSuperCall:
+    active: true
+  MissingUseCall:
+    active: false
+  UnnamedParameterUse:
+    active: true
+
+style:
+  AbstractClassCanBeConcreteClass:
+    active: true
+  AbstractClassCanBeInterface:
+    active: true
+  DoubleNegativeExpression:
+    active: true
+  ExplicitItLambdaMultipleParameters:
+    active: true
+  ForbiddenNamedParam:
+    active: false
+  ForbiddenOptIn:
+    active: false
+  MayBeConstant:
+    active: true
+  RangeUntilInsteadOfRangeTo:
+    active: true
+  RedundantConstructorKeyword:
+    active: true
+  RedundantVisibilityModifier:
+    active: false
+  SpacingAfterPackageAndImports:
+    active: false
+  UnnecessaryAny:
+    active: true
+  UnnecessaryFullyQualifiedName:
+    active: true
+  UnnecessaryReversed:
+    active: true
+  UnusedImport:
+    active: false
+  UnusedPrivateFunction:
+    active: true
+  UnusedVariable:
+    active: true

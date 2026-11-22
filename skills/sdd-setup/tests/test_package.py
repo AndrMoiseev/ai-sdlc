@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 import os
 from pathlib import Path
 import shutil
@@ -5,6 +6,7 @@ import subprocess
 import sys
 
 import pytest
+from ruamel.yaml import YAML
 import setup_core as core
 
 
@@ -36,9 +38,46 @@ def test_runtime_metadata_locks_and_clean_package():
     assert not any(p.suffix == ".pyc" for p in core.PACKAGE.rglob("*"))
 
 
+@pytest.mark.parametrize("major", [1, 2])
+def test_detekt_delegates_overlapping_checks_to_ktlint(major):
+    assets = core.PACKAGE / "assets"
+    yaml = YAML(typ="safe")
+    common = yaml.load(assets / "detekt.yml")
+    version = yaml.load(assets / f"detekt-{major}.yml")
+    style = common["style"] | version["style"]
+    unused_import = "UnusedImports" if major == 1 else "UnusedImport"
+    for rule in (unused_import, "ModifierOrder", "NewLineAtEndOfFile", "ExpressionBodySyntax",
+                 "BracesOnIfStatements", "BracesOnWhenStatements", "MandatoryBracesLoops",
+                 "NoTabs", "TrailingWhitespace", "OptionalUnit", "MaxLineLength"):
+        assert style[rule]["active"] is False, rule
+    assert common["empty-blocks"]["EmptyClassBlock"]["active"] is False
+    assert style["WildcardImport"]["active"] is True
+
+
 def test_missing_companion_is_actionable(tmp_path):
     with pytest.raises(ValueError, match="matching sdd-shared"):
         core.shared_contract(tmp_path)
+
+
+def test_ktlint_autocorrections_preserve_explicit_unit():
+    profile = ConfigParser(interpolation=None)
+    profile.read(core.PACKAGE / "assets" / "ktlint-1.8.0.editorconfig", encoding="utf-8")
+    assert profile.sections() == ["*.{kt,kts}"]
+    kotlin = profile["*.{kt,kts}"]
+    assert kotlin["ktlint_code_style"] == "ktlint_official"
+    assert kotlin["ktlint_standard"] == kotlin["ktlint_experimental"] == "disabled"
+    assert kotlin["indent_size"] == "4"
+    assert kotlin["ktlint_standard_indent"] == kotlin["ktlint_standard_op-spacing"] == "enabled"
+    for rule in ("expression-operand-wrapping", "function-expression-body", "if-else-bracing",
+                 "multiline-if-else", "multiline-loop", "no-empty-class-body",
+                 "no-single-line-block-comment", "no-unused-imports", "string-template",
+                 "unnecessary-parentheses-before-trailing-lambda", "when-entry-bracing"):
+        assert kotlin[f"ktlint_standard_{rule}"] == "enabled", rule
+    assert kotlin["ktlint_standard_no-unit-return"] == "disabled"
+    assert kotlin.get("ktlint_standard_class-naming", "disabled") == "disabled"
+    assert kotlin["ktlint_standard_max-line-length"] == "enabled"
+    assert kotlin["max_line_length"] == "140"
+    assert kotlin["ktlint_ignore_back_ticked_identifier"] == "false"
 
 
 def test_empty_offline_cache_fails_without_project_changes(tmp_path):
