@@ -119,8 +119,10 @@ diagnosis or the choice of transformation.
 
 For each suspected problem:
 
-1. Locate the observed or proposed construction and cite the rule's file and section. Explain
-   why the rule applies in this context, including relevant exceptions.
+1. Locate the observed or proposed construction in the code or contract and state the
+   guarantee or quality property at stake. When an existing project or shared heuristic
+   applies, cite its file and section and check its exceptions. An uncovered case can
+   still support a finding through the evidence and comparison below.
 2. Trace the scenario through the code or described design to a concrete error, coordinated edit,
    hidden dependency or repeated work. Inspect existing protection and an
    alternative explanation before calling it a problem.
@@ -149,7 +151,7 @@ including any cold dependencies and important omissions. Return a compact findin
 for each distinct cause with:
 
 - **Evidence and rule:** exact paths and document sections or declarations, inspected construction,
-  relevant consumers/tests, and the heuristic reference and section.
+  relevant consumers/tests, and the heuristic reference and section when one applies.
 - **Scenario and mechanism:** the consequence, existing protection, alternative
   explanation examined and what the inspection established.
 - **Options:** current construction, smallest useful change, affected owner and

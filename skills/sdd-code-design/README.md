@@ -4,7 +4,7 @@ This skill is a fork of [CodeAlive-AI's original skill](https://github.com/CodeA
 
 Cross-agent skill for keeping software understandable and inexpensive to change. It helps prevent accidental complexity, architectural erosion into a Big Ball of Mud, and silent technical-debt accumulation—especially when coding agents can generate code faster than people can review and own it.
 
-The skill is based on Mark Seemann's *Code That Fits in Your Head: Heuristics for Software Engineering* (2021), with clearly labelled editorial amendments for agent-driven development.
+The shared guidance is based on Mark Seemann's *Code That Fits in Your Head: Heuristics for Software Engineering* (2021), with clearly labelled editorial amendments for agent-driven development. Projects can add their own guidance from review decisions.
 
 Invoke it explicitly with `$sdd-code-design` in Codex or `/sdd-code-design` in Claude Code. A sibling APM skill can also explicitly instruct the agent to read `../sdd-code-design/SKILL.md`, relative to its own directory, and apply it to a named task. Implicit invocation remains disabled; task relevance or a passing mention alone does not activate it.
 
@@ -32,9 +32,23 @@ Large tasks are not rejected because they are large. Agents can successfully imp
 
 `SKILL.md` contains the explicit invocation policy and top-level index. `guidelines.md` is the routing layer: it maps tasks, symptoms, and named practices to the smallest useful reference files.
 
-Code examples include the original C# material and Kotlin/JVM and Go counterparts; every rule and the tooling tables are language-neutral. Use [Examples by Stack](guidelines.md#examples-by-stack) to select the matching language and dependencies.
+Code examples include the original C# material and Kotlin/JVM and Go counterparts. The shared rules and tooling tables are language-neutral. Use [Examples by Stack](guidelines.md#examples-by-stack) to select the matching language and dependencies.
 
 The skill uses progressive disclosure. Load one primary file and at most one or two secondary files for the current task instead of reading the whole skill. Focused diagnosis returns findings. Tasks that authorize lasting gates or project-instruction edits can operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
+
+### Project heuristics
+
+During design, implementation and review, the skill uses relevant entries from
+`memory/code-design/heuristics.md` in the target project when that file exists.
+A short collection fits in one file. A larger collection can point to groups by
+the situations in which an agent needs them. See the [file contract](references/project-heuristics.md)
+for the entry format and the criterion for splitting a group.
+
+| Request | Example prompt | Result |
+| --- | --- | --- |
+| Assess a review comment | `$sdd-code-design The reviewer objects to retrying this import inside the queue worker. Compare both choices using the queue policy. Is there a lesson worth keeping?` | A reasoned decision about the code and, if warranted, proposed wording with its scope and limits |
+| Record an agreed heuristic | `$sdd-code-design Save the import-retry heuristic we just agreed on, including the exception for retrying only the failed item.` | The accepted entry in project memory, with the evidence behind the choice |
+| Compare project and shared heuristics | `$sdd-code-design Compare our project heuristics with the shared guidance. Which entries still add something here, and which could help another project?` | Local refinements, duplicates or candidates for the shared source, each with a reason |
 
 ### Design and implementation
 
@@ -116,7 +130,7 @@ references/              # Focused reference packs by theme
 references/tooling/      # Executable measurement commands (complexity, cycles, dead code, …)
 ```
 
-Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, refactoring, debugging, threat modelling, and operationalizing findings into gates.
+Core themes include decomposition, encapsulation, API design, outside-in TDD, separation of concerns, teamwork and Git discipline, software evolution, troubleshooting, security, and measurement tooling. Workflows cover focused diagnosis, review, outside-in features, refactoring, debugging, threat modelling, maintaining project heuristics, and operationalizing findings into gates.
 
 ## Source Boundaries
 
@@ -172,6 +186,7 @@ not copy the external implementation or introduce a runtime dependency.
 
 ## Changes from Upstream
 
+- Added project heuristics derived from review and a workflow for comparing them with shared guidance.
 - Added a refactoring workflow for proposed design and implementation, integrated into SDD authoring, execution and focused reviews. It uses separate structural and preservation criteria and the caller's existing test-evolution rules.
 - Added semantic-layer diagnosis, paired policy and representation-change scenarios, and safeguards for moving reads and effects. Sources and adaptation boundaries are recorded above.
 - Added focused code diagnosis for selected refactoring candidates and an explicit handoff from `sdd-architect`; this workflow is a fork addition.

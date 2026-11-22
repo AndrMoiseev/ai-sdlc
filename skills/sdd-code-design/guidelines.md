@@ -1,6 +1,6 @@
 # Guidelines — Task Routing for `sdd-code-design`
 
-This is the routing layer for the skill. Find the user's task or symptom below, then load **only** the specific files listed.
+Use the task or symptom below to select bundled material alongside the applicable project heuristics identified through [the skill entry point](SKILL.md#how-to-use-this-skill).
 
 **Rule of thumb**: one primary file + at most 1-2 secondary files per task. If you find yourself wanting to load four or more, re-read the task — you may be combining two tasks.
 
@@ -65,6 +65,13 @@ candidates selected by `sdd-architect` for a known risk or upcoming change.
 It owns the scoped inspection and rule selection; return its findings before the
 caller decides which recommendations to prioritize. A general PR review uses the
 separate route below.
+
+### Project heuristics
+
+| Request | Route |
+| --- | --- |
+| Examine a disputed decision for reuse or record the agreed lesson | [Assess a review comment](workflows/maintain-project-heuristics.md#assess-a-review-comment) |
+| Compare the project's accepted heuristics with those available in this version of the skill | [Compare project and shared heuristics](workflows/maintain-project-heuristics.md#compare-project-and-shared-heuristics) |
 
 ### Feature Design
 
@@ -157,7 +164,7 @@ Select references below for the specific transformation.
 | Situation | Load these files |
 |-----------|-------------------|
 | Measure complexity, cycles, duplication, dead code, hotspots | `references/tooling/commands.md` |
-| Turn a recurring finding into a lint/CI gate; persist thresholds in project memory | `workflows/operationalize-finding.md` |
+| Turn a recurring finding into a lint/CI gate and document its command in project agent instructions | `workflows/operationalize-finding.md` |
 
 ---
 
