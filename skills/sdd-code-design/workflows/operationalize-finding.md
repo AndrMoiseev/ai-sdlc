@@ -2,6 +2,9 @@
 
 Convert a recurring review finding or design rule into an executable gate, then record it in the project's agent instructions. This is how the skill's discipline survives beyond the session that applied it: a machine-enforced rule is harder to erode under delivery pressure than a prose convention, and a rule recorded in project memory reaches every future session.
 
+If the request is to assess a disputed decision or retain advice that needs
+engineering judgment, use [maintain project heuristics](maintain-project-heuristics.md).
+
 ## When to Use
 
 - The same class of finding appeared in review twice or more (complexity, layering, logging, naming, duplication).

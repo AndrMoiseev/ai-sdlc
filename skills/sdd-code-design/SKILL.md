@@ -1,6 +1,6 @@
 ---
 name: sdd-code-design
-description: Software design and review heuristics based on Mark Seemann's Code That Fits in Your Head (2021), with agent-driven development amendments. Use only when the user explicitly invokes sdd-code-design or an active skill explicitly instructs you to invoke it. Do not select it implicitly for coding, review, refactoring, or debugging tasks.
+description: Apply shared and project heuristics to software design and review. Assess review feedback for reuse and compare project heuristics with shared guidance. Use when the user explicitly invokes sdd-code-design or an active skill explicitly calls it. Do not use for coding or review on task relevance alone.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Engineering heuristics for sustainable software, based on Mark Seemann's 2021 book and clearly labelled agent-era amendments.
 
-Code examples include C#, Kotlin/JVM, and Go; every rule and the tooling tables are language-neutral. Select examples by the affected module's stack using `guidelines.md`.
+The bundled rules are language-neutral. Select C#, Kotlin/JVM or Go examples by the affected module's stack using `guidelines.md`. Projects can contribute heuristics for their own conditions.
 
 ## Philosophy (Why This Skill Exists)
 
@@ -43,11 +43,10 @@ For an explicit call from a sibling APM skill, read `../sdd-code-design/SKILL.md
 
 ## How to Use This Skill
 
-1. Identify the requested task (focused diagnosis, writing, reviewing, debugging, security review, setting up, etc.)
-2. Read `guidelines.md` — it maps tasks and symptoms to specific reference files
-3. Load only the reference files relevant to the current task (progressive disclosure)
-4. Apply the rules; when in doubt, consult `references/practices-glossary/` for cross-references
-5. For focused diagnosis, return the findings to the caller. When the task authorizes persistent gates or project-instruction edits, operationalize a repeatedly useful rule (`workflows/operationalize-finding.md`).
+1. Identify the requested decision and scope. Use [guidelines](guidelines.md) to select the workflow and bundled references by task or symptom.
+2. When designing, implementing or assessing code, check `memory/code-design/heuristics.md` at the **target project's root**. If present, use relevant inline entries or follow only the group links whose situation matches the current decision. If absent, proceed with the bundled guidance.
+3. Apply each heuristic within its stated conditions. If local and shared guidance point to different choices, check whether the project exception applies. Requirements and acceptance criteria govern the decision. Use `references/practices-glossary/` for named practices and cross-references.
+4. Use project memory as a read-only source during ordinary work. A focused diagnosis returns findings to its caller.
 
 ## Chapter Index
 
@@ -83,11 +82,12 @@ Composite step-by-step processes live in `workflows/`:
 | Task | Workflow |
 |------|----------|
 | Diagnose a proposed design or implemented code within a named scope | [Focused diagnosis](workflows/diagnose-code.md) |
+| Assess a review comment, record its agreed lesson, or compare project heuristics with shared guidance | [Maintain project heuristics](workflows/maintain-project-heuristics.md) |
 | Review a pull request / piece of code | `workflows/review-code.md` |
 | Design or implement a new or changed feature | [Outside-in](workflows/add-feature-outside-in.md), selecting the work product |
 | Design or implement a structural change with preserved behavior | [Refactoring](workflows/refactor-code.md), selecting the work product |
 | Investigate and fix a defect | `workflows/debug-defect.md` |
 | Threat-model a new endpoint | `workflows/threat-model.md` |
-| Turn a recurring finding into an executable gate and persist it in project memory | `workflows/operationalize-finding.md` |
+| Enforce a stable, mechanically checkable rule and document its verification command | [Operationalize a finding](workflows/operationalize-finding.md) |
 
 See `guidelines.md` for the full routing layer (task → file, symptom → file).

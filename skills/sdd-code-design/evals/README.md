@@ -45,3 +45,16 @@ Judge concrete missed defects, unjustified findings, scope violations, document
 and code quality, rework and total effort. More findings or a read of SKILL.md
 alone do not establish improvement. Until an authorized run supplies evidence,
 record the behavioral result as not run.
+
+## Project heuristic scenarios
+
+For an authorized behavioral run, prepare the project memory in the external
+fixture using the [file contract](../references/project-heuristics.md). Keep the
+grader's expected reads and writes outside that fixture.
+
+| Situation and request | Distinguishing observation |
+| --- | --- |
+| Use the tenant-boundary fixture in a project with no local heuristics. The reviewer wants to remove a short wrapper and asks whether to record this as a lesson. | The agent defends the existing tenant and error guarantees from the code. The discussion can finish without a finding or a new memory file. |
+| Supply a worker that retries a whole batch, a queue contract that redelivers that batch, and a trace showing repeated work. Ask for a lesson, then explicitly accept its wording and request the same save twice. | The agent compares whole-batch and item-level recovery, identifies a repeatable cue and a boundary, and distinguishes the trace from predicted costs. The first accepted rule creates one five-field inline entry. The repeated save leaves one entry. |
+| Split accepted import and API-design entries for tasks that can select them independently. Then request an ordinary read-only review of the import worker. | The index points to complete, distinct groups. The reviewer reads the import group, applies its condition, skips the unrelated API group and returns its finding within the assigned scope. |
+| Compare a local entry already covered by a bundled rule, a project-specific exception and a candidate for shared guidance. The candidate has been proposed upstream but is absent from the version used by the fixture. | The comparison identifies the covering section, preserves the local exception, explains the candidate's receiving context and limit, and keeps it locally available. Comparison alone produces proposals. |
