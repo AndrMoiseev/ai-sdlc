@@ -138,7 +138,7 @@ def test_audit_checks_each_required_tool_before_jvm(monkeypatch, releases, mise_
                                         junit=[("5.12.1", "Jupiter test results")])
     tools = {row["id"]: row for row in result["requirements"] if "tool_request" in row}
     assert {name: row["tool_request"] for name, row in tools.items()} == {
-        "uv": "uv@latest", "git": "conda:git@latest", "scc": "github:boyter/scc@latest",
+        "git": "conda:git@latest", "scc": "github:boyter/scc@latest",
         "rg": "ripgrep@latest", "node": "node@latest", "rga": "ripgrep-all@latest", "apm": "apm@latest",
     }
     for name, row in tools.items():

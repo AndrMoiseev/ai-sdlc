@@ -75,7 +75,7 @@ def test_only_explicit_reset_reopens_completed_steps(progress_cli):
 def test_new_or_newly_applicable_step_is_pending(progress_cli, monkeypatch):
     run, settings, writes = progress_cli
     settings["setup"] = {"completed_steps": [s for s in setup_progress.STEPS if s != "detekt"]}
-    assert run("--applicable", "mise", "roles")["next_step"] is None
+    assert run("--applicable", "common-tools", "roles")["next_step"] is None
     assert run()["next_step"] == "detekt"
     monkeypatch.setattr(setup_progress, "STEPS", ("new-step", *setup_progress.STEPS))
     assert run()["pending_steps"] == ["new-step", "detekt"]
@@ -87,6 +87,18 @@ def test_jacoco_follows_junit_and_precedes_archunit(progress_cli):
     args = ("--applicable", "archunit", "jacoco", "junit5")
     assert run(*args)["pending_steps"] == ["junit5", "jacoco", "archunit"]
     assert run(*args, "--complete", "junit5")["next_step"] == "jacoco"
+
+
+def test_runtime_tools_are_outside_project_progress(progress_cli):
+    run, _, writes = progress_cli
+    pending = run()["pending_steps"]
+    assert pending[0] == "common-tools"
+    for tool in ("mise", "uv"):
+        assert tool not in pending
+        with pytest.raises(SystemExit) as rejected:
+            run("--complete", tool)
+        assert rejected.value.code == 2
+    assert not writes
 
 
 def test_invalid_progress_preserves_settings(progress_cli):

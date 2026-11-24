@@ -1,5 +1,4 @@
 {
-  "uv": "uv@latest",
   "git": "conda:git@latest",
   "scc": "github:boyter/scc@latest",
   "rg": "ripgrep@latest",
