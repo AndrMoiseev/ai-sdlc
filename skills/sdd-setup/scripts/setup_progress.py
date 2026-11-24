@@ -6,7 +6,7 @@ from pathlib import Path
 from setup_core import read_json, replace_file, require, safe_target, setup_lock
 
 
-STEPS = ("mise", "common-tools", "jdk", "gradle", "junit5", "jacoco", "archunit",
+STEPS = ("common-tools", "jdk", "gradle", "junit5", "jacoco", "archunit",
          "ktlint", "detekt", "typespec", "collection", "mise-tasks", "roles")
 
 
