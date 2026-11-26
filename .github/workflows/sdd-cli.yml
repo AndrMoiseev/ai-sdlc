@@ -51,7 +51,12 @@ jobs:
           cache-dependency-path: cli/go.sum
       - name: Check Go packages
         run: go -C cli test -mod=readonly ./...
-      - name: Build, package and run the CLI
+      - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5
+        with:
+          version: '2026.11.8'
+          install: false
+          cache: false
+      - name: Build the package and run the CLI through mise
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
           if ("$(go env GOOS)-$(go env GOARCH)" -ne $env:TARGET) {
@@ -73,12 +78,16 @@ jobs:
           Copy-Item -LiteralPath LICENSE -Destination $stage
           & $tar -acf $archive -C $stage $binary sdd-shared LICENSE
 
-          $unpacked = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/unpacked"
+          # Test the final archive before it has a public release URL.
           $project = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/example"
-          & $tar -xf $archive -C $unpacked
-          $inspection = & "$unpacked/$binary" setup inspect --host codex --project-root $project --user-agent-dir $project
+          $env:MISE_DATA_DIR = "$env:RUNNER_TEMP/mise-smoke"
+          $uri = [Uri]::new((Get-Item -LiteralPath $archive).FullName).AbsoluteUri
+          $checksum = (Get-FileHash -LiteralPath $archive).Hash.ToLowerInvariant()
+          $tool = "http:sdd[url=$uri,checksum=sha256:$checksum]@0.0.0"
+          mise -C $project install $tool
+          $inspection = mise -C $project exec $tool -- sdd setup inspect --host codex --project-root $project --user-agent-dir $project
           $result = $inspection | ConvertFrom-Json
-          $contract = Get-FileHash "$unpacked/sdd-shared/scripts/sdd_shared/subagents.py"
+          $contract = Get-FileHash "$stage/sdd-shared/scripts/sdd_shared/subagents.py"
           if (!$result.ok -or $result.result.evidence.contract -ne $contract.Hash) {
             throw 'Packaged CLI could not inspect a project using its bundled sdd-shared contract'
           }
@@ -106,7 +115,30 @@ jobs:
           pattern: sdd-*
           path: dist
           merge-multiple: true
-      - name: Publish verified archives and checksums
+      - name: Generate the mise configuration and checksums
+        shell: bash
+        working-directory: dist
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          archives=(sdd-windows-{amd64,arm64}.zip sdd-darwin-{amd64,arm64}.tar.gz)
+          sha256sum --binary "${archives[@]}" > SHA256SUMS
+          {
+            printf '[tools."github:%s"]\nversion = "%s"\nversion_prefix = "sdd-v"\n' "$REPOSITORY" "${TAG#sdd-v}"
+            echo 'os = ["windows", "macos"]'
+            while read -r digest binary_file; do
+              archive=${binary_file#\*}
+              platform=${archive#sdd-}
+              platform=${platform%%.*}
+              platform=${platform/darwin/macos}
+              platform=${platform/amd64/x64}
+              printf 'platforms.%s = { asset_pattern = "%s", checksum = "sha256:%s" }\n' "$platform" "$archive" "$digest"
+            done < SHA256SUMS
+          } > sdd.mise.toml
+          sha256sum --binary sdd.mise.toml >> SHA256SUMS
+      - name: Publish release assets
         shell: bash
         working-directory: dist
         env:
@@ -115,12 +147,11 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          archives=(sdd-windows-{amd64,arm64}.zip sdd-darwin-{amd64,arm64}.tar.gz)
-          sha256sum "${archives[@]}" > SHA256SUMS
+          assets=(sdd-windows-{amd64,arm64}.zip sdd-darwin-{amd64,arm64}.tar.gz sdd.mise.toml SHA256SUMS)
           if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft); then
             if [[ "$draft" == false ]]; then
               gh release view "$TAG" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/published-assets"
-              for file in "${archives[@]}" SHA256SUMS; do
+              for file in "${assets[@]}"; do
                 grep -Fxq "$file" "$RUNNER_TEMP/published-assets" || { echo "Published release is missing $file" >&2; exit 1; }
               done
               echo "Release $TAG is already published"
@@ -129,5 +160,5 @@ jobs:
           else
             gh release create "$TAG" --verify-tag --draft --title "sdd ${TAG#sdd-}" --generate-notes
           fi
-          gh release upload "$TAG" "${archives[@]}" SHA256SUMS --clobber
+          gh release upload "$TAG" "${assets[@]}" --clobber
           gh release edit "$TAG" --draft=false
