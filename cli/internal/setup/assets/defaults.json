@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "sdd-spec.architect": {"agent": "sdd-architect", "codex": {"model": null, "effort": null}, "claude-code": {"model": null, "effort": null}},
+    "sdd-spec.explorer": {"agent": "sdd-explorer", "codex": {"model": null, "effort": null}, "claude-code": {"model": null, "effort": null}},
+    "sdd-apply.explorer": {"agent": "sdd-explorer", "codex": {"model": null, "effort": null}, "claude-code": {"model": null, "effort": null}},
+    "sdd-spec.reviewer": {"agent": "sdd-spec-reviewer", "codex": {"model": "gpt-6.1-sol", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}},
+    "sdd-spec.editor": {"agent": "sdd-editor", "codex": {"model": "gpt-6-luna", "effort": "high"}, "claude-code": {"model": "sonnet", "effort": "medium"}},
+    "sdd-apply.executor": {"agent": "sdd-executor", "codex": {"model": "gpt-6.1-sol", "effort": "high"}, "claude-code": {"model": "sonnet", "effort": "high"}},
+    "sdd-apply.reviewer": {"agent": "sdd-reviewer", "codex": {"model": "gpt-6-astra", "effort": "high"}, "claude-code": {"model": "opus", "effort": "high"}}
+  }
+}

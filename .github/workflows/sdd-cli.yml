@@ -1,0 +1,133 @@
+name: SDD CLI
+
+on:
+  pull_request:
+    paths:
+      - 'cli/**'
+      - 'skills/sdd-shared/**'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.github/workflows/sdd-cli.yml'
+  push:
+    branches: [main]
+    tags: ['sdd-v[0-9]+.[0-9]+.[0-9]+']
+    paths:
+      - 'cli/**'
+      - 'skills/sdd-shared/**'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.github/workflows/sdd-cli.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    if: github.event.deleted != true
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: windows-amd64, runner: windows-2025 }
+          - { target: windows-arm64, runner: windows-11-arm }
+          - { target: darwin-amd64, runner: macos-15-intel }
+          - { target: darwin-arm64, runner: macos-15 }
+    env:
+      CGO_ENABLED: '0'
+      TARGET: ${{ matrix.target }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7
+        with:
+          go-version: '1.26.5'
+          cache-dependency-path: cli/go.sum
+      - name: Check Go packages
+        run: go -C cli test -mod=readonly ./...
+      - name: Build, package and run the CLI
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          if ("$(go env GOOS)-$(go env GOARCH)" -ne $env:TARGET) {
+            throw "Go toolchain does not match $env:TARGET"
+          }
+          $stage = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/stage"
+          $dist = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/dist"
+          $binary = if ($IsWindows) { 'sdd.exe' } else { 'sdd' }
+          $format = if ($IsWindows) { 'zip' } else { 'tar.gz' }
+          $tar = if ($IsWindows) { "$env:SystemRoot/System32/tar.exe" } else { '/usr/bin/tar' }
+          $archive = "$dist/sdd-$env:TARGET.$format"
+          go -C cli build -mod=readonly -trimpath -o "$stage/$binary" ./cmd/sdd
+
+          # Export the tracked runtime files from the same commit as the binary.
+          $shared = 'SKILL.md','README.md','api.json','agents','references','schemas','scripts','templates' |
+            ForEach-Object { "sdd-shared/$_" }
+          git archive -o "$env:RUNNER_TEMP/shared.tar" HEAD:skills -- $shared
+          & $tar -xf "$env:RUNNER_TEMP/shared.tar" -C $stage
+          Copy-Item -LiteralPath LICENSE -Destination $stage
+          & $tar -acf $archive -C $stage $binary sdd-shared LICENSE
+
+          $unpacked = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/unpacked"
+          $project = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP/example"
+          & $tar -xf $archive -C $unpacked
+          $inspection = & "$unpacked/$binary" setup inspect --host codex --project-root $project --user-agent-dir $project
+          $result = $inspection | ConvertFrom-Json
+          $contract = Get-FileHash "$unpacked/sdd-shared/scripts/sdd_shared/subagents.py"
+          if (!$result.ok -or $result.result.evidence.contract -ne $contract.Hash) {
+            throw 'Packaged CLI could not inspect a project using its bundled sdd-shared contract'
+          }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: sdd-${{ matrix.target }}
+          path: ${{ runner.temp }}/dist/sdd-*
+          if-no-files-found: error
+          compression-level: 0
+          overwrite: true
+
+  release:
+    name: Publish CLI release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: sdd-release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: sdd-*
+          path: dist
+          merge-multiple: true
+      - name: Publish verified archives and checksums
+        shell: bash
+        working-directory: dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          archives=(sdd-windows-{amd64,arm64}.zip sdd-darwin-{amd64,arm64}.tar.gz)
+          sha256sum "${archives[@]}" > SHA256SUMS
+          if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft); then
+            if [[ "$draft" == false ]]; then
+              gh release view "$TAG" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/published-assets"
+              for file in "${archives[@]}" SHA256SUMS; do
+                grep -Fxq "$file" "$RUNNER_TEMP/published-assets" || { echo "Published release is missing $file" >&2; exit 1; }
+              done
+              echo "Release $TAG is already published"
+              exit 0
+            fi
+          else
+            gh release create "$TAG" --verify-tag --draft --title "sdd ${TAG#sdd-}" --generate-notes
+          fi
+          gh release upload "$TAG" "${archives[@]}" SHA256SUMS --clobber
+          gh release edit "$TAG" --draft=false
