@@ -3,6 +3,8 @@
 /apm.lock.yaml text eol=lf
 /pyproject.toml text eol=lf
 /uv.lock text eol=lf
+# Keep embedded CLI templates and contract hashes identical on all build runners.
+/cli/** text=auto eol=lf
 /scripts/** text=auto eol=lf
 /packages/** text=auto eol=lf
 /skills/** text=auto eol=lf
