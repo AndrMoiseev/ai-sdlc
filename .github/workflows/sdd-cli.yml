@@ -150,11 +150,30 @@ jobs:
           assets=(sdd-windows-{amd64,arm64}.zip sdd-darwin-{amd64,arm64}.tar.gz sdd.mise.toml SHA256SUMS)
           if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft); then
             if [[ "$draft" == false ]]; then
-              gh release view "$TAG" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/published-assets"
+              gh release view "$TAG" --json assets \
+                --jq '.assets[] | select(.state == "uploaded") | [.name, .digest] | @tsv' > "$RUNNER_TEMP/published-assets"
+              declare -A published
+              while IFS=$'\t' read -r name digest; do
+                published["$name"]=$digest
+              done < "$RUNNER_TEMP/published-assets"
+              missing=()
               for file in "${assets[@]}"; do
-                grep -Fxq "$file" "$RUNNER_TEMP/published-assets" || { echo "Published release is missing $file" >&2; exit 1; }
+                [[ -v 'published[$file]' ]] || missing+=("$file")
               done
-              echo "Release $TAG is already published"
+              if (( ${#missing[@]} == 0 )); then
+                echo "Release $TAG already contains all assets"
+                exit 0
+              fi
+              # A partial upload must agree with this build's checksums.
+              for file in "${assets[@]}"; do
+                [[ -v 'published[$file]' ]] || continue
+                digest=$(sha256sum -- "$file")
+                if [[ ${published[$file]} != "sha256:${digest%% *}" ]]; then
+                  echo "Published $file differs from this build" >&2
+                  exit 1
+                fi
+              done
+              gh release upload "$TAG" "${missing[@]}"
               exit 0
             fi
           else
